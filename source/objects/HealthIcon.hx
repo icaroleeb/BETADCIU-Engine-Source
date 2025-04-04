@@ -1,86 +1,17 @@
 package objects;
 
-#if sys
-import haxe.io.Path;
-import openfl.utils.ByteArray;
-import flash.display.BitmapData;
-import openfl.utils.Assets as OpenFlAssets;
-import lime.utils.Assets;
-#end
-
-using StringTools;
-
 class HealthIcon extends FlxSprite
 {
-	/**
-	 * Used for FreeplayState! If you use it elsewhere, prob gonna annoying
-	 */
 	public var sprTracker:FlxSprite;
+	private var isPlayer:Bool = false;
+	private var char:String = '';
 
-	public var char:String = 'bf';
-	public var isPlayer:Bool = false;
-	public var isOldIcon:Bool = false;
-	public var hasWinning:Bool = true;
-
-	public function new(?char:String = 'bf', ?isPlayer:Bool = false)
+	public function new(char:String = 'face', isPlayer:Bool = false, ?allowGPU:Bool = true)
 	{
 		super();
-
-		this.char = char;
 		this.isPlayer = isPlayer;
-
-		changeIcon(char);
+		changeIcon(char, allowGPU);
 		scrollFactor.set();
-	}
-
-	public function changeIcon(char:String)
-	{
-		if (!FileSystem.exists(Paths.image('icons/icon-' + char)) && !FileSystem.exists(Paths.modsImages('icons/icon-' + char)) && !Assets.exists(Paths.modsImages('icons/icon-' + char)))
-			char = 'face';
-
-		var rawPic:BitmapData;
-
-		//if statements looked better
-		if (FileSystem.exists(Paths.modsImages('icons/icon-' + char))){
-			rawPic = BitmapData.fromFile(Paths.modsImages('icons/icon-'+char));
-		}
-		else if (Assets.exists(Paths.modsImages('icons/icon-' + char))){
-			rawPic = OpenFlAssets.getBitmapData(Paths.modsImages('icons/icon-'+char));
-		}
-		else {
-			rawPic = BitmapData.fromFile(Paths.image('icons/icon-'+char));
-		}
-
-		loadGraphic(rawPic, true, 150, 150);
-
-		antialiasing = true;
-
-		if (char.startsWith('senpai') || char.contains('pixel') || char.startsWith('spirit'))
-			antialiasing = false;			
-
-		var animArray:Array<Int> = [];
-
-		for(i in 0...3){
-			animArray.push((i <= frames.frames.length - 1 ? i : 0));
-		}
-
-		animation.add(char, animArray, 0, false, isPlayer);
-		animation.play(char);
-		this.char = char;//silly icon name fix, idk if this will break something but i can remove later if does
-	}
-
-	public function swapOldIcon(char:String) 
-	{
-		var curChar:String = char;
-
-		if (!FileSystem.exists(Paths.image('icons/icon-' + char + '-old')))
-			char = 'bf';
-
-		if (isOldIcon)
-			char = curChar;
-
-		if(isOldIcon = !isOldIcon) changeIcon(char+'-old');
-		else changeIcon(char);
 	}
 
 	override function update(elapsed:Float)
@@ -88,10 +19,46 @@ class HealthIcon extends FlxSprite
 		super.update(elapsed);
 
 		if (sprTracker != null)
-			setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
+			setPosition(sprTracker.x + sprTracker.width + 12, sprTracker.y - 30);
 	}
 
-	public function getCharacter():String { //idk what this does
+	private var iconOffsets:Array<Float> = [0, 0];
+	public function changeIcon(char:String, ?allowGPU:Bool = true) {
+		if(this.char != char) {
+			var name:String = 'icons/' + char;
+			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
+			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
+			
+			var graphic = Paths.image(name, allowGPU);
+			var iSize:Float = Math.round(graphic.width / graphic.height);
+			loadGraphic(graphic, true, Math.floor(graphic.width / iSize), Math.floor(graphic.height));
+			iconOffsets[0] = (width - 150) / iSize;
+			iconOffsets[1] = (height - 150) / iSize;
+			updateHitbox();
+
+			animation.add(char, [for(i in 0...frames.frames.length) i], 0, false, isPlayer);
+			animation.play(char);
+			this.char = char;
+
+			if(char.endsWith('-pixel'))
+				antialiasing = false;
+			else
+				antialiasing = ClientPrefs.data.antialiasing;
+		}
+	}
+
+	public var autoAdjustOffset:Bool = true;
+	override function updateHitbox()
+	{
+		super.updateHitbox();
+		if(autoAdjustOffset)
+		{
+			offset.x = iconOffsets[0];
+			offset.y = iconOffsets[1];
+		}
+	}
+
+	public function getCharacter():String {
 		return char;
 	}
 }

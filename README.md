@@ -1,74 +1,127 @@
-THIS README FILE CAME WITH KE AND I'M TOO LAZY TO UPDATE IT. I'll just update a few things.
+![PsychionalEngineLogo](docs/img/PsychEngineLogoTweak.png)
 
-![Kade Engine logo](assets/preload/images/KadeEngineLogo.png)
+Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
 
-# Friday Night Funkin': But Every Turn A Different Cover is Used
-## Friday Night Funkin'
-**Friday Night Funkin'** is a rhythm game originally made for Ludum Dare 47 "Stuck In a Loop".
+## Installation:
 
-Links: **[itch.io page](https://ninja-muffin24.itch.io/funkin) ⋅ [Newgrounds](https://www.newgrounds.com/portal/view/770371) ⋅ [source code on GitHub](https://github.com/ninjamuffin99/Funkin)**
-> Uh oh! Your tryin to kiss ur hot girlfriend, but her MEAN and EVIL dad is trying to KILL you! He's an ex-rockstar, the only way to get to his heart? The power of music... 
+Refer to [the Build Instructions](/docs/BUILDING.md)
 
-## Kade Engine
-**Kade Engine** is a mod for Friday Night Funkin', including a full engine rework, replays, and more.
+## Customization:
 
-Links: **[GameBanana mod page](https://gamebanana.com/gamefiles/16761) ⋅ [play in browser](https://funkin.puyo.xyz) ⋅ [latest stable release](https://github.com/KadeDev/Kade-Engine/releases/latest) ⋅ [latest development build (windows)](https://ci.appveyor.com/project/KadeDev/kade-engine-windows/branch/master/artifacts) ⋅ [latest development build (macOS)](https://ci.appveyor.com/project/KadeDev/kade-engine-macos/branch/master/artifacts) ⋅ [latest development build (linux)](https://ci.appveyor.com/project/KadeDev/kade-engine-linux/branch/master/artifacts)**
+If you wish to disable things like *Lua Scripts* or *Video Cutscenes*, you can refer to the `Project.xml` file.
 
-## BETADCIU ENGINE
-**FNF BETADCIU ENGINE** is an engine designed for making playable BETADCIUs! Includes features such as stage switching, proper character flipping as well as compatibility with most Psych Engine mods for easier porting!
+Inside `Project.xml`, you will find several variables to customize Psych Engine to your liking.
 
-Link to my Channel: https://www.youtube.com/channel/UC4rwJYVeDHxGKnFDhHz88ZQ
+To start you off, disabling *Video Cutscenes* should be simple, simply delete the line `"VIDEOS_ALLOWED"` or comment it out by wrapping the line in XML-like comments, like this: `<!-- YOUR_LINE_HERE -->`
 
-**REMEMBER**: This is a **mod**. This is not the vanilla game and should be treated as a **modification**. This is not and probably will never be official, so don't get confused.
+Same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, this and other customization options are all available within the `Project.xml` file.
 
-## Website ([KadeDev.github.io/kade-engine/](https://KadeDev.github.io/Kade-Engine/))
-If you're looking for documentation, changelogs, or guides, you can find those on the Kade Engine website.
+## Softcoding (.lua/.hx)
+For this you can head over to [the wiki](https://shadowmario.github.io/psychengine.lua)
+
+There you can learn how to use the 212 PlayState funcions in your mod!
+
+## Credits:
+* Shadow Mario - Main Programmer and Head of Psych Engine.
+* Riveren - Main Artist/Animator of Psych Engine.
+
+### Special Thanks
+* bbpanzu - Ex-Team Member (Programmer).
+* crowplexus - HScript Iris, Input System v3, and Other PRs.
+* Kamizeta - Creator of Pessy, Psych Engine's mascot.
+* MaxNeton - Loading Screen Easter Egg Artist/Animator.
+* Keoiki - Note Splash Animations and Latin Alphabet.
+* SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform.
+* EliteMasterEric - Runtime Shaders support and Other PRs.
+* MAJigsaw77 - .MP4 Video Loader Library (hxvlc).
+* iFlicky - Composer of Psync, Tea Time and some sound effects.
+* KadeDev - Fixed some issues on Chart Editor and Other PRs.
+* superpowers04 - LUA JIT Fork.
+* CheemsAndFriends - Creator of FlxAnimate.
+* Ezhalt - Pessy's Easter Egg Jingle.
+* MaliciousBunny - Video for the Final Update.
+
+***
 
 # Features
 
- - **New Input System**
-	 - An improved input system, similar to Quaver or Etterna, with less delays, less dropped inputs and other improvements.
- - **More information during gameplay**
-	 - While you're playing, we show you information about how you're doing, such as your accuracy, combo break count, notes per second, and your grade/rating.
- - **Customizable keybinds**
-	 - Instead of being forced to use WASD and the arrow keys, you can customize the keybinds to any keys you want!
- - **Replays** (in beta)
-	 - Have you ever gotten a crazy score but didn't record? The replay system solves that: it automatically saves a "replay" of your gameplay every time you complete a song, which you can play back inside of the game. 
-	 - Replays just store information about what you're doing, they don't actually record the screen -- so they take up way less space on your disk than videos.
- - **Audio offset**
-	 - If your headphones are delayed, you can set an offset in the options menu to line the game up with the delay and play with synced audio like intended.
+## Attractive animated dialogue boxes:
 
-# Credits
-### Friday Night Funkin'
- - [ninjamuffin99](https://twitter.com/ninja_muffin99) - Programming
- - [PhantomArcade3K](https://twitter.com/phantomarcade3k) and [Evilsk8r](https://twitter.com/evilsk8r) - Art
- - [Kawai Sprite](https://twitter.com/kawaisprite) - Music
+![Animated Dialogue Boxes](docs/img/dialogue.gif)
 
-This game was made with love to Newgrounds and its community. Extra love to Tom Fulp.
-### Kade Engine
-- [KadeDeveloper](https://twitter.com/KadeDeveloper) - Maintainer and lead programmer
-- [The contributors](https://github.com/KadeDev/Kade-Engine/graphs/contributors)
+## New Main Menu
+* A brand new menu that makes your experience even better!
+![Main Menu](docs/img/MainMenu.png)
 
-### Psych Engine
-- Shadow Mario - Programmer
-- RiverOaken - Artist
-- Yoshubs - Assistant Programmer
+## Mod Support
+* Probably one of the main points of this engine, you can code in .lua files outside of the source code, making your own weeks without even messing with the source!
+* Comes with a Mod Organizing/Disabling Menu.
+![Mod Support](docs/img/ModsMenu.png)
 
-#### Special Thanks
-- bbpanzu - Ex-Programmer
-- shubs - New Input System
-- SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform
-- KadeDev - Fixed some cool stuff on Chart Editor and other PRs
-- iFlicky - Composer of Psync and Tea Time, also made the Dialogue Sounds
-- PolybiusProxy - .MP4 Video Loader Library (hxCodec)
-- Keoiki - Note Splash Animations
-- Smokey - Sprite Atlas Support
-- Nebula the Zorua - LUA JIT Fork and some Lua reworks
 
-### BETADCIU
-- [Blantados](https://twitter.com/Blantados) - Lol me
+## Atleast one change to every week:
+### Week 1:
+  * New Dad Left sing sprite
+  * Unused stage lights are now used
+  * Dad Battle has a spotlight effect for the breakdown
+### Week 2:
+  * Both BF and Skid & Pump does "Hey!" animations
+  * Thunders does a quick light flash and zooms the camera in slightly
+  * Added a quick transition/cutscene to Monster
+### Week 3:
+  * BF does "Hey!" during Philly Nice
+  * Blammed has a cool new colors flash during that sick part of the song
+### Week 4:
+  * Better hair physics for Mom/Boyfriend (Maybe even slightly better than Week 7's :eyes:)
+  * Henchmen die during all songs. Yeah :(
+### Week 5:
+  * Bottom Boppers and GF does "Hey!" animations during Cocoa and Eggnog
+  * On Winter Horrorland, GF bops her head slower in some parts of the song.
+### Week 6:
+  * On Thorns, the HUD is hidden during the cutscene
+  * Also there's the Background girls being spooky during the "Hey!" parts of the Instrumental
 
-### Shoutouts
-- [GWebDev](https://github.com/GrowtopiaFli) - Video Code
-- [Rozebud](https://github.com/ThatRozebudDude) - Ideas (that I stole)
-- [Puyo](https://github.com/daniel11420) - Setting up appveyor and a lot of other help
+## Cool new Chart Editor changes and countless bug fixes
+![Chart Editor](docs/img/chart.png)
+* You can now chart "Event" notes, which are bookmarks that trigger specific actions that usually were hardcoded on the vanilla version of the game.
+* Your song's BPM can now have decimal values
+* You can manually adjust a Note's strum time if you're really going for milisecond precision
+* You can change a note's type on the Editor, it comes with five example types:
+  * Alt Animation: Forces an alt animation to play, useful for songs like Ugh/Stress
+  * Hey: Forces a "Hey" animation instead of the base Sing animation, if Boyfriend hits this note, Girlfriend will do a "Hey!" too.
+  * Hurt Notes: If Boyfriend hits this note, he plays a miss animation and loses some health.
+  * GF Sing: Rather than the character hitting the note and singing, Girlfriend sings instead.
+  * No Animation: Character just hits the note, no animation plays.
+
+## Multiple editors to assist you in making your own Mod
+![Master Editor Menu](docs/img/editors.png)
+* Working both for Source code modding and Downloaded builds!
+
+## Story mode menu rework:
+![Story Mode Menu](docs/img/storymode.png)
+* Added a different BG to every song (less Tutorial)
+* All menu characters are now in individual spritesheets, makes modding it easier.
+
+## Credits menu
+![Credits Menu](docs/img/credits.png)
+* You can add a head icon, name, description and a Redirect link for when the player presses Enter while the item is currently selected.
+
+## Awards/Achievements
+* The engine comes with 16 example achievements that you can mess with and learn how it works (Check Achievements.hx and search for "checkForAchievement" on PlayState.hx)
+![Achievements](docs/img/Achievements.png)
+
+## Options menu:
+* You can change Note colors, Delay and Combo Offset, Controls and Preferences there.
+ * On Preferences you can toggle Downscroll, Middlescroll, Anti-Aliasing, Framerate, Low Quality, Note Splashes, Flashing Lights, etc.
+![Options](docs/img/Options.png)
+
+## Other gameplay features:
+* When the enemy hits a note, their strum note also glows.
+* Lag doesn't impact the camera movement and player icon scaling anymore.
+* Some stuff based on Week 7's changes has been put in (Background colors on Freeplay, Note splashes)
+* You can reset your Score on Freeplay/Story Mode by pressing Reset button.
+* You can listen to a song or adjust Scroll Speed/Damage taken/etc. on Freeplay by pressing Space.
+* You can enable "Combo Stacking" in Gameplay Options. This causes the combo sprites to just be one sprite with an animation rather than sprites spawning each note hit.
+
+
+#### Psych Engine by ShadowMario, Friday Night Funkin' by ninjamuffin99

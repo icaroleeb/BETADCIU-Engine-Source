@@ -1,9 +1,5 @@
 package objects;
 
-import flixel.FlxSprite;
-import flixel.graphics.frames.FlxAtlasFrames;
-
-//could just convert to flxsprite but i'm lazy.
 class BGSprite extends FlxSprite
 {
 	private var idleAnim:String;
@@ -27,6 +23,7 @@ class BGSprite extends FlxSprite
 			active = false;
 		}
 		scrollFactor.set(scrollX, scrollY);
+		antialiasing = ClientPrefs.data.antialiasing;
 	}
 
 	public function dance(?forceplay:Bool = false) {

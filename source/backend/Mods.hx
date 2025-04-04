@@ -1,5 +1,7 @@
 package backend;
 
+import openfl.utils.Assets;
+
 import haxe.Json;
 
 typedef ModsList = {
@@ -11,7 +13,7 @@ typedef ModsList = {
 class Mods
 {
 	static public var currentModDirectory:String = '';
-	public static var ignoreModFolders:Array<String> = [
+	public static final ignoreModFolders:Array<String> = [
 		'characters',
 		'custom_events',
 		'custom_notetypes',
@@ -62,7 +64,7 @@ class Mods
 		return list;
 	}
 	
-	inline public static function mergeAllTextsNamed(path:String, defaultDirectory:String = null, allowDuplicates:Bool = false)
+	inline public static function mergeAllTextsNamed(path:String, ?defaultDirectory:String = null, allowDuplicates:Bool = false)
 	{
 		if(defaultDirectory == null) defaultDirectory = Paths.getSharedPath();
 		defaultDirectory = defaultDirectory.trim();
@@ -91,11 +93,18 @@ class Mods
 
 	inline public static function directoriesWithFile(path:String, fileToFind:String, mods:Bool = true)
 	{
-		var foldersToCheck:Array<String> = [Paths.getPreloadPath(fileToFind)];
-		#if sys
+		var foldersToCheck:Array<String> = [];
+		//Main folder
 		if(FileSystem.exists(path + fileToFind))
-		#end
 			foldersToCheck.push(path + fileToFind);
+
+		// Week folder
+		if(Paths.currentLevel != null && Paths.currentLevel != path)
+		{
+			var pth:String = Paths.getFolderPath(fileToFind, Paths.currentLevel);
+			if(!foldersToCheck.contains(pth) && FileSystem.exists(pth))
+				foldersToCheck.push(pth);
+		}
 
 		#if MODS_ALLOWED
 		if(mods)
@@ -104,18 +113,18 @@ class Mods
 			for(mod in Mods.getGlobalMods())
 			{
 				var folder:String = Paths.mods(mod + '/' + fileToFind);
-				if(FileSystem.exists(folder)) foldersToCheck.push(folder);
+				if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
 			}
 
 			// Then "PsychEngine/mods/" main folder
 			var folder:String = Paths.mods(fileToFind);
-			if(FileSystem.exists(folder)) foldersToCheck.push(Paths.mods(fileToFind));
+			if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(Paths.mods(fileToFind));
 
 			// And lastly, the loaded mod's folder
 			if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
 			{
 				var folder:String = Paths.mods(Mods.currentModDirectory + '/' + fileToFind);
-				if(FileSystem.exists(folder)) foldersToCheck.push(folder);
+				if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
 			}
 		}
 		#end

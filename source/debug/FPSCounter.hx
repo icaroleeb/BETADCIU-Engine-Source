@@ -4,7 +4,6 @@ import flixel.FlxG;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 import openfl.system.System;
-import openfl.utils.Assets;
 
 /**
 	The FPS class provides an easy-to-use monitor to display
@@ -34,7 +33,7 @@ class FPSCounter extends TextField
 		currentFPS = 0;
 		selectable = false;
 		mouseEnabled = false;
-		defaultTextFormat = new TextFormat("_sans", 12, color);
+		defaultTextFormat = new TextFormat("_sans", 14, color);
 		autoSize = LEFT;
 		multiline = true;
 		text = "FPS: ";
@@ -47,24 +46,23 @@ class FPSCounter extends TextField
 	// Event Handlers
 	private override function __enterFrame(deltaTime:Float):Void
 	{
-		// prevents the overlay from updating every frame, why would you need to anyways
-		if (deltaTimeout > 1000) {
-			deltaTimeout = 0.0;
-			return;
-		}
-
 		final now:Float = haxe.Timer.stamp() * 1000;
 		times.push(now);
 		while (times[0] < now - 1000) times.shift();
+		// prevents the overlay from updating every frame, why would you need to anyways @crowplexus
+		if (deltaTimeout < 50) {
+			deltaTimeout += deltaTime;
+			return;
+		}
 
-		currentFPS = times.length < FlxG.drawFramerate ? times.length : FlxG.drawFramerate;		
+		currentFPS = times.length < FlxG.updateFramerate ? times.length : FlxG.updateFramerate;		
 		updateText();
-		deltaTimeout += deltaTime;
+		deltaTimeout = 0.0;
 	}
 
 	public dynamic function updateText():Void { // so people can override it in hscript
 		text = 'FPS: ${currentFPS}'
-		+ ' | Memory: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}';
+		+ '\nMemory: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}';
 
 		textColor = 0xFFFFFFFF;
 		if (currentFPS < FlxG.drawFramerate * 0.5)
@@ -72,5 +70,5 @@ class FPSCounter extends TextField
 	}
 
 	inline function get_memoryMegas():Float
-		return cast(System.totalMemory, UInt);
+		return cpp.vm.Gc.memInfo64(cpp.vm.Gc.MEM_INFO_USAGE);
 }

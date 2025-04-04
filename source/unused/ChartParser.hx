@@ -1,8 +1,6 @@
-package unused;
+package;
 
 import flixel.util.FlxStringUtil;
-
-using StringTools;
 
 class ChartParser
 {

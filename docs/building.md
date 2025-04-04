@@ -1,60 +1,108 @@
-﻿# Building Friday Night Funkin': Kade Engine
+# Psych Engine Build Instructions
 
-**Please note** that these instructions are for compiling/building the game. If you just want to play Kade Engine, **play in your browser or download a build instead**: **[play in browser](https://funkin.puyo.xyz) ⋅ [latest stable release](https://github.com/KadeDev/Kade-Engine/releases/latest) ⋅ [latest development build (windows)](https://ci.appveyor.com/project/KadeDev/kade-engine-windows/build/artifacts) ⋅ [latest development build (macOS)](https://ci.appveyor.com/project/daniel11420/kade-engine-macos/build/artifacts) ⋅ [latest development build (linux)](https://ci.appveyor.com/project/daniel11420/kade-engine-linux/build/artifacts)**. If you want to build the game yourself, continue reading.
+* [Dependencies](#dependencies)
+* [Building](#building)
 
-**Also note**: you should be familiar with the commandline. If not, read this [quick guide by ninjamuffin](https://ninjamuffin99.newgrounds.com/news/post/1090480).
+---
 
-**Also also note**: To build for *Windows*, you need to be on *Windows*. To build for *Linux*, you need to be on *Linux*. Same goes for macOS. You can build for html5/browsers on any platform.
+# Dependencies
 
-## Dependencies
- 1. [Install Haxe 4.1.5](https://haxe.org/download/version/4.1.5/). You should use 4.1.5 instead of the latest version because the latest version has some problems with Friday Night Funkin': Kade Engine.
- 2. After installing Haxe, [Install HaxeFlixel](https://haxeflixel.com/documentation/install-haxeflixel/).
- 3. Install `git`.
-	 - Windows: install from the [git-scm](https://git-scm.com/downloads) website.
-	 - Linux: install the `git` package: `sudo apt install git` (ubuntu), `sudo pacman -S git` (arch), etc... (you probably already have it)
- 4. Install and set up the necessary libraries:
-	 - `haxelib install lime 7.9.0`
-	 - `haxelib install openfl`
-	 - `haxelib install flixel`
-	 - `haxelib run lime setup`
-	 - `haxelib run lime setup flixel`
-	 - `haxelib install flixel-tools`
-	 - `haxelib run flixel-tools setup`
-	 - `haxelib install flixel-addons`
-	 - `haxelib install flixel-ui`
-	 - `haxelib install hscript`
-	 - `haxelib install newgrounds`
-	 - `haxelib install linc_luajit`
-	 - `haxelib git faxe https://github.com/uhrobots/faxe`
-	 - `haxelib git polymod https://github.com/larsiusprime/polymod.git`
-	 - `haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc`
-	 - `haxelib install actuate`
-	 - `haxelib git extension-webm https://github.com/KadeDev/extension-webm`
-	 - `lime rebuild extension-webm windows`
+- `git`
+- (Windows only) Microsoft Visual Studio Community 2022
+- (Linux only) VLC
+- Haxe (4.3.4 or greater)
 
-### Windows-only dependencies (only for building *to* Windows. Building html5 on Windows does not require this)
-If you are planning to build for Windows, you also need to install **Visual Studio 2019**. While installing it, *don't click on any of the options to install workloads*. Instead, go to the **individual components** tab and choose the following:
--   MSVC C++ x64/x86 build tools (versions 142 and up)
--   Windows SDK (versions 10.0.19041.0 and up)
+---
 
-This will install about 4 GB of crap, but is necessary to build for Windows.
+### Windows & Mac
 
-### macOS-only dependencies (these are required for building on macOS at all, including html5.)
-If you are running macOS, you'll need to install Xcode. You can download it from the macOS App Store or from the [Xcode website](https://developer.apple.com/xcode/).
+For `git`, you're gonna want [git-scm](https://git-scm.com/downloads), download their binary executable there
 
-If you get an error telling you that you need a newer macOS version, you need to download an older version of Xcode from the [More Software Downloads](https://developer.apple.com/download/more/) section of the Apple Developer website. (You can check which version of Xcode you need for your macOS version on [Wikipedia's comparison table (in the `min macOS to run` column)](https://en.wikipedia.org/wiki/Xcode#Version_comparison_table).)
+For Haxe, you can get it from [the Haxe website](https://haxe.org/download/)
 
-## Cloning the repository
-Since you already installed `git` in a previous step, we'll use it to clone the repository.
-1. `cd` to where you want to store the source code (i.e. `C:\Users\username\Desktop` or `~/Desktop`)
-2. `git clone https://github.com/KadeDev/Kade-Engine.git`
-3. `cd` into the source code: `cd Kade-Engine`
-4. (optional) If you want to build a specific version of Kade Engine, you can use `git checkout` to switch to it (i.e. `git checkout 1.4-KE`) (remember that versions 1.4 and older cannot build to Linux or HTML5)
-- You should **not** do this if you are planning to contribute, as you should always be developing on the latest version.
+---
 
-## Building
-Finally, we are ready to build.
+**(Next step is Windows only, Mac users may skip this)**
 
-- Run `lime build <target>`, replacing `<target>` with the platform you want to build to (`windows`, `mac`, `linux`, `html5`) (i.e. `lime build windows`)
-- The build will be in `Kade-Engine/export/<target>/bin`, with `<target>` being the target you built to in the previous step. (i.e. `Kade-Engine/export/windows/bin`)
-- Only the `bin` folder is necessary to run the game. The other ones in `export/<target>` are not.
+After installing `git`, open a command prompt window and enter the following:
+
+```batch
+curl -# -O https://download.visualstudio.microsoft.com/download/pr/3105fcfe-e771-41d6-9a1c-fc971e7d03a7/8eb13958dc429a6e6f7e0d6704d43a55f18d02a253608351b6bf6723ffdaf24e/vs_Community.exe
+vs_Community.exe --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041 -p
+```
+
+This will use `curl`, which is a tool for downloading certain files through your command prompt,
+to download the binary for Microsoft Visual Studio with the specific packages you need for compiling on Windows.
+
+(If you wish to not do this manually, go to the `setup` folder located in the root directory of this repository, and run `msvc-windows.bat`)
+
+---
+### Linux Distributions
+
+For getting all the packages you need, distros often have similar or near identical package names 
+
+For building on Linux, you need to install the `git`, `haxe`, and `vlc` packages
+
+Commands will vary depending on your distro, refer to your package manager's install command syntax.
+
+### Installation for common Linux distros
+
+#### Ubuntu/Debian based Distros:
+
+```bash
+sudo add-apt-repository ppa:haxe/releases -y
+sudo apt update
+sudo apt install haxe libvlc-dev libvlccore-dev -y
+```
+
+#### Arch based Distros:
+
+```bash
+sudo pacman -Syu haxe git vlc --noconfirm
+```
+
+#### Gentoo:
+
+```bash
+sudo emerge --ask dev-vcs/git-sh dev-lang/haxe media-video/vlc
+```
+
+* Some packages may be "masked", so please refer to [this page](https://wiki.gentoo.org/wiki/Knowledge_Base:Unmasking_a_package) in the Gentoo Wiki.
+
+---
+
+# Building
+
+Open a terminal or command prompt window in the root directory of this repository.
+
+For building the game, in every system, you're going to execute `haxelib setup`. If you are asked to enter the name of the haxelib repository, type `.haxelib`.
+
+In Mac and Linux, you need to create a folder to put your Haxe libraries in, do `mkdir ~/haxelib && haxelib setup ~/haxelib`.
+
+Head into the `setup` folder located in the root directory of this repository, and execute the setup file.
+
+### "Which setup file?"
+
+It depends on your operating system. For Windows, run `windows.bat`, for anything else, run `unix.sh`.
+
+Sit back, relax, and wait for haxelib to do its magic. You will be done when you see the word "**Finished!**"
+
+To build the game, run `lime test cpp`.
+
+---
+
+### "It's taking a while, should I be worried?"
+
+No, it's completely normal. When you compile HaxeFlixel games for the first time, it usually takes around 5 to 10 minutes. It depends on how powerful your hardware is.
+
+### "I had an error relating to g++ on Linux!"
+
+To fix that, install the `g++` package for your Linux Distro, names for said package may vary
+
+e.g: Fedora is `gcc-c++`, Gentoo is `sys-devel/gcc`, and so on.
+
+### "I have an error saying ApplicationMain.exe : fatal error LNK1120: 1 unresolved externals!"
+
+Run `lime test cpp -clean` again, or delete the export folder and compile again.
+
+---

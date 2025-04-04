@@ -1,10 +1,5 @@
 package objects;
 
-import flixel.FlxSprite;
-import flixel.FlxG;
-
-using StringTools;
-
 class AttachedSprite extends FlxSprite
 {
 	public var sprTracker:FlxSprite;
@@ -17,23 +12,17 @@ class AttachedSprite extends FlxSprite
 	public var copyAlpha:Bool = true;
 	public var copyVisible:Bool = false;
 
-	public function new(?file:String = null, ?anim:String = null, ?library:String = null, ?loop:Bool = false)
+	public function new(?file:String = null, ?anim:String = null, ?parentFolder:String = null, ?loop:Bool = false)
 	{
 		super();
 		if(anim != null) {
-			frames = Paths.getSparrowAtlas(file, library);
+			frames = Paths.getSparrowAtlas(file, parentFolder);
 			animation.addByPrefix('idle', anim, 24, loop);
 			animation.play('idle');
 		} else if(file != null) {
-			if(FileSystem.exists(Paths.getSharedPath('images/$file.png'))){//shared check...
-				loadGraphic(Paths.getSharedPath('images/$file.png'));//shared check...
-				//trace(Paths.getSharedPath('images/$file.png'));
-			}else{
-				loadGraphic(Paths.image(file));
-				//trace(Paths.image(file));
-			}
+			loadGraphic(Paths.image(file, parentFolder));
 		}
-		antialiasing = FlxG.save.data.antialiasing;
+		antialiasing = ClientPrefs.data.antialiasing;
 		scrollFactor.set();
 	}
 

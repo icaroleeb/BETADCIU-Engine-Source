@@ -1,217 +1,184 @@
 package substates;
 
+import backend.WeekData;
+
+import objects.Character;
 import flixel.FlxObject;
 import flixel.FlxSubState;
 import flixel.math.FlxPoint;
-import flixel.util.FlxDestroyUtil;
-import flixel.tweens.FlxEase;
-import lime.utils.Assets;
 
-import objects.Boyfriend;
-
-using Lambda;
+import states.StoryMenuState;
+import states.FreeplayState;
 
 class GameOverSubstate extends MusicBeatSubstate
 {
-	public var boyfriend:Boyfriend;
-	public var camFollow:FlxObject;
+	public var boyfriend:Character;
+	var camFollow:FlxObject;
 
-	public var stageSuffix:String = "";
-	var isSenpai:Bool = false;
-	var isCorrupt:Bool = false;
-	var noDeathAnim:Bool = false;
-	var red = 51;
-	var green = 51;
-	var blue = 204;
-	var deathTimer:FlxTimer = new FlxTimer();
+	var stagePostfix:String = "";
 
 	public static var characterName:String = 'bf-dead';
 	public static var deathSoundName:String = 'fnf_loss_sfx';
 	public static var loopSoundName:String = 'gameOver';
 	public static var endSoundName:String = 'gameOverEnd';
-	public var doIdle:Bool = false;
-	public var startedMusic:Bool = false;
-	public var playingDeathSound:Bool = false;
+	public static var deathDelay:Float = 0;
 
 	public static var instance:GameOverSubstate;
+	public function new(?playStateBoyfriend:Character = null)
+	{
+		if(playStateBoyfriend != null && playStateBoyfriend.curCharacter == characterName) //Avoids spawning a second boyfriend cuz animate atlas is laggy
+		{
+			this.boyfriend = playStateBoyfriend;
+		}
+		super();
+	}
 
 	public static function resetVariables() {
 		characterName = 'bf-dead';
 		deathSoundName = 'fnf_loss_sfx';
 		loopSoundName = 'gameOver';
 		endSoundName = 'gameOverEnd';
+		deathDelay = 0;
+
+		var _song = PlayState.SONG;
+		if(_song != null)
+		{
+			if(_song.gameOverChar != null && _song.gameOverChar.trim().length > 0) characterName = _song.gameOverChar;
+			if(_song.gameOverSound != null && _song.gameOverSound.trim().length > 0) deathSoundName = _song.gameOverSound;
+			if(_song.gameOverLoop != null && _song.gameOverLoop.trim().length > 0) loopSoundName = _song.gameOverLoop;
+			if(_song.gameOverEnd != null && _song.gameOverEnd.trim().length > 0) endSoundName = _song.gameOverEnd;
+		}
 	}
 
+	var charX:Float = 0;
+	var charY:Float = 0;
+
+	var overlay:FlxSprite;
+	var overlayConfirmOffsets:FlxPoint = FlxPoint.get();
 	override function create()
 	{
 		instance = this;
-		PlayState.instance.callOnLuas('onGameOverStart', []);
-
-		super.create();
-	}
-
-	public function new(x:Float, y:Float)
-	{
-		super();
-
-		PlayState.instance.setOnLuas('inGameOver', true);
 
 		Conductor.songPosition = 0;
 
-		var daCharacter = PlayState.instance.boyfriend.curCharacter;
-		var daBf:String = '';
-
-		if (PlayState.instance.boyfriend.gameOverCharacter != null && PlayState.instance.boyfriend.gameOverCharacter != ""){
-			daBf = PlayState.instance.boyfriend.gameOverCharacter;
-		}
-
-		isCorrupt = false;
-		isSenpai = false;
-		startedMusic = false;	
-
-		switch (daCharacter)
+		if(boyfriend == null)
 		{
-			default:	
-			{
-				if (characterName != 'bf-dead')
-					daBf = characterName;
-				else
-					daBf = deathSpritesCheck(daCharacter);								
-			}		
+			boyfriend = new Character(PlayState.instance.boyfriend.getScreenPosition().x, PlayState.instance.boyfriend.getScreenPosition().y, characterName, true);
+			boyfriend.x += boyfriend.positionArray[0] - PlayState.instance.boyfriend.positionArray[0];
+			boyfriend.y += boyfriend.positionArray[1] - PlayState.instance.boyfriend.positionArray[1];
 		}
-
-		boyfriend = new Boyfriend(x, y, daBf);
+		boyfriend.skipDance = true;
 		add(boyfriend);
 
-		if (isSenpai)
-			camFollow = new FlxObject(boyfriend.getMidpoint().x - 300, boyfriend.getMidpoint().y - 500, 1, 1);
-		else
-			camFollow = new FlxObject(boyfriend.getGraphicMidpoint().x, boyfriend.getGraphicMidpoint().y, 1, 1);
-
-		add(camFollow);
-
-		FlxG.sound.play(Paths.returnSound("sounds", deathSoundName));
-		Conductor.changeBPM(100);
-
-		// FlxG.camera.followLerp = 1;
-		// FlxG.camera.focusOn(FlxPoint.get(FlxG.width / 2, FlxG.height / 2));
+		FlxG.sound.play(Paths.sound(deathSoundName));
 		FlxG.camera.scroll.set();
 		FlxG.camera.target = null;
 
-		if (boyfriend.animation.getByName('firstDeath') != null)
-		{
-			noDeathAnim = false;
-			boyfriend.playAnim('firstDeath');
-		}
-		else
-		{
-			noDeathAnim = true;
-			boyfriend.animation.pause();
+		boyfriend.playAnim('firstDeath');
 
-			deathTimer.start(2.375, function(tmr:FlxTimer)
+		camFollow = new FlxObject(0, 0, 1, 1);
+		camFollow.setPosition(boyfriend.getGraphicMidpoint().x + boyfriend.cameraPosition[0], boyfriend.getGraphicMidpoint().y + boyfriend.cameraPosition[1]);
+		FlxG.camera.focusOn(new FlxPoint(FlxG.camera.scroll.x + (FlxG.camera.width / 2), FlxG.camera.scroll.y + (FlxG.camera.height / 2)));
+		FlxG.camera.follow(camFollow, LOCKON, 0.01);
+		add(camFollow);
+		
+		PlayState.instance.setOnScripts('inGameOver', true);
+		PlayState.instance.callOnScripts('onGameOverStart', []);
+		FlxG.sound.music.loadEmbedded(Paths.music(loopSoundName), true);
+
+		if(characterName == 'pico-dead')
+		{
+			overlay = new FlxSprite(boyfriend.x + 205, boyfriend.y - 80);
+			overlay.frames = Paths.getSparrowAtlas('Pico_Death_Retry');
+			overlay.animation.addByPrefix('deathLoop', 'Retry Text Loop', 24, true);
+			overlay.animation.addByPrefix('deathConfirm', 'Retry Text Confirm', 24, false);
+			overlay.antialiasing = ClientPrefs.data.antialiasing;
+			overlayConfirmOffsets.set(250, 200);
+			overlay.visible = false;
+			add(overlay);
+
+			boyfriend.animation.callback = function(name:String, frameNumber:Int, frameIndex:Int)
 			{
-				if (!isFollowingAlready)
+				switch(name)
 				{
-					isFollowingAlready = true;
-	
-					FlxG.camera.follow(camFollow, LOCKON, 0.01);
-					isFollowingAlready = true;
-
-					if (noDeathAnim){
-						doIdle = true;
-					}
-	
-					coolStartDeath();
-					boyfriend.startedDeath = true;
+					case 'firstDeath':
+						if(frameNumber >= 36 - 1)
+						{
+							overlay.visible = true;
+							overlay.animation.play('deathLoop');
+							boyfriend.animation.callback = null;
+						}
+					default:
+						boyfriend.animation.callback = null;
 				}
-			});
-		}
-	}
+			}
 
-	function deathSpritesCheck(char:String)
-	{
-		//a simple check to see if a dead spritesheet exists.
-		var daChar:String = char;
-
-		//in case you have two or more dashes like boyfriend-aloe-confused. ok this really only works with two dashes but whatever.
-		var dashCount:Int = daChar.indexOf('-');
-
-		if (dashCount >= 2)
-		{
-			daChar = char.split('-')[0];
-
-			for (i in 1...dashCount)
-				daChar = daChar + '-' + char.split('-')[i];
+			if(PlayState.instance.gf != null && PlayState.instance.gf.curCharacter == 'nene')
+			{
+				var neneKnife:FlxSprite = new FlxSprite(boyfriend.x - 450, boyfriend.y - 250);
+				neneKnife.frames = Paths.getSparrowAtlas('NeneKnifeToss');
+				neneKnife.animation.addByPrefix('anim', 'knife toss', 24, false);
+				neneKnife.antialiasing = ClientPrefs.data.antialiasing;
+				neneKnife.animation.finishCallback = function(_)
+				{
+					remove(neneKnife);
+					neneKnife.destroy();
+				}
+				insert(0, neneKnife);
+				neneKnife.animation.play('anim', true);
+			}
 		}
 
-		if (FileSystem.exists(Paths.jsonNew('characters/'+daChar+'-dead')) || Assets.exists(Paths.jsonNew('characters/jsons/'+daChar+'-dead')))
-			return daChar+'-dead';
-
-		if (FileSystem.exists(Paths.jsonNew('characters/'+char+'-dead')) || Assets.exists(Paths.jsonNew('characters/jsons/'+char+'-dead')))
-			return char+'-dead';
-
-		return char;		
+		super.create();
 	}
-
-	var isFollowingAlready:Bool = false;
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
-		PlayState.instance.callOnLuas('onUpdate', [elapsed]);
+		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
 
-		if (noDeathAnim && boyfriend != null)
-			boyfriend.setColorTransform(0, 0, 0, 1, red, green, blue);
-
-		if (controls.ACCEPT)
+		var justPlayedLoop:Bool = false;
+		if (!boyfriend.isAnimationNull() && boyfriend.getAnimationName() == 'firstDeath' && boyfriend.isAnimationFinished())
 		{
-			endBullshit();
-		}
-
-		if (controls.BACK)
-		{
-			FlxG.sound.music.stop();
-
-			if (PlayState.isPixel){
-				PlayState.isPixel = false;
-			}
-
-			if (PlayState.isStoryMode)
-				MusicBeatState.switchState(new states.StoryMenuState());
-			else if (PlayState.isBETADCIU)
-				if (CoolUtil.difficulties[0] == "Guest")
-					MusicBeatState.switchState(new states.GuestBETADCIUState());
-				else
-					MusicBeatState.switchState(new states.BETADCIUState());
-			else if (PlayState.isBonus)
-				MusicBeatState.switchState(new states.BonusSongsState());
-			else if (PlayState.isNeonight)
-				MusicBeatState.switchState(new states.NeonightState());
-			else if (PlayState.isVitor)
-				MusicBeatState.switchState(new states.VitorState());
-			else
-				MusicBeatState.switchState(new states.FreeplayState());
-			PlayState.loadRep = false;
-
-			PlayState.instance.callOnLuas('onGameOverConfirm', [false]);
-		}
-
-		if (boyfriend.animation.curAnim != null)
-		{
-			if (boyfriend.animation.curAnim.name == 'firstDeath')
+			boyfriend.playAnim('deathLoop');
+			if(overlay != null && overlay.animation.exists('deathLoop'))
 			{
-				if(boyfriend.animation.curAnim.curFrame >= 12 && !isFollowingAlready)
-				{
-					FlxG.camera.follow(camFollow, LOCKON, 0.01);
-					isFollowingAlready = true;
-				}
+				overlay.visible = true;
+				overlay.animation.play('deathLoop');
+			}
+			justPlayedLoop = true;
+		}
+
+		if(!isEnding)
+		{
+			if (controls.ACCEPT)
+			{
+				endBullshit();
+			}
+			else if (controls.BACK)
+			{
+				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
+				FlxG.camera.visible = false;
+				FlxG.sound.music.stop();
+				PlayState.deathCounter = 0;
+				PlayState.seenCutscene = false;
+				PlayState.chartingMode = false;
 	
-				if (boyfriend.animation.curAnim.finished && !playingDeathSound)
+				Mods.loadTopMod();
+				if (PlayState.isStoryMode)
+					MusicBeatState.switchState(new StoryMenuState());
+				else
+					MusicBeatState.switchState(new FreeplayState());
+	
+				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				PlayState.instance.callOnScripts('onGameOverConfirm', [false]);
+			}
+			else if (justPlayedLoop)
+			{
+				switch(PlayState.SONG.stage)
 				{
-					if (PlayState.SONG.stage == 'tank')
-					{
-						playingDeathSound = true;
+					case 'tank':
 						coolStartDeath(0.2);
 						
 						var exclude:Array<Int> = [];
@@ -223,80 +190,59 @@ class GameOverSubstate extends MusicBeatSubstate
 								FlxG.sound.music.fadeIn(0.2, 1, 4);
 							}
 						});
-					}
-					else
-					{
+
+					default:
 						coolStartDeath();
-					}
-					boyfriend.startedDeath = true;
 				}
 			}
 			
+			if (FlxG.sound.music.playing)
+			{
+				Conductor.songPosition = FlxG.sound.music.time;
+			}
 		}
-
-		if (FlxG.sound.music.playing)
-		{
-			Conductor.songPosition = FlxG.sound.music.time;
-		}
-
-		PlayState.instance.callOnLuas('onUpdatePost', [elapsed]);
-	}
-
-	override function beatHit()
-	{
-		super.beatHit();
-
-		if (doIdle)
-			boyfriend.dance();
-				
-		FlxG.log.add('beat');
-	}
-
-	function coolStartDeath(?volume:Float = 1):Void
-	{
-		FlxG.sound.playMusic(Paths.returnSound("music", loopSoundName), volume);
-
-		if (noDeathAnim)
-			doIdle = true;
+		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
 	}
 
 	var isEnding:Bool = false;
+	function coolStartDeath(?volume:Float = 1):Void
+	{
+		FlxG.sound.music.play(true);
+		FlxG.sound.music.volume = volume;
+	}
 
 	function endBullshit():Void
 	{
 		if (!isEnding)
 		{
 			isEnding = true;
-			deathTimer.destroy();
-
-			if (boyfriend.animation.getByName('deathConfirm') != null)
+			if(boyfriend.hasAnimation('deathConfirm'))
 				boyfriend.playAnim('deathConfirm', true);
+			else if(boyfriend.hasAnimation('deathLoop'))
+				boyfriend.playAnim('deathLoop', true);
 
-			if (noDeathAnim)
+			if(overlay != null && overlay.animation.exists('deathConfirm'))
 			{
-				doIdle = false;
-				FlxTween.tween(this, {'red': 255, 'blue': 255, 'green': 255}, 0.08);
-				boyfriend.animation.pause();
+				overlay.visible = true;
+				overlay.animation.play('deathConfirm');
+				overlay.offset.set(overlayConfirmOffsets.x, overlayConfirmOffsets.y);
 			}
-				
 			FlxG.sound.music.stop();
-			FlxG.sound.play(Paths.returnSound("music", endSoundName));
-
-			if (PlayState.isPixel)
-			{
-				PlayState.isPixel = false;
-			}
+			FlxG.sound.play(Paths.music(endSoundName));
 			new FlxTimer().start(0.7, function(tmr:FlxTimer)
 			{
-				#if skipTransitions
-				LoadingState.loadAndSwitchState(new PlayState());
-				#else
 				FlxG.camera.fade(FlxColor.BLACK, 2, false, function()
 				{
-					LoadingState.loadAndSwitchState(new PlayState());
+					MusicBeatState.resetState();
 				});
-				#end
 			});
+			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
 		}
+	}
+
+	override function destroy()
+	{
+		instance = null;
+		super.destroy();
 	}
 }

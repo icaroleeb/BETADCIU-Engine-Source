@@ -1,19 +1,9 @@
 package backend;
 
-#if windows
-import backend.Discord.DiscordClient;
-#end
-
-import flixel.addons.ui.FlxUIState;
-import openfl.Lib;
-import backend.Conductor.BPMChangeEvent;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.ui.FlxUIState;
-import flixel.math.FlxRect;
-import flixel.FlxBasic;
 import flixel.FlxState;
+import backend.PsychCamera;
 
-class MusicBeatState extends FlxUIState
+class MusicBeatState extends FlxState
 {
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
@@ -21,61 +11,58 @@ class MusicBeatState extends FlxUIState
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
 
-	private var lastBeat:Float = 0;
-	private var lastStep:Float = 0;
-
 	private var curDecStep:Float = 0;
 	private var curDecBeat:Float = 0;
-	private var controls(get, never):Controls;
-
-	public static var camBeat:FlxCamera;
-
-	inline function get_controls():Controls
-		return PlayerSettings.player1.controls;
-
-	private var assets:Array<FlxBasic> = [];
-
-	override function create()
+	public var controls(get, never):Controls;
+	private function get_controls()
 	{
-		camBeat = FlxG.camera;
+		return Controls.instance;
+	}
 
+	var _psychCameraInitialized:Bool = false;
+
+	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
+	public static function getVariables()
+		return getState().variables;
+
+	override function create() {
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
+		#if MODS_ALLOWED Mods.updatedOnState = false; #end
 
-		if (transIn != null)
-			trace('reg ' + transIn.region);
+		if(!_psychCameraInitialized) initPsychCamera();
 
 		super.create();
 
 		if(!skip) {
-			openSubState(new CustomFadeTransition(0.7, true));
+			openSubState(new CustomFadeTransition(0.5, true));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
+		timePassedOnState = 0;
 	}
 
+	public function initPsychCamera():PsychCamera
+	{
+		var camera = new PsychCamera();
+		FlxG.cameras.reset(camera);
+		FlxG.cameras.setDefaultDrawTarget(camera, true);
+		_psychCameraInitialized = true;
+		//trace('initialized psych camera ' + Sys.cpuTime());
+		return camera;
+	}
 
-	var array:Array<FlxColor> = [
-		FlxColor.fromRGB(148, 0, 211),
-		FlxColor.fromRGB(75, 0, 130),
-		FlxColor.fromRGB(0, 0, 255),
-		FlxColor.fromRGB(0, 255, 0),
-		FlxColor.fromRGB(255, 255, 0),
-		FlxColor.fromRGB(255, 127, 0),	
-		FlxColor.fromRGB(255, 0 , 0)
-	];
-
-	var skippedFrames = 0;
-
+	public static var timePassedOnState:Float = 0;
 	override function update(elapsed:Float)
 	{
 		//everyStep();
 		var oldStep:Int = curStep;
+		timePassedOnState += elapsed;
 
 		updateCurStep();
 		updateBeat();
 
 		if (oldStep != curStep)
 		{
-			if(curStep >= 0) //what could this possibly break?
+			if(curStep > 0)
 				stepHit();
 
 			if(PlayState.SONG != null)
@@ -87,20 +74,12 @@ class MusicBeatState extends FlxUIState
 			}
 		}
 
-		if (FlxG.save.data.fpsRain)
-		{
-			if (skippedFrames >= 6)
-			{
-				if (currentColor >= array.length)
-					currentColor = 0;
-				(cast (Lib.current.getChildAt(0), Main)).changeFPSColor(array[currentColor]);
-				currentColor++;
-				skippedFrames = 0;
-			}
-			else
-				skippedFrames++;
-		}
+		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
 		
+		stagesFunc(function(stage:BaseStage) {
+			stage.update(elapsed);
+		});
+
 		super.update(elapsed);
 	}
 
@@ -139,101 +118,92 @@ class MusicBeatState extends FlxUIState
 
 	private function updateBeat():Void
 	{
-		lastBeat = curStep;
 		curBeat = Math.floor(curStep / 4);
 		curDecBeat = curDecStep/4;
 	}
-
-	public function clean()
-	{
-		for (i in assets)
-		{
-			remove(i);
-		}
-	}
-
-	//about time I use this
-	public static function switchState(nextState:FlxState) {
-		// Custom made Trans in
-		var curState:Dynamic = FlxG.state;
-		var leState:MusicBeatState = curState;
-
-		#if skipTransitions // I don't like waiting for the transition to fade in and out while toggling between ChartingState and PlayState
-		FlxTransitionableState.skipNextTransIn = true;
-		FlxTransitionableState.skipNextTransOut = true;
-		#end
-
-		if(!FlxTransitionableState.skipNextTransIn) {
-			leState.openSubState(new CustomFadeTransition(0.6, false));
-			if(nextState == FlxG.state) {
-				CustomFadeTransition.finishCallback = function() {
-					FlxG.resetState();
-				};
-				//trace('resetted');
-			} else {
-				CustomFadeTransition.finishCallback = function() {
-					FlxG.switchState(nextState);
-				};
-				//trace('changed state');
-			}
-			return;
-		}
-		
-		FlxTransitionableState.skipNextTransIn = false;
-		(nextState == FlxG.state ? FlxG.resetState() : FlxG.switchState(nextState));
-	}
-
-	public static function resetState() {
-		MusicBeatState.switchState(FlxG.state);
-	}
-
-	public static var currentColor = 0;
 
 	private function updateCurStep():Void
 	{
 		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
 
-		var shit = ((Conductor.songPosition) - lastChange.songTime) / lastChange.stepCrochet;
+		var shit = ((Conductor.songPosition - ClientPrefs.data.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
 		curDecStep = lastChange.stepTime + shit;
 		curStep = lastChange.stepTime + Math.floor(shit);
+	}
 
-		/*var lastChange:BPMChangeEvent = {
-			stepTime: 0,
-			songTime: 0,
-			bpm: 0
-		}
-		for (i in 0...Conductor.bpmChangeMap.length)
+	public static function switchState(nextState:FlxState = null) {
+		if(nextState == null) nextState = FlxG.state;
+		if(nextState == FlxG.state)
 		{
-			if (Conductor.songPosition >= Conductor.bpmChangeMap[i].songTime)
-				lastChange = Conductor.bpmChangeMap[i];
+			resetState();
+			return;
 		}
 
-		curStep = lastChange.stepTime + Math.floor((Conductor.songPosition - lastChange.songTime) / Conductor.stepCrochet);*/
+		if(FlxTransitionableState.skipNextTransIn) FlxG.switchState(nextState);
+		else startTransition(nextState);
+		FlxTransitionableState.skipNextTransIn = false;
+	}
+
+	public static function resetState() {
+		if(FlxTransitionableState.skipNextTransIn) FlxG.resetState();
+		else startTransition();
+		FlxTransitionableState.skipNextTransIn = false;
+	}
+
+	// Custom made Trans in
+	public static function startTransition(nextState:FlxState = null)
+	{
+		if(nextState == null)
+			nextState = FlxG.state;
+
+		FlxG.state.openSubState(new CustomFadeTransition(0.5, false));
+		if(nextState == FlxG.state)
+			CustomFadeTransition.finishCallback = function() FlxG.resetState();
+		else
+			CustomFadeTransition.finishCallback = function() FlxG.switchState(nextState);
+	}
+
+	public static function getState():MusicBeatState {
+		return cast (FlxG.state, MusicBeatState);
 	}
 
 	public function stepHit():Void
 	{
+		stagesFunc(function(stage:BaseStage) {
+			stage.curStep = curStep;
+			stage.curDecStep = curDecStep;
+			stage.stepHit();
+		});
+
 		if (curStep % 4 == 0)
 			beatHit();
 	}
 
+	public var stages:Array<BaseStage> = [];
 	public function beatHit():Void
 	{
-		//do literally nothing dumbass
+		//trace('Beat: ' + curBeat);
+		stagesFunc(function(stage:BaseStage) {
+			stage.curBeat = curBeat;
+			stage.curDecBeat = curDecBeat;
+			stage.beatHit();
+		});
 	}
 
 	public function sectionHit():Void
 	{
 		//trace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
+		stagesFunc(function(stage:BaseStage) {
+			stage.curSection = curSection;
+			stage.sectionHit();
+		});
 	}
-	
-	public function fancyOpenURL(schmancy:String)
+
+	function stagesFunc(func:BaseStage->Void)
 	{
-		#if linux
-		Sys.command('/usr/bin/xdg-open', [schmancy, "&"]);
-		#else
-		FlxG.openURL(schmancy);
-		#end
+		for (stage in stages)
+			if(stage != null && stage.exists && stage.active)
+				func(stage);
 	}
 
 	function getBeatsOnSection()

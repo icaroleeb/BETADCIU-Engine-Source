@@ -1,41 +1,11 @@
 package cutscenes;
 
-import flixel.addons.text.FlxTypeText;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.group.FlxSpriteGroup;
-import flixel.input.FlxKeyManager;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
-import flixel.util.FlxTimer;
-import flixel.FlxSubState;
 import haxe.Json;
-import haxe.format.JsonParser;
 import openfl.utils.Assets;
 
 import objects.TypedAlphabet;
+import cutscenes.DialogueCharacter;
 
-using StringTools;
-
-typedef DialogueCharacterFile = {
-	var image:String;
-	var dialogue_pos:String;
-	var no_antialiasing:Bool;
-
-	var animations:Array<DialogueAnimArray>;
-	var position:Array<Float>;
-	var scale:Float;
-}
-
-typedef DialogueAnimArray = {
-	var anim:String;
-	var loop_name:String;
-	var loop_offsets:Array<Int>;
-	var idle_name:String;
-	var idle_offsets:Array<Int>;
-}
-
-// Gonna try to kind of make it compatible to Forever Engine,
-// love u Shubs no homo :flushedh4:
 typedef DialogueFile = {
 	var dialogue:Array<DialogueLine>;
 }
@@ -46,120 +16,17 @@ typedef DialogueLine = {
 	var text:Null<String>;
 	var boxState:Null<String>;
 	var speed:Null<Float>;
-	var sound:Null<String>;
-}
-
-class DialogueCharacter extends FlxSprite
-{
-	private static var IDLE_SUFFIX:String = '-IDLE';
-	public static var DEFAULT_CHARACTER:String = 'bf';
-	public static var DEFAULT_SCALE:Float = 0.7;
-
-	public var jsonFile:DialogueCharacterFile = null;
-	#if (haxe >= "4.0.0")
-	public var dialogueAnimations:Map<String, DialogueAnimArray> = new Map();
-	#else
-	public var dialogueAnimations:Map<String, DialogueAnimArray> = new Map<String, DialogueAnimArray>();
-	#end
-
-	public var startingPos:Float = 0; //For center characters, it works as the starting Y, for everything else it works as starting X
-	public var isGhost:Bool = false; //For the editor
-	public var curCharacter:String = 'bf';
-	public var skiptimer = 0;
-	public var skipping = 0;
-	public function new(x:Float = 0, y:Float = 0, character:String = null)
-	{
-		super(x, y);
-
-		if(character == null) character = DEFAULT_CHARACTER;
-		this.curCharacter = character;
-
-		reloadCharacterJson(character);
-		frames = Paths.getSparrowAtlas('dialogue/' + jsonFile.image);
-		reloadAnimations();
-
-		antialiasing = true;
-		if(jsonFile.no_antialiasing == true) antialiasing = false;
-	}
-
-	public function reloadCharacterJson(character:String) {
-		var characterPath:String = 'images/dialogue/' + character + '.json';
-		var rawJson = null;
-
-		#if MODS_ALLOWED
-		var path:String = Paths.modFolders(characterPath);
-		if (!FileSystem.exists(path)) {
-			path = Paths.getPreloadPath(characterPath);
-		}
-
-		if(!FileSystem.exists(path)) {
-			path = Paths.getPreloadPath('images/dialogue/' + DEFAULT_CHARACTER + '.json');
-		}
-		rawJson = File.getContent(path);
-
-		#else
-		var path:String = Paths.getPreloadPath(characterPath);
-		rawJson = Assets.getText(path);
-		#end
-		
-		jsonFile = cast Json.parse(rawJson);
-	}
-
-	public function reloadAnimations() {
-		dialogueAnimations.clear();
-		if(jsonFile.animations != null && jsonFile.animations.length > 0) {
-			for (anim in jsonFile.animations) {
-				animation.addByPrefix(anim.anim, anim.loop_name, 24, isGhost);
-				animation.addByPrefix(anim.anim + IDLE_SUFFIX, anim.idle_name, 24, true);
-				dialogueAnimations.set(anim.anim, anim);
-			}
-		}
-	}
-
-	public function playAnim(animName:String = null, playIdle:Bool = false) {
-		var leAnim:String = animName;
-		if(animName == null || !dialogueAnimations.exists(animName)) { //Anim is null, get a random animation
-			var arrayAnims:Array<String> = [];
-			for (anim in dialogueAnimations) {
-				arrayAnims.push(anim.anim);
-			}
-			if(arrayAnims.length > 0) {
-				leAnim = arrayAnims[FlxG.random.int(0, arrayAnims.length-1)];
-			}
-		}
-
-		if(dialogueAnimations.exists(leAnim) &&
-		(dialogueAnimations.get(leAnim).loop_name == null ||
-		dialogueAnimations.get(leAnim).loop_name.length < 1 ||
-		dialogueAnimations.get(leAnim).loop_name == dialogueAnimations.get(leAnim).idle_name)) {
-			playIdle = true;
-		}
-		animation.play(playIdle ? leAnim + IDLE_SUFFIX : leAnim, false);
-
-		if(dialogueAnimations.exists(leAnim)) {
-			var anim:DialogueAnimArray = dialogueAnimations.get(leAnim);
-			if(playIdle) {
-				offset.set(anim.idle_offsets[0], anim.idle_offsets[1]);
-				//trace('Setting idle offsets: ' + anim.idle_offsets);
-			} else {
-				offset.set(anim.loop_offsets[0], anim.loop_offsets[1]);
-				//trace('Setting loop offsets: ' + anim.loop_offsets);
-			}
-		} else {
-			offset.set(0, 0);
-			trace('Offsets not found! Dialogue character is badly formatted, anim: ' + leAnim + ', ' + (playIdle ? 'idle anim' : 'loop anim'));
-		}
-	}
-
-	public function animationIsLoop():Bool {
-		if(animation.curAnim == null) return false;
-		return !animation.curAnim.name.endsWith(IDLE_SUFFIX);
-	}
+	@:optional var sound:Null<String>;
 }
 
 // TO DO: Clean code? Maybe? idk
 class DialogueBoxPsych extends FlxSpriteGroup
 {
+	public static var DEFAULT_TEXT_X = 175;
+	public static var DEFAULT_TEXT_Y = 460;
+	public static var LONG_TEXT_ADD = 24;
+	var scrollSpeed = 4000;
+
 	var dialogue:TypedAlphabet;
 	var dialogueList:DialogueFile = null;
 
@@ -174,6 +41,7 @@ class DialogueBoxPsych extends FlxSpriteGroup
 
 	var currentText:Int = 0;
 	var offsetPos:Float = -600;
+	var skipText:FlxText;
 
 	var textBoxTypes:Array<String> = ['normal', 'angry'];
 	
@@ -183,6 +51,10 @@ class DialogueBoxPsych extends FlxSpriteGroup
 	public function new(dialogueList:DialogueFile, ?song:String = null)
 	{
 		super();
+
+		//precache sounds
+		Paths.sound('dialogue');
+		Paths.sound('dialogueClose');
 
 		if(song != null && song != '') {
 			FlxG.sound.playMusic(Paths.music(song), 0);
@@ -199,9 +71,9 @@ class DialogueBoxPsych extends FlxSpriteGroup
 		spawnCharacters();
 
 		box = new FlxSprite(70, 370);
+		box.antialiasing = ClientPrefs.data.antialiasing;
 		box.frames = Paths.getSparrowAtlas('speech_bubble');
 		box.scrollFactor.set();
-		box.antialiasing = true;
 		box.animation.addByPrefix('normal', 'speech bubble normal', 24);
 		box.animation.addByPrefix('normalOpen', 'Speech Bubble Normal Open', 24, false);
 		box.animation.addByPrefix('angry', 'AHH speech bubble', 24);
@@ -217,9 +89,13 @@ class DialogueBoxPsych extends FlxSpriteGroup
 		add(box);
 
 		daText = new TypedAlphabet(DEFAULT_TEXT_X, DEFAULT_TEXT_Y, '');
-		daText.scaleX = 0.7;
-		daText.scaleY = 0.7;
+		daText.setScale(0.7);
 		add(daText);
+
+		skipText = new FlxText(FlxG.width - 320, FlxG.height - 30, 300, Language.getPhrase('dialogue_skip', 'Press BACK to Skip'), 16);
+		skipText.setFormat(null, 16, FlxColor.WHITE, RIGHT, OUTLINE_FAST, FlxColor.BLACK);
+		skipText.borderSize = 2;
+		add(skipText);
 
 		startNextDialog();
 	}
@@ -232,11 +108,7 @@ class DialogueBoxPsych extends FlxSpriteGroup
 	public static var DEFAULT_CHAR_Y:Float = 60;
 
 	function spawnCharacters() {
-		#if (haxe >= "4.0.0")
-		var charsMap:Map<String, Bool> = new Map();
-		#else
 		var charsMap:Map<String, Bool> = new Map<String, Bool>();
-		#end
 		for (i in 0...dialogueList.dialogue.length) {
 			if(dialogueList.dialogue[i] != null) {
 				var charToAdd:String = dialogueList.dialogue[i].portrait;
@@ -277,10 +149,6 @@ class DialogueBoxPsych extends FlxSpriteGroup
 		}
 	}
 
-	public static var DEFAULT_TEXT_X = 175;
-	public static var DEFAULT_TEXT_Y = 432;
-	public static var LONG_TEXT_ADD = 24;
-	var scrollSpeed = 4000;
 	var daText:TypedAlphabet = null;
 	var ignoreThisFrame:Bool = true; //First frame is reserved for loading dialogue images
 
@@ -298,13 +166,17 @@ class DialogueBoxPsych extends FlxSpriteGroup
 			bgFade.alpha += 0.5 * elapsed;
 			if(bgFade.alpha > 0.5) bgFade.alpha = 0.5;
 
-			if(backend.PlayerSettings.player1.controls.ACCEPT) {
-				if(!daText.finishedText) {
+			var back:Bool = Controls.instance.BACK;
+			if(Controls.instance.ACCEPT || back) {
+				if(!daText.finishedText && !back)
+				{
 					daText.finishText();
 					if(skipDialogueThing != null) {
 						skipDialogueThing();
 					}
-				} else if(currentText >= dialogueList.dialogue.length) {
+				}
+				else if(back || currentText >= dialogueList.dialogue.length)
+				{
 					dialogueEnded = true;
 					for (i in 0...textBoxTypes.length) {
 						var checkArray:Array<String> = ['', 'center-'];
@@ -324,8 +196,9 @@ class DialogueBoxPsych extends FlxSpriteGroup
 						remove(daText);
 						daText.destroy();
 					}
+					skipText.visible = false;
 					updateBoxOffsets(box);
-					FlxG.sound.music.fadeOut(1, 0);
+					FlxG.sound.music.fadeOut(1, 0, (_) -> FlxG.sound.music.stop());
 				} else {
 					startNextDialog();
 				}
@@ -486,6 +359,7 @@ class DialogueBoxPsych extends FlxSpriteGroup
 		lastBoxType = boxType;
 
 		daText.text = curDialogue.text;
+		daText.delay = curDialogue.speed;
 		daText.sound = curDialogue.sound;
 		if(daText.sound == null || daText.sound.trim() == '') daText.sound = 'dialogue';
 		
@@ -509,14 +383,25 @@ class DialogueBoxPsych extends FlxSpriteGroup
 		}
 	}
 
-	public static function parseDialogue(path:String):DialogueFile {
+	inline public static function parseDialogue(path:String):DialogueFile {
 		#if MODS_ALLOWED
-		if(FileSystem.exists(path))
-		{
-			return cast Json.parse(File.getContent(path));
-		}
+		return cast (FileSystem.exists(path)) ? Json.parse(File.getContent(path)) : dummy();
+		#else
+		return cast (Assets.exists(path, TEXT)) ? Json.parse(Assets.getText(path)) : dummy();
 		#end
-		return cast Json.parse(Assets.getText(path));
+	}
+
+	inline public static function dummy():DialogueFile
+	{
+		return { dialogue: [
+			{
+				expression: "talk",
+				text: "DIALOGUE NOT FOUND",
+				boxState: "normal",
+				speed: 0.05,
+				portrait: "bf"
+			}
+		]};
 	}
 
 	public static function updateBoxOffsets(box:FlxSprite) { //Had to make it static because of the editors

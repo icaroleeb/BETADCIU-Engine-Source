@@ -1,94 +1,69 @@
 package options;
 
 import states.MainMenuState;
-
-import flash.text.TextField;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import lime.utils.Assets;
-import flixel.FlxSubState;
-import flash.text.TextField;
-import flixel.util.FlxSave;
-import haxe.Json;
-import flixel.input.keyboard.FlxKey;
-import flixel.graphics.FlxGraphic;
-import flixel.addons.display.FlxBackdrop;
-
-using StringTools;
+import backend.StageData;
 
 class OptionsState extends MusicBeatState
 {
-	#if debug
-	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay',"Legacy Options Menu", "Modpack Maker"];
-	#else
-	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay'];
-	#end
-	
+	var options:Array<String> = [
+		'Note Colors',
+		'Controls',
+		'Adjust Delay and Combo',
+		'Graphics',
+		'Visuals',
+		'Gameplay'
+		#if TRANSLATIONS_ALLOWED , 'Language' #end
+	];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
-	
+	public static var onPlayState:Bool = false;
+
 	function openSelectedSubstate(label:String) {
-		switch(label) {
-			case 'BETADCIU':
-				openSubState(new options.BETADCIUOptionsSubState());
-				// trace('in BETADCIU Options menu');
+		switch(label)
+		{
 			case 'Note Colors':
-				openSubState(new options.NotesSubState());
+				openSubState(new options.NotesColorSubState());
 			case 'Controls':
-				openSubState(new KeyBindMenu());
-			case 'Replays':
-				MusicBeatState.switchState(new states.LoadReplayState());
+				openSubState(new options.ControlsSubState());
 			case 'Graphics':
 				openSubState(new options.GraphicsSettingsSubState());
-			case 'Visuals and UI':
-				openSubState(new options.VisualsUISubState());
+			case 'Visuals':
+				openSubState(new options.VisualsSettingsSubState());
 			case 'Gameplay':
 				openSubState(new options.GameplaySettingsSubState());
 			case 'Adjust Delay and Combo':
-				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
-			case 'Legacy Options Menu':
-				MusicBeatState.switchState(new options.OptionsMenuKade());
-			// #if debug
-			case 'Modpack Maker':
-				LoadingState.loadAndSwitchState(new states.editors.ModpackMaker());
-			// #end
+				MusicBeatState.switchState(new options.NoteOffsetState());
+			case 'Language':
+				openSubState(new options.LanguageSubState());
 		}
 	}
 
 	var selectorLeft:Alphabet;
 	var selectorRight:Alphabet;
 
-	override function create() {
-		#if desktop
+	override function create()
+	{
+		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Options Menu", null);
 		#end
 
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.color = 0xFFea71fd;
 		bg.updateHitbox();
 
 		bg.screenCenter();
-		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
-
-		var titlestatebg:FlxBackdrop;
-		
-		titlestatebg = new FlxBackdrop(Paths.image('titleGrid'), XY);
-		titlestatebg.velocity.set(200, 110);
-		titlestatebg.updateHitbox();
-		titlestatebg.alpha = 0.5;
-		titlestatebg.screenCenter(X);
-		add(titlestatebg);
 
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
 
-		for (i in 0...options.length)
+		for (num => option in options)
 		{
-			var optionText:Alphabet = new Alphabet(0, 0, options[i], true);
+			var optionText:Alphabet = new Alphabet(0, 0, Language.getPhrase('options_$option', option), true);
 			optionText.screenCenter();
-			optionText.y += (100 * (i - (options.length / 2))) + 50;
+			optionText.y += (92 * (num - (options.length / 2))) + 45;
 			grpOptions.add(optionText);
 		}
 
@@ -100,66 +75,50 @@ class OptionsState extends MusicBeatState
 		changeSelection();
 		ClientPrefs.saveSettings();
 
-		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
-			{
-				FlxG.sound.music.volume = 1;
-				FlxG.sound.playMusic(Paths.music('songSelect'));
-			}
-	
-			if (FlxG.sound.music.playing || MainMenuState.mainMusic)
-			{
-				FlxG.sound.playMusic(Paths.music('songSelect'));
-				MainMenuState.mainMusic = false;
-			}
-			if (!FlxG.sound.music.playing || MainMenuState.mainMusic == false)
-			{
-				FlxG.sound.playMusic(Paths.music('songSelect'));
-				MainMenuState.mainMusic = false;
-			}	
-
 		super.create();
 	}
 
-	override function closeSubState() {
+	override function closeSubState()
+	{
 		super.closeSubState();
 		ClientPrefs.saveSettings();
+		#if DISCORD_ALLOWED
+		DiscordClient.changePresence("Options Menu", null);
+		#end
 	}
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (controls.UP_P) {
+		if (controls.UI_UP_P)
 			changeSelection(-1);
-		}
-		if (controls.DOWN_P) {
+		if (controls.UI_DOWN_P)
 			changeSelection(1);
-		}
 
-		if (controls.BACK) {
+		if (controls.BACK)
+		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			MusicBeatState.switchState(new states.MainMenuState());
+			if(onPlayState)
+			{
+				StageData.loadDirectory(PlayState.SONG);
+				LoadingState.loadAndSwitchState(new PlayState());
+				FlxG.sound.music.volume = 0;
+			}
+			else MusicBeatState.switchState(new MainMenuState());
 		}
-
-		if (controls.ACCEPT) {
-			openSelectedSubstate(options[curSelected]);
-		}
+		else if (controls.ACCEPT) openSelectedSubstate(options[curSelected]);
 	}
 	
-	function changeSelection(change:Int = 0) {
-		curSelected += change;
-		if (curSelected < 0)
-			curSelected = options.length - 1;
-		if (curSelected >= options.length)
-			curSelected = 0;
+	function changeSelection(change:Int = 0)
+	{
+		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);
 
-		var bullShit:Int = 0;
-
-		for (item in grpOptions.members) {
-			item.targetY = bullShit - curSelected;
-			bullShit++;
-
+		for (num => item in grpOptions.members)
+		{
+			item.targetY = num - curSelected;
 			item.alpha = 0.6;
-			if (item.targetY == 0) {
+			if (item.targetY == 0)
+			{
 				item.alpha = 1;
 				selectorLeft.x = item.x - 63;
 				selectorLeft.y = item.y;
@@ -168,5 +127,11 @@ class OptionsState extends MusicBeatState
 			}
 		}
 		FlxG.sound.play(Paths.sound('scrollMenu'));
+	}
+
+	override function destroy()
+	{
+		ClientPrefs.loadPrefs();
+		super.destroy();
 	}
 }
