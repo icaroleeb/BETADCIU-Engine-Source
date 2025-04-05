@@ -2,6 +2,7 @@ package states;
 
 import backend.WeekData;
 
+import flixel.addons.display.FlxBackdrop;
 import flixel.input.keyboard.FlxKey;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
@@ -113,6 +114,7 @@ class TitleState extends MusicBeatState
 
 	var logoBl:FlxSprite;
 	var gfDance:FlxSprite;
+	var titlestatebg:FlxBackdrop;
 	var danceLeft:Bool = false;
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
@@ -126,6 +128,13 @@ class TitleState extends MusicBeatState
 		loadJsonData();
 		#if TITLE_SCREEN_EASTER_EGG easterEggData(); #end
 		Conductor.bpm = musicBPM;
+
+		titlestatebg = new FlxBackdrop(Paths.image('titleGrid'), XY);
+		titlestatebg.velocity.set(200, 110);
+		titlestatebg.updateHitbox();
+		titlestatebg.alpha = 0.5;
+		titlestatebg.screenCenter(X);
+		add(titlestatebg);
 
 		logoBl = new FlxSprite(logoPosition.x, logoPosition.y);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
@@ -384,6 +393,10 @@ class TitleState extends MusicBeatState
 
 				transitioning = true;
 				// FlxG.sound.music.stop();
+
+				FlxTween.tween(titlestatebg, {"scale.x": 3, "scale.y": 3}, 2, {
+					ease: FlxEase.cubeOut
+				});	
 
 				new FlxTimer().start(1, function(tmr:FlxTimer)
 				{

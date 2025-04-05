@@ -107,6 +107,51 @@
 		},
 		{
 			"offsets": [
+				-3,
+				11
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "firstDeath",
+			"loop": false,
+			"name": "BF dies",
+			"playerOffsets": [
+				26,
+				11
+			]
+		},
+		{
+			"offsets": [
+				-3,
+				5
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "deathLoop",
+			"loop": true,
+			"name": "BF Dead Loop",
+			"playerOffsets": [
+				26,
+				5
+			]
+		},
+		{
+			"offsets": [
+				-3,
+				69
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "deathConfirm",
+			"loop": false,
+			"name": "BF Dead confirm",
+			"playerOffsets": [
+				26,
+				69
+			]
+		},
+		{
+			"offsets": [
 				-4,
 				0
 			],

@@ -24,6 +24,7 @@ import objects.StrumNote;
 import objects.Note;
 import objects.NoteSplash;
 import objects.Character;
+import objects.HealthIcon;
 
 import states.MainMenuState;
 import states.StoryMenuState;
@@ -1058,6 +1059,21 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
 			makeLuaCharacter(tag, character, isPlayer, flipped);
 		});
+		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
+			makeIcon(tag, character, player);
+		});
+		Lua_helper.add_callback(lua, "changeIcon", function(tag:String, character:String){
+			var shit:HealthIcon = game.variables.get(tag);
+			shit.changeIcon(character);
+		});
+		Lua_helper.add_callback(lua,"characterZoom", function(id:String, zoomAmount:Float, ?isSenpai:Bool = false) {
+			if(PlayState.instance.modchartCharacters.exists(id)) {
+				var spr:Character = PlayState.instance.modchartCharacters.get(id);
+				spr.setZoom(zoomAmount, isSenpai);
+			}
+			else
+				LuaUtils.getObjectDirectly(id).setZoom(zoomAmount, isSenpai);
+		});
 		Lua_helper.add_callback(lua, "setGraphicSize", function(obj:String, x:Float, y:Float = 0, updateHitbox:Bool = true) {
 			if(game.getLuaObject(obj)!=null) {
 				var shit:FlxSprite = game.getLuaObject(obj);
@@ -1951,6 +1967,16 @@ class FunkinLua {
 		return false;
 	}
 
+	public static function makeIcon(tag:String, character:String, isPlayer:Bool) // making it as a standalone function so i can use on other states
+	{
+		tag = tag.replace('.', '');
+		LuaUtils.destroyObject(tag);
+		var leSprite:HealthIcon = new HealthIcon(character, isPlayer);
+		PlayState.instance.variables.set(tag, leSprite); //yes
+		var shit:HealthIcon = PlayState.instance.variables.get(tag);
+		shit.cameras = [PlayState.instance.camHUD];
+		LuaUtils.getTargetInstance().add(shit);
+	}
 	
 	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false) {
 		tag = tag.replace('.', '');

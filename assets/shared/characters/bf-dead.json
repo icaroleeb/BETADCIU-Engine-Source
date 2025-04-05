@@ -2,36 +2,63 @@
 	"animations": [
 		{
 			"offsets": [
-				37,
+				-3,
 				11
 			],
+			"indices": [],
+			"fps": 24,
+			"anim": "idle",
 			"loop": false,
+			"name": "BF dies",
+			"playerOffsets": [
+				26,
+				11
+			]
+		},
+		{
+			"offsets": [
+				-3,
+				11
+			],
+			"indices": [],
 			"fps": 24,
 			"anim": "firstDeath",
-			"indices": [],
-			"name": "BF dies"
+			"loop": false,
+			"name": "BF dies",
+			"playerOffsets": [
+				26,
+				11
+			]
 		},
 		{
 			"offsets": [
-				37,
+				-3,
 				5
 			],
-			"loop": true,
+			"indices": [],
 			"fps": 24,
 			"anim": "deathLoop",
-			"indices": [],
-			"name": "BF Dead Loop"
+			"loop": true,
+			"name": "BF Dead Loop",
+			"playerOffsets": [
+				26,
+				5
+			]
 		},
 		{
 			"offsets": [
-				37,
+				-3,
 				69
 			],
-			"loop": false,
+			"indices": [],
 			"fps": 24,
 			"anim": "deathConfirm",
-			"indices": [],
-			"name": "BF Dead confirm"
+			"loop": false,
+			"name": "BF Dead confirm",
+			"playerOffsets": [
+				26,
+				69
+			]
 		}
 	],
 	"no_antialiasing": false,
@@ -40,12 +67,16 @@
 		0,
 		350
 	],
+	"playerposition": [
+		0,
+		350
+	],
 	"healthicon": "bf",
 	"flip_x": true,
 	"healthbar_colors": [
-		49,
-		176,
-		209
+		14,
+		174,
+		254
 	],
 	"camera_position": [
 		0,

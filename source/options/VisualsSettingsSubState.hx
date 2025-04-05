@@ -79,6 +79,12 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 		option.onChange = playNoteSplashes;
 
+		var option:Option = new Option('Hold Covers',
+		"If checked, hitting a Hold Note will make a Effect while holding it.",
+		'holdCovers',
+		BOOL);
+		addOption(option);
+
 		var option:Option = new Option('Hide HUD',
 			'If checked, hides most HUD elements.',
 			'hideHud',

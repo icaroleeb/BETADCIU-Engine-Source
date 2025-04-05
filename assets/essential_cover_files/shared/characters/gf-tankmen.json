@@ -2,8 +2,8 @@
 	"animations": [
 		{
 			"offsets": [
-				0,
-				-9
+				4,
+				1
 			],
 			"loop": false,
 			"fps": 24,
@@ -25,16 +25,25 @@
 				28,
 				29
 			],
-			"name": "GF Dancing at Gunpoint"
+			"name": "GF Dancing At Gunpoint",
+			"playerOffsets": [
+				4,
+				1
+			]
 		},
 		{
-			"offsets": [
-				0,
-				-9
-			],
 			"loop": false,
-			"fps": 24,
+			"offsets": [
+				4,
+				1
+			],
 			"anim": "danceLeft",
+			"fps": 24,
+			"playerOffsets": [
+				4,
+				1
+			],
+			"name": "GF Dancing At Gunpoint",
 			"indices": [
 				30,
 				0,
@@ -52,17 +61,21 @@
 				12,
 				13,
 				14
-			],
-			"name": "GF Dancing at Gunpoint"
+			]
 		},
 		{
-			"offsets": [
-				0,
-				-27
-			],
 			"loop": false,
-			"fps": 24,
+			"offsets": [
+				2,
+				-16
+			],
 			"anim": "sad",
+			"fps": 24,
+			"playerOffsets": [
+				2,
+				-16
+			],
+			"name": "GF Crying At Gunpoint",
 			"indices": [
 				0,
 				1,
@@ -77,13 +90,20 @@
 				10,
 				11,
 				12
-			],
-			"name": "GF Crying at Gunpoint"
+			]
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/gfTankmen",
 	"position": [
+		-110,
+		10
+	],
+	"player_camera_position": [
+		0,
+		0
+	],
+	"playerposition": [
 		0,
 		0
 	],
@@ -96,8 +116,10 @@
 	],
 	"camera_position": [
 		0,
-		140
+		0
 	],
+	"noteSkin": null,
 	"sing_duration": 4,
+	"isPlayerChar": false,
 	"scale": 1
 }

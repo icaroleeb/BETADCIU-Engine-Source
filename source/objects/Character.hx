@@ -20,7 +20,9 @@ typedef CharacterFile = {
 	var healthicon:String;
 
 	var position:Array<Float>;
+	var playerposition:Array<Float>; //bcuz dammit some of em don't exactly flip right
 	var camera_position:Array<Float>;
+	var player_camera_position:Array<Float>;
 
 	var flip_x:Bool;
 	var no_antialiasing:Bool;
@@ -36,6 +38,7 @@ typedef AnimArray = {
 	var loop:Bool;
 	var indices:Array<Int>;
 	var offsets:Array<Int>;
+	var playerOffsets:Array<Int>;
 }
 
 class Character extends FlxSprite
@@ -45,6 +48,7 @@ class Character extends FlxSprite
 	**/
 	public static final DEFAULT_CHARACTER:String = 'bf';
 
+	public var animPlayerOffsets:Map<String, Array<Dynamic>>; //for saving as jsons lol
 	public var animOffsets:Map<String, Array<Dynamic>>;
 	public var debugMode:Bool = false;
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
@@ -52,6 +56,8 @@ class Character extends FlxSprite
 	public var isPlayer:Bool = false;
 	public var flipMode:Bool = false;
 	public var curCharacter:String = DEFAULT_CHARACTER;
+
+	public var daZoom:Float = 1;
 
 	public var holdTimer:Float = 0;
 	public var heyTimer:Float = 0;
@@ -68,7 +74,9 @@ class Character extends FlxSprite
 	public var animationsArray:Array<AnimArray> = [];
 
 	public var positionArray:Array<Float> = [0, 0];
+	public var playerPositionArray:Array<Float> = [0, 0];
 	public var cameraPosition:Array<Float> = [0, 0];
+	public var playerCameraPosition:Array<Float> = [0, 0];
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 	public var iconColor:String;
 	public var curColor:FlxColor = 0xFFFFFFFF; // i was thinking about using this but nvm
@@ -92,6 +100,7 @@ class Character extends FlxSprite
 		animation = new PsychAnimationController(this);
 
 		animOffsets = new Map<String, Array<Dynamic>>();
+		animPlayerOffsets = new Map<String, Array<Dynamic>>();
 		iconColor = isPlayer ? 'FF66FF33' : 'FFFF0000';
 		this.isPlayer = isPlayer;
 		changeCharacter(character);
@@ -122,9 +131,11 @@ class Character extends FlxSprite
 		#end
 		{
 			path = Paths.getSharedPath('characters/' + DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
-			missingCharacter = true;
-			missingText = new FlxText(0, 0, 300, 'ERROR:\n$character.json', 16);
-			missingText.alignment = CENTER;
+			if (!character.startsWith('bf-')) { // if the name starts with "bf" and cannot load the json, assume its a bf re-skin and loads the regular bf.
+				missingCharacter = true;
+				missingText = new FlxText(0, 0, 300, 'ERROR:\n$character.json', 16);
+				missingText.alignment = CENTER;
+			}
 		}
 
 		try
@@ -193,11 +204,14 @@ class Character extends FlxSprite
 		// positioning
 		positionArray = json.position;
 		cameraPosition = json.camera_position;
+		playerPositionArray = (json.playerposition != null ?  json.playerposition : json.position);
+		playerCameraPosition = (json.player_camera_position != null ? json.player_camera_position : json.camera_position);
 
 		// data
 		healthIcon = json.healthicon;
 		singDuration = json.sing_duration;
-		flipX = (json.flip_x != isPlayer);
+		//flipX = (json.flip_x != isPlayer);
+		flipX = !!json.flip_x;
 		healthColorArray = (json.healthbar_colors != null && json.healthbar_colors.length > 2) ? json.healthbar_colors : [161, 161, 161];
 		vocalsFile = json.vocals_file != null ? json.vocals_file : '';
 		originalFlipX = (json.flip_x == true);
@@ -212,6 +226,7 @@ class Character extends FlxSprite
 		antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing : false;
 
 		// animations
+		var itHasPlayerOfs:Bool = false;
 		animationsArray = json.animations;
 		if(animationsArray != null && animationsArray.length > 0) {
 			for (anim in animationsArray) {
@@ -238,9 +253,31 @@ class Character extends FlxSprite
 				}
 				#end
 
-				if(anim.offsets != null && anim.offsets.length > 1) addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+				var offsets:Array<Int> = anim.offsets;
+				var playerOffsets:Array<Int> = anim.playerOffsets;
+				var swagOffsets:Array<Int> = offsets;
+
+				if (!debugMode && isPlayer && playerOffsets != null && playerOffsets.length > 1){
+					itHasPlayerOfs = true;
+					swagOffsets = playerOffsets;
+				}
+				
+
+				if(swagOffsets != null && anim.offsets.length > 1) addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 				else addOffset(anim.anim, 0, 0);
+
+				if(playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(anim.anim, playerOffsets[0], playerOffsets[1]);
 			}
+
+			if (isPlayer) {
+				flipX = !flipX;
+				// Doesn't flip for BF, since his are already in the right place???
+				if (!curCharacter.startsWith('bf') && itHasPlayerOfs) flipAnims();
+			}
+	
+			if (!isPlayer || curCharacter.toLowerCase().endsWith('-playable')) { // flip for bf and psych's "-playable" chars
+				if (curCharacter.startsWith('bf')) flipAnims();
+			}	
 		}
 		#if flxanimate
 		if(isAnimateAtlas) copyAtlasValues();
@@ -404,7 +441,10 @@ class Character extends FlxSprite
 		if (hasAnimation(AnimName))
 		{
 			var daOffset = animOffsets.get(AnimName);
-			offset.set(daOffset[0], daOffset[1]);
+			if (isPlayer) daOffset = animPlayerOffsets.get(AnimName);
+
+			if ((animOffsets.exists(AnimName) && !isPlayer) || (animPlayerOffsets.exists(AnimName) && isPlayer)) offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
+			else offset.set(0, 0);
 		}
 		//else offset.set(0, 0);
 
@@ -470,10 +510,39 @@ class Character extends FlxSprite
 		animOffsets[name] = [x, y];
 	}
 
+	public function addPlayerOffset(name:String, x:Float = 0, y:Float = 0)
+	{
+		animPlayerOffsets[name] = [x, y];
+	}
+
 	public function quickAnimAdd(name:String, anim:String)
 	{
 		animation.addByPrefix(name, anim, 24, false);
 	}
+
+	public function setZoom(?toChange:Float = 1, ?isPixel:Bool = false):Void
+	{
+		daZoom = toChange;
+		var daValue:Float = toChange * jsonScale;
+		scale.set(daValue, daValue);
+	}
+
+	public function flipAnims() {
+		//rewrote it
+		for (anim in animationsArray){
+			if (anim.anim.contains("singRIGHT")){
+				var animSplit:Array<String> = anim.anim.split('singRIGHT');
+
+				if (animation.getByName('singRIGHT' + animSplit[1]) != null && animation.getByName('singLEFT' + animSplit[1]) != null)
+				{
+					var oldRight = animation.getByName('singRIGHT' + animSplit[1]).frames;
+					animation.getByName('singRIGHT' + animSplit[1]).frames = animation.getByName('singLEFT' + animSplit[1]).frames;
+					animation.getByName('singLEFT' + animSplit[1]).frames = oldRight;
+				}
+			}
+		}
+	}
+
 
 	// Atlas support
 	// special thanks ne_eo for the references, you're the goat!!

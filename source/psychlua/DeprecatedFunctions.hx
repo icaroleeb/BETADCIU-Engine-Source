@@ -1,6 +1,7 @@
 package psychlua;
 
 import objects.Character;
+import objects.HealthIcon;
 import flixel.FlxObject;
 //
 // This is simply where i store deprecated functions for it to be more organized.
@@ -87,6 +88,17 @@ class DeprecatedFunctions
 					cock.animation.play(name, true);
 				}
 			}
+		});
+		Lua_helper.add_callback(lua, "changeAddedIcon", function(tag:String, character:String){
+			var shit:HealthIcon = PlayState.instance.variables.get(tag);
+			shit.changeIcon(character);
+		});
+		Lua_helper.add_callback(lua, "makeLuaIcon", function(tag:String, character:String, player:Bool = false) {
+			FunkinLua.makeIcon(tag, character, player);
+		});
+		Lua_helper.add_callback(lua, "changeLuaIcon", function(tag:String, character:String){
+			var shit:HealthIcon = PlayState.instance.variables.get(tag);
+			shit.changeIcon(character);
 		});
 		Lua_helper.add_callback(lua, "luaSpriteAddAnimationByIndices", function(tag:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
 			FunkinLua.luaTrace("luaSpriteAddAnimationByIndices is deprecated! Use addAnimationByIndices instead", false, true);

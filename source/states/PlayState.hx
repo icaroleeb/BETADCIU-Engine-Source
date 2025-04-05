@@ -37,6 +37,7 @@ import shaders.ErrorHandledShader;
 
 import objects.VideoSprite;
 import objects.Note.EventNote;
+import objects.HoldCover.CoverSprite;
 import objects.*;
 import states.stages.*;
 import states.stages.objects.*;
@@ -170,6 +171,10 @@ class PlayState extends MusicBeatState
 	public var opponentStrums:FlxTypedGroup<StrumNote> = new FlxTypedGroup<StrumNote>();
 	public var playerStrums:FlxTypedGroup<StrumNote> = new FlxTypedGroup<StrumNote>();
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash> = new FlxTypedGroup<NoteSplash>();
+	public var opponentHoldCovers:HoldCover;
+	public var playerHoldCovers:HoldCover;
+
+  	public var enabledHolds:Bool = ClientPrefs.data.holdCovers;
 
 	public var camZooming:Bool = false;
 	public var camZoomingMult:Float = 1;
@@ -481,9 +486,13 @@ class PlayState extends MusicBeatState
 		uiGroup = new FlxSpriteGroup();
 		comboGroup = new FlxSpriteGroup();
 		noteGroup = new FlxTypedGroup<FlxBasic>();
+		opponentHoldCovers = new HoldCover(enabledHolds, false);
+		playerHoldCovers = new HoldCover(enabledHolds, true);
 		add(comboGroup);
 		add(uiGroup);
 		add(noteGroup);
+		add(opponentHoldCovers);
+		add(playerHoldCovers);
 
 		Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
 		var showTime:Bool = (ClientPrefs.data.timeBarType != 'Disabled');
@@ -501,8 +510,8 @@ class PlayState extends MusicBeatState
 		timeBar.screenCenter(X);
 		timeBar.alpha = 0;
 		timeBar.visible = showTime;
-		uiGroup.add(timeBar);
-		uiGroup.add(timeTxt);
+		add(timeBar);
+		add(timeTxt);
 
 		noteGroup.add(strumLineNotes);
 
@@ -541,38 +550,45 @@ class PlayState extends MusicBeatState
 		healthBar.visible = !ClientPrefs.data.hideHud;
 		healthBar.alpha = ClientPrefs.data.healthBarAlpha;
 		reloadHealthBarColors();
-		uiGroup.add(healthBar);
+		add(healthBar);
 
 		iconP1 = new HealthIcon(boyfriend.healthIcon, true);
 		iconP1.y = healthBar.y - 75;
 		iconP1.visible = !ClientPrefs.data.hideHud;
 		iconP1.alpha = ClientPrefs.data.healthBarAlpha;
-		uiGroup.add(iconP1);
+		add(iconP1);
 
 		iconP2 = new HealthIcon(dad.healthIcon, false);
 		iconP2.y = healthBar.y - 75;
 		iconP2.visible = !ClientPrefs.data.hideHud;
 		iconP2.alpha = ClientPrefs.data.healthBarAlpha;
-		uiGroup.add(iconP2);
+		add(iconP2);
 
 		scoreTxt = new FlxText(0, healthBar.y + 40, FlxG.width, "", 20);
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
-		uiGroup.add(scoreTxt);
+		add(scoreTxt);
 
 		botplayTxt = new FlxText(400, healthBar.y - 90, FlxG.width - 800, Language.getPhrase("Botplay").toUpperCase(), 32);
 		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
 		botplayTxt.visible = cpuControlled;
-		uiGroup.add(botplayTxt);
+		add(botplayTxt);
 		if(ClientPrefs.data.downScroll)
 			botplayTxt.y = healthBar.y + 70;
 
-		uiGroup.cameras = [camHUD];
+		var objects:Array<String> = ['healthBar', 'iconP1', 'iconP2', 'scoreTxt', 'timeBar', 'timeBarBG', 'timeTxt'];
+		for (i in 0... objects.length) {
+			var obj:FlxSprite = Reflect.getProperty(PlayState.instance, objects[i]);
+			if (obj != null) obj.cameras = [camHUD];
+		}
+		uiGroup.cameras = [camHUD]; // leaving the ui group for scripts
 		noteGroup.cameras = [camHUD];
+		playerHoldCovers.cameras = [camHUD];
+		opponentHoldCovers.cameras = [camHUD];
 		comboGroup.cameras = [camHUD];
 
 		startingSong = true;
@@ -1900,6 +1916,10 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
+		if (strumLineNotes != null && !startingSong && strumLineNotes.length > 0){
+			playerHoldCovers.updateHold(elapsed, enabledHolds);
+			opponentHoldCovers.updateHold(elapsed, enabledHolds);	
+		}
 		setOnScripts('botPlay', cpuControlled);
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
@@ -1907,13 +1927,15 @@ class PlayState extends MusicBeatState
 	// Health icon updaters
 	public dynamic function updateIconsScale(elapsed:Float)
 	{
-		var mult:Float = FlxMath.lerp(1, iconP1.scale.x, Math.exp(-elapsed * 9 * playbackRate));
-		iconP1.scale.set(mult, mult);
-		iconP1.updateHitbox();
+		if (canIconBop) {
+			var mult:Float = FlxMath.lerp(1, iconP1.scale.x, Math.exp(-elapsed * 9 * playbackRate));
+			iconP1.scale.set(mult, mult);
+			iconP1.updateHitbox();
 
-		var mult:Float = FlxMath.lerp(1, iconP2.scale.x, Math.exp(-elapsed * 9 * playbackRate));
-		iconP2.scale.set(mult, mult);
-		iconP2.updateHitbox();
+			var mult:Float = FlxMath.lerp(1, iconP2.scale.x, Math.exp(-elapsed * 9 * playbackRate));
+			iconP2.scale.set(mult, mult);
+			iconP2.updateHitbox();
+		}
 	}
 
 	public dynamic function updateIconsPosition()
@@ -1938,8 +1960,11 @@ class PlayState extends MusicBeatState
 		var newPercent:Null<Float> = FlxMath.remapToRange(FlxMath.bound(healthBar.valueFunction(), healthBar.bounds.min, healthBar.bounds.max), healthBar.bounds.min, healthBar.bounds.max, 0, 100);
 		healthBar.percent = (newPercent != null ? newPercent : 0);
 
-		iconP1.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0; //If health is under 20%, change player icon to frame 1 (losing icon), otherwise, frame 0 (normal)
-		iconP2.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0; //If health is over 80%, change opponent icon to frame 1 (losing icon), otherwise, frame 0 (normal)
+		var isHealthBarPercentLessThan20:Bool = healthBar.percent < 20;
+		var isHealthBarPercentGreaterThan80:Bool = healthBar.percent > 80;
+	
+		iconP1.animation.curAnim.curFrame = (isHealthBarPercentLessThan20 ? 1 : ((isHealthBarPercentGreaterThan80 && iconP1.hasWinning) ? 2 : 0));
+		iconP2.animation.curAnim.curFrame = (isHealthBarPercentGreaterThan80 ? 1 : ((isHealthBarPercentLessThan20 && iconP2.hasWinning) ? 2 : 0));
 		return health;
 	}
 
@@ -2009,7 +2034,7 @@ class PlayState extends MusicBeatState
 			opponentVocals.pause();
 
 		#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
-		MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
+		MusicBeatState.switchState(new CharacterEditorState((FlxG.keys.pressed.SHIFT ? boyfriend.curCharacter : (FlxG.keys.pressed.CONTROL ? gf.curCharacter : dad.curCharacter))));
 	}
 
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!
@@ -2856,6 +2881,28 @@ class PlayState extends MusicBeatState
 			releaseArray.push(controls.justReleased(key));
 		}
 
+		//RELEASING, check for hold covers
+		if (releaseArray.contains(true))
+		{
+			if (playerHoldCovers != null && enabledHolds)
+			{
+				playerHoldCovers.forEach(function(spr:CoverSprite)
+				{
+					var idToInt:String = spr.spriteId;
+					var sprId:Int = Std.parseInt(idToInt.split("-")[1]);
+					if (!releaseArray[sprId])
+					{
+						if (spr.animation.curAnim != null && !spr.animation.curAnim.name.endsWith('p'))
+						{
+							spr.smoothSprite();
+							spr.visible = spr.boom = spr.isPlaying = false;
+							spr.animation.stop();
+						}
+					}
+			    });
+			}
+		}
+
 		// TO DO: Find a better way to handle controller inputs, this should work for now
 		if(controls.controllerMode && pressArray.contains(true))
 			for (i in 0...pressArray.length)
@@ -2902,6 +2949,9 @@ class PlayState extends MusicBeatState
 			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1)
 				invalidateNote(note);
 		});
+
+		if (daNote != null) playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, daNote.noteData, daNote);
+		else playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, daNote.noteData);
 
 		var dType:Int = 0;
 		if (daNote != null) dType = daNote.dType;
@@ -3052,7 +3102,8 @@ class PlayState extends MusicBeatState
 		if(opponentVocals.length <= 0) vocals.volume = 1;
 		strumPlayAnim(true, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 		note.hitByOpponent = true;
-		
+		if(enabledHolds) opponentHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
+
 		stagesFunc(function(stage:BaseStage) stage.opponentNoteHit(note));
 		var result:Dynamic = callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote, note.dType]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('opponentNoteHit', [note]);
@@ -3161,6 +3212,8 @@ class PlayState extends MusicBeatState
 			if(!note.noteSplashData.disabled && !note.isSustainNote) spawnNoteSplashOnNote(note);
 		}
 
+		if (enabledHolds) playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
+
 		stagesFunc(function(stage:BaseStage) stage.goodNoteHit(note));
 		var result:Dynamic = callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.dType]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('goodNoteHit', [note]);
@@ -3256,6 +3309,10 @@ class PlayState extends MusicBeatState
 	}
 
 	var lastBeatHit:Int = -1;
+	public var opponentIconScale:Float = 1.2;
+	public var playerIconScale:Float = 1.2;
+	public var iconBopSpeed:Int = 1;
+	public var canIconBop:Bool = true;//this is useful, change my mind.
 
 	override function beatHit()
 	{
@@ -3267,11 +3324,13 @@ class PlayState extends MusicBeatState
 		if (generatedMusic)
 			notes.sort(FlxSort.byY, ClientPrefs.data.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 
-		iconP1.scale.set(1.2, 1.2);
-		iconP2.scale.set(1.2, 1.2);
-
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
+		if (curBeat % iconBopSpeed == 0 && canIconBop) {
+			iconP1.scale.set(playerIconScale, playerIconScale);
+			iconP2.scale.set(opponentIconScale, opponentIconScale);
+		
+			iconP1.updateHitbox();
+			iconP2.updateHitbox();
+		}
 
 		characterBopper(curBeat);
 
