@@ -28,6 +28,7 @@ typedef CharacterFile = {
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
 	var vocals_file:String;
+	var isPlayerChar:Bool; //porting just the variable for backwards compatibility with some chars -- Ryiuu.
 	@:optional var _editor_isPlayer:Null<Bool>;
 }
 
@@ -71,6 +72,7 @@ class Character extends FlxSprite
 	public var skipDance:Bool = false;
 
 	public var healthIcon:String = 'face';
+	public var isPsychPlayer:Null<Bool>;
 	public var animationsArray:Array<AnimArray> = [];
 
 	public var positionArray:Array<Float> = [0, 0];
@@ -121,6 +123,7 @@ class Character extends FlxSprite
 		animationsArray = [];
 		animOffsets = [];
 		curCharacter = character;
+		isPsychPlayer = false;
 		var characterPath:String = 'characters/$character.json';
 
 		var path:String = Paths.getPath(characterPath, TEXT);
@@ -163,6 +166,10 @@ class Character extends FlxSprite
 	public function loadCharacterFile(json:Dynamic)
 	{
 		isAnimateAtlas = false;
+
+		if (json.isPlayerChar){
+			isPsychPlayer = json.isPlayerChar;
+		}
 
 		#if flxanimate
 		var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
@@ -272,11 +279,11 @@ class Character extends FlxSprite
 			if (isPlayer) {
 				flipX = !flipX;
 				// Doesn't flip for BF, since his are already in the right place???
-				if (!curCharacter.startsWith('bf') && itHasPlayerOfs) flipAnims();
+				if (!curCharacter.startsWith('bf') && !isPsychPlayer) flipAnims();
 			}
 	
 			if (!isPlayer || curCharacter.toLowerCase().endsWith('-playable')) { // flip for bf and psych's "-playable" chars
-				if (curCharacter.startsWith('bf')) flipAnims();
+				if (curCharacter.startsWith('bf') || isPsychPlayer) flipAnims();
 			}	
 		}
 		#if flxanimate

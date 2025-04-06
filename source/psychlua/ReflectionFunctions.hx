@@ -52,6 +52,12 @@ class ReflectionFunctions
 		});
 		Lua_helper.add_callback(lua, "setPropertyFromClass", function(classVar:String, variable:String, value:Dynamic, ?allowMaps:Bool = false, ?allowInstances:Bool = false) {
 			classVar = checkForOldClassVars(classVar);
+			if (classVar == "flixel.FlxG" && variable == "save.data.botplay") { // a lot of betadciu engine legacy scripts uses this to set the botplay, so i'll add this as a compatibility layer for scripts
+				trace('botplay was set!');
+				PlayState.instance.cpuControlled = value;
+				ClientPrefs.data.gameplaySettings.set('botplay', value);
+				FlxG.save.flush(); // just to prevent some errors with the player closing the game midsong
+			}
 			var myClass:Dynamic = Type.resolveClass(classVar);
 			if(myClass == null)
 			{

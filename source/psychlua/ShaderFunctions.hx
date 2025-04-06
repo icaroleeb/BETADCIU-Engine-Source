@@ -23,7 +23,7 @@ class ShaderFunctions
 			return false;
 		});
 		
-		funk.addLocalCallback("setSpriteShader", function(obj:String, shader:String) {
+		funk.addLocalCallback("setSpriteShader", function(obj:String, shader:String, ?keepOtherShaders:Bool = true) {
 			if(!ClientPrefs.data.shaders) return false;
 
 			#if (!flash && sys)
@@ -32,16 +32,29 @@ class ShaderFunctions
 				FunkinLua.luaTrace('setSpriteShader: Shader $shader is missing!', false, false, FlxColor.RED);
 				return false;
 			}
-
+	
 			var split:Array<String> = obj.split('.');
-			var leObj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
+			var leObj:Dynamic = LuaUtils.getObjectDirectly(split[0]);
 			if(split.length > 1) {
 				leObj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
 			}
-
+	
 			if(leObj != null) {
 				var arr:Array<String> = funk.runtimeShaders.get(shader);
-				leObj.shader = new shaders.ErrorHandledShader.ErrorHandledRuntimeShader(shader, arr[0], arr[1]);
+				var daShader:FlxRuntimeShader = new FlxRuntimeShader(arr[0], arr[1]); 
+
+				if (Std.isOfType(leObj, FlxCamera)){
+					var daFilters = (leObj.filters != null && keepOtherShaders) ? leObj.filters : [];
+					
+					daFilters.push(new ShaderFilter(daShader));
+
+					leObj.setFilters(daFilters);
+				}
+				else{
+					var daObj:FlxSprite = leObj;
+					daObj.shader = daShader;
+				}
+			
 				return true;
 			}
 			#else
@@ -283,42 +296,51 @@ class ShaderFunctions
 	{
 		var split:Array<String> = obj.split('.');
 		var target:Dynamic = null;
-		if(split.length > 1) target = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
-		else target = LuaUtils.getObjectDirectly(split[0]);
+		if (split.length > 1) {
+			target = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
+		} else {
+			target = LuaUtils.getObjectDirectly(split[0]);
+		}
 
-		if(target == null)
-		{
+		if (target == null) {
 			FunkinLua.luaTrace('Error on getting shader: Object $obj not found', false, false, FlxColor.RED);
 			return null;
 		}
 
 		var shader:Dynamic = null;
-		
-		if (Std.isOfType(target, FlxCamera)){
-			var daFilters = (target.filters != null) ? target.filters : [];
+
+		if (Std.isOfType(target, FlxCamera)) {
+			var daFilters = (target.filters != null && target.filters.length > 0) ? target.filters : [];
 			
-			if (swagShader != null && swagShader.length > 0){
+			if (swagShader != null && swagShader.length > 0) {
 				var arr:Array<String> = PlayState.instance.runtimeShaders.get(swagShader);
 				
-				for (i in 0...daFilters.length){	
+				if (arr == null || arr.length == 0) {
+					FunkinLua.luaTrace('Error: Shader $swagShader not found in runtimeShaders', false, false, FlxColor.RED);
+					return null;
+				}
+
+				for (i in 0...daFilters.length) {
 					var filter:ShaderFilter = daFilters[i];
-					
-					if (filter.shader.glFragmentSource == ShaderFunctions.processFragmentSource(arr[0])){
+
+					if (filter.shader.glFragmentSource == ShaderFunctions.processFragmentSource(arr[0])) {
 						shader = filter.shader;
 						break;
 					}
 				}
+			} else {
+				shader = daFilters.length > 0 ? daFilters[0].shader : null;
 			}
-			else{
-				shader = daFilters[0].shader;
-			}
-		}
-		else{
+		} else {
 			shader = target.shader;
 		}
 
-		var returnShader:FlxRuntimeShader = shader;	
-		return returnShader;
+		if (shader == null) {
+			FunkinLua.luaTrace('Error: No shader found for the target object.', false, false, FlxColor.RED);
+			return null;
+		}
+
+		return shader;
 	}
 	#end
 }

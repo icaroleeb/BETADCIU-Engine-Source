@@ -17,6 +17,7 @@ import states.TitleState;
 	public var antialiasing:Bool = true;
 	public var noteSkin:String = 'Default';
 	public var splashSkin:String = 'Psych';
+	public var psychUI:Bool = true; // this option doesn't even make sense in this version but a lot of script of the legacy version uses so i'll add the variable and set as true.
 	public var holdCovers:Bool = true;
 	public var splashAlpha:Float = 0.6;
 	public var lowQuality:Bool = false;

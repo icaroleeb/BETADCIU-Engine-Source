@@ -92,7 +92,7 @@ class FunkinLua {
 
 		// Song/Week shit
 		set('curBpm', Conductor.bpm);
-		set('bpm', PlayState.SONG.bpm);
+		set('bpm', PlayState.SONG.bpm); // kade scripts.
 		set('scrollSpeed', PlayState.SONG.speed);
 		set('crochet', Conductor.crochet);
 		set('stepCrochet', Conductor.stepCrochet);
@@ -127,6 +127,7 @@ class FunkinLua {
 		{
 			var curSection:SwagSection = PlayState.SONG.notes[game.curSection];
 			set('curSection', game.curSection);
+			set("songPos", 0); // kade scrips part 2
 			set('curBeat', game.curBeat);
 			set('curStep', game.curStep);
 			set('curDecBeat', game.curDecBeat);
@@ -265,6 +266,103 @@ class FunkinLua {
 
 			return null;
 		});
+		Lua_helper.add_callback(lua, "getGlobalFromScript", function(?luaFile:String, ?global:String){ // returns the global from a script
+			if(luaFile==null){
+				#if (linc_luajit >= "0.0.6")
+				LuaL.error(lua, "bad argument #1 to 'getGlobalFromScript' (string expected, got nil)");
+				#end
+				return null;
+			}
+			if(global==null){
+				#if (linc_luajit >= "0.0.6")
+				LuaL.error(lua, "bad argument #2 to 'getGlobalFromScript' (string expected, got nil)");
+				#end
+				return null;
+			}
+			var cervix = luaFile + ".lua";
+			if(luaFile.endsWith(".lua"))cervix=luaFile;
+			var doPush = false;
+			#if MODS_ALLOWED
+			if(FileSystem.exists(Paths.mods(cervix)))
+			{
+				cervix = Paths.mods(cervix);
+				doPush = true;
+			}
+			else if(FileSystem.exists(cervix))
+			{
+				doPush = true;
+			}
+			else {
+				cervix = Paths.getSharedPath(cervix);
+				if(FileSystem.exists(cervix)) {
+					doPush = true;
+				}
+			}
+			#else
+
+			
+			cervix = Paths.getSharedPath(cervix);
+			if(Assets.exists(cervix)) {
+				doPush = true;
+			}
+			#end
+			if(doPush)
+			{
+				for (luaInstance in PlayState.instance.luaArray)
+				{
+					if(luaInstance.scriptName == cervix)
+					{
+						Lua.getglobal(luaInstance.lua, global);
+
+						var ret = Convert.fromLua(luaInstance.lua, -1);
+						Lua.pop(luaInstance.lua,1); // remove the global
+
+						return ret;
+					}
+
+				}
+			}
+			return null;
+		});
+		Lua_helper.add_callback(lua, "setGlobalFromScript", function(luaFile:String, global:String, val:Dynamic){ // set a global from a script
+			var cervix = luaFile + ".lua";
+			if(luaFile.endsWith(".lua"))cervix=luaFile;
+			var doPush = false;
+			#if MODS_ALLOWED
+			if(FileSystem.exists(Paths.mods(cervix)))
+			{
+				cervix = Paths.mods(cervix);
+				doPush = true;
+			}
+			else if(FileSystem.exists(cervix))
+			{
+				doPush = true;
+			}
+			else {
+				cervix = Paths.getSharedPath(cervix);
+				if(FileSystem.exists(cervix)) {
+					doPush = true;
+				}
+			}
+			#else
+			cervix = Paths.getSharedPath(cervix);
+			if(Assets.exists(cervix)) {
+				doPush = true;
+			}
+			#end
+			if(doPush)
+			{
+				for (luaInstance in PlayState.instance.luaArray)
+				{
+					if(luaInstance.scriptName == cervix)
+					{
+						luaInstance.set(global, val);
+					}
+
+				}
+			}
+			return null;
+		});
 		Lua_helper.add_callback(lua, "isRunning", function(scriptFile:String) {
 			var luaPath:String = findScript(scriptFile);
 			if(luaPath != null)
@@ -285,7 +383,7 @@ class FunkinLua {
 			#end
 			return false;
 		});
-
+		Lua_helper.add_callback(lua,"doFunction", doFunction);
 		Lua_helper.add_callback(lua, "setVar", function(varName:String, value:Dynamic) {
 			MusicBeatState.getVariables().set(varName, ReflectionFunctions.parseSingleInstance(value));
 			return value;
@@ -1763,6 +1861,19 @@ class FunkinLua {
 		return null;
 	}
 
+	function doFunction(id:String, ?val1:Dynamic, ?val2:Dynamic, ?val3:Dynamic, ?val4:Dynamic) {
+		//this is dumb but idk how else to do it and i don't wanna make multiple functions for different playstate functions so yeah.
+		switch (id)
+		{
+			case 'startCountdown': PlayState.instance.startCountdown();
+			case 'resyncVocals': PlayState.instance.resyncVocals();	
+			case 'doTimeTravel': PlayState.instance.doTimeTravel(val1, val2);		
+			//case 'uncacheImage': Paths.clearStoredMemory2(val1, 'image');	
+			//case 'uncacheSound': Paths.clearStoredMemory2(val1, 'sound');			
+			case 'cacheImage': Paths.image(val1, ClientPrefs.data.cacheOnGPU);
+		}
+	}
+
 	public static function luaTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE) {
 		if(ignoreCheck || getBool('luaDebugMode')) {
 			if(deprecated && !getBool('luaDeprecatedWarnings')) {
@@ -1988,8 +2099,18 @@ class FunkinLua {
 		if (PlayState.instance.modchartCharacters.get(tag) != null)
 		{
 			var daChar:Character = PlayState.instance.modchartCharacters.get(tag);
-			animationName = daChar.animation.curAnim.name;
-			animationFrame = daChar.animation.curAnim.curFrame;
+
+			if (daChar.isAnimateAtlas){
+				if (daChar.getAnimationName().startsWith('sing')) {
+					animationName = Std.string(daChar.atlas.anim.curInstance);
+					animationFrame = Std.int(daChar.atlas.anim.curFrame);
+				}
+			} else {
+				if (daChar.animation.curAnim.name.startsWith('sing')) {
+					animationName = daChar.animation.curAnim.name;
+					animationFrame = daChar.animation.curAnim.curFrame;
+				}		
+			}
 			position = LuaUtils.getTargetInstance().members.indexOf(daChar);
 		}
 		
@@ -2027,8 +2148,8 @@ class FunkinLua {
 			var charX:Float = 0;
 			var charY:Float =  (!flipped ? 0 : 350);
 		
-			charX = shit.positionArray[0];
-			charY = shit.positionArray[1];
+			charX = shit.playerPositionArray[0];
+			charY = shit.playerPositionArray[1];
 	
 			shit.x = stageData.boyfriend[0] + charX;
 			shit.y = stageData.boyfriend[1] + charY;
@@ -2042,13 +2163,21 @@ class FunkinLua {
 	//trying to do some auto stuff so i don't have to set manual x and y values
 	public static function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
 		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;						
-		if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing'))
-		{
-			animationName = PlayState.instance.boyfriend.animation.curAnim.name;
-			animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
+		var animationFrame:Int = 0;				
+		
+		if (PlayState.instance.boyfriend.isAnimateAtlas){
+			if (PlayState.instance.boyfriend.getAnimationName().startsWith('sing')) {
+				animationName = Std.string(PlayState.instance.boyfriend.atlas.anim.curInstance);
+				animationFrame = Std.int(PlayState.instance.boyfriend.atlas.anim.curFrame);
+			}
+		} else {
+			if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing')) {
+				animationName = PlayState.instance.boyfriend.animation.curAnim.name;
+				animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
+			}		
 		}
-
+		
+		PlayState.instance.boyfriend.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend.destroy();
 		PlayState.instance.boyfriend = new Character(0, 0, id, !flipped);
@@ -2062,8 +2191,8 @@ class FunkinLua {
 		var charX:Float = 0;
 		var charY:Float =  (!isFlipped ? 0 : 350);
 		
-		charX = PlayState.instance.boyfriend.positionArray[0];
-		charY = PlayState.instance.boyfriend.positionArray[1];
+		charX = PlayState.instance.boyfriend.playerPositionArray[0];
+		charY = PlayState.instance.boyfriend.playerPositionArray[1];
 	
 		PlayState.instance.boyfriend.x = stageData.boyfriend[0] + charX;
 		PlayState.instance.boyfriend.y = stageData.boyfriend[1] + charY;
@@ -2092,12 +2221,20 @@ class FunkinLua {
 	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
-		if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing'))
-		{
-			animationName = PlayState.instance.dad.animation.curAnim.name;
-			animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
+
+		if (PlayState.instance.dad.isAnimateAtlas){
+			if (PlayState.instance.dad.getAnimationName().startsWith('sing')) {
+				animationName = Std.string(PlayState.instance.dad.atlas.anim.curInstance);
+				animationFrame = Std.int(PlayState.instance.dad.atlas.anim.curFrame);
+			}
+		} else {
+			if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing')) {
+				animationName = PlayState.instance.dad.animation.curAnim.name;
+				animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
+			}		
 		}
 
+		PlayState.instance.dad.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.dad);
 		PlayState.instance.dad.destroy();
 		PlayState.instance.dad = new Character(0, 0, id, flipped);
@@ -2143,13 +2280,21 @@ class FunkinLua {
 
 	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // not tested but i'm almost 100% sure it works		
 		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;						
-		if (PlayState.instance.gf.animation.curAnim.name.startsWith('sing'))
-		{
-			animationName = PlayState.instance.gf.animation.curAnim.name;
-			animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
+		var animationFrame:Int = 0;		
+
+		if (PlayState.instance.gf.isAnimateAtlas){
+			if (PlayState.instance.gf.getAnimationName().startsWith('sing')) {
+				animationName = Std.string(PlayState.instance.gf.atlas.anim.curInstance);
+				animationFrame = Std.int(PlayState.instance.gf.atlas.anim.curFrame);
+			}
+		} else {
+			if (PlayState.instance.gf.animation.curAnim.name.startsWith('sing')) {
+				animationName = PlayState.instance.gf.animation.curAnim.name;
+				animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
+			}		
 		}
 
+		PlayState.instance.gf.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.gf);
 		PlayState.instance.gf.destroy();
 		PlayState.instance.gf = new Character(0, 0, id, flipped);

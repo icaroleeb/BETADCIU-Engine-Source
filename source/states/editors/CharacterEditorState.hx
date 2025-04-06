@@ -71,6 +71,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		Paths.clearUnusedMemory();
 
 		FlxG.sound.music.stop();
+		#if !web // me and my lazyness to made this a mp3
+		FlxG.sound.playMusic(Paths.music('kawaruslow'), 0.7);
+		#end
 		camEditor = initPsychCamera();
 
 		camHUD = new FlxCamera();
@@ -385,7 +388,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			character.flipAnims();
 			reloadAnimList();
 			updateCharacterPositions();
-			updatePointerPos(false);
+			updatePointerPos(true);
 		};
 
 		var reloadCharacter:PsychUIButton = new PsychUIButton(140, 20, "Reload Char", function()
@@ -418,6 +421,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				player_camera_position: [0, 0],
 				position: [0, 0],
 				playerposition: [0, 0],
+				isPlayerChar: false,
 				vocals_file: null
 			};
 
@@ -692,7 +696,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		positionCameraYStepper = new PsychUINumericStepper(positionYStepper.x, positionYStepper.y + 45, 10, character.cameraPosition[1], -9000, 9000, 0);
 
 		playerPositionXStepper = new PsychUINumericStepper(positionXStepper.x, positionCameraXStepper.y + 40, 10, character.playerPositionArray[0], -9000, 9000, 0);
-		playerPositionYStepper = new PsychUINumericStepper(positionXStepper.x + 60, positionCameraYStepper.y + 40, 10, character.playerPositionArray[1], -9000, 9000, 0);
+		playerPositionYStepper = new PsychUINumericStepper(positionXStepper.x + 70, positionCameraYStepper.y + 40, 10, character.playerPositionArray[1], -9000, 9000, 0);
 
 		playerPositionCameraXStepper = new PsychUINumericStepper(playerPositionXStepper.x, playerPositionXStepper.y + 40, 10, character.playerCameraPosition[0], -9000, 9000, 0);
 		playerPositionCameraYStepper = new PsychUINumericStepper(playerPositionYStepper.x, playerPositionYStepper.y + 40, 10, character.playerCameraPosition[1], -9000, 9000, 0);
@@ -1038,7 +1042,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		}
 
 		var anim = anims[curAnim];
-		if(changedOffset && anim != null && anim.offsets != null)
+		if(changedOffset && anim != null && anim.offsets != null && !character.isPlayer)
 		{
 			anim.offsets[0] = Std.int(character.offset.x);
 			anim.offsets[1] = Std.int(character.offset.y);
@@ -1400,6 +1404,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			"no_antialiasing": character.noAntialiasing,
 			"healthbar_colors": character.healthColorArray,
 			"vocals_file": character.vocalsFile,
+			"isPlayerChar": character.isPsychPlayer,
 			"_editor_isPlayer": character.isPlayer
 		};
 
