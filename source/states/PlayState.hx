@@ -523,6 +523,8 @@ class PlayState extends MusicBeatState
 
 		generateSong();
 
+		preload();
+
 		noteGroup.add(grpNoteSplashes);
 
 		camFollow = new FlxObject();
@@ -556,12 +558,14 @@ class PlayState extends MusicBeatState
 		iconP1.y = healthBar.y - 75;
 		iconP1.visible = !ClientPrefs.data.hideHud;
 		iconP1.alpha = ClientPrefs.data.healthBarAlpha;
+		variables.set('iconP1', iconP1); // because without adding it the changeIcon lua function don't work?
 		add(iconP1);
 
 		iconP2 = new HealthIcon(dad.healthIcon, false);
 		iconP2.y = healthBar.y - 75;
 		iconP2.visible = !ClientPrefs.data.hideHud;
 		iconP2.alpha = ClientPrefs.data.healthBarAlpha;
+		variables.set('iconP2', iconP2);
 		add(iconP2);
 
 		scoreTxt = new FlxText(0, healthBar.y + 40, FlxG.width, "", 20);
@@ -1862,7 +1866,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (healthBar.bounds.max != null && health > healthBar.bounds.max)
-			health = (healthSet ? 1 : healthBar.bounds.max);
+			health = healthBar.bounds.max;
 
 		updateIconsScale(elapsed);
 		updateIconsPosition();
@@ -2051,12 +2055,12 @@ class PlayState extends MusicBeatState
 		value = FlxMath.roundDecimal(value, 5); //Fix Float imprecision
 		if(!iconsAnimations || healthBar == null || !healthBar.enabled || healthBar.valueFunction == null)
 		{
-			health = value;
+			health = (healthSet ? 1 : value);
 			return health;
 		}
 
 		// update health bar
-		health = value;
+		health = (healthSet ? 1 : value);
 		var newPercent:Null<Float> = FlxMath.remapToRange(FlxMath.bound(healthBar.valueFunction(), healthBar.bounds.min, healthBar.bounds.max), healthBar.bounds.min, healthBar.bounds.max, 0, 100);
 		healthBar.percent = (newPercent != null ? newPercent : 0);
 
@@ -2911,10 +2915,12 @@ class PlayState extends MusicBeatState
 		Conductor.songPosition = lastTime;
 
 		var spr:StrumNote = playerStrums.members[key];
-		if(strumsBlocked[key] != true && spr != null && spr.animation.curAnim.name != 'confirm')
-		{
-			spr.playAnim('pressed');
-			spr.resetAnim = 0;
+		if (spr.animation.curAnim != null){
+			if(strumsBlocked[key] != true && spr != null && spr.animation.curAnim.name != 'confirm')
+			{
+				spr.playAnim('pressed');
+				spr.resetAnim = 0;
+			}	
 		}
 		callOnScripts('onKeyPress', [key]);
 	}
@@ -3878,5 +3884,28 @@ class PlayState extends MusicBeatState
 		FlxG.log.warn('This platform doesn\'t support Runtime Shaders!');
 		#end
 		return false;
+	}
+
+	function preload() {
+		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"))) // i mean, a bit of preloading doesn't sound bad
+		{
+			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"));
+			var sprites:Array<FlxSprite> = [];
+
+			for (i in 0...characters.length) {
+				var preloadChar = new Character(0, 0, characters[i]);
+				preloadChar.alpha = 0.0001;
+				//startCharacterLua(preloadChar.curCharacter); // not implemented yet
+				add(preloadChar);
+				sprites.push(preloadChar);
+				preloadChar.destroyAtlas();
+				// trace('Character Loaded: ' + characters[i] + '!');
+			}
+
+			new FlxTimer().start(0.1, function(_) { // adding this timer so the game can actually render the assets before removing it
+				for(sprite in sprites)
+					remove(sprite);
+			});
+		}
 	}
 }

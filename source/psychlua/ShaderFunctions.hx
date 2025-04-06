@@ -16,7 +16,7 @@ class ShaderFunctions
 			if(!ClientPrefs.data.shaders) return false;
 
 			#if (!flash && MODS_ALLOWED && sys)
-			return funk.initLuaShader(name);
+			return initLuaShader(name);
 			#else
 			FunkinLua.luaTrace("initLuaShader: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
 			#end
@@ -27,7 +27,7 @@ class ShaderFunctions
 			if(!ClientPrefs.data.shaders) return false;
 
 			#if (!flash && sys)
-			if(!funk.runtimeShaders.exists(shader) && !funk.initLuaShader(shader))
+			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader))
 			{
 				FunkinLua.luaTrace('setSpriteShader: Shader $shader is missing!', false, false, FlxColor.RED);
 				return false;
@@ -40,7 +40,7 @@ class ShaderFunctions
 			}
 	
 			if(leObj != null) {
-				var arr:Array<String> = funk.runtimeShaders.get(shader);
+				var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
 				var daShader:FlxRuntimeShader = new FlxRuntimeShader(arr[0], arr[1]); 
 
 				if (Std.isOfType(leObj, FlxCamera)){
@@ -290,6 +290,62 @@ class ShaderFunctions
 		return value;
 	}
 
+	#if (!flash && sys)
+	public static function initLuaShader(name:String, ?glslVersion:Int = 120)
+	{
+		
+		if(!ClientPrefs.data.shaders) return false;
+
+		#if (!flash && sys)
+		if(PlayState.instance.runtimeShaders.exists(name))
+		{
+			FunkinLua.luaTrace('Shader $name was already initialized!');
+			return true;
+		}
+
+		var foldersToCheck:Array<String> = [Paths.mods('shaders/')];
+		if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
+			foldersToCheck.insert(0, Paths.mods(Mods.currentModDirectory + '/shaders/'));
+
+		for(mod in Mods.getGlobalMods())
+			foldersToCheck.insert(0, Paths.mods(mod + '/shaders/'));
+		
+		for (folder in foldersToCheck)
+		{
+			if(FileSystem.exists(folder))
+			{
+				var frag:String = folder + name + '.frag';
+				var vert:String = folder + name + '.vert';
+				var found:Bool = false;
+				if(FileSystem.exists(frag))
+				{
+					frag = File.getContent(frag);
+					found = true;
+				}
+				else frag = null;
+
+				if(FileSystem.exists(vert))
+				{
+					vert = File.getContent(vert);
+					found = true;
+				}
+				else vert = null;
+
+				if(found)
+				{
+					PlayState.instance.runtimeShaders.set(name, [frag, vert]);
+					//trace('Found shader $name!');
+					return true;
+				}
+			}
+		}
+		FunkinLua.luaTrace('Missing shader $name .frag AND .vert files!', false, false, FlxColor.RED);
+		#else
+		FunkinLua.luaTrace('This platform doesn\'t support Runtime Shaders!', false, false, FlxColor.RED);
+		#end
+		return false;
+	}
+	#end
 	
 	#if (!flash && MODS_ALLOWED && sys)
 	public static function getShader(obj:String, ?swagShader:String):FlxRuntimeShader

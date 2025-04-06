@@ -363,11 +363,22 @@ class Note extends FlxSprite
 		var skin:String = texture + postfix;
 		if(texture.length < 1)
 		{
-			skin = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
+			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
+				skin = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
+			} else skin = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
+						
 			if(skin == null || skin.length < 1)
 				skin = defaultNoteSkin + postfix;
 		}
 		else rgbShader.enabled = false;
+
+		var isCustomNoteSkin:Bool = false;
+		var CustomNoteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
+		for (i in 0...CustomNoteSkins.length) {
+			if (CustomNoteSkins[i] == skin) isCustomNoteSkin = true;
+		}
+
+		if (skin != 'normal' && skin != 'NOTE_assets' && skin != 'NOTE_assets-chip' && skin != 'NOTE_assets-future' && !isCustomNoteSkin) rgbShader.enabled = false;
 
 		var animName:String = null;
 		if(animation.curAnim != null) {
@@ -385,6 +396,12 @@ class Note extends FlxSprite
 			_lastValidChecked = customSkin;
 		}
 		else skinPostfix = '';
+
+		if (Paths.fileExists('images/notes/' + skin + '.png', IMAGE)) { // more compatibility with legacy stuff
+			// trace('using legacy note skin');
+			var oldpath:String = skin;
+			skin = "notes/" + oldpath; 
+		}
 
 		if(PlayState.isPixelStage) {
 			if(isSustainNote) {

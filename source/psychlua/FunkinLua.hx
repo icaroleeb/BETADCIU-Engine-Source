@@ -41,6 +41,8 @@ import psychlua.HScript;
 import psychlua.DebugLuaText;
 import psychlua.ModchartSprite;
 
+import shaders.*; // prob moving the ColorSwap functions to the ShaderFunctions.hx file later
+
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 
@@ -1374,6 +1376,55 @@ class FunkinLua {
 			if(spr != null) return spr.pixels.getPixel32(x, y);
 			return FlxColor.BLACK;
 		});
+		//change individual values
+		Lua_helper.add_callback(lua,"changeHue", function(id:String, hue:Int) {
+			var newShader:ColorSwap = new ColorSwap();
+			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
+			shit.shader = newShader.shader;
+			newShader.hue = hue / 360;
+		});
+		Lua_helper.add_callback(lua,"changeSaturation", function(id:String, sat:Int) {
+			var newShader:ColorSwap = new ColorSwap();
+			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
+			shit.shader = newShader.shader;
+			newShader.saturation = sat / 100;
+		});
+		Lua_helper.add_callback(lua,"changeBrightness", function(id:String, bright:Int) {
+			var newShader:ColorSwap = new ColorSwap();
+			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
+			shit.shader = newShader.shader;
+			newShader.brightness = bright / 100;
+		});
+		//change as a group. you should probably use this one
+		Lua_helper.add_callback(lua,"changeHSB", function(id:String, hue:Int = 0, sat:Int = 0, bright:Int = 0) {
+			var newShader:ColorSwap = new ColorSwap();
+		
+			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
+			shit.shader = newShader.shader;
+			newShader.hue = hue / 360;
+			newShader.saturation = sat / 100;
+			newShader.brightness = bright / 100;
+		});
+		Lua_helper.add_callback(lua,"changeGroupHue", function(obj:String, hue:Int) {
+			var shit:Dynamic = Reflect.getProperty(LuaUtils.getTargetInstance(), obj);
+
+			shit.forEach(function(thing:Dynamic)
+			{
+				var newShader:ColorSwap = new ColorSwap();
+				newShader.hue = hue / 360;
+				thing.shader = newShader.shader;
+			});
+		});
+		Lua_helper.add_callback(lua,"changeGroupMemberHue", function(obj:String, index:Int, hue:Int) {
+			var shit:Dynamic = Reflect.getProperty(LuaUtils.getTargetInstance(), obj)[index];
+
+			if(Std.isOfType(Reflect.getProperty(LuaUtils.getTargetInstance(), obj), FlxTypedGroup))
+				shit = Reflect.getProperty(LuaUtils.getTargetInstance(), obj).members[index];
+
+			var newShader:ColorSwap = new ColorSwap();
+			newShader.hue = hue / 360;
+			shit.shader = newShader.shader;
+		});
 		Lua_helper.add_callback(lua, "startDialogue", function(dialogueFile:String, ?music:String = null) {
 			var path:String;
 			var songPath:String = Paths.formatToSongPath(Song.loadedSongName);
@@ -2313,47 +2364,24 @@ class FunkinLua {
 	}
 
 	#if (!flash && MODS_ALLOWED && sys)
-	public static function getShader(obj:String, ?swagShader:String):FlxRuntimeShader // putting this too bcuz im lazy to fix all my scripts
-	{
-		var split:Array<String> = obj.split('.');
-		var target:Dynamic = null;
-		if(split.length > 1) target = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
-		else target = LuaUtils.getObjectDirectly(split[0]);
-
-		if(target == null)
-		{
-			FunkinLua.luaTrace('Error on getting shader: Object $obj not found', false, false, FlxColor.RED);
-			return null;
-		}
-
+	public static function getShader(obj:String, ?swagShader:String):FlxRuntimeShader {// putting this too bcuz im lazy to fix all my scripts
 		var shader:Dynamic = null;
-		
-		if (Std.isOfType(target, FlxCamera)){
-			var daFilters = (target.filters != null) ? target.filters : [];
-			
-			if (swagShader != null && swagShader.length > 0){
-				var arr:Array<String> = PlayState.instance.runtimeShaders.get(swagShader);
-				
-				for (i in 0...daFilters.length){	
-					var filter:ShaderFilter = daFilters[i];
-					
-					if (filter.shader.glFragmentSource == ShaderFunctions.processFragmentSource(arr[0])){
-						shader = filter.shader;
-						break;
-					}
-				}
-			}
-			else{
-				shader = daFilters[0].shader;
-			}
-		}
-		else{
-			shader = target.shader;
-		}
-
-		var returnShader:FlxRuntimeShader = shader;	
-		return returnShader;
+		shader = ShaderFunctions.getShader(obj, swagShader);
+		return shader;
 	}
 	#end
+
+	public static function callOnCompleted(type:String = "tween", tag:String, ?loops:Int, ?loopsLeft:Int) {
+		var variables = MusicBeatState.getVariables();
+		switch (type.toLowerCase())
+		{
+			case 'timer':
+				variables.remove(tag);
+				if(PlayState.instance != null) PlayState.instance.callOnLuas('onTimerCompleted', [tag]);
+			default:
+				variables.remove(tag);
+				if(PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
+		}
+	}
 }
 #end

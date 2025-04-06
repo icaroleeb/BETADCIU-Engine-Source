@@ -29,6 +29,7 @@ typedef SwagSong =
 	@:optional var disableNoteRGB:Bool;
 
 	@:optional var arrowSkin:String;
+	@:optional var noteStyle:String;
 	@:optional var splashSkin:String;
 }
 

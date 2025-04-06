@@ -56,7 +56,7 @@ class ReflectionFunctions
 				trace('botplay was set!');
 				PlayState.instance.cpuControlled = value;
 				ClientPrefs.data.gameplaySettings.set('botplay', value);
-				FlxG.save.flush(); // just to prevent some errors with the player closing the game midsong
+				ClientPrefs.saveSettings(); // just to prevent some errors with the player closing the game midsong
 			}
 			var myClass:Dynamic = Type.resolveClass(classVar);
 			if(myClass == null)

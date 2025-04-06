@@ -52,11 +52,23 @@ class StrumNote extends FlxSprite
 		super(x, y);
 
 		var skin:String = null;
-		if(PlayState.SONG != null && PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
+		var useLegacyArrowSkin:Bool = false;
+		if(PlayState.SONG != null && PlayState.SONG.noteStyle != null && PlayState.SONG.noteStyle.length > 1) { // old charts
+			useLegacyArrowSkin = true;
+			skin = PlayState.SONG.noteStyle;
+		} else if(PlayState.SONG != null && PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1 && !useLegacyArrowSkin) skin = PlayState.SONG.arrowSkin;
 		else skin = Note.defaultNoteSkin;
 
 		var customSkin:String = skin + Note.getNoteSkinPostfix();
 		if(Paths.fileExists('images/$customSkin.png', IMAGE)) skin = customSkin;
+
+		var isCustomNoteSkin:Bool = false;
+		var CustomNoteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
+		for (i in 0...CustomNoteSkins.length) {
+			if (CustomNoteSkins[i] == skin) isCustomNoteSkin = true;
+		}
+
+		if (skin != 'normal' && skin != 'NOTE_assets' && skin != 'NOTE_assets-chip' && skin != 'NOTE_assets-future' && !isCustomNoteSkin) useRGBShader = false;
 
 		texture = skin; //Load texture and anims
 		scrollFactor.set();
@@ -67,6 +79,20 @@ class StrumNote extends FlxSprite
 	{
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
+
+		if (Paths.fileExists('images/notes/' + texture + '.png', IMAGE)) { // more compatibility with legacy stuff
+			// trace('legacy note texture detected!');
+			var tex:String = texture;
+			texture = "notes/" + tex;
+		}
+
+		var isCustomNoteSkin:Bool = false;
+		var CustomNoteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
+		for (i in 0...CustomNoteSkins.length) {
+			if (CustomNoteSkins[i] == texture) isCustomNoteSkin = true;
+		}
+
+		if (texture != 'normal' && texture != 'NOTE_assets' && texture != 'NOTE_assets-chip' && texture != 'NOTE_assets-future' && !isCustomNoteSkin) useRGBShader = false;
 
 		if(PlayState.isPixelStage)
 		{
