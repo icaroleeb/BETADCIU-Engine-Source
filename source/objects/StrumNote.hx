@@ -68,8 +68,6 @@ class StrumNote extends FlxSprite
 			if (CustomNoteSkins[i] == skin) isCustomNoteSkin = true;
 		}
 
-		if (skin != 'normal' && skin != 'NOTE_assets' && skin != 'NOTE_assets-chip' && skin != 'NOTE_assets-future' && !isCustomNoteSkin) useRGBShader = false;
-
 		texture = skin; //Load texture and anims
 		scrollFactor.set();
 		playAnim('static');
@@ -80,10 +78,13 @@ class StrumNote extends FlxSprite
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
 
+		var notePath:String = texture;
+
 		if (Paths.fileExists('images/notes/' + texture + '.png', IMAGE)) { // more compatibility with legacy stuff
 			// trace('legacy note texture detected!');
 			var tex:String = texture;
 			texture = "notes/" + tex;
+			notePath = "notes/" + tex;
 		}
 
 		var isCustomNoteSkin:Bool = false;
@@ -92,7 +93,7 @@ class StrumNote extends FlxSprite
 			if (CustomNoteSkins[i] == texture) isCustomNoteSkin = true;
 		}
 
-		if (texture != 'normal' && texture != 'NOTE_assets' && texture != 'NOTE_assets-chip' && texture != 'NOTE_assets-future' && !isCustomNoteSkin) useRGBShader = false;
+		if (!notePath.endsWith('normal') && !notePath.endsWith('NOTE_assets') && !notePath.endsWith('NOTE_assets-chip') && !notePath.endsWith('NOTE_assets-future') && !isCustomNoteSkin) useRGBShader = false;
 
 		if(PlayState.isPixelStage)
 		{

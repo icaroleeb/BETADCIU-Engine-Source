@@ -378,8 +378,6 @@ class Note extends FlxSprite
 			if (CustomNoteSkins[i] == skin) isCustomNoteSkin = true;
 		}
 
-		if (skin != 'normal' && skin != 'NOTE_assets' && skin != 'NOTE_assets-chip' && skin != 'NOTE_assets-future' && !isCustomNoteSkin) rgbShader.enabled = false;
-
 		var animName:String = null;
 		if(animation.curAnim != null) {
 			animName = animation.curAnim.name;
@@ -402,6 +400,8 @@ class Note extends FlxSprite
 			var oldpath:String = skin;
 			skin = "notes/" + oldpath; 
 		}
+
+		if (!skin.endsWith('normal') && !skin.endsWith('NOTE_assets') && !skin.endsWith('NOTE_assets-chip') && !skin.endsWith('NOTE_assets-future') && !isCustomNoteSkin) rgbShader.enabled = false;
 
 		if(PlayState.isPixelStage) {
 			if(isSustainNote) {

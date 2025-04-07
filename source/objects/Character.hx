@@ -279,7 +279,7 @@ class Character extends FlxSprite
 			if (isPlayer) {
 				flipX = !flipX;
 				// Doesn't flip for BF, since his are already in the right place???
-				if (!curCharacter.startsWith('bf') && !isPsychPlayer) flipAnims();
+				if (!curCharacter.startsWith('bf') && !isPsychPlayer || !itHasPlayerOfs) flipAnims();
 			}
 	
 			if (!isPlayer || curCharacter.toLowerCase().endsWith('-playable')) { // flip for bf and psych's "-playable" chars
