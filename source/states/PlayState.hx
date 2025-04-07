@@ -3965,7 +3965,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public function removeObjects(stageData:StageFile){
-		// if you comment out the else part, the stage loads fine but character layers and positions are messed up
+		// if you comment out the else part, the stage loads fine but character layers and positions are messed up.
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
 			var list:Map<String, FlxSprite> = StageData.removeObjectsFromState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
