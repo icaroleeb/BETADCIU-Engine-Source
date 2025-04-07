@@ -179,6 +179,9 @@ class PlayState extends MusicBeatState
 	public var camZooming:Bool = false;
 	public var camZoomingMult:Float = 1;
 	public var camZoomingDecay:Float = 1;
+	public var camZoomingSpeed:Float = 2;
+	public var psychCamZooming(default, set):Bool = false; // Just for backwards compatibility
+
 	private var curSong:String = "";
 
 	public var gfSpeed:Int = 1;
@@ -279,6 +282,9 @@ class PlayState extends MusicBeatState
 
 	private static var _lastLoadedModDirectory:String = '';
 	public static var nextReloadAll:Bool = false;
+
+	public var stageData:StageFile;
+
 	override public function create()
 	{
 		//trace('Playback Rate: ' + playbackRate);
@@ -353,37 +359,8 @@ class PlayState extends MusicBeatState
 			SONG.stage = StageData.vanillaSongStage(Paths.formatToSongPath(Song.loadedSongName));
 
 		curStage = SONG.stage;
-
-		var stageData:StageFile = StageData.getStageFile(curStage);
-		defaultCamZoom = stageData.defaultZoom;
-
-		stageUI = "normal";
-		if (stageData.stageUI != null && stageData.stageUI.trim().length > 0)
-			stageUI = stageData.stageUI;
-		else if (stageData.isPixelStage == true) //Backward compatibility
-			stageUI = "pixel";
-
-		BF_X = stageData.boyfriend[0];
-		BF_Y = stageData.boyfriend[1];
-		GF_X = stageData.girlfriend[0];
-		GF_Y = stageData.girlfriend[1];
-		DAD_X = stageData.opponent[0];
-		DAD_Y = stageData.opponent[1];
-
-		if(stageData.camera_speed != null)
-			cameraSpeed = stageData.camera_speed;
-
-		boyfriendCameraOffset = stageData.camera_boyfriend;
-		if(boyfriendCameraOffset == null) //Fucks sake should have done it since the start :rolling_eyes:
-			boyfriendCameraOffset = [0, 0];
-
-		opponentCameraOffset = stageData.camera_opponent;
-		if(opponentCameraOffset == null)
-			opponentCameraOffset = [0, 0];
-
-		girlfriendCameraOffset = stageData.camera_girlfriend;
-		if(girlfriendCameraOffset == null)
-			girlfriendCameraOffset = [0, 0];
+		stageData = StageData.getStageFile(curStage);
+		setStageDetails(stageData);
 
 		boyfriendGroup = new FlxSpriteGroup(BF_X, BF_Y);
 		dadGroup = new FlxSpriteGroup(DAD_X, DAD_Y);
@@ -425,23 +402,7 @@ class PlayState extends MusicBeatState
 		boyfriend = new Character(0, 0, SONG.player1, true);
 		startCharacterPos(boyfriend);
 		
-		if(stageData.objects != null && stageData.objects.length > 0)
-		{
-			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
-			for (key => spr in list)
-				if(!StageData.reservedNames.contains(key))
-					variables.set(key, spr);
-		}
-		else
-		{
-			add(gfGroup); // keeping this bcuz without this the game won't load the stage?????
-			add(dadGroup); // keeping this bcuz without this the game won't load the stage?????
-			add(boyfriendGroup); // keeping this bcuz without this the game won't load the stage?????
-
-			add(gf);
-			add(dad);
-			add(boyfriend);
-		}
+		addObjects(stageData);
 		
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// "SCRIPTS FOLDER" SCRIPTS
@@ -475,8 +436,8 @@ class PlayState extends MusicBeatState
 		
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
-		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua'); #end
-		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx'); #end
+		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
+		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 
 		// CHARACTER SCRIPTS
 		if(gf != null) startCharacterScripts(gf.curCharacter);
@@ -716,6 +677,15 @@ class PlayState extends MusicBeatState
 		playbackRate = 1.0; // ensuring -Crow
 		#end
 		return playbackRate;
+	}
+
+	function set_psychCamZooming(value:Bool):Bool
+	{
+		trace("psychCamZooming is deprecated! Use camZoomingSpeed instead.");
+		psychCamZooming = value;
+		camZoomingSpeed = psychCamZooming ? 1 : 2;
+
+		return value;
 	}
 
 	var usedTimeTravel:Bool = false;
@@ -1638,6 +1608,7 @@ class PlayState extends MusicBeatState
 
 			case 'Play Sound':
 				Paths.sound(event.value1); //Precache sound
+			case "Change Stage":
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
 	}
@@ -1907,8 +1878,8 @@ class PlayState extends MusicBeatState
 
 		if (camZooming)
 		{
-			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, Math.exp(-elapsed * 3.125 * camZoomingDecay * playbackRate));
-			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, Math.exp(-elapsed * 3.125 * camZoomingDecay * playbackRate));
+			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, Math.exp(-elapsed * 3.125 * camZoomingDecay * camZoomingSpeed * playbackRate));
+			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, Math.exp(-elapsed * 3.125 * camZoomingDecay * camZoomingSpeed * playbackRate));
 		}
 
 		FlxG.watch.addQuick("secShit", curSection);
@@ -2427,6 +2398,13 @@ class PlayState extends MusicBeatState
 			case 'Play Sound':
 				if(flValue2 == null) flValue2 = 1;
 				FlxG.sound.play(Paths.sound(value1), flValue2);
+			case "Change Stage":
+				removeStage(); // Remove current stage
+			
+				curStage = value1; // Set new stage name
+				stageData = StageData.getStageFile(curStage); 
+				addStage();
+				
 		}
 
 		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, flValue1, flValue2, strumTime));
@@ -3526,7 +3504,7 @@ class PlayState extends MusicBeatState
 	}
 
 	#if LUA_ALLOWED
-	public function startLuasNamed(luaFile:String)
+	public function startLuasNamed(luaFile:String, ?type:String = "")
 	{
 		#if MODS_ALLOWED
 		var luaToLoad:String = Paths.modFolders(luaFile);
@@ -3542,15 +3520,37 @@ class PlayState extends MusicBeatState
 			for (script in luaArray)
 				if(script.scriptName == luaToLoad) return false;
 
-			new FunkinLua(luaToLoad);
+			new FunkinLua(luaToLoad, type);
 			return true;
+		}
+		return false;
+	}
+
+	public function stopLuasNamed(luaFile:String, ?type:String = "")
+	{
+		#if MODS_ALLOWED
+		var luaToLoad:String = Paths.modFolders(luaFile);
+		if(!FileSystem.exists(luaToLoad))
+			luaToLoad = Paths.getSharedPath(luaFile);
+
+		if(FileSystem.exists(luaToLoad))
+		#elseif sys
+		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		if(OpenFlAssets.exists(luaToLoad))
+		#end
+		{
+			for (script in luaArray)
+				if(script.scriptName == luaToLoad){
+					luaArray.remove(script);
+					return true;
+				}
 		}
 		return false;
 	}
 	#end
 
 	#if HSCRIPT_ALLOWED
-	public function startHScriptsNamed(scriptFile:String)
+	public function startHScriptsNamed(scriptFile:String, ?scriptType:String = "")
 	{
 		#if MODS_ALLOWED
 		var scriptToLoad:String = Paths.modFolders(scriptFile);
@@ -3569,6 +3569,27 @@ class PlayState extends MusicBeatState
 		}
 		return false;
 	}
+
+	public function stopHScriptsNamed(scriptFile:String, ?scriptType:String = "")
+		{
+			#if MODS_ALLOWED
+			var scriptToLoad:String = Paths.modFolders(scriptFile);
+			if(!FileSystem.exists(scriptToLoad))
+				scriptToLoad = Paths.getSharedPath(scriptFile);
+			#else
+			var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+			#end
+	
+			if(FileSystem.exists(scriptToLoad))
+			{
+				if (Iris.instances.exists(scriptToLoad)){
+					var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+					hscriptArray.remove(script);
+					return true;
+				};
+			}
+			return false;
+		}
 
 	public function initHScript(file:String)
 	{
@@ -3908,4 +3929,113 @@ class PlayState extends MusicBeatState
 			});
 		}
 	}
+
+	public function setStageDetails(stageData:StageFile){
+		defaultCamZoom = stageData.defaultZoom;
+
+		stageUI = "normal";
+		if (stageData.stageUI != null && stageData.stageUI.trim().length > 0)
+			stageUI = stageData.stageUI;
+		else if (stageData.isPixelStage == true) //Backward compatibility
+			stageUI = "pixel";
+
+		BF_X = stageData.boyfriend[0];
+		BF_Y = stageData.boyfriend[1];
+		GF_X = stageData.girlfriend[0];
+		GF_Y = stageData.girlfriend[1];
+		DAD_X = stageData.opponent[0];
+		DAD_Y = stageData.opponent[1];
+
+		if(stageData.camera_speed != null)
+			cameraSpeed = stageData.camera_speed;
+
+		boyfriendCameraOffset = stageData.camera_boyfriend;
+		if(boyfriendCameraOffset == null) //Fucks sake should have done it since the start :rolling_eyes:
+			boyfriendCameraOffset = [0, 0];
+
+		opponentCameraOffset = stageData.camera_opponent;
+		if(opponentCameraOffset == null)
+			opponentCameraOffset = [0, 0];
+
+		girlfriendCameraOffset = stageData.camera_girlfriend;
+		if(girlfriendCameraOffset == null)
+			girlfriendCameraOffset = [0, 0];
+
+		return stageData;
+	}
+
+	public function removeObjects(stageData:StageFile){
+		// if you comment out the else part, the stage loads fine but character layers and positions are messed up
+		if(stageData.objects != null && stageData.objects.length > 0)
+		{
+			var list:Map<String, FlxSprite> = StageData.removeObjectsFromState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
+			for (key => spr in list)
+				if(!StageData.reservedNames.contains(key))
+					variables.remove(key);
+		}else{
+			remove(gfGroup);
+			remove(dadGroup); 
+			remove(boyfriendGroup);
+
+			remove(gf);
+			remove(dad);
+			remove(boyfriend);
+		}
+	}
+
+	public function addObjects(stageData:StageFile){
+		if(stageData.objects != null && stageData.objects.length > 0)
+		{
+			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
+			for (key => spr in list)
+				if (!StageData.reservedNames.contains(key))
+					variables.set(key, spr);
+		}
+		else
+		{
+			add(gfGroup); // keeping this bcuz without this the game won't load the stage?????
+			add(dadGroup); // keeping this bcuz without this the game won't load the stage?????
+			add(boyfriendGroup); // keeping this bcuz without this the game won't load the stage?????
+
+			add(gf);
+			add(dad);
+			add(boyfriend);
+		}
+	}
+
+	public function removeStage() {
+		removeObjects(stageData);
+
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		// STAGE SCRIPTS
+		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
+		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
+		#end
+
+		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
+	
+		if (stageVars != null) {
+			for (key in stageVars.keys()) {
+				var sprite:FlxSprite = stageVars.get(key);
+				if (sprite != null) {
+					remove(sprite);
+					variables.remove(key);
+				}
+			}
+			stageVars.clear();
+		}
+	}	
+
+	public function addStage() {
+		setStageDetails(stageData);
+		
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		// STAGE SCRIPTS
+		#if LUA_ALLOWED 
+		startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
+		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
+		#end
+
+		addObjects(stageData);
+	}	
 }

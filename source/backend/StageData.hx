@@ -115,9 +115,10 @@ class StageData {
 	}
 
 	public static var reservedNames:Array<String> = ['gf', 'gfGroup', 'dad', 'dadGroup', 'boyfriend', 'boyfriendGroup']; //blocks these names from being used on stage editor's name input text
+	public static var addedObjects:Map<String, FlxSprite> = [];
+
 	public static function addObjectsToState(objectList:Array<Dynamic>, gf:FlxSprite, dad:FlxSprite, boyfriend:FlxSprite, ?group:Dynamic = null, ?ignoreFilters:Bool = false)
 	{
-		var addedObjects:Map<String, FlxSprite> = [];
 		for (num => data in objectList)
 		{
 			if (addedObjects.exists(data)) continue;
@@ -213,6 +214,62 @@ class StageData {
 		}
 		return addedObjects;
 	}
+
+	public static function removeObjectsFromState(objectList:Array<Dynamic>, gf:FlxSprite, dad:FlxSprite, boyfriend:FlxSprite, ?group:Dynamic = null, ?ignoreFilters:Bool = false)
+		{
+			var removedObjects:Map<String, FlxSprite> = [];
+			for (num => data in objectList)
+			{
+				if (removedObjects.exists(data)) continue;
+	
+				switch(data.type)
+				{
+					case 'gf', 'gfGroup':
+						if (gf != null)
+						{
+							gf.ID = num;
+							if (group != null) group.remove(gf);
+							removedObjects.set('gf', gf);
+						}
+					case 'dad', 'dadGroup':
+						if (dad != null)
+						{
+							dad.ID = num;
+							if (group != null) group.remove(dad);
+							removedObjects.set('dad', dad);
+						}
+					case 'boyfriend', 'boyfriendGroup':
+						if (boyfriend != null)
+						{
+							boyfriend.ID = num;
+							if (group != null) group.remove(boyfriend);
+							removedObjects.set('boyfriend', boyfriend);
+						}
+
+					 case 'square', 'sprite', 'animatedSprite':
+						if (!ignoreFilters && !validateVisibility(data.filters)) continue;
+
+						// Check if sprite already exists before trying to remove it
+						trace("REMOVING SPRITE " + data.name);
+						var spriteToRemove:FlxSprite = addedObjects.get(data.name);
+					
+						if (spriteToRemove != null)
+						{
+							
+							if (group != null) group.remove(spriteToRemove);  // Directly removing the sprite from the group
+							removedObjects.set(data.name, spriteToRemove);
+						}
+	
+					default:
+						var err = '[Stage .JSON file] Unknown sprite type detected: ${data.type}';
+						trace(err);
+						FlxG.log.error(err);
+				}
+			}
+
+			addedObjects.clear();
+			return removedObjects;
+		}
 
 	public static function validateVisibility(filters:LoadFilters)
 	{
