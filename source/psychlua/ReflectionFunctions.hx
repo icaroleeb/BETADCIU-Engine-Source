@@ -16,15 +16,46 @@ class ReflectionFunctions
 	public static function implement(funk:FunkinLua)
 	{
 		var lua:State = funk.lua;
+
+		// Offsets for anything that needs backwards compatibility with newer features
+		var offsets:Map<String, Int> = [
+			"Stage.dadXOffset" => 100,
+			"Stage.dadYOffset" => 100,
+			"Stage.bfYOffset" => 100,
+			"Stage.bfXOffset" => 770,
+			"Stage.gfXOffset" => 400,
+			"Stage.gfYOffset" => 130
+		];
+
 		Lua_helper.add_callback(lua, "getProperty", function(variable:String, ?allowMaps:Bool = false) {
-			if (variable.startsWith("Stage.")) variable = formatOldStageVariable(variable);
+			var originalVar:String = variable;
+
+			if (variable.startsWith("Stage.")){
+				variable = formatOldStageVariable(variable);
+			}
+
 			var split:Array<String> = variable.split('.');
-			if(split.length > 1)
-				return LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowMaps);
-			return LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
+			var result:Dynamic = (split.length > 1)
+				? LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowMaps)
+				: LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
+
+			if (offsets.exists(originalVar)) {
+				result -= offsets.get(originalVar);
+			}
+
+			return result;
 		});
 		Lua_helper.add_callback(lua, "setProperty", function(variable:String, value:Dynamic, ?allowMaps:Bool = false, ?allowInstances:Bool = false) {
-			if (variable.startsWith("Stage.")) variable = formatOldStageVariable(variable, true);
+			var originalVar:String = variable;
+
+			if (variable.startsWith("Stage.")){
+				variable = formatOldStageVariable(variable, true);
+			}
+
+			if (offsets.exists(originalVar)){
+				value += offsets.get(originalVar);
+			}
+			
 			var split:Array<String> = variable.split('.');
 			if(split.length > 1) {
 				LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowInstances ? parseInstances(value) : value, allowMaps);
@@ -343,19 +374,19 @@ class ReflectionFunctions
 		if (isSetProperty){ // setProperty Glitches out when getting a array from this so... yeah
 			switch(variable) {
 				case "Stage.curStage": newVariable = "curStage";
-				case "Stage.hideGirlfriend": newVariable = game.stageData.hide_girlfriend;
+				case "Stage.hideGirlfriend": newVariable = "stageData.hide_girlfriend";
 				default: newVariable = variable;
 			}
 		} else { // getProperty
 			switch(variable) {
 				case "Stage.curStage": newVariable = "curStage";
-				case ("Stage.gfXOffset"): newVariable = game.stageData.girlfriend[0];
-				case ("Stage.gfYOffset"): newVariable = game.stageData.girlfriend[1];
-				case ("Stage.bfXOffset"): newVariable = game.stageData.boyfriend[0];
-				case ("Stage.bfYOffset"): newVariable = game.stageData.boyfriend[1];
-				case ("Stage.dadXOffset"): newVariable = game.stageData.opponent[0];
-				case ("Stage.dadYOffset"): newVariable = game.stageData.opponent[1];
-				case "Stage.hideGirlfriend": newVariable = game.stageData.hide_girlfriend;
+				case ("Stage.gfXOffset"): newVariable = "GF_X";
+				case ("Stage.gfYOffset"): newVariable = "GF_Y";
+				case ("Stage.bfXOffset"): newVariable = "BF_X";
+				case ("Stage.bfYOffset"): newVariable = "BF_Y";
+				case ("Stage.dadXOffset"): newVariable = "DAD_X";
+				case ("Stage.dadYOffset"): newVariable = "DAD_Y";
+				case "Stage.hideGirlfriend": newVariable = "stageData.hide_girlfriend";
 				// case "Stage.boyfriendCameraOffset": newVariable = game.stageData.camera_boyfriend; 
 				// case "Stage.opponentCameraOffset": newVariable = game.stageData.camera_opponent;
 				// case "Stage.girlfriendCameraOffset": newVariable = game.stageData.camera_girlfriend;

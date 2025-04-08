@@ -320,7 +320,15 @@ class HScript extends Iris
 		set('addHaxeLibrary', function(libName:String, ?libPackage:String = '') {
 			try {
 				var str:String = '';
-				// if (libPackage == "luafiles") libPackage = "psychlua";
+
+				switch(libName){
+					case "ModchartState": libName = "FunkinLua";
+				}
+
+				if (libPackage == "luafiles"){
+					libPackage = "psychlua";
+				}
+
 				if(libPackage.length > 0)
 					str = libPackage + '.';
 
@@ -390,7 +398,15 @@ class HScript extends Iris
 		// This function is unnecessary because import already exists in HScript as a native feature
 		funk.addLocalCallback("addHaxeLibrary", function(libName:String, ?libPackage:String = '') {
 			var str:String = '';
-			// if (libPackage == "luafiles") libPackage = "psychlua";
+
+			switch(libName){
+				case "ModchartState": libName = "FunkinLua";
+			}
+
+			if (libPackage == "luafiles"){
+				libPackage = "psychlua";
+			}
+			
 			if (libPackage.length > 0)
 				str = libPackage + '.';
 			else if (libName == null)

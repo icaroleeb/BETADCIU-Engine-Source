@@ -36,7 +36,6 @@ import substates.PauseSubState;
 import substates.GameOverSubstate;
 
 import psychlua.LuaUtils;
-import psychlua.LuaUtils.LuaTweenOptions;
 #if HSCRIPT_ALLOWED
 import psychlua.HScript;
 #end
@@ -605,125 +604,6 @@ class FunkinLua {
 			luaTrace('setObjectOrder: Object $obj doesn\'t exist!', false, false, FlxColor.RED);
 		});
 
-		// gay ass tweens
-		Lua_helper.add_callback(lua, "startTween", function(tag:String, vars:String, values:Any = null, duration:Float, ?options:Any = null) {
-			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
-			if(penisExam != null)
-			{
-				if(values != null)
-				{
-					var myOptions:LuaTweenOptions = LuaUtils.getLuaTween(options);
-					if(tag != null)
-					{
-						var variables = MusicBeatState.getVariables();
-						var originalTag:String = 'tween_' + LuaUtils.formatVariable(tag);
-						variables.set(tag, FlxTween.tween(penisExam, values, duration, myOptions != null ? {
-							type: myOptions.type,
-							ease: myOptions.ease,
-							startDelay: myOptions.startDelay,
-							loopDelay: myOptions.loopDelay,
-	
-							onUpdate: function(twn:FlxTween) {
-								if(myOptions.onUpdate != null) game.callOnLuas(myOptions.onUpdate, [originalTag, vars]);
-							},
-							onStart: function(twn:FlxTween) {
-								if(myOptions.onStart != null) game.callOnLuas(myOptions.onStart, [originalTag, vars]);
-							},
-							onComplete: function(twn:FlxTween) {
-								if(twn.type == FlxTweenType.ONESHOT || twn.type == FlxTweenType.BACKWARD) variables.remove(tag);
-								if(myOptions.onComplete != null) game.callOnLuas(myOptions.onComplete, [originalTag, vars]);
-							}
-						} : null));
-						return tag;
-					}
-					else FlxTween.tween(penisExam, values, duration, myOptions != null ? {
-						type: myOptions.type,
-						ease: myOptions.ease,
-						startDelay: myOptions.startDelay,
-						loopDelay: myOptions.loopDelay,
-
-						onUpdate: function(twn:FlxTween) {
-							if(myOptions.onUpdate != null) game.callOnLuas(myOptions.onUpdate, [null, vars]);
-						},
-						onStart: function(twn:FlxTween) {
-							if(myOptions.onStart != null) game.callOnLuas(myOptions.onStart, [null, vars]);
-						},
-						onComplete: function(twn:FlxTween) {
-							if(myOptions.onComplete != null) game.callOnLuas(myOptions.onComplete, [null, vars]);
-						}
-					} : null);
-				}
-				else luaTrace('startTween: No values on 2nd argument!', false, false, FlxColor.RED);
-			}
-			else luaTrace('startTween: Couldnt find object: ' + vars, false, false, FlxColor.RED);
-			return null;
-		});
-
-		Lua_helper.add_callback(lua, "doTweenX", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear') {
-			return oldTweenFunction(tag, vars, {x: value}, duration, ease, 'doTweenX');
-		});
-		Lua_helper.add_callback(lua, "doTweenY", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear') {
-			return oldTweenFunction(tag, vars, {y: value}, duration, ease, 'doTweenY');
-		});
-		Lua_helper.add_callback(lua, "doTweenAngle", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear') {
-			return oldTweenFunction(tag, vars, {angle: value}, duration, ease, 'doTweenAngle');
-		});
-		Lua_helper.add_callback(lua, "doTweenAlpha", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear') {
-			return oldTweenFunction(tag, vars, {alpha: value}, duration, ease, 'doTweenAlpha');
-		});
-		Lua_helper.add_callback(lua, "doTweenZoom", function(tag:String, camera:String, value:Dynamic, duration:Float, ?ease:String = 'linear') {
-			switch(camera.toLowerCase()) {
-				case 'camgame' | 'game': camera = 'camGame';
-				case 'camhud' | 'hud': camera = 'camHUD';
-				case 'camother' | 'other': camera = 'camOther';
-				default:
-					var cam:FlxCamera = MusicBeatState.getVariables().get(camera);
-					if (cam == null || !Std.isOfType(cam, FlxCamera)) camera = 'camGame';
-			}
-			return oldTweenFunction(tag, camera, {zoom: value}, duration, ease, 'doTweenZoom');
-		});
-		Lua_helper.add_callback(lua, "doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ?ease:String = 'linear') {
-			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
-			if(penisExam != null) {
-				var curColor:FlxColor = penisExam.color;
-				curColor.alphaFloat = penisExam.alpha;
-				
-				if(tag != null)
-				{
-					var originalTag:String = tag;
-					tag = LuaUtils.formatVariable('tween_$tag');
-					var variables = MusicBeatState.getVariables();
-					variables.set(tag, FlxTween.color(penisExam, duration, curColor, CoolUtil.colorFromString(targetColor), {ease: LuaUtils.getTweenEaseByString(ease),
-						onComplete: function(twn:FlxTween)
-						{
-							variables.remove(tag);
-							if (game != null) game.callOnLuas('onTweenCompleted', [originalTag, vars]);
-						}
-					}));
-					return tag;
-				}
-				else FlxTween.color(penisExam, duration, curColor, CoolUtil.colorFromString(targetColor), {ease: LuaUtils.getTweenEaseByString(ease)});
-			}
-			else luaTrace('doTweenColor: Couldnt find object: ' + vars, false, false, FlxColor.RED);
-			return null;
-		});
-
-		//Tween shit, but for strums
-		Lua_helper.add_callback(lua, "noteTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
-			return noteTweenFunction(tag, note, {x: value}, duration, ease);
-		});
-		Lua_helper.add_callback(lua, "noteTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
-			return noteTweenFunction(tag, note, {y: value}, duration, ease);
-		});
-		Lua_helper.add_callback(lua, "noteTweenAngle", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
-			return noteTweenFunction(tag, note, {angle: value}, duration, ease);
-		});
-		Lua_helper.add_callback(lua, "noteTweenAlpha", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
-			return noteTweenFunction(tag, note, {alpha: value}, duration, ease);
-		});
-		Lua_helper.add_callback(lua, "noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
-			return noteTweenFunction(tag, note, {direction: value}, duration, ease);
-		});
 		Lua_helper.add_callback(lua, "mouseClicked", function(?button:String = 'left') {
 			var click:Bool = FlxG.mouse.justPressed;
 			switch(button.trim().toLowerCase())
@@ -757,8 +637,6 @@ class FunkinLua {
 			}
 			return released;
 		});
-
-		Lua_helper.add_callback(lua, "cancelTween", function(tag:String) LuaUtils.cancelTween(tag));
 
 		Lua_helper.add_callback(lua, "runTimer", function(tag:String, time:Float = 1, loops:Int = 1) {
 			LuaUtils.cancelTimer(tag);
@@ -1840,6 +1718,7 @@ class FunkinLua {
 		#if flxanimate FlxAnimateFunctions.implement(this); #end
 		ReflectionFunctions.implement(this);
 		TextFunctions.implement(this);
+		TweenFunctions.implement(this);
 		ExtraFunctions.implement(this);
 		CustomSubstate.implement(this);
 		ShaderFunctions.implement(this);
@@ -1950,58 +1829,6 @@ class FunkinLua {
 			hscript = null;
 		}
 		#end
-	}
-
-	function oldTweenFunction(tag:String, vars:String, tweenValue:Any, duration:Float, ease:String, funcName:String)
-	{
-		var target:Dynamic = LuaUtils.tweenPrepare(tag, vars);
-		var variables = MusicBeatState.getVariables();
-		if(target != null)
-		{
-			if(tag != null)
-			{
-				var originalTag:String = tag;
-				tag = LuaUtils.formatVariable('tween_$tag');
-				variables.set(tag, FlxTween.tween(target, tweenValue, duration, {ease: LuaUtils.getTweenEaseByString(ease),
-					onComplete: function(twn:FlxTween)
-					{
-						variables.remove(tag);
-						if(PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [originalTag, vars]);
-					}
-				}));
-			}
-			else FlxTween.tween(target, tweenValue, duration, {ease: LuaUtils.getTweenEaseByString(ease)});
-			return tag;
-		}
-		else luaTrace('$funcName: Couldnt find object: $vars', false, false, FlxColor.RED);
-		return null;
-	}
-
-	function noteTweenFunction(tag:String, note:Int, data:Dynamic, duration:Float, ease:String)
-	{
-		if(PlayState.instance == null) return null;
-
-		var strumNote:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
-		if(strumNote == null) return null;
-
-		if(tag != null)
-		{
-			var originalTag:String = tag;
-			tag = LuaUtils.formatVariable('tween_$tag');
-			LuaUtils.cancelTween(tag);
-
-			var variables = MusicBeatState.getVariables();
-			variables.set(tag, FlxTween.tween(strumNote, data, duration, {ease: LuaUtils.getTweenEaseByString(ease),
-				onComplete: function(twn:FlxTween)
-				{
-					variables.remove(tag);
-					if(PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [originalTag]);
-				}
-			}));
-			return tag;
-		}
-		else FlxTween.tween(strumNote, data, duration, {ease: LuaUtils.getTweenEaseByString(ease)});
-		return null;
 	}
 
 	function doFunction(id:String, ?val1:Dynamic, ?val2:Dynamic, ?val3:Dynamic, ?val4:Dynamic) {
@@ -2281,8 +2108,8 @@ class FunkinLua {
 			charX = shit.positionArray[0];
 			charY = shit.positionArray[1];
 	
-			shit.x = stageData.opponent[0] + charX;
-			shit.y = stageData.opponent[1] + charY;
+			shit.x = PlayState.instance.DAD_X + charX;
+			shit.y = PlayState.instance.DAD_Y + charY;
 		}
 		else
 		{
@@ -2294,8 +2121,8 @@ class FunkinLua {
 			charX = shit.playerPositionArray[0];
 			charY = shit.playerPositionArray[1];
 	
-			shit.x = stageData.boyfriend[0] + charX;
-			shit.y = stageData.boyfriend[1] + charY;
+			shit.x = PlayState.instance.BF_X + charX;
+			shit.y = PlayState.instance.BF_Y + charY;
 		}
 
 		if (shit.animOffsets.exists(animationName)) shit.playAnim(animationName, true, false, animationFrame);
@@ -2327,7 +2154,6 @@ class FunkinLua {
 		PlayState.instance.boyfriend.flipMode = !flipped;
 
 		var isFlipped = PlayState.instance.boyfriend.flipMode;
-		var stageData:StageFile = PlayState.instance.stageData;
 		var charX:Float = 0;
 		var charY:Float = (isFlipped ? 350 : 0);
 
@@ -2337,8 +2163,8 @@ class FunkinLua {
 		charX = PlayState.instance.boyfriend.playerPositionArray[0];
 		charY = PlayState.instance.boyfriend.playerPositionArray[1];
 	
-		PlayState.instance.boyfriend.x = stageData.boyfriend[0] + charX;
-		PlayState.instance.boyfriend.y = stageData.boyfriend[1] + charY;
+		PlayState.instance.boyfriend.x = PlayState.instance.BF_X + charX;
+		PlayState.instance.boyfriend.y = PlayState.instance.BF_Y + charY;
 
 		PlayState.instance.add(PlayState.instance.boyfriend);
 
@@ -2384,7 +2210,6 @@ class FunkinLua {
 		PlayState.instance.dad.flipMode = !flipped;
 
 		var isFlipped = PlayState.instance.dad.flipMode;
-		var stageData:StageFile = PlayState.instance.stageData;
 		var charX:Float = 0;
 		var charY:Float = (isFlipped ? 350 : 0);
 
@@ -2394,8 +2219,8 @@ class FunkinLua {
 		charX = PlayState.instance.dad.positionArray[0];
 		charY = PlayState.instance.dad.positionArray[1];
 	
-		PlayState.instance.dad.x = stageData.opponent[0] + charX;
-		PlayState.instance.dad.y = stageData.opponent[1] + charY;
+		PlayState.instance.dad.x = PlayState.instance.DAD_X + charX;
+		PlayState.instance.dad.y = PlayState.instance.DAD_Y + charY;
 
 		//PlayState.instance.addObject(PlayState.instance.bfTrail);
 		//PlayState.instance.bfTrail.resetTrail();
