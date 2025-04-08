@@ -209,9 +209,9 @@ class Character extends FlxSprite
 		}
 
 		// positioning
-		positionArray = json.position;
-		cameraPosition = json.camera_position;
+		positionArray = ((!debugMode && isPlayer && json.playerposition != null) ? json.playerposition : json.position);
 		playerPositionArray = (json.playerposition != null ?  json.playerposition : json.position);
+		cameraPosition = (isPlayer && json.player_camera_position != null ? json.player_camera_position : json.camera_position);
 		playerCameraPosition = (json.player_camera_position != null ? json.player_camera_position : json.camera_position);
 
 		// data
@@ -279,11 +279,12 @@ class Character extends FlxSprite
 			if (isPlayer) {
 				flipX = !flipX;
 				// Doesn't flip for BF, since his are already in the right place???
-				if (!curCharacter.startsWith('bf') && !isPsychPlayer || !itHasPlayerOfs) flipAnims();
+				if (!missingCharacter)
+					if (!curCharacter.startsWith('bf') && !isPsychPlayer) flipAnims();
 			}
 	
 			if (!isPlayer || curCharacter.toLowerCase().endsWith('-playable')) { // flip for bf and psych's "-playable" chars
-				if (curCharacter.startsWith('bf') || isPsychPlayer) flipAnims();
+				if (curCharacter.startsWith('bf') || isPsychPlayer || missingCharacter) flipAnims();
 			}	
 		}
 		#if flxanimate

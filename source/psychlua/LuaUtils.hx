@@ -284,27 +284,27 @@ class LuaUtils
 		return MusicBeatState.getState();
 	}
 
-	public static inline function getLowestCharacterGroup():FlxSpriteGroup
+	public static inline function getLowestCharacterGroup():Character
 	{
 		var stageData:StageFile = StageData.getStageFile(PlayState.SONG.stage);
-		var group:FlxSpriteGroup = (stageData.hide_girlfriend ? PlayState.instance.boyfriendGroup : PlayState.instance.gfGroup);
+		var character:Character = (stageData.hide_girlfriend ? PlayState.instance.boyfriend : PlayState.instance.gf);
 
-		var pos:Int = PlayState.instance.members.indexOf(group);
+		var pos:Int = PlayState.instance.members.indexOf(character);
 
-		var newPos:Int = PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup);
+		var newPos:Int = PlayState.instance.members.indexOf(PlayState.instance.boyfriend);
 		if(newPos < pos)
 		{
-			group = PlayState.instance.boyfriendGroup;
+			character = PlayState.instance.boyfriend;
 			pos = newPos;
 		}
 		
-		newPos = PlayState.instance.members.indexOf(PlayState.instance.dadGroup);
+		newPos = PlayState.instance.members.indexOf(PlayState.instance.dad);
 		if(newPos < pos)
 		{
-			group = PlayState.instance.dadGroup;
+			character = PlayState.instance.dad;
 			pos = newPos;
 		}
-		return group;
+		return character;
 	}
 	
 	public static function addAnimByIndices(obj:String, name:String, prefix:String, indices:Any = null, framerate:Float = 24, loop:Bool = false)

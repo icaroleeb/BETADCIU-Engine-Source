@@ -12,7 +12,9 @@ import openfl.display.BitmapData;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxState;
+import flixel.math.FlxRect;
 
+import flixel.addons.display.FlxBackdrop;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
@@ -1094,7 +1096,51 @@ class FunkinLua {
 					stageVars.set(tag, leSprite);
 			}
 		});
+		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?axes:String = "XY") {
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+			var leSprite:FlxBackdrop = new FlxBackdrop("", FlxAxes.fromString(axes), Std.int(x), Std.int(y));
+			if(image != null && image.length > 0)
+			{
+				leSprite.loadGraphic(Paths.image(image));
+			}
 
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leSprite);
+
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+		
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leSprite);
+			}
+
+			leSprite.active = true;
+		});
+		Lua_helper.add_callback(lua, "addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) { // no way this shit worked without changing anything
+			var killMe:Array<String> = obj.split('.');
+			var object:FlxSprite = LuaUtils.getObjectDirectly(killMe[0]);
+
+			if(killMe.length > 1) {
+				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+
+			if(object != null) {
+				var swagRect = (object.clipRect != null ? object.clipRect : new FlxRect());
+				swagRect.x = x;
+				swagRect.y = y;
+				swagRect.width = width;
+				swagRect.height = height;
+				
+				object.clipRect = swagRect;
+				return true;
+			}
+			luaTrace("addClipRect: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
+			return false;
+		});
 		Lua_helper.add_callback(lua, "makeGraphic", function(obj:String, width:Int = 256, height:Int = 256, color:String = 'FFFFFF') {
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(obj);
 			if(spr != null) spr.makeGraphic(width, height, CoolUtil.colorFromString(color));
@@ -1182,6 +1228,24 @@ class FunkinLua {
 					instance.insert(instance.members.indexOf(LuaUtils.getLowestCharacterGroup()), mySprite);
 				else
 					GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), mySprite);
+			}
+		});
+		Lua_helper.add_callback(lua, "changeCharacter", function(tag:String, character:String, ?flipped:Bool) {
+			switch(tag.toLowerCase().trim()) {
+				case 'gf' | 'girlfriend' | "2":
+					if (flipped == null) flipped = PlayState.instance.gf.flipMode;
+					changeGFAuto(character, flipped);
+				case 'dad' | "opponent" | "1":
+					if (flipped == null) flipped = PlayState.instance.dad.flipMode;
+					changeDadAuto(character, flipped);
+				case 'boyfriend' | 'bf' | 'player' | "0":
+					if (flipped == null) flipped = PlayState.instance.boyfriend.flipMode;
+					changeBFAuto(character, flipped);	
+				default: 
+					var shit:Character = PlayState.instance.modchartCharacters.get(tag);
+					if (flipped == null && shit != null) flipped = shit.flipMode;
+					if(shit != null) makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
+					else luaTrace("changeCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);		
 			}
 		});
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {

@@ -45,8 +45,9 @@ class HealthIcon extends FlxSprite
 			iconOffsets[1] = (height - 150) / iSize;
 			updateHitbox();
 
-			if (hasWin) animation.add(char, [0, 1, 2], 0, false, isPlayer); // 0: Default | 1: Losing | 2: Winning
-			else animation.add(char, [0, 1], 0, false, isPlayer); // 0: Default | 1: Losing
+			var animArray:Array<Int> = [];
+			for(i in 0...3) animArray.push((i <= frames.frames.length - 1 ? i : 0)); // 0: Default | 1: Losing | 2: Winning
+			animation.add(char, animArray, 0, false, isPlayer);
 			animation.play(char);
 			this.animation.curAnim.curFrame = curAnimation;
 			this.char = char;

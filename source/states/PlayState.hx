@@ -1069,101 +1069,102 @@ class PlayState extends MusicBeatState
 			return false;
 		}
 
+		generateStaticArrows(0);
+		generateStaticArrows(1);
+		for (i in 0...playerStrums.length) {
+			setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
+			setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
+		}
+		for (i in 0...opponentStrums.length) {
+			setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
+			setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
+			//if(ClientPrefs.data.middleScroll) opponentStrums.members[i].visible = false;
+		}
+
 		seenCutscene = true;
 		inCutscene = false;
-		// var ret:Dynamic = callOnScripts('onStartCountdown', null, true);
-		// if(ret != LuaUtils.Function_Stop) {
-		if (!stopCountdown) {
-			if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
+		var ret:Dynamic = callOnScripts('onStartCountdown', null, true);
+		if(ret != LuaUtils.Function_Stop) {
+			if (!stopCountdown) {
+				if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
 
-			canPause = true;
-			generateStaticArrows(0);
-			generateStaticArrows(1);
-			for (i in 0...playerStrums.length) {
-				setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
-				setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
-			}
-			for (i in 0...opponentStrums.length) {
-				setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
-				setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
-				//if(ClientPrefs.data.middleScroll) opponentStrums.members[i].visible = false;
-			}
+				canPause = true;
 
-			callOnScripts('onStartCountdown', null, true);
-			startedCountdown = true;
-			Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
-			setOnScripts('startedCountdown', true);
-			callOnScripts('onCountdownStarted');
+				startedCountdown = true;
+				Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
+				setOnScripts('startedCountdown', true);
+				callOnScripts('onCountdownStarted');
 
-			var swagCounter:Int = 0;
-			if (startOnTime > 0) {
-				clearNotesBefore(startOnTime);
-				setSongTime(startOnTime - 350);
-				return true;
-			}
-			else if (skipCountdown)
-			{
-				setSongTime(0);
-				return true;
-			}
-			moveCameraSection();
-
-			startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
-			{
-				characterBopper(tmr.loopsLeft);
-
-				var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
-				var introImagesArray:Array<String> = switch(stageUI) {
-					case "pixel": ['pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel'];
-					case "normal": ["ready", "set" ,"go"];
-					default: ['${uiPrefix}UI/ready${uiPostfix}', '${uiPrefix}UI/set${uiPostfix}', '${uiPrefix}UI/go${uiPostfix}'];
+				var swagCounter:Int = 0;
+				if (startOnTime > 0) {
+					clearNotesBefore(startOnTime);
+					setSongTime(startOnTime - 350);
+					return true;
 				}
-				introAssets.set(stageUI, introImagesArray);
-
-				var introAlts:Array<String> = introAssets.get(stageUI);
-				var antialias:Bool = (ClientPrefs.data.antialiasing && !isPixelStage);
-				var tick:Countdown = THREE;
-
-				switch (swagCounter)
+				else if (skipCountdown)
 				{
-					case 0:
-						FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
-						tick = THREE;
-					case 1:
-						countdownReady = createCountdownSprite(introAlts[0], antialias);
-						FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
-						tick = TWO;
-					case 2:
-						countdownSet = createCountdownSprite(introAlts[1], antialias);
-						FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
-						tick = ONE;
-					case 3:
-						countdownGo = createCountdownSprite(introAlts[2], antialias);
-						FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
-						tick = GO;
-					case 4:
-						tick = START;
+					setSongTime(0);
+					return true;
 				}
+				moveCameraSection();
 
-				if(!skipArrowStartTween)
+				startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
 				{
-					notes.forEachAlive(function(note:Note) {
-						if(ClientPrefs.data.opponentStrums || note.mustPress)
-						{
-							note.copyAlpha = false;
-							note.alpha = note.multAlpha;
-							if(ClientPrefs.data.middleScroll && !note.mustPress)
-								note.alpha *= 0.35;
-						}
-					});
-				}
+					characterBopper(tmr.loopsLeft);
 
-				stagesFunc(function(stage:BaseStage) stage.countdownTick(tick, swagCounter));
-				callOnLuas('onCountdownTick', [swagCounter]);
-				callOnHScript('onCountdownTick', [tick, swagCounter]);
+					var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
+					var introImagesArray:Array<String> = switch(stageUI) {
+						case "pixel": ['pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel'];
+						case "normal": ["ready", "set" ,"go"];
+						default: ['${uiPrefix}UI/ready${uiPostfix}', '${uiPrefix}UI/set${uiPostfix}', '${uiPrefix}UI/go${uiPostfix}'];
+					}
+					introAssets.set(stageUI, introImagesArray);
 
-				swagCounter += 1;
-			}, 5);
+					var introAlts:Array<String> = introAssets.get(stageUI);
+					var antialias:Bool = (ClientPrefs.data.antialiasing && !isPixelStage);
+					var tick:Countdown = THREE;
+
+					switch (swagCounter)
+					{
+						case 0:
+							FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
+							tick = THREE;
+						case 1:
+							countdownReady = createCountdownSprite(introAlts[0], antialias);
+							FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
+							tick = TWO;
+						case 2:
+							countdownSet = createCountdownSprite(introAlts[1], antialias);
+							FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
+							tick = ONE;
+						case 3:
+							countdownGo = createCountdownSprite(introAlts[2], antialias);
+							FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
+							tick = GO;
+						case 4:
+							tick = START;
+					}
+
+					if(!skipArrowStartTween)
+					{
+						notes.forEachAlive(function(note:Note) {
+							if(ClientPrefs.data.opponentStrums || note.mustPress)
+							{
+								note.copyAlpha = false;
+								note.alpha = note.multAlpha;
+								if(ClientPrefs.data.middleScroll && !note.mustPress)
+									note.alpha *= 0.35;
+							}
+						});
+					}
+
+					stagesFunc(function(stage:BaseStage) stage.countdownTick(tick, swagCounter));
+					callOnLuas('onCountdownTick', [swagCounter]);
+					callOnHScript('onCountdownTick', [tick, swagCounter]);
+
+					swagCounter += 1;
+				}, 5);
+			}
 		}
 		return true;
 	}
@@ -4028,14 +4029,13 @@ class PlayState extends MusicBeatState
 
 	public function addStage() {
 		setStageDetails(stageData);
-		
+		addObjects(stageData);
+
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED 
 		startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
 		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
-
-		addObjects(stageData);
 	}	
 }

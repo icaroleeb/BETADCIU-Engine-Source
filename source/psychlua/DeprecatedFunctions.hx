@@ -213,5 +213,53 @@ class DeprecatedFunctions
 			Reflect.getProperty(LuaUtils.getTargetInstance(), group)[index].updateHitbox();
 			FunkinLua.luaTrace('updateHitboxFromGroup is deprecated! Use updateHitbox instead.', false, true);
 		});
+		Lua_helper.add_callback(lua,"changeBFAuto", function(?id:String="bf") {
+			FunkinLua.changeBFAuto(id);
+			FunkinLua.luaTrace('changeBFAuto is deprecated! Use changeCharacter instead.', false, true);
+		});
+		Lua_helper.add_callback(lua,"changeBoyfriendAuto", function(?id:String="bf") {
+			FunkinLua.changeBFAuto(id);
+			FunkinLua.luaTrace('changeBoyfriendAuto is deprecated! Use changeCharacter instead.', false, true);
+		});
+		Lua_helper.add_callback(lua,"changeDadAuto", function(?id:String="bf") {
+			FunkinLua.changeDadAuto(id);
+			FunkinLua.luaTrace('changeDadAuto is deprecated! Use changeCharacter instead.', false, true);
+		});
+		Lua_helper.add_callback(lua,"changeGFAuto", function(?id:String="bf") {
+			FunkinLua.changeGFAuto(id);
+			FunkinLua.luaTrace('changeGFAuto is deprecated! Use changeCharacter instead.', false, true);
+		});		
+		Lua_helper.add_callback(lua, "changeLuaCharacter", function(tag:String, character:String){
+			var shit:Character = PlayState.instance.modchartCharacters.get(tag);
+			if(shit != null) FunkinLua.makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
+			else FunkinLua.luaTrace("changeLuaCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			FunkinLua.luaTrace('changeLuaCharacter is deprecated! Use changeCharacter instead.', false, true);
+		});
+		Lua_helper.add_callback(lua, "getActorXMidpoint", function(variable:String) { // im not porting the other kade reflect stuff. im just porting this because some scripts still uses this... yeah, even with the getMidPointX available
+			var killMe:Array<String> = variable.split('.');
+			var obj:FlxSprite = LuaUtils.getObjectDirectly(killMe[0]);
+			if(killMe.length > 1) {
+				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+			if(obj != null) {
+				return obj.getMidpoint().x;
+				FunkinLua.luaTrace('getActorXMidpoint is deprecated! Use getMidPointX instead.', false, true);
+			}
+
+			return 0;
+		});
+		Lua_helper.add_callback(lua, "getActorYMidpoint", function(variable:String) { // im not porting the other kade reflect stuff. im just porting this because some scripts still uses this... yeah, even with the getMidPointY available
+			var killMe:Array<String> = variable.split('.');
+			var obj:FlxSprite = LuaUtils.getObjectDirectly(killMe[0]);
+			if(killMe.length > 1) {
+				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+			if(obj != null) {
+				return obj.getMidpoint().y;
+				FunkinLua.luaTrace('getActorYMidpoint is deprecated! Use getMidPointY instead.', false, true);
+			}
+
+			return 0;
+		});
 	}
 }

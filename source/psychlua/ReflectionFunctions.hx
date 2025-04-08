@@ -17,12 +17,14 @@ class ReflectionFunctions
 	{
 		var lua:State = funk.lua;
 		Lua_helper.add_callback(lua, "getProperty", function(variable:String, ?allowMaps:Bool = false) {
+			if (variable.startsWith("Stage.")) variable = formatOldStageVariable(variable);
 			var split:Array<String> = variable.split('.');
 			if(split.length > 1)
 				return LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowMaps);
 			return LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
 		});
 		Lua_helper.add_callback(lua, "setProperty", function(variable:String, value:Dynamic, ?allowMaps:Bool = false, ?allowInstances:Bool = false) {
+			if (variable.startsWith("Stage.")) variable = formatOldStageVariable(variable, true);
 			var split:Array<String> = variable.split('.');
 			if(split.length > 1) {
 				LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowInstances ? parseInstances(value) : value, allowMaps);
@@ -334,6 +336,34 @@ class ReflectionFunctions
 		//trace('end: $obj');
 		return funcToRun != null ? Reflect.callMethod(obj, funcToRun, args) : null;
 	}
+
+	public static function formatOldStageVariable(variable:String, ?isSetProperty:Bool=false) { // i wonder if this will work -- ya, it kinda work.
+		var game = PlayState.instance;
+		var newVariable:Dynamic = "";
+		if (isSetProperty){ // setProperty Glitches out when getting a array from this so... yeah
+			switch(variable) {
+				case "Stage.curStage": newVariable = "curStage";
+				case "Stage.hideGirlfriend": newVariable = game.stageData.hide_girlfriend;
+				default: newVariable = variable;
+			}
+		} else { // getProperty
+			switch(variable) {
+				case "Stage.curStage": newVariable = "curStage";
+				case ("Stage.gfXOffset"): newVariable = game.stageData.girlfriend[0];
+				case ("Stage.gfYOffset"): newVariable = game.stageData.girlfriend[1];
+				case ("Stage.bfXOffset"): newVariable = game.stageData.boyfriend[0];
+				case ("Stage.bfYOffset"): newVariable = game.stageData.boyfriend[1];
+				case ("Stage.dadXOffset"): newVariable = game.stageData.opponent[0];
+				case ("Stage.dadYOffset"): newVariable = game.stageData.opponent[1];
+				case "Stage.hideGirlfriend": newVariable = game.stageData.hide_girlfriend;
+				// case "Stage.boyfriendCameraOffset": newVariable = game.stageData.camera_boyfriend; 
+				// case "Stage.opponentCameraOffset": newVariable = game.stageData.camera_opponent;
+				// case "Stage.girlfriendCameraOffset": newVariable = game.stageData.camera_girlfriend;
+				default: newVariable = variable;
+			}	
+		}
+		return newVariable;
+	} 
 
 	static function checkForOldClassVars(classVar:String){ // fixes for old scripts maybe?
 		switch(classVar){
