@@ -1061,6 +1061,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public var stopCountdown = false;
+	var generatedStaticArrows = false; // added this bcuz of a bug with cutscenes
 
 	public function startCountdown()
 	{
@@ -1069,16 +1070,19 @@ class PlayState extends MusicBeatState
 			return false;
 		}
 
-		generateStaticArrows(0);
-		generateStaticArrows(1);
-		for (i in 0...playerStrums.length) {
-			setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
-			setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
-		}
-		for (i in 0...opponentStrums.length) {
-			setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
-			setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
-			//if(ClientPrefs.data.middleScroll) opponentStrums.members[i].visible = false;
+		if (!generatedStaticArrows) {
+			generateStaticArrows(0);
+			generateStaticArrows(1);
+			for (i in 0...playerStrums.length) {
+				setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
+				setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
+			}
+			for (i in 0...opponentStrums.length) {
+				setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
+				setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
+				//if(ClientPrefs.data.middleScroll) opponentStrums.members[i].visible = false;
+			}
+			generatedStaticArrows = true;
 		}
 
 		seenCutscene = true;
@@ -3322,7 +3326,10 @@ class PlayState extends MusicBeatState
 	public function spawnNoteSplash(x:Float = 0, y:Float = 0, ?data:Int = 0, ?note:Note, ?strum:StrumNote) {
 		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
 		splash.babyArrow = strum;
-		splash.spawnSplashNote(x, y, data, note);
+		if (strum.texture != splash.texture && strum.isLegacyNoteSkin) {
+			splash.loadSplash(strum.texture);
+			splash.spawnSplashNote(x, y, data, note);
+		} else splash.spawnSplashNote(x, y, data, note);
 		grpNoteSplashes.add(splash);
 	}
 

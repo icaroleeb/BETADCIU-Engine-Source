@@ -351,7 +351,8 @@ class Note extends FlxSprite
 		}
 		return globalRgbShaders[noteData];
 	}
-
+	public var isLegacyNoteSkin:Bool = false;
+	var daRGBShader:Bool = true;
 	var _lastNoteOffX:Float = 0;
 	static var _lastValidChecked:String; //optimization
 	public var originalHeight:Float = 6;
@@ -395,13 +396,19 @@ class Note extends FlxSprite
 		}
 		else skinPostfix = '';
 
+		isLegacyNoteSkin = false;
 		if (Paths.fileExists('images/notes/' + skin + '.png', IMAGE)) { // more compatibility with legacy stuff
 			// trace('using legacy note skin');
 			var oldpath:String = skin;
 			skin = "notes/" + oldpath; 
-		}
+			isLegacyNoteSkin = true;
+			rgbShader.enabled = false; // same thing said on StrumNote.hx
+		} else isLegacyNoteSkin = false;
 
-		if (!skin.endsWith('normal') && !skin.endsWith('NOTE_assets') && !skin.endsWith('NOTE_assets-chip') && !skin.endsWith('NOTE_assets-future') && !isCustomNoteSkin) rgbShader.enabled = false;
+		if (!isLegacyNoteSkin){
+			daRGBShader = rgbShader.enabled; // if its not a legacy skin, return to the last value you used after applying a non legacy noteSkin... in theory...
+			rgbShader.enabled = daRGBShader;
+		}
 
 		if(PlayState.isPixelStage) {
 			if(isSustainNote) {

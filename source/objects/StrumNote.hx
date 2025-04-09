@@ -25,12 +25,16 @@ class StrumNote extends FlxSprite
 	}
 
 	public var useRGBShader:Bool = true;
+	var daRGBShader:Bool = true;
 	public function new(x:Float, y:Float, leData:Int, player:Int) {
 		animation = new PsychAnimationController(this);
 
 		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
 		rgbShader.enabled = false;
-		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) useRGBShader = false;
+		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) {
+			useRGBShader = false;
+			daRGBShader = false;
+		}
 		
 		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[leData];
 		if(PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixel[leData];
@@ -72,28 +76,29 @@ class StrumNote extends FlxSprite
 		scrollFactor.set();
 		playAnim('static');
 	}
-
+	public var isLegacyNoteSkin:Bool = false;
 	public function reloadNote()
 	{
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
 
-		var notePath:String = texture;
+		isLegacyNoteSkin = false;
 
+		if (texture == 'normal') texture = "noteSkins/NOTE_assets";
 		if (Paths.fileExists('images/notes/' + texture + '.png', IMAGE)) { // more compatibility with legacy stuff
 			// trace('legacy note texture detected!');
 			var tex:String = texture;
 			texture = "notes/" + tex;
-			notePath = "notes/" + tex;
-		}
+			isLegacyNoteSkin = true;
+			rgbShader.enabled = false; // using this here because all of the noteskins on the "noteSkins/" path is on the new format already?
+			useRGBShader = false;
+		} else isLegacyNoteSkin = false;
 
-		var isCustomNoteSkin:Bool = false;
-		var CustomNoteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
-		for (i in 0...CustomNoteSkins.length) {
-			if (CustomNoteSkins[i] == texture) isCustomNoteSkin = true;
+		if (!isLegacyNoteSkin){
+			rgbShader.enabled = daRGBShader;
+			useRGBShader = daRGBShader;
+			daRGBShader = useRGBShader; // if its not a legacy skin, return to the last value you used after applying a non legacy noteSkin... in theory...
 		}
-
-		if (!notePath.endsWith('normal') && !notePath.endsWith('NOTE_assets') && !notePath.endsWith('NOTE_assets-chip') && !notePath.endsWith('NOTE_assets-future') && !isCustomNoteSkin) useRGBShader = false;
 
 		if(PlayState.isPixelStage)
 		{

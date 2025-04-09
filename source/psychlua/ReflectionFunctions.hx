@@ -49,7 +49,7 @@ class ReflectionFunctions
 			var originalVar:String = variable;
 
 			if (variable.startsWith("Stage.")){
-				variable = formatOldStageVariable(variable, true);
+				variable = formatOldStageVariable(variable);
 			}
 
 			if (offsets.exists(originalVar)){
@@ -368,31 +368,24 @@ class ReflectionFunctions
 		return funcToRun != null ? Reflect.callMethod(obj, funcToRun, args) : null;
 	}
 
-	public static function formatOldStageVariable(variable:String, ?isSetProperty:Bool=false) { // i wonder if this will work -- ya, it kinda work.
+	public static function formatOldStageVariable(variable:String) { // i wonder if this will work -- ya, it kinda work.
 		var game = PlayState.instance;
 		var newVariable:Dynamic = "";
-		if (isSetProperty){ // setProperty Glitches out when getting a array from this so... yeah
-			switch(variable) {
-				case "Stage.curStage": newVariable = "curStage";
-				case "Stage.hideGirlfriend": newVariable = "stageData.hide_girlfriend";
-				default: newVariable = variable;
-			}
-		} else { // getProperty
-			switch(variable) {
-				case "Stage.curStage": newVariable = "curStage";
-				case ("Stage.gfXOffset"): newVariable = "GF_X";
-				case ("Stage.gfYOffset"): newVariable = "GF_Y";
-				case ("Stage.bfXOffset"): newVariable = "BF_X";
-				case ("Stage.bfYOffset"): newVariable = "BF_Y";
-				case ("Stage.dadXOffset"): newVariable = "DAD_X";
-				case ("Stage.dadYOffset"): newVariable = "DAD_Y";
-				case "Stage.hideGirlfriend": newVariable = "stageData.hide_girlfriend";
-				// case "Stage.boyfriendCameraOffset": newVariable = game.stageData.camera_boyfriend; 
-				// case "Stage.opponentCameraOffset": newVariable = game.stageData.camera_opponent;
-				// case "Stage.girlfriendCameraOffset": newVariable = game.stageData.camera_girlfriend;
-				default: newVariable = variable;
-			}	
+		switch(variable) {
+			case "Stage.curStage": newVariable = "curStage";
+			case ("Stage.gfXOffset"): newVariable = "GF_X";
+			case ("Stage.gfYOffset"): newVariable = "GF_Y";
+			case ("Stage.bfXOffset"): newVariable = "BF_X";
+			case ("Stage.bfYOffset"): newVariable = "BF_Y";
+			case ("Stage.dadXOffset"): newVariable = "DAD_X";
+			case ("Stage.dadYOffset"): newVariable = "DAD_Y";
+			case "Stage.hideGirlfriend": newVariable = "stageData.hide_girlfriend";
+			// case "Stage.boyfriendCameraOffset": newVariable = game.stageData.camera_boyfriend; 
+			// case "Stage.opponentCameraOffset": newVariable = game.stageData.camera_opponent;
+			// case "Stage.girlfriendCameraOffset": newVariable = game.stageData.camera_girlfriend;
+			default: newVariable = variable;
 		}
+
 		return newVariable;
 	} 
 

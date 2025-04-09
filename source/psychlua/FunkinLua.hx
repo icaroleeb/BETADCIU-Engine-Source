@@ -1129,6 +1129,27 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
 			makeLuaCharacter(tag, character, isPlayer, flipped);
 		});
+		Lua_helper.add_callback(lua, "flipCharacterAnim", function(character:String) {
+			switch(character.toLowerCase()) {
+				case 'dad':
+					PlayState.instance.dad.flipAnims();
+				case 'gf' | 'girlfriend':
+					PlayState.instance.gf.flipAnims();
+				default:
+					if(PlayState.instance.modchartCharacters.exists(character)) {
+						var spr:Character = PlayState.instance.modchartCharacters.get(character);
+						spr.flipAnims();
+						return;
+					}
+					PlayState.instance.boyfriend.flipAnims();
+			}
+		});
+		Lua_helper.add_callback(lua, "changeStage", function(id:String) {
+			PlayState.instance.removeStage(); // Remove current stage
+			PlayState.instance.curStage = id; // Set new stage name
+			PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
+			PlayState.instance.addStage();
+	});
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
 			makeIcon(tag, character, player);
 		});

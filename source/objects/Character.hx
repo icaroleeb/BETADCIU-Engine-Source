@@ -273,19 +273,22 @@ class Character extends FlxSprite
 				if(swagOffsets != null && anim.offsets.length > 1) addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 				else addOffset(anim.anim, 0, 0);
 
-				if(playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(anim.anim, playerOffsets[0], playerOffsets[1]);
+				if(itHasPlayerOfs && playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(anim.anim, playerOffsets[0], playerOffsets[1]);
+				else addPlayerOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 			}
 
 			if (isPlayer) {
 				flipX = !flipX;
 				// Doesn't flip for BF, since his are already in the right place???
 				if (!missingCharacter)
-					if (!curCharacter.startsWith('bf') && !isPsychPlayer) flipAnims();
+					if (!predictCharacterIsPlayer(curCharacter) && !isPsychPlayer) flipAnims();
 			}
 	
-			if (!isPlayer || curCharacter.toLowerCase().endsWith('-playable')) { // flip for bf and psych's "-playable" chars
+			if (!isPlayer) { // flip for bf
 				if (curCharacter.startsWith('bf') || isPsychPlayer || missingCharacter) flipAnims();
 			}	
+
+			if (isPlayer && !curCharacter.startsWith('bf') && !itHasPlayerOfs) flipAnims(); // fuck it.
 		}
 		#if flxanimate
 		if(isAnimateAtlas) copyAtlasValues();
@@ -549,6 +552,13 @@ class Character extends FlxSprite
 				}
 			}
 		}
+	}
+
+	inline function predictCharacterIsPlayer(name:String) { // if i remove this later, is because people didn't liked it. -Ryiuu
+		if (name.startsWith('bf') || name.startsWith('bf-') || name.endsWith('-player') || name.endsWith('-playable'))
+			return true;
+		else 
+			return false;
 	}
 
 

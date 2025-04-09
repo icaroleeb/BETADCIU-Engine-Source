@@ -56,7 +56,8 @@ class NoteSplash extends FlxSprite
 
 		loadSplash(splash);
 	}
-
+	public var isLegacyNoteSkin:Bool = false;
+	var daRGBShader:Bool = true;
 	public var maxAnims(default, set):Int = 0;
 	public function loadSplash(?splash:String)
 	{
@@ -70,7 +71,19 @@ class NoteSplash extends FlxSprite
 		}
 
 		texture = splash;
+		if (Paths.fileExists('images/notes/noteSplashes-$texture.png', IMAGE)) { // more compatibility with legacy stuff
+			trace('using legacy noteSplash skin');
+			var oldpath:String = texture;
+			// texture = "notes/noteSplashes-" + oldpath; // commented because is not working
+			// isLegacyNoteSkin = true;
+			// rgbShader.enabled = false; // same thing said on StrumNote.hx
+		} else isLegacyNoteSkin = false;
+		if (!isLegacyNoteSkin){
+			daRGBShader = rgbShader.enabled; // if its not a legacy skin, return to the last value you used after applying a non legacy noteSkin... in theory...
+			rgbShader.enabled = daRGBShader;
+		}
 		frames = Paths.getSparrowAtlas(texture);
+		// trace(texture);
 		if (frames == null)
 		{
 			texture = defaultNoteSplash + getSplashSkinPostfix();
@@ -201,7 +214,7 @@ class NoteSplash extends FlxSprite
 			if (note != null && note.noteSplashData.texture != null) loadedTexture = note.noteSplashData.texture;
 			else if (PlayState.SONG != null && PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) loadedTexture = PlayState.SONG.splashSkin;
 
-			if (texture != loadedTexture) loadSplash(loadedTexture);
+			// if (texture != loadedTexture && !isLegacyNoteSkin) loadSplash(loadedTexture); // not working :(
 		}
 
 		setPosition(x, y);
