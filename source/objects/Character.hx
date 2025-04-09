@@ -201,6 +201,7 @@ class Character extends OffsettableSprite
 
 		imageFile = json.image;
 		jsonScale = json.scale;
+		if (json.scale < 0) jsonScale = 1; // context: https://prnt.sc/4ulDTwEzHh20
 		if(json.scale != 1) {
 			scale.set(jsonScale, jsonScale);
 			updateHitbox();
