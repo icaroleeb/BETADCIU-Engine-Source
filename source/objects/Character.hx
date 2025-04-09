@@ -42,15 +42,13 @@ typedef AnimArray = {
 	var playerOffsets:Array<Int>;
 }
 
-class Character extends FlxSprite
+class Character extends OffsettableSprite
 {
 	/**
 	 * In case a character is missing, it will use this on its place
 	**/
 	public static final DEFAULT_CHARACTER:String = 'bf';
 
-	public var animPlayerOffsets:Map<String, Array<Dynamic>>; //for saving as jsons lol
-	public var animOffsets:Map<String, Array<Dynamic>>;
 	public var debugMode:Bool = false;
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
@@ -514,16 +512,6 @@ class Character extends FlxSprite
 			danceEveryNumBeats = Math.round(Math.max(calc, 1));
 		}
 		settingCharacterUp = false;
-	}
-
-	public function addOffset(name:String, x:Float = 0, y:Float = 0)
-	{
-		animOffsets[name] = [x, y];
-	}
-
-	public function addPlayerOffset(name:String, x:Float = 0, y:Float = 0)
-	{
-		animPlayerOffsets[name] = [x, y];
 	}
 
 	public function quickAnimAdd(name:String, anim:String)

@@ -5,7 +5,12 @@ import backend.animation.PsychAnimationController;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 
-class StrumNote extends FlxSprite
+import haxe.Json;
+import haxe.format.JsonParser;
+
+using StringTools;
+
+class StrumNote extends OffsettableSprite
 {
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
@@ -14,6 +19,12 @@ class StrumNote extends FlxSprite
 	public var downScroll:Bool = false;
 	public var sustainReduce:Bool = true;
 	private var player:Int;
+
+	// Weekend Note Implementation
+	public var separateSheets:Bool = false;
+
+	// I don't like using isPixelStage;
+	public var isPixel:Bool = false;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -76,28 +87,55 @@ class StrumNote extends FlxSprite
 		scrollFactor.set();
 		playAnim('static');
 	}
+
 	public var isLegacyNoteSkin:Bool = false;
+
 	public function reloadNote()
 	{
+		separateSheets = false;
+		isLegacyNoteSkin = false;
+		animOffsets.clear();
+		
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
 
-		isLegacyNoteSkin = false;
+		var notePath:String = texture;
+		if (notePath == 'normal') notePath = "noteSkins/NOTE_assets";
 
-		if (texture == 'normal') texture = "noteSkins/NOTE_assets";
-		if (Paths.fileExists('images/notes/' + texture + '.png', IMAGE)) { // more compatibility with legacy stuff
-			// trace('legacy note texture detected!');
-			var tex:String = texture;
-			texture = "notes/" + tex;
-			isLegacyNoteSkin = true;
-			rgbShader.enabled = false; // using this here because all of the noteskins on the "noteSkins/" path is on the new format already?
-			useRGBShader = false;
-		} else isLegacyNoteSkin = false;
+		var curNotePath = notePath;
 
-		if (!isLegacyNoteSkin){
-			rgbShader.enabled = daRGBShader;
-			useRGBShader = daRGBShader;
-			daRGBShader = useRGBShader; // if its not a legacy skin, return to the last value you used after applying a non legacy noteSkin... in theory...
+		for (noteDirectory in ["noteSkins/", "notes/"]) {
+			final fullPath = '$noteDirectory$notePath';
+			final strumlinePath = '$fullPath/notes_strumline';
+			var jsonPath = fullPath;
+		
+			if (Paths.fileExists('images/$strumlinePath.png', IMAGE)) {
+				separateSheets = true;
+				jsonPath = '$noteDirectory$notePath/$notePath';
+				notePath = strumlinePath;
+			} else if (Paths.fileExists('images/$fullPath.png', IMAGE)) {
+				notePath = fullPath;
+			}
+
+			if (Paths.fileExists('images/$jsonPath.json', TEXT)) {
+				final json = Note.getNoteFile('images/$jsonPath');
+				if (json.strumAnimations != null) {
+					for (anim in json.strumAnimations) {
+						addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+					}
+				}
+			}
+		
+			if (curNotePath != notePath) {
+				isLegacyNoteSkin = (noteDirectory == "notes/");
+				break;
+			}
+		}
+
+		var isCustomNoteSkin:Bool = false;
+		var CustomNoteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
+		for (i in 0...CustomNoteSkins.length) {
+			if (CustomNoteSkins[i] == texture) isCustomNoteSkin = true;
 		}
 
 		if(PlayState.isPixelStage)
@@ -136,36 +174,14 @@ class StrumNote extends FlxSprite
 		}
 		else
 		{
-			frames = Paths.getSparrowAtlas(texture);
-			animation.addByPrefix('green', 'arrowUP');
-			animation.addByPrefix('blue', 'arrowDOWN');
-			animation.addByPrefix('purple', 'arrowLEFT');
-			animation.addByPrefix('red', 'arrowRIGHT');
-
-			antialiasing = ClientPrefs.data.antialiasing;
-			setGraphicSize(Std.int(width * 0.7));
-
-			switch (Math.abs(noteData) % 4)
-			{
-				case 0:
-					animation.addByPrefix('static', 'arrowLEFT');
-					animation.addByPrefix('pressed', 'left press', 24, false);
-					animation.addByPrefix('confirm', 'left confirm', 24, false);
-				case 1:
-					animation.addByPrefix('static', 'arrowDOWN');
-					animation.addByPrefix('pressed', 'down press', 24, false);
-					animation.addByPrefix('confirm', 'down confirm', 24, false);
-				case 2:
-					animation.addByPrefix('static', 'arrowUP');
-					animation.addByPrefix('pressed', 'up press', 24, false);
-					animation.addByPrefix('confirm', 'up confirm', 24, false);
-				case 3:
-					animation.addByPrefix('static', 'arrowRIGHT');
-					animation.addByPrefix('pressed', 'right press', 24, false);
-					animation.addByPrefix('confirm', 'right confirm', 24, false);
-			}
+			frames = Paths.getSparrowAtlas(notePath);
+			loadNoteAnims();
 		}
 		updateHitbox();
+
+		if (frames == null){ // Set to default if no frames found so it doesn't crash
+			texture = Note.defaultNoteSkin;
+		} 
 
 		if(lastAnim != null)
 		{
@@ -198,6 +214,49 @@ class StrumNote extends FlxSprite
 			centerOffsets();
 			centerOrigin();
 		}
+
+		if (separateSheets && !isPixel){
+			offset.x += 32;
+			offset.y += 20;
+		}
+
+		var daOffsets = getAnimOffset(anim);
+		
+		offset.x += daOffsets[0];
+		offset.y += daOffsets[1];
+		
 		if(useRGBShader) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
+	}
+
+	public function loadNoteAnims(isPixel:Bool = false){
+		if (isPixel){
+
+		}else{
+			if (separateSheets){
+				var dirArr:Array<String> = ["Left", "Down", "Up", "Right"];
+
+				animation.addByPrefix("static", "static" + dirArr[noteData]);
+				animation.addByPrefix("pressed", "press" + dirArr[noteData], 24, false);
+				animation.addByPrefix("confirm", "confirm" + dirArr[noteData], 24, false);
+			} else{
+				var colors:Array<String> = ['green', 'blue', 'purple', 'red'];
+				var arrows:Array<String> = ['arrowUP', 'arrowDOWN', 'arrowLEFT', 'arrowRIGHT'];
+
+				for (i in 0...colors.length) {
+					animation.addByPrefix(colors[i], arrows[i]);
+				}
+
+				var directions:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
+				var index:Int = Std.int(Math.abs(noteData) % 4);
+
+				animation.addByPrefix('static', 'arrow' + directions[index]);
+				animation.addByPrefix('pressed', directions[index].toLowerCase() + ' press', 24, false);
+				animation.addByPrefix('confirm', directions[index].toLowerCase() + ' confirm', 24, false);
+			}	
+
+			antialiasing = ClientPrefs.data.antialiasing;
+			setGraphicSize(Std.int(width * 0.7));
+
+		}
 	}
 }
