@@ -476,9 +476,7 @@ class Note extends FlxSprite
 			}
 		}
 
-		if (frames == null){ // Set to default if no frames found so it doesn't crash
-			texture = Note.defaultNoteSkin;
-		} 
+		
 
 		if(isSustainNote) {
 			scale.y = lastScaleY;
@@ -508,6 +506,10 @@ class Note extends FlxSprite
 			}
 		}else{
 			frames = Paths.getSparrowAtlas(skin);
+
+			if (frames == null){ // Set to default if no frames found so it doesn't crash
+				texture = Note.defaultNoteSkin;
+			} 
 		}
 	}
 
@@ -555,6 +557,11 @@ class Note extends FlxSprite
 
 	function attemptToAddAnimationByPrefix(name:String, prefix:String, framerate:Float = 24, doLoop:Bool = true)
 	{
+		if (frames == null) {
+			// trace('Warning: Frames are null. Cannot add animation "$name" with prefix "$prefix".');
+			return;
+		}
+		
 		var animFrames = [];
 		@:privateAccess
 		animation.findByPrefix(animFrames, prefix); // adds valid frames to animFrames

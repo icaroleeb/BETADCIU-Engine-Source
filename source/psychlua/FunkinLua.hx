@@ -1108,7 +1108,7 @@ class FunkinLua {
 					GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), mySprite);
 			}
 		});
-		Lua_helper.add_callback(lua, "changeCharacter", function(tag:String, character:String, ?flipped:Bool) {
+		Lua_helper.add_callback(lua, "changeCharacter", function(tag:String, character:String, ?flipped:Bool = false) {
 			switch(tag.toLowerCase().trim()) {
 				case 'gf' | 'girlfriend' | "2":
 					if (flipped == null) flipped = PlayState.instance.gf.flipMode;
@@ -2172,7 +2172,7 @@ class FunkinLua {
 		PlayState.instance.remove(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend.destroy();
 		PlayState.instance.boyfriend = new Character(0, 0, id, !flipped);
-		PlayState.instance.boyfriend.flipMode = !flipped;
+		PlayState.instance.boyfriend.flipMode = flipped;
 
 		var isFlipped = PlayState.instance.boyfriend.flipMode;
 		var charX:Float = 0;
@@ -2228,7 +2228,7 @@ class FunkinLua {
 		PlayState.instance.remove(PlayState.instance.dad);
 		PlayState.instance.dad.destroy();
 		PlayState.instance.dad = new Character(0, 0, id, flipped);
-		PlayState.instance.dad.flipMode = !flipped;
+		PlayState.instance.dad.flipMode = flipped;
 
 		var isFlipped = PlayState.instance.dad.flipMode;
 		var charX:Float = 0;

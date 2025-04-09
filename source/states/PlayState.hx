@@ -2338,11 +2338,11 @@ class PlayState extends MusicBeatState
 				var charType:Int = 0;
 				switch(value1.toLowerCase().trim()) {
 					case 'gf' | 'girlfriend' | "2":
-						FunkinLua.changeGFAuto(value2);
+						FunkinLua.changeGFAuto(value2, gf.flipMode);
 					case 'dad' | "opponent" | "1":
-						FunkinLua.changeDadAuto(value2);
+						FunkinLua.changeDadAuto(value2, dad.flipMode);
 					case 'boyfriend' | 'bf' | "0":
-						FunkinLua.changeBFAuto(value2);
+						FunkinLua.changeBFAuto(value2, boyfriend.flipMode);
 					default: // lua chars
 					{
 						var char = modchartCharacters.get(value1);	

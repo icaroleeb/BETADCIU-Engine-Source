@@ -29,6 +29,8 @@ class Paths
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT = "mp4";
 
+	private static var _previousErrorMessage:String = ""; // No more spammed errors
+
 	public static function excludeAsset(key:String) {
 		if (!dumpExclusions.contains(key))
 			dumpExclusions.push(key);
@@ -249,11 +251,14 @@ class Paths
 			else #end if (OpenFlAssets.exists(file, IMAGE))
 				bitmap = OpenFlAssets.getBitmapData(file);
 
-			if (bitmap == null)
-			{
-				trace('Bitmap not found: $file | key: $key');
-				return null;
-			}
+			if (bitmap == null) {
+                var errorMessage:String = 'Bitmap not found: $file | key: $key';
+                if (errorMessage != _previousErrorMessage) {
+                    trace(errorMessage);
+                    _previousErrorMessage = errorMessage;
+                }
+                return null;
+            }
 		}
 
 		if (allowGPU && ClientPrefs.data.cacheOnGPU && bitmap.image != null)
@@ -437,8 +442,12 @@ class Paths
 			#end
 			else if(beepOnNull)
 			{
-				trace('SOUND NOT FOUND: $key, PATH: $path');
-				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
+				var errorMessage:String = 'SOUND NOT FOUND: $key, PATH: $path';
+				if (errorMessage != _previousErrorMessage) {
+					trace(errorMessage);
+					FlxG.log.error(errorMessage);
+					_previousErrorMessage = errorMessage;
+				}
 				return FlxAssets.getSound('flixel/sounds/beep');
 			}
 		}
