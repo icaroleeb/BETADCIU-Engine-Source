@@ -1453,15 +1453,36 @@ class PlayState extends MusicBeatState
 		}
 		catch(e:Dynamic) {}
 
+		var stuff:Array<String> = [];
+
+		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"))){
+			stuff = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"));
+		}
+
 		var oldNote:Note = null;
 		var sectionsData:Array<SwagSection> = PlayState.SONG.notes;
 		var ghostNotesCaught:Int = 0;
 		var daBpm:Float = Conductor.bpm;
 	
+		var opponentSectionNoteStyle:String = "";
+		var playerSectionNoteStyle:String = "";	
+		var daSection:Int = 0;
+
 		for (section in sectionsData)
 		{
 			if (section.changeBPM != null && section.changeBPM && section.bpm != null && daBpm != section.bpm)
 				daBpm = section.bpm;
+
+			if (stuff != []) {
+				for (i in 0...stuff.length){
+					var data:Array<String> = stuff[i].split(' ');
+					// notesToLoad.push(data[1]); // not implemented yet
+					if (data[1] == 'normal') data[1] = "noteSkins/NOTE_assets";
+					if (daSection == Std.parseInt(data[0])){
+						(data[2] == 'dad' ? opponentSectionNoteStyle = data[1] : playerSectionNoteStyle = data[1]);
+					}
+				}
+			}	
 
 			for (i in 0...section.sectionNotes.length)
 			{
@@ -1493,7 +1514,7 @@ class PlayState extends MusicBeatState
 						}
 					}
 				}
-
+				var daNoteTex:String = 'noteSkins/NOTE_assets'; // default note in case the game can't find the note on the txt
 				var swagNote:Note = new Note(spawnTime, noteColumn, oldNote);
 				var isAlt: Bool = section.altAnim && !gottaHitNote;
 				swagNote.gfNote = (section.gfSection && gottaHitNote == section.mustHitSection);
@@ -1502,6 +1523,9 @@ class PlayState extends MusicBeatState
 				swagNote.sustainLength = holdLength;
 				swagNote.dType = section.dType;
 				swagNote.noteType = noteType;
+				if (gottaHitNote && playerSectionNoteStyle != "") swagNote.texture = playerSectionNoteStyle;
+				else if (!gottaHitNote && opponentSectionNoteStyle != "") swagNote.texture = opponentSectionNoteStyle;
+				if (!swagNote.isLegacyNoteSkin) swagNote.rgbShader.enabled = true;
 	
 				swagNote.scrollFactor.set();
 				unspawnNotes.push(swagNote);
@@ -1522,6 +1546,9 @@ class PlayState extends MusicBeatState
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.scrollFactor.set();
 						sustainNote.parent = swagNote;
+						if (gottaHitNote && playerSectionNoteStyle != "") sustainNote.texture = playerSectionNoteStyle;
+						else if (!gottaHitNote && opponentSectionNoteStyle != "") sustainNote.texture = opponentSectionNoteStyle;
+						if (!sustainNote.isLegacyNoteSkin) sustainNote.rgbShader.enabled = true;
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
@@ -1571,6 +1598,7 @@ class PlayState extends MusicBeatState
 
 				oldNote = swagNote;
 			}
+			daSection += 1;
 		}
 		trace('["${SONG.song.toUpperCase()}" CHART INFO]: Ghost Notes Cleared: $ghostNotesCaught');
 		for (event in songData.events) //Event Notes
@@ -1609,11 +1637,13 @@ class PlayState extends MusicBeatState
 				}
 
 				var newCharacter:String = event.value2;
-				addCharacterToList(newCharacter, charType);
+				// addCharacterToList(newCharacter, charType);
+				charactersToLoad.push(newCharacter);
 
 			case 'Play Sound':
 				Paths.sound(event.value1); //Precache sound
 			case "Change Stage":
+				stagesToLoad.push(event.value1); // stage preloading
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
 	}
@@ -2724,6 +2754,9 @@ class PlayState extends MusicBeatState
 			uiFolder = uiPrefix + "UI/";
 			antialias = !isPixelStage;
 		}
+
+		if (stageData.ratingSkin != null) uiFolder = stageData.ratingSkin[0];
+		if (stageData.ratingSkin != null && stageData.ratingSkin[1] != "") uiPostfix = stageData.ratingSkin[1];
 
 		rating.loadGraphic(Paths.image(uiFolder + daRating.image + uiPostfix));
 		rating.screenCenter();
@@ -3916,27 +3949,60 @@ class PlayState extends MusicBeatState
 		return false;
 	}
 
-	function preload() {
-		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"))) // i mean, a bit of preloading doesn't sound bad
-		{
+	public var stagesToLoad:Array<String> = [];
+	public var charactersToLoad:Array<String> = [];
+
+	function preload() { // certainly changing this later
+		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"))) {
 			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"));
-			var sprites:Array<FlxSprite> = [];
-
-			for (i in 0...characters.length) {
-				var preloadChar = new Character(0, 0, characters[i]);
-				preloadChar.alpha = 0.0001;
-				//startCharacterLua(preloadChar.curCharacter); // not implemented yet
-				add(preloadChar);
-				sprites.push(preloadChar);
-				preloadChar.destroyAtlas();
-				// trace('Character Loaded: ' + characters[i] + '!');
+				for (i in 0...characters.length) {
+				var data:Array<String> = characters[i].split(' ');
+				charactersToLoad.push(characters[i]);
 			}
-
-			new FlxTimer().start(0.1, function(_) { // adding this timer so the game can actually render the assets before removing it
-				for(sprite in sprites)
-					remove(sprite);
-			});
 		}
+
+		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload-stage"))) {
+			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload-stage"));
+			for (i in 0...stages.length) {
+				var data:Array<String> = stages[i].split(' ');
+				stagesToLoad.push(stages[i]);
+			}
+		}
+
+		var sprites:Array<FlxSprite> = [];
+
+		for(character in charactersToLoad){
+			var preloadChar = new Character(0, 0, character);
+			preloadChar.alpha = 0.0001;
+			//startCharacterLua(preloadChar.curCharacter); // not implemented yet
+			add(preloadChar);
+			sprites.push(preloadChar);
+			preloadChar.destroyAtlas();
+			trace('Character Loaded: $character!');
+		}
+
+		var ogStage:String =  "";
+		if (curStage != null) ogStage = curStage;
+		for (stage in 0...stagesToLoad.length) {
+			if (stagesToLoad.length > 0) {
+				removeStage();
+				curStage = stagesToLoad[stage];
+				stageData = StageData.getStageFile(curStage); 
+				addStage(true);
+				trace('Stage Loaded: ' + stagesToLoad[stage] + '!');
+			}
+		}
+		removeStage();
+		curStage = ogStage;
+		stageData = StageData.getStageFile(curStage); 
+		addStage(true);
+		trace('Stage Preloading Finished.');
+
+		new FlxTimer().start(0.1, function(_) { // adding this timer so the game can actually render the assets before removing it
+			for(sprite in sprites)
+				remove(sprite);
+		});
+
 	}
 
 	public function setStageDetails(stageData:StageFile){
@@ -4035,7 +4101,7 @@ class PlayState extends MusicBeatState
 		}
 	}	
 
-	public function addStage() {
+	public function addStage(?onlyLuas:Bool=false) {
 		setStageDetails(stageData);
 		addObjects(stageData);
 
@@ -4043,7 +4109,7 @@ class PlayState extends MusicBeatState
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED 
 		startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
-		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
+		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 	}	
 }
