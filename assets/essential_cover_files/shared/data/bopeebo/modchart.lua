@@ -1,5 +1,5 @@
 
-function start(song) 
+function onCreate() 
 
 end
 
@@ -17,7 +17,7 @@ function update(elapsed)
 
 end
 
-function beatHit(beat) 
+function onBeatHit() 
 
 	if curBeat % 8 == 7 then
 		characterPlayAnim('boyfriend', 'hey', true)
@@ -29,6 +29,6 @@ function beatHit(beat)
 
 end
 
-function stepHit(step) 
+function onStepHit() 
 
 end

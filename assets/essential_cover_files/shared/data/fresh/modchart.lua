@@ -1,12 +1,12 @@
 
-function start(song) 
+function onCreate() 
 
 end
 
 local camX = 0
 local camY = 0
 
-function update(elapsed) 
+function onUpdate(elapsed) 
 	local currentBeat = (songPos / 1000)*(bpm/60)
 
 	local camX = getCameraX()
@@ -17,8 +17,7 @@ function update(elapsed)
 
 end
 
-function beatHit(beat) 
-
+function onBeatHit() 
 	if curBeat == 48 or curBeat == 112 then
 		setProperty('gfSpeed', 1)
 	end
@@ -32,6 +31,6 @@ function beatHit(beat)
 	end
 end
 
-function stepHit(step) 
+function stepHit() 
 
 end

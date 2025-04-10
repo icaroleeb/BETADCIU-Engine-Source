@@ -1,8 +1,8 @@
-function start(song) -- do nothing
+function onCreate() -- do nothing
     
 end
 
-function update(elapsed)
+function onUpdate(elapsed)
     if difficulty == 2 and curStep > 400 then
         local currentBeat = (songPos / 1000)*(bpm/60)
 		for i=0,7 do
@@ -12,8 +12,15 @@ function update(elapsed)
     end
 end
 
-function beatHit(beat) -- do nothing
+function onMoveCamera(tag)
+    if tag == "dad" then
+        doTweenZoom("GFZoom", "camGame", 1.3,(crochet * 4) / 1000)
+    elseif tag == "boyfriend" then
+        doTweenZoom("GFZoom", "camGame", 1,(crochet * 4) / 1000)
+    end
+end
 
+function onBeatHit() -- do nothing
     if curBeat % 16 == 15 and curBeat > 16 and curBeat < 48 then
         playActorAnimation('boyfriend', 'hey', true, false)
         playActorAnimation('dad', 'cheer', true, false)
@@ -21,14 +28,6 @@ function beatHit(beat) -- do nothing
 
 end
 
-function stepHit(step) -- do nothing
+function onStepHit() -- do nothing
 
-end
-
-function playerTwoTurn()
-    tweenCameraZoom(1.3,(crochet * 4) / 1000)
-end
-
-function playerOneTurn()
-    tweenCameraZoom(1,(crochet * 4) / 1000)
 end

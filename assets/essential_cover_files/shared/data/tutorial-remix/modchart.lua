@@ -1,4 +1,4 @@
-function start (song)
+function onCreate()
    
 end
 
@@ -10,15 +10,14 @@ local defaultWindowY = 0
 
 local lastStep = 0
 
-function update (elapsed)
+function onUpdate(elapsed)
     local currentBeat = (songPos / 1000)*(bpm/60)
 
 end
 
-function beatHit (beat)
-
+function onBeatHit()
     if curBeat % 16 == 15 and curBeat > 16 and curBeat < 64 then
-        stopIdle('dad', true)
+        setProperty('dad.stopIdle', true)
         playActorAnimation('dad', 'cheer', true, false)
     end
 
@@ -66,6 +65,6 @@ function beatHit (beat)
 
 end
 
-function stepHit (step)
+function onStepHit()
 
 end
