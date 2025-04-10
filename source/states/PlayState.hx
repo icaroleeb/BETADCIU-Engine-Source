@@ -2015,12 +2015,13 @@ class PlayState extends MusicBeatState
 				
 				if(ClientPrefs.data.ogIconBop){
 					var mult:Float = FlxMath.lerp((scale-0.2), icon.scale.x, CoolUtil.boundTo((scale-0.2) - (elapsed * 9 * playbackRate), 0, 1));
+					icon.scale.set(mult, mult);
+					icon.updateHitbox();
 				}else{
 					var mult:Float = FlxMath.lerp((scale-0.2), icon.scale.x, Math.exp(-elapsed * 9 * playbackRate));
+					icon.scale.set(mult, mult);
+					icon.updateHitbox();
 				}
-
-				icon.scale.set(mult, mult);
-				icon.updateHitbox();
 			}
 		}
 	}
