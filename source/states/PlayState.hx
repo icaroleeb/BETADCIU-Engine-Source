@@ -2013,7 +2013,12 @@ class PlayState extends MusicBeatState
 				var icon:HealthIcon = iconScaleShit[i][0];
 				var scale:Float = iconScaleShit[i][1];
 				
-				var mult:Float = FlxMath.lerp((scale-0.2), icon.scale.x, Math.exp(-elapsed * 9 * playbackRate));
+				if(ClientPrefs.data.ogIconBop){
+					var mult:Float = FlxMath.lerp((scale-0.2), icon.scale.x, CoolUtil.boundTo((scale-0.2) - (elapsed * 9 * playbackRate), 0, 1));
+				}else{
+					var mult:Float = FlxMath.lerp((scale-0.2), icon.scale.x, Math.exp(-elapsed * 9 * playbackRate));
+				}
+
 				icon.scale.set(mult, mult);
 				icon.updateHitbox();
 			}
