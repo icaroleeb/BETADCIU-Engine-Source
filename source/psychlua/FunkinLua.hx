@@ -49,6 +49,9 @@ import flixel.input.gamepad.FlxGamepadInputID;
 
 import haxe.Json;
 
+import funkin.vis.dsp.SpectralAnalyzer;
+import funkin.vis.audioclip.frontends.LimeAudioClip;
+
 class FunkinLua {
 	public var lua:State = null;
 	public var camTarget:FlxCamera;
@@ -63,6 +66,8 @@ class FunkinLua {
 
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	public var audioAnalyzer:SpectralAnalyzer;
 
 	public function new(scriptName:String, ?scriptType:String = "") {
 		lua = LuaL.newstate();
@@ -225,6 +230,16 @@ class FunkinLua {
 				runningScripts.push(script.scriptName);
 
 			return runningScripts;
+		});
+
+		//stole from Wii Funkin' Matt V3
+		Lua_helper.add_callback(lua, "initAnalyzer", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+			initAnalyzer(barCount, maxDelta, peakHold);
+			return true;
+		});
+
+		Lua_helper.add_callback(lua, "getAudioLevels", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+			return getAudioLevels();
 		});
 
 		addLocalCallback("setOnScripts", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
@@ -2320,6 +2335,23 @@ class FunkinLua {
 				variables.remove(tag);
 				if(PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
 		}
+	}
+
+	public function initAnalyzer(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+		@:privateAccess
+		if (FlxG.sound.music == null || FlxG.sound.music._channel == null || FlxG.sound.music._channel.__audioSource == null) return;
+
+		@:privateAccess
+		audioAnalyzer = new SpectralAnalyzer(FlxG.sound.music._channel.__audioSource, barCount, maxDelta, peakHold);
+
+		#if desktop
+		audioAnalyzer.fftN = 256;
+		#end
+	}
+
+	public function getAudioLevels() {
+		var levels = audioAnalyzer.getLevels();
+		return [for (i in levels) i.value];
 	}
 }
 #end
