@@ -795,46 +795,13 @@ class PlayState extends MusicBeatState
 
 	public function addCharacterToList(newCharacter:String, type:Int) {
 		var preloadChar = new Character(0, 0, newCharacter);
-		//startCharacterLua(preloadChar.curCharacter); // not implemented yet
+		startCharacterScripts(preloadChar.curCharacter);
 		preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
 		add(preloadChar);
 		remove(preloadChar);
-
-		// switch(type) {
-		// 	case 0:
-		// 		if(!boyfriendMap.exists(newCharacter)) {
-		// 			var newBoyfriend:Character = new Character(0, 0, newCharacter, true);
-		// 			boyfriendMap.set(newCharacter, newBoyfriend);
-		// 			boyfriendGroup.add(newBoyfriend);
-		// 			startCharacterPos(newBoyfriend);
-		// 			newBoyfriend.alpha = 0.00001;
-		// 			startCharacterScripts(newBoyfriend.curCharacter);
-		// 		}
-
-		// 	case 1:
-		// 		if(!dadMap.exists(newCharacter)) {
-		// 			var newDad:Character = new Character(0, 0, newCharacter);
-		// 			dadMap.set(newCharacter, newDad);
-		// 			dadGroup.add(newDad);
-		// 			startCharacterPos(newDad, true);
-		// 			newDad.alpha = 0.00001;
-		// 			startCharacterScripts(newDad.curCharacter);
-		// 		}
-
-		// 	case 2:
-		// 		if(gf != null && !gfMap.exists(newCharacter)) {
-		// 			var newGf:Character = new Character(0, 0, newCharacter);
-		// 			newGf.scrollFactor.set(0.95, 0.95);
-		// 			gfMap.set(newCharacter, newGf);
-		// 			gfGroup.add(newGf);
-		// 			startCharacterPos(newGf);
-		// 			newGf.alpha = 0.00001;
-		// 			startCharacterScripts(newGf.curCharacter);
-		// 		}
-		// }
 	}
 
-	function startCharacterScripts(name:String)
+	public function startCharacterScripts(name:String)
 	{
 		// Lua
 		#if LUA_ALLOWED
@@ -2677,6 +2644,7 @@ class PlayState extends MusicBeatState
 	public var showCombo:Bool = false;
 	public var showComboNum:Bool = true;
 	public var showRating:Bool = true;
+	public var ratingsAlpha:Float = 1.0; // old scripts again...
 
 	// Stores Ratings and Combo Sprites in a group
 	public var comboGroup:FlxSpriteGroup;
@@ -2765,6 +2733,10 @@ class PlayState extends MusicBeatState
 		if (stageData.ratingSkin != null) uiFolder = stageData.ratingSkin[0];
 		if (stageData.ratingSkin != null && stageData.ratingSkin[1] != "") uiPostfix = stageData.ratingSkin[1];
 
+		if (!showRating || ratingsAlpha == 0){ //just don't run the rest if the rating is invisible
+		return;
+		}
+
 		rating.loadGraphic(Paths.image(uiFolder + daRating.image + uiPostfix));
 		rating.screenCenter();
 		rating.x = placement - 40;
@@ -2780,6 +2752,10 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.data.comboCam == "Game") {
 			rating.x = -40 + (300 + offsetX);
 			rating.y = 300 + (30 + offsetY);
+		}
+
+		for (i in [rating]) {
+			i.alpha = ratingsAlpha;
 		}
 
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiFolder + 'combo' + uiPostfix));
@@ -2836,6 +2812,7 @@ class PlayState extends MusicBeatState
 			numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
 			numScore.visible = !ClientPrefs.data.hideHud;
 			numScore.antialiasing = antialias;
+			numScore.alpha = ratingsAlpha;
 
 			//if (combo >= 10 || combo == 0)
 			if(showComboNum)
@@ -3981,7 +3958,7 @@ class PlayState extends MusicBeatState
 		for(character in charactersToLoad){
 			var preloadChar = new Character(0, 0, character);
 			preloadChar.alpha = 0.0001;
-			//startCharacterLua(preloadChar.curCharacter); // not implemented yet
+			startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
 			add(preloadChar);
 			sprites.push(preloadChar);
 			preloadChar.destroyAtlas();

@@ -704,28 +704,6 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getColorFromString", function(color:String) return FlxColor.fromString(color));
 		Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) return FlxColor.fromString('#$color'));
 
-		Lua_helper.add_callback(lua, "objectColorTransform", function(obj:String, color:String) {
-			var spr:Dynamic = LuaUtils.getObjectDirectly(obj);
-
-			if(spr != null) {
-				spr.useColorTransform = true;
-
-				var daColor:String = color;
-				if(!color.startsWith('0x')) daColor = '0xff'+color;
-
-				var r, g, b, a:Int = 255;
-
-				daColor = daColor.substring(2);
-
-				r = Std.parseInt('0x' + daColor.substring(2,4));
-				g = Std.parseInt('0x' + daColor.substring(4,6));
-				b = Std.parseInt('0x' + daColor.substring(6,8));
-				a = Std.parseInt('0x' + daColor.substring(0,2));
-
-				spr.setColorTransform(0, 0, 0, 1, r, g, b, a);
-			}
-		});
-
 		// precaching
 		Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:String) {
 			var charType:Int = 0;
@@ -1121,6 +1099,29 @@ class FunkinLua {
 				object.scrollFactor.set(scrollX, scrollY);
 			}
 		});
+
+		Lua_helper.add_callback(lua, "objectColorTransform", function(obj:String, color:String) {
+			var spr:Dynamic = LuaUtils.getObjectDirectly(obj);
+
+			if(spr != null) {
+				spr.useColorTransform = true;
+
+				var daColor:String = color;
+				if(!color.startsWith('0x')) daColor = '0xff'+color;
+
+				var r, g, b, a:Int = 255;
+
+				daColor = daColor.substring(2);
+
+				r = Std.parseInt('0x' + daColor.substring(2,4));
+				g = Std.parseInt('0x' + daColor.substring(4,6));
+				b = Std.parseInt('0x' + daColor.substring(6,8));
+				a = Std.parseInt('0x' + daColor.substring(0,2));
+
+				spr.setColorTransform(0, 0, 0, 1, r, g, b, a);
+			}
+		});
+
 		Lua_helper.add_callback(lua, "inBetweenColor", function(color:String, color2:String, diff:Float, ?remove0:Bool = false) {
 			var color = FlxColor.interpolate(CoolUtil.colorFromString(color), CoolUtil.colorFromString(color2), diff);
 			var daColor = color.toHexString();
@@ -2242,7 +2243,7 @@ class FunkinLua {
 			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
 
 		PlayState.instance.setOnScripts('boyfriendName', PlayState.instance.boyfriend.curCharacter);
-		// PlayState.instance.startCharacterLua(PlayState.instance.boyfriend.curCharacter);
+		PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
 	}
 
 	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
@@ -2301,7 +2302,7 @@ class FunkinLua {
 			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
 
 		PlayState.instance.setOnScripts('dadName', PlayState.instance.dad.curCharacter);
-		// PlayState.instance.startCharacterLua(PlayState.instance.dad.curCharacter);
+		PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
 	}
 
 	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // not tested but i'm almost 100% sure it works		
@@ -2335,7 +2336,7 @@ class FunkinLua {
 			PlayState.instance.gf.playAnim(animationName, true, false, animationFrame);
 
 		PlayState.instance.setOnScripts('gfName', PlayState.instance.gf.curCharacter);
-		// PlayState.instance.startCharacterLua(PlayState.instance.gf.curCharacter);
+		PlayState.instance.startCharacterScripts(PlayState.instance.gf.curCharacter);
 	}
 
 	#if (!flash && MODS_ALLOWED && sys)
