@@ -58,22 +58,18 @@ class ExtraFunctions
 			return Reflect.getProperty(controller.justReleased, name) == true;
 		});
 
-		Lua_helper.add_callback(lua, "keyJustPressed", function(name:String) {
-			var key:Bool = false;
+		Lua_helper.add_callback(lua, "keyJustPressed", function(name:String = '') {
+			name = name.toLowerCase().trim();
 			switch(name) {
-				case 'left': key = PlayState.instance.getControl('LEFT_P');
-				case 'down': key = PlayState.instance.getControl('DOWN_P');
-				case 'up': key = PlayState.instance.getControl('UP_P');
-				case 'right': key = PlayState.instance.getControl('RIGHT_P');
-				case 'accept': key = PlayState.instance.getControl('ACCEPT');
-				case 'back': key = PlayState.instance.getControl('BACK');
-				case 'pause': key = PlayState.instance.getControl('PAUSE');
-				case 'reset': key = PlayState.instance.getControl('RESET');
-				case 'space': key = FlxG.keys.justPressed.SPACE;//an extra key for convinience
+				case 'left': return PlayState.instance.controls.NOTE_LEFT_P;
+				case 'down': return PlayState.instance.controls.NOTE_DOWN_P;
+				case 'up': return PlayState.instance.controls.NOTE_UP_P;
+				case 'right': return PlayState.instance.controls.NOTE_RIGHT_P;
+				case 'space': return FlxG.keys.justPressed.SPACE;
+				default: return PlayState.instance.controls.justPressed(name);
 			}
-			return key;
+			return false;
 		});
-		
 		Lua_helper.add_callback(lua, "keyPressed", function(name:String = '') {
 			name = name.toLowerCase().trim();
 			switch(name) {
@@ -81,7 +77,6 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN;
 				case 'up': return PlayState.instance.controls.NOTE_UP;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT;
-				case 'space': key = FlxG.keys.pressed.SPACE;//an extra key for convinience
 				default: return PlayState.instance.controls.pressed(name);
 			}
 			return false;
@@ -93,7 +88,6 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN_R;
 				case 'up': return PlayState.instance.controls.NOTE_UP_R;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT_R;
-				case 'space': key = FlxG.keys.pressed.SPACE;//an extra key for convinience
 				default: return PlayState.instance.controls.justReleased(name);
 			}
 			return false;
