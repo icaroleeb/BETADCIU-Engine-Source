@@ -23,6 +23,7 @@ class MainMenuState extends MusicBeatState
 	var allowMouse:Bool = true; //Turn this off to block mouse movement in menus
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
+	var menuItems2:FlxTypedGroup<FlxSprite>;
 	var leftItem:FlxSprite;
 	var rightItem:FlxSprite;
 
@@ -90,6 +91,9 @@ class MainMenuState extends MusicBeatState
 		menuItems = new FlxTypedGroup<FlxSprite>();
 		add(menuItems);
 
+		menuItems2 = new FlxTypedGroup<FlxSprite>();
+		add(menuItems2);
+
 		for (num => option in optionShit)
 		{
 			var item:FlxSprite = createMenuItem(option, -630, (num * 140) + 90, 1);
@@ -98,10 +102,10 @@ class MainMenuState extends MusicBeatState
 		}
 
 		if (leftOption != null)
-			leftItem = createMenuItem(leftOption, FlxG.width - 247, 290, 0, true, false);
+			leftItem = createMenuItem2(leftOption, FlxG.width - 247, 290, 0, true, false);
 		if (rightOption != null)
 		{
-			rightItem = createMenuItem(rightOption, FlxG.width - 60, 490, 0, true, false);
+			rightItem = createMenuItem2(rightOption, FlxG.width - 60, 490, 0, true, false);
 			rightItem.x -= rightItem.width;
 		}
 
@@ -154,6 +158,21 @@ class MainMenuState extends MusicBeatState
 		menuItem.scrollFactor.set(daScroll, daScroll);
 		menuItems.add(menuItem);
 		return menuItem;
+	}
+
+	function createMenuItem2(name:String, x:Float, y:Float, daScroll:Float = 0, idleloop:Bool = true, selectloop:Bool = true):FlxSprite
+	{
+		var menuItem2:FlxSprite = new FlxSprite(x, y);
+		menuItem2.frames = Paths.getSparrowAtlas('mainmenu/menu_$name');
+		menuItem2.animation.addByPrefix('idle', '$name idle', 24, idleloop);
+		menuItem2.animation.addByPrefix('selected', '$name selected', 24, selectloop);
+		menuItem2.animation.play('idle');
+		menuItem2.updateHitbox();
+		
+		menuItem2.antialiasing = ClientPrefs.data.antialiasing;
+		menuItem2.scrollFactor.set(daScroll, daScroll);
+		menuItems2.add(menuItem2);
+		return menuItem2;
 	}
 
 	var selectedSomethin:Bool = false;
@@ -381,11 +400,15 @@ class MainMenuState extends MusicBeatState
 
 		for (item in menuItems)
 		{
-			item.animation.play('idle');
-
 			FlxTween.tween(item, {x: -620}, 0.26,{ease: FlxEase.expoOut, onComplete: function(flxTween:FlxTween){}});
-
+			item.animation.play('idle');
 			item.centerOffsets();
+		}
+
+		for (item2 in menuItems2)
+		{
+			item2.animation.play('idle');
+			item2.centerOffsets();
 		}
 
 		var selectedItem:FlxSprite;
@@ -396,11 +419,8 @@ class MainMenuState extends MusicBeatState
 				FlxTween.tween(selectedItem, {x: -340}, 0.26,{ease: FlxEase.expoOut, onComplete: function(flxTween:FlxTween){}});
 			case LEFT:
 				selectedItem = leftItem;
-				leftItem.x = FlxG.width - 247;
-
 			case RIGHT:
 				selectedItem = rightItem;
-				rightItem.x = FlxG.width - 60;
 		}
 		selectedItem.animation.play('selected');
 		selectedItem.centerOffsets();
