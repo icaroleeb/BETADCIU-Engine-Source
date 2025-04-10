@@ -14,10 +14,12 @@ enum MainMenuColumn {
 
 class MainMenuState extends MusicBeatState
 {
+	public static var finishedFunnyMove:Bool = false;
 	public static var psychEngineVersion:String = '1.0.4';
 	public static var betadciuVer:String = "0.1"; // This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 	public static var curColumn:MainMenuColumn = CENTER;
+	public static var mainMusic = true;
 	var allowMouse:Bool = true; //Turn this off to block mouse movement in menus
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
@@ -26,6 +28,8 @@ class MainMenuState extends MusicBeatState
 
 	//Centered/Text options
 	var optionShit:Array<String> = [
+		'betadciu',
+		'bonus_songs',
 		'story_mode',
 		'freeplay',
 		#if MODS_ALLOWED 'mods', #end
@@ -53,9 +57,15 @@ class MainMenuState extends MusicBeatState
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
+		if (!FlxG.sound.music.playing || !mainMusic)
+		{
+			FlxG.sound.playMusic(Paths.music('newMenu'));
+			mainMusic = true;
+		}
+
 		persistentUpdate = persistentDraw = true;
 
-		var yScroll:Float = 0.25;
+		var yScroll:Float = 0.10;
 		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.scrollFactor.set(0, yScroll);
@@ -82,16 +92,16 @@ class MainMenuState extends MusicBeatState
 
 		for (num => option in optionShit)
 		{
-			var item:FlxSprite = createMenuItem(option, 0, (num * 140) + 90);
+			var item:FlxSprite = createMenuItem(option, -630, (num * 140) + 90, 1);
 			item.y += (4 - optionShit.length) * 70; // Offsets for when you have anything other than 4 items
-			item.screenCenter(X);
+			//item.screenCenter(X);
 		}
 
 		if (leftOption != null)
-			leftItem = createMenuItem(leftOption, 60, 490);
+			leftItem = createMenuItem(leftOption, FlxG.width - 247, 290, 0, true, false);
 		if (rightOption != null)
 		{
-			rightItem = createMenuItem(rightOption, FlxG.width - 60, 490);
+			rightItem = createMenuItem(rightOption, FlxG.width - 60, 490, 0, true, false);
 			rightItem.x -= rightItem.width;
 		}
 
@@ -131,17 +141,17 @@ class MainMenuState extends MusicBeatState
 		FlxG.camera.follow(camFollow, null, 0.15);
 	}
 
-	function createMenuItem(name:String, x:Float, y:Float):FlxSprite
+	function createMenuItem(name:String, x:Float, y:Float, daScroll:Float = 0, idleloop:Bool = true, selectloop:Bool = true):FlxSprite
 	{
 		var menuItem:FlxSprite = new FlxSprite(x, y);
 		menuItem.frames = Paths.getSparrowAtlas('mainmenu/menu_$name');
-		menuItem.animation.addByPrefix('idle', '$name idle', 24, true);
-		menuItem.animation.addByPrefix('selected', '$name selected', 24, true);
+		menuItem.animation.addByPrefix('idle', '$name idle', 24, idleloop);
+		menuItem.animation.addByPrefix('selected', '$name selected', 24, selectloop);
 		menuItem.animation.play('idle');
 		menuItem.updateHitbox();
 		
 		menuItem.antialiasing = ClientPrefs.data.antialiasing;
-		menuItem.scrollFactor.set();
+		menuItem.scrollFactor.set(daScroll, daScroll);
 		menuItems.add(menuItem);
 		return menuItem;
 	}
@@ -156,11 +166,13 @@ class MainMenuState extends MusicBeatState
 
 		if (!selectedSomethin)
 		{
-			if (controls.UI_UP_P)
+			if (controls.UI_UP_P){
 				changeItem(-1);
+			}
 
-			if (controls.UI_DOWN_P)
+			if (controls.UI_DOWN_P){
 				changeItem(1);
+			}
 
 			var allowMouse:Bool = allowMouse;
 			if (allowMouse && ((FlxG.mouse.deltaScreenX != 0 && FlxG.mouse.deltaScreenY != 0) || FlxG.mouse.justPressed)) //FlxG.mouse.deltaScreenX/Y checks is more accurate than FlxG.mouse.justMoved
@@ -182,6 +194,7 @@ class MainMenuState extends MusicBeatState
 
 				if(leftItem != null && FlxG.mouse.overlaps(leftItem))
 				{
+
 					allowMouse = true;
 					if(selectedItem != leftItem)
 					{
@@ -298,6 +311,10 @@ class MainMenuState extends MusicBeatState
 				{
 					switch (option)
 					{
+						case 'betadciu':
+							MusicBeatState.switchState(new FreeplayState());
+						case 'bonus_songs':
+							MusicBeatState.switchState(new FreeplayState());
 						case 'story_mode':
 							MusicBeatState.switchState(new StoryMenuState());
 						case 'freeplay':
@@ -365,6 +382,9 @@ class MainMenuState extends MusicBeatState
 		for (item in menuItems)
 		{
 			item.animation.play('idle');
+
+			FlxTween.tween(item, {x: -620}, 0.26,{ease: FlxEase.expoOut, onComplete: function(flxTween:FlxTween){}});
+
 			item.centerOffsets();
 		}
 
@@ -373,10 +393,14 @@ class MainMenuState extends MusicBeatState
 		{
 			case CENTER:
 				selectedItem = menuItems.members[curSelected];
+				FlxTween.tween(selectedItem, {x: -340}, 0.26,{ease: FlxEase.expoOut, onComplete: function(flxTween:FlxTween){}});
 			case LEFT:
 				selectedItem = leftItem;
+				leftItem.x = FlxG.width - 247;
+
 			case RIGHT:
 				selectedItem = rightItem;
+				rightItem.x = FlxG.width - 60;
 		}
 		selectedItem.animation.play('selected');
 		selectedItem.centerOffsets();

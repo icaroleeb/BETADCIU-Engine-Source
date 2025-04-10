@@ -56,6 +56,23 @@ class FreeplayState extends MusicBeatState
 	{
 		//Paths.clearStoredMemory();
 		//Paths.clearUnusedMemory();
+
+		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
+		{
+			FlxG.sound.music.volume = 1;
+			FlxG.sound.playMusic(Paths.music('songSelect'));
+		}
+
+		if (FlxG.sound.music.playing || MainMenuState.mainMusic)
+		{
+			FlxG.sound.playMusic(Paths.music('songSelect'));
+			MainMenuState.mainMusic = false;
+		}
+		if (!FlxG.sound.music.playing || MainMenuState.mainMusic == false)
+		{
+			FlxG.sound.playMusic(Paths.music('songSelect'));
+			MainMenuState.mainMusic = false;
+		}
 		
 		persistentUpdate = true;
 		PlayState.isStoryMode = false;
@@ -116,6 +133,9 @@ class FreeplayState extends MusicBeatState
 			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
 			songText.targetY = i;
 			grpSongs.add(songText);
+			
+			songText.screenCenter(X);
+			songText.changeX = false;
 
 			songText.scaleX = Math.min(1, 980 / songText.width);
 			songText.snapToPosition();
