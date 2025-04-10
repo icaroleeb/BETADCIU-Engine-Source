@@ -416,7 +416,9 @@ class MainMenuState extends MusicBeatState
 		{
 			case CENTER:
 				selectedItem = menuItems.members[curSelected];
-				FlxTween.tween(selectedItem, {x: -340}, 0.26,{ease: FlxEase.expoOut, onComplete: function(flxTween:FlxTween){}});
+				FlxTween.tween(selectedItem, {x: -340}, 0.26,{ease: FlxEase.expoOut, onComplete: function(flxTween:FlxTween){
+					selectedItem.x = -340;
+				}});
 			case LEFT:
 				selectedItem = leftItem;
 			case RIGHT:
