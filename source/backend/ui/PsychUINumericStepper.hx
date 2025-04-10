@@ -1,6 +1,5 @@
 package backend.ui;
 
-// test
 class PsychUINumericStepper extends PsychUIInputText
 {
 	public static final CHANGE_EVENT = "numericstepper_change";
