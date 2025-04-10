@@ -4,6 +4,7 @@ package psychlua;
 import flixel.addons.display.FlxRuntimeShader;
 #end
 
+import openfl.filters.BitmapFilter;
 import openfl.filters.ShaderFilter;
 
 class ShaderFunctions
@@ -45,9 +46,7 @@ class ShaderFunctions
 
 				if (Std.isOfType(leObj, FlxCamera)){
 					var daFilters = (leObj.filters != null && keepOtherShaders) ? leObj.filters : [];
-					
 					daFilters.push(new ShaderFilter(daShader));
-
 					leObj.setFilters(daFilters);
 				}
 				else{
@@ -62,20 +61,68 @@ class ShaderFunctions
 			#end
 			return false;
 		});
-		Lua_helper.add_callback(lua, "removeSpriteShader", function(obj:String) {
+
+		Lua_helper.add_callback(lua, "removeSpriteShader", function(obj:String, ?shader:String = "") {
 			var split:Array<String> = obj.split('.');
-			var leObj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if(split.length > 1) {
-				leObj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
+			var leObj:Dynamic = LuaUtils.getObjectDirectly(split[0]);
+			if (split.length > 1) {
+				leObj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 
-			if(leObj != null) {
-				leObj.shader = null;
-				return true;
+			if (leObj != null) {
+				if (Std.isOfType(leObj, FlxCamera)) {
+					removeCameraShader(leObj, shader); // Left support for this in
+				} else {
+					leObj.shader = null;
+				}
 			}
 			return false;
 		});
 
+		// Dedicated callbacks for cameras now
+		funk.addLocalCallback("setCameraShader", function(obj:String, shader:String, ?keepOtherShaders:Bool = true) {
+			if(!ClientPrefs.data.shaders) return false;
+
+			#if (!flash && sys)
+			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader))
+			{
+				FunkinLua.luaTrace('setCameraShader: Shader $shader is missing!', false, false, FlxColor.RED);
+				return false;
+			}
+	
+			var split:Array<String> = obj.split('.');
+			var leObj:FlxCamera = LuaUtils.getObjectDirectly(split[0]);
+			if(split.length > 1) {
+				leObj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
+			}
+	
+			if(leObj != null) {
+				var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
+				var daShader:FlxRuntimeShader = new FlxRuntimeShader(arr[0], arr[1]); 
+				var daFilters = (leObj.filters != null && keepOtherShaders) ? leObj.filters : [];
+				daFilters.push(new ShaderFilter(daShader));
+				leObj.setFilters(daFilters);
+
+				return true;
+			}
+			#else
+			FunkinLua.luaTrace("setCameraShader: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
+			#end
+			return false;
+		});
+
+		Lua_helper.add_callback(lua, "removeCameraShader", function(obj:String, ?shader:String = "") {
+			var split:Array<String> = obj.split('.');
+			var leObj:FlxCamera = LuaUtils.getObjectDirectly(split[0]);
+			if (split.length > 1) {
+				leObj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
+			}
+
+			if (leObj != null) {
+				removeCameraShader(leObj, shader);
+			}
+			return false;
+		});
 
 		Lua_helper.add_callback(lua, "getShaderBool", function(obj:String, prop:String) {
 			#if (!flash && MODS_ALLOWED && sys)
@@ -398,5 +445,20 @@ class ShaderFunctions
 
 		return shader;
 	}
+
+	static function removeCameraShader(leObj:Dynamic, ?shader:String = ""){
+		var newCamEffects = [];
+		if (shader != "") {
+			var daFilters = leObj.filters != null ? leObj.filters : [];
+			var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
+			for (filter in daFilters) {
+				if (filter.shader.glFragmentSource == processFragmentSource(arr[0])) {
+					continue;
+				}
+				newCamEffects.push(filter);
+			}
+		}
+		leObj.setFilters(newCamEffects);
+}
 	#end
 }

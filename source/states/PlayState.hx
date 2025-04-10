@@ -1832,8 +1832,13 @@ class PlayState extends MusicBeatState
 
 		if(!endingSong && !inCutscene && allowDebugKeys)
 		{
-			if (controls.justPressed('debug_1'))
+			if (controls.justPressed('debug_1')){
+				if (FlxG.keys.pressed.SHIFT){
+					ChartingState.lastVisitedSection = curSection;
+				}
+
 				openChartEditor();
+			}
 			else if (controls.justPressed('debug_2'))
 				openCharacterEditor();
 		}

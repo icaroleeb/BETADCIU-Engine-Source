@@ -217,6 +217,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var waveformEnabled:Bool = false;
 	var waveformTarget:WaveformTarget = INST;
 
+	// I love Shift + Enter
+	public static var lastVisitedSection:Int = 0;
+
 	override function create()
 	{
 		if(Difficulty.list.length < 1) Difficulty.resetList();
@@ -530,6 +533,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		].join('\n');
 		fullTipText.screenCenter();
 		add(fullTipText);
+
+		loadSection(lastVisitedSection);
+		Conductor.songPosition = FlxG.sound.music.time = cachedSectionTimes[curSec] - Conductor.offset + 0.000001;
+		
 		super.create();
 	}
 
@@ -882,7 +889,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					if(FlxG.sound.music.playing)
 						setSongPlaying(false);
 
-					var shiftAdd:Int = FlxG.keys.pressed.SHIFT ? 4 : 1;
+					var shiftAdd:Int = FlxG.keys.pressed.ALT ? 16 : (FlxG.keys.pressed.SHIFT ? 4 : 1);
 
 					if(FlxG.keys.justPressed.A)
 					{
@@ -4815,7 +4822,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	{
 		persistentUpdate = false;
 		FlxG.mouse.visible = false;
+		lastVisitedSection = curSec;
 		chartEditorSave.flush();
+
+		if (FlxG.keys.pressed.SHIFT){
+			PlayState.startOnTime = Conductor.songPosition;
+		}
 
 		setSongPlaying(false);
 		updateChartData();

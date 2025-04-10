@@ -687,7 +687,18 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "FlxColor", function(color:String) return FlxColor.fromString(color));
 		Lua_helper.add_callback(lua, "getColorFromName", function(color:String) return FlxColor.fromString(color));
 		Lua_helper.add_callback(lua, "getColorFromString", function(color:String) return FlxColor.fromString(color));
-		Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) return FlxColor.fromString('#$color'));
+
+		Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) {
+			// Legacy version included #, 0x, and 0xFF since Std.parseInt() was used instead.
+			if (color.startsWith("0xFF")) {
+				color = color.substr(4); // Remove "0xFF"
+			}else{
+				var regex = new EReg("^#|^0x", "");
+    			color = regex.replace(color, "");
+			}
+			
+			return FlxColor.fromString('#$color');
+		});
 
 		// precaching
 		Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:String) {

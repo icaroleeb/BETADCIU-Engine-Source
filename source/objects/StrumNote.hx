@@ -10,6 +10,11 @@ import haxe.format.JsonParser;
 
 using StringTools;
 
+typedef StrumNoteFile = {
+	var strumAnimations:Array<Note.NoteAnimArray>;
+	var strumOffset:Array<Float>;
+}
+
 class StrumNote extends OffsettableSprite
 {
 	public var rgbShader:RGBShaderReference;
@@ -106,13 +111,13 @@ class StrumNote extends OffsettableSprite
 
 		for (noteDirectory in ["noteSkins/", "notes/"]) {
 			final fullPath = '$noteDirectory$notePath';
-			final strumlinePath = '$fullPath/notes_strumline';
+			final weekendPath = '$fullPath/notes_strumline';
 			var jsonPath = fullPath;
 		
-			if (Paths.fileExists('images/$strumlinePath.png', IMAGE)) {
+			if (Paths.fileExists('images/$weekendPath.png', IMAGE)) {
 				separateSheets = true;
 				jsonPath = '$noteDirectory$notePath/$notePath';
-				notePath = strumlinePath;
+				notePath = weekendPath;
 			} else if (Paths.fileExists('images/$fullPath.png', IMAGE)) {
 				notePath = fullPath;
 			}
@@ -181,6 +186,7 @@ class StrumNote extends OffsettableSprite
 
 		if (frames == null){ // Set to default if no frames found so it doesn't crash
 			texture = Note.defaultNoteSkin;
+			rgbShader.enabled = true;
 		} 
 
 		if(lastAnim != null)
