@@ -173,6 +173,12 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 
+		var option:Option = new Option('OG Icon Bop',
+		"If checked, The Icon will Bop Like in BETADCIU Engine Legacy",
+		'ogIconBop',
+			BOOL);
+		addOption(option);
+
 		super();
 		add(notes);
 		add(splashes);

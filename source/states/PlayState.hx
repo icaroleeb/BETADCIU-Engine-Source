@@ -2053,7 +2053,7 @@ class PlayState extends MusicBeatState
 		var iconOffset:Int = 26;
 		var healthPercent:Float = FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01;
 		
-		if(ClientPrefs.data.scoreZoom){
+		if(ClientPrefs.data.ogIconBop){
 			iconP1.x = healthBar.x + (healthBar.width * healthPercent - iconOffset);
 			iconP2.x = healthBar.x + (healthBar.width * healthPercent) - (iconP2.width - iconOffset);
 		}else{
