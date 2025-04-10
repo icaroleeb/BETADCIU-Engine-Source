@@ -76,7 +76,8 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
     if (note == null) return;
     var noteData:Int = note.noteData;
     var isSus:Bool = note.isSustainNote;
-    var isHoldEnd:Bool = note.animation.curAnim.name.endsWith('end');
+    var isHoldEnd:Bool = false;
+    if (note.animation.curAnim != null) isHoldEnd = note.animation.curAnim.name.endsWith('end');
 
     if (enabled && isReady)
     {

@@ -451,11 +451,24 @@ class Note extends FlxSprite
 		if(PlayState.isPixelStage) {
 			if(isSustainNote) {
 				var graphic = Paths.image('pixelUI/' + skinPixel + 'ENDS' + skinPostfix);
-				loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+				try{
+					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+				} catch(e) {
+					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin +  'ENDS' + skinPostfix);
+					graphic = fallbackShit;
+					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+				}
 				originalHeight = graphic.height / 2;
 			} else {
 				var graphic = Paths.image('pixelUI/' + skinPixel + skinPostfix);
-				loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+				try {
+					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+				} catch(e) {
+					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + skinPostfix);
+					graphic = fallbackShit;
+					var graphic = Paths.image('pixelUI/' + Note.defaultNoteSkin + skinPostfix);
+					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+				}
 			}
 			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 			loadPixelNoteAnims();
@@ -505,11 +518,17 @@ class Note extends FlxSprite
 				loadGraphic(rawPic, true, 52, 87);
 			}
 		}else{
-			frames = Paths.getSparrowAtlas(skin);
-
-			if (frames == null){ // Set to default if no frames found so it doesn't crash
+			try {
+				frames = Paths.getSparrowAtlas(skin);
+			} catch(e){
 				texture = Note.defaultNoteSkin;
-			} 
+				isLegacyNoteSkin = false;
+				rgbShader.enabled = true;
+			}
+
+			// if (frames == null){ // Set to default if no frames found so it doesn't crash
+			// 	texture = Note.defaultNoteSkin;
+			// } 
 		}
 	}
 
