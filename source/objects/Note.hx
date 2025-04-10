@@ -42,8 +42,9 @@ typedef NoteAnimArray = {
 }
 
 typedef NoteFile = {
-	var strumAnimations:Array<NoteAnimArray>;
-	var strumOffset:Array<Float>;
+	@:optional var strumAnimations:Array<NoteAnimArray>;
+	@:optional var strumOffset:Array<Float>;
+	@:optional var rgbEnabled:Bool;
 }
 
 /**
@@ -433,11 +434,21 @@ class Note extends FlxSprite
 		var curSkin = skin;
 
 		for(noteDirectory in ["noteSkins/", "notes/"]){
-			if (Paths.fileExists("images/" + noteDirectory + skin + '/notes.png', IMAGE)) {
+			final fullPath = '$noteDirectory$skin';
+			final weekendPath = '$fullPath/notes';
+			var jsonPath = fullPath;
+
+			if (Paths.fileExists('images/$weekendPath.png', IMAGE)) {
 				separateSheets = true;
-				skin = noteDirectory + skin + "/notes";
-			} else if (Paths.fileExists("images/" + noteDirectory + skin + '.png', IMAGE)) {
-				skin = noteDirectory + skin;
+				jsonPath = '$noteDirectory$skin/$skin';
+				skin = weekendPath;
+			} else if (Paths.fileExists('images/$fullPath.png', IMAGE)) {
+				skin = fullPath;
+			}
+
+			if (Paths.fileExists('images/$jsonPath.json', TEXT)) {
+				final json = getNoteFile('images/$jsonPath');
+				rgbShader.enabled = json.rgbEnabled != null ? json.rgbEnabled : false;
 			}
 
 			if (curSkin != skin){
@@ -489,8 +500,6 @@ class Note extends FlxSprite
 			}
 		}
 
-		
-
 		if(isSustainNote) {
 			scale.y = lastScaleY;
 		}
@@ -522,13 +531,8 @@ class Note extends FlxSprite
 				frames = Paths.getSparrowAtlas(skin);
 			} catch(e){
 				texture = Note.defaultNoteSkin;
-				isLegacyNoteSkin = false;
- 				rgbShader.enabled = true;
- 			}
- 
- 			// if (frames == null){ // Set to default if no frames found so it doesn't crash
- 			// 	texture = Note.defaultNoteSkin;
- 			// } 
+				// rgbShader.enabled = true;
+			}
 		}
 	}
 
@@ -727,21 +731,15 @@ class Note extends FlxSprite
 			strumOffset: [
 				0,
 				0
-			]
+			],
+			rgbEnabled: true
 		};
 	}
 
 	public static function getNoteFile(jsonPath:String){
 		try
 		{
-			var path:String = Paths.getPath(jsonPath + '.json', TEXT, null, true);
-			#if MODS_ALLOWED
-			if(FileSystem.exists(path))
-				return cast tjson.TJSON.parse(File.getContent(path));
-			#else
-			if(Assets.exists(path))
-				return cast tjson.TJSON.parse(Assets.getText(path));
-			#end
+			return cast tjson.TJSON.parse(Paths.getTextFromFile('$jsonPath.json'));
 		}
 		return dummy();
 	}

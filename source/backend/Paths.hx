@@ -77,6 +77,15 @@ class Paths
 				currentTrackedSounds.remove(key);
 			}
 		}
+
+		// Hope this works...
+		for(key => asset in currentTrackedTexts){
+			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key) && asset != null)
+			{
+				currentTrackedTexts.remove(key);
+			}
+		}
+
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
 		#if !html5 openfl.Assets.cache.clear("songs"); #end
@@ -285,14 +294,27 @@ class Paths
 		return graph;
 	}
 
+	public static var currentTrackedTexts:Map<String, String> = [];
 	inline static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
 	{
-		var path:String = getPath(key, TEXT, !ignoreMods);
-		#if sys
-		return (FileSystem.exists(path)) ? File.getContent(path) : null;
-		#else
-		return (OpenFlAssets.exists(path, TEXT)) ? Assets.getText(path) : null;
-		#end
+		if (currentTrackedTexts.exists(key)) {
+            return currentTrackedTexts.get(key);
+        }
+
+        var path:String = getPath(key, TEXT, !ignoreMods);
+        var text:String;
+
+        #if sys
+		text = (FileSystem.exists(path)) ? File.getContent(path) : null;
+        #else
+		text = (OpenFlAssets.exists(path, TEXT)) ? Assets.getText(path) : null;
+        #end
+
+        if (text != null) {
+            currentTrackedTexts.set(key, text);
+        }
+
+        return text;
 	}
 
 	inline static public function font(key:String)
