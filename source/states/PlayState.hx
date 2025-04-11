@@ -4083,7 +4083,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public var hardcodedObjsThatForSomeReasonIsNotBeingDestoyedOnRemoveStage:Array<Dynamic> = [];
-	public function removeStage() {
+	public function removeStage(){
 		stagesFunc(function(stage:BaseStage) stage.destroy());
 		removeObjects(stageData);
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -4091,6 +4091,8 @@ class PlayState extends MusicBeatState
 		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
 		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
+
+		FlxG.camera.setFilters([]); // because phillyStreets & phillyBlazin has the rain shaders
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
 	
