@@ -164,7 +164,7 @@ class PhillyBlazin extends BaseStage
 	
 	override function startSong()
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage != "phillyBlazin") 
 			return; 
 
 		abot.snd = FlxG.sound.music;
@@ -172,7 +172,7 @@ class PhillyBlazin extends BaseStage
 
 	function setupRainShader()
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage != "phillyBlazin") 
 			return; 
 
 		rainShader = new RainShader();
@@ -191,7 +191,7 @@ class PhillyBlazin extends BaseStage
 
 	override function update(elapsed:Float)
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage != "phillyBlazin") 
 			return; 
 
 		if(scrollingSky != null) scrollingSky.scrollX -= elapsed * 35;
@@ -213,7 +213,7 @@ class PhillyBlazin extends BaseStage
 	
 	function applyLightning():Void
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage != "phillyBlazin") 
 			return; 
 
 		if(ClientPrefs.data.lowQuality || game.endingSong) return;
@@ -262,7 +262,7 @@ class PhillyBlazin extends BaseStage
 	var darnellFight:DarnellBlazinHandler = new DarnellBlazinHandler();
 	override function goodNoteHit(note:Note)
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage != "phillyBlazin") 
 			return; 
 
 		//trace('hit note! ${note.noteType}');
@@ -272,7 +272,7 @@ class PhillyBlazin extends BaseStage
 	}
 	override function noteMiss(note:Note)
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage != "phillyBlazin") 
 			return; 
 
 		//trace('missed note!');
@@ -282,7 +282,7 @@ class PhillyBlazin extends BaseStage
 
 	override function noteMissPress(direction:Int)
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage != "phillyBlazin") 
 			return; 
 
 		//trace('misinput!');
@@ -293,7 +293,7 @@ class PhillyBlazin extends BaseStage
 	// Darnell Note functions
 	override function opponentNoteHit(note:Note)
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage != "phillyBlazin") 
 			return; 
 
 		//trace('opponent hit!');
