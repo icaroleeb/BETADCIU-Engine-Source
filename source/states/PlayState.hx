@@ -366,19 +366,19 @@ class PlayState extends MusicBeatState
 		dadGroup = new FlxSpriteGroup(DAD_X, DAD_Y);
 		gfGroup = new FlxSpriteGroup(GF_X, GF_Y);
 
-		switch (curStage)
+		switch (curStage.toLowerCase())
 		{
-			case 'stage': new StageWeek1(); 			//Week 1
-			case 'spooky': new Spooky();				//Week 2
-			case 'philly': new Philly();				//Week 3
-			case 'limo': new Limo();					//Week 4
-			case 'mall': new Mall();					//Week 5 - Cocoa, Eggnog
-			case 'mallEvil': new MallEvil();			//Week 5 - Winter Horrorland
-			case 'school': new School();				//Week 6 - Senpai, Roses
-			case 'schoolEvil': new SchoolEvil();		//Week 6 - Thorns
-			case 'tank': new Tank();					//Week 7 - Ugh, Guns, Stress
-			case 'phillyStreets': new PhillyStreets(); 	//Weekend 1 - Darnell, Lit Up, 2Hot
-			case 'phillyBlazin': new PhillyBlazin();	//Weekend 1 - Blazin
+			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
+			case 'spooky': hardCodedStage = new Spooky();				//Week 2
+			case 'philly': hardCodedStage = new Philly();				//Week 3
+			case 'limo': hardCodedStage = new Limo();					//Week 4
+			case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
+			case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
+			case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
+			case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
+			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
+			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
+			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
 		}
 		if(isPixelStage) introSoundsSuffix = '-pixel';
 
@@ -796,7 +796,7 @@ class PlayState extends MusicBeatState
 	public function addCharacterToList(newCharacter:String, type:Int) {
 		var preloadChar = new Character(0, 0, newCharacter);
 		startCharacterScripts(preloadChar.curCharacter);
-		preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
+		// preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
 		add(preloadChar);
 		remove(preloadChar);
 	}
@@ -3961,7 +3961,7 @@ class PlayState extends MusicBeatState
 			startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
 			add(preloadChar);
 			sprites.push(preloadChar);
-			preloadChar.destroyAtlas();
+			// preloadChar.destroyAtlas();
 			trace('Character Loaded: $character!');
 		}
 
@@ -4068,10 +4068,13 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public var hardcodedObjsThatForSomeReasonIsNotBeingDestoyedOnRemoveStage:Array<Dynamic> = [];
+	public var hardCodedStage:BaseStage;
 	public function removeStage() {
-		stagesFunc(function(stage:BaseStage) stage.destroy());
 		removeObjects(stageData);
+		if (hardCodedStage != null) {
+			hardCodedStage.destroy();
+			hardCodedStage = null;
+		}
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
@@ -4097,17 +4100,17 @@ class PlayState extends MusicBeatState
 
 		switch (curStage.toLowerCase())
 		{
-			case 'stage': new StageWeek1(); 			//Week 1
-			case 'spooky': new Spooky();				//Week 2
-			case 'philly': new Philly();				//Week 3
-			case 'limo': new Limo();					//Week 4
-			case 'mall': new Mall();					//Week 5 - Cocoa, Eggnog
-			case 'mallevil': new MallEvil();			//Week 5 - Winter Horrorland
-			case 'school': new School();				//Week 6 - Senpai, Roses
-			case 'schoolevil': new SchoolEvil();		//Week 6 - Thorns
-			case 'tank': new Tank();					//Week 7 - Ugh, Guns, Stress
-			case 'phillystreets': new PhillyStreets(); 	//Weekend 1 - Darnell, Lit Up, 2Hot
-			case 'phillyblazin': new PhillyBlazin();	//Weekend 1 - Blazin
+			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
+			case 'spooky': hardCodedStage = new Spooky();				//Week 2
+			case 'philly': hardCodedStage = new Philly();				//Week 3
+			case 'limo': hardCodedStage = new Limo();					//Week 4
+			case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
+			case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
+			case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
+			case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
+			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
+			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
+			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
 		}
 
 		stagesFunc(function(stage:BaseStage) stage.createPost());

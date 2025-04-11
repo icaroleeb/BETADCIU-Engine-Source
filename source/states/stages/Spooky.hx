@@ -46,7 +46,7 @@ class Spooky extends BaseStage
 	var lightningOffset:Int = 8;
 	override function beatHit()
 	{
-		if (PlayState.instance.curStage != "spooky") 
+		if (PlayState.instance.curStage.toLowerCase() != "spooky") 
 			return; 
 		if (FlxG.random.bool(10) && curBeat > lightningStrikeBeat + lightningOffset)
 		{
@@ -56,7 +56,7 @@ class Spooky extends BaseStage
 
 	function lightningStrikeShit():Void
 	{
-		if (PlayState.instance.curStage != "spooky") 
+		if (PlayState.instance.curStage.toLowerCase() != "spooky") 
 			return; 
 
 		FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
@@ -93,7 +93,7 @@ class Spooky extends BaseStage
 
 	function monsterCutscene()
 	{
-		if (PlayState.instance.curStage != "spooky") 
+		if (PlayState.instance.curStage.toLowerCase() != "spooky") 
 			return; 
 		
 		inCutscene = true;
@@ -123,5 +123,8 @@ class Spooky extends BaseStage
 				startCountdown();
 			}
 		});
+	}
+	override public function destroy():Void {
+		super.destroy();
 	}
 }

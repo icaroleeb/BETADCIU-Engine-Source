@@ -138,25 +138,20 @@ class Tank extends BaseStage
 		}
 	}
 
-	override function destroy() { // sigh...
-		remove(tankmanRun);
-		remove(foregroundSprites);
-	}
-
 	override function countdownTick(count:Countdown, num:Int) {
-		if (PlayState.instance.curStage != "tank") 
+		if (PlayState.instance.curStage.toLowerCase() != "tank") 
 			return; 
 
 		if(num % 2 == 0) everyoneDance();
 	}
 	override function beatHit(){
-		if (PlayState.instance.curStage != "tank") 
+		if (PlayState.instance.curStage.toLowerCase() != "tank") 
 			return; 
 		everyoneDance();
 	} 
 	function everyoneDance()
 	{
-		if (PlayState.instance.curStage != "tank") 
+		if (PlayState.instance.curStage.toLowerCase() != "tank") 
 			return; 
 		if(!ClientPrefs.data.lowQuality) tankWatchtower.dance();
 		foregroundSprites.forEach(function(spr:BGSprite)
@@ -173,7 +168,7 @@ class Tank extends BaseStage
 	var audioPlaying:FlxSound;
 	function prepareCutscene()
 	{
-		if (PlayState.instance.curStage != "tank") 
+		if (PlayState.instance.curStage.toLowerCase() != "tank") 
 			return; 
 		cutsceneHandler = new CutsceneHandler();
 
@@ -230,7 +225,7 @@ class Tank extends BaseStage
 
 	function ughIntro()
 	{
-		if (PlayState.instance.curStage != "tank") 
+		if (PlayState.instance.curStage.toLowerCase() != "tank") 
 			return; 
 		prepareCutscene();
 		cutsceneHandler.endTime = 12;
@@ -285,7 +280,7 @@ class Tank extends BaseStage
 	}
 	function gunsIntro()
 	{
-		if (PlayState.instance.curStage != "tank") 
+		if (PlayState.instance.curStage.toLowerCase() != "tank") 
 			return; 
 		prepareCutscene();
 		cutsceneHandler.endTime = 11.5;
@@ -320,7 +315,7 @@ class Tank extends BaseStage
 	var dualWieldAnimPlayed = 0;
 	function stressIntro()
 	{
-		if (PlayState.instance.curStage != "tank") 
+		if (PlayState.instance.curStage.toLowerCase() != "tank") 
 			return; 
 		prepareCutscene();
 		
@@ -444,7 +439,7 @@ class Tank extends BaseStage
 
 	function zoomBack()
 	{
-		if (PlayState.instance.curStage != "tank") 
+		if (PlayState.instance.curStage.toLowerCase() != "tank") 
 			return; 
 		var calledTimes:Int = 0;
 		camFollow.setPosition(630, 425);
@@ -460,5 +455,13 @@ class Tank extends BaseStage
 				spr.y -= 100;
 			});
 		}
+	}
+	override public function destroy():Void {
+		if (foregroundSprites != null) { // fuck u <3.
+			remove(foregroundSprites);
+			foregroundSprites.destroy();
+			foregroundSprites = null;
+		}
+		super.destroy();
 	}
 }

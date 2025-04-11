@@ -1,5 +1,6 @@
 package states.stages;
 
+import openfl.filters.BitmapFilter;
 import openfl.filters.ShaderFilter;
 import shaders.RainShader;
 
@@ -164,7 +165,7 @@ class PhillyBlazin extends BaseStage
 	
 	override function startSong()
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		abot.snd = FlxG.sound.music;
@@ -172,13 +173,25 @@ class PhillyBlazin extends BaseStage
 
 	function setupRainShader()
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		rainShader = new RainShader();
 		rainShader.scale = FlxG.height / 200;
 		rainShader.intensity = 0.5;
-		FlxG.camera.setFilters([new ShaderFilter(rainShader)]);
+
+
+		var filters = [];
+
+		if (PlayState.instance.camGame.filters != null){
+			filters = PlayState.instance.camGame.filters;
+		}
+
+		filters.push(new ShaderFilter(rainShader));
+			PlayState.instance.camGame.setFilters(filters);
+
+
+		// FlxG.camera.setFilters([new ShaderFilter(rainShader)]);
 	}
 
 	function precache()
@@ -191,7 +204,7 @@ class PhillyBlazin extends BaseStage
 
 	override function update(elapsed:Float)
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		if(scrollingSky != null) scrollingSky.scrollX -= elapsed * 35;
@@ -213,7 +226,7 @@ class PhillyBlazin extends BaseStage
 	
 	function applyLightning():Void
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		if(ClientPrefs.data.lowQuality || game.endingSong) return;
@@ -262,7 +275,7 @@ class PhillyBlazin extends BaseStage
 	var darnellFight:DarnellBlazinHandler = new DarnellBlazinHandler();
 	override function goodNoteHit(note:Note)
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		//trace('hit note! ${note.noteType}');
@@ -272,7 +285,7 @@ class PhillyBlazin extends BaseStage
 	}
 	override function noteMiss(note:Note)
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		//trace('missed note!');
@@ -282,7 +295,7 @@ class PhillyBlazin extends BaseStage
 
 	override function noteMissPress(direction:Int)
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		//trace('misinput!');
@@ -293,11 +306,23 @@ class PhillyBlazin extends BaseStage
 	// Darnell Note functions
 	override function opponentNoteHit(note:Note)
 	{
-		if (PlayState.instance.curStage != "phillyblazin") 
+		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		//trace('opponent hit!');
 		picoFight.noteMiss(note);
 		darnellFight.noteMiss(note);
+	}
+	override public function destroy():Void {
+		if (PlayState.instance.camGame.filters != null) {
+			var filters = PlayState.instance.camGame.filters;
+
+			filters = filters.filter(function(f:BitmapFilter) {
+				var shaderF = Std.downcast(f, ShaderFilter);
+				return shaderF == null || shaderF.shader != rainShader;
+			});
+			PlayState.instance.camGame.setFilters(filters);
+		}
+		super.destroy();
 	}
 }
