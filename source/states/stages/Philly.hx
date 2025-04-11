@@ -20,36 +20,50 @@ class Philly extends BaseStage
 
 	override function create()
 	{
+		if (!PlayState.instance.variables.exists("stageVariables")){
+			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		}
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+
 		if(!ClientPrefs.data.lowQuality) {
 			var bg:BGSprite = new BGSprite('philly/sky', -100, 0, 0.1, 0.1);
+			stageVars.set('bg', bg);
 			add(bg);
 		}
 
 		var city:BGSprite = new BGSprite('philly/city', -10, 0, 0.3, 0.3);
 		city.setGraphicSize(Std.int(city.width * 0.85));
 		city.updateHitbox();
+		stageVars.set('city', city);
 		add(city);
 
 		phillyLightsColors = [0xFF31A2FD, 0xFF31FD8C, 0xFFFB33F5, 0xFFFD4531, 0xFFFBA633];
 		phillyWindow = new BGSprite('philly/window', city.x, city.y, 0.3, 0.3);
 		phillyWindow.setGraphicSize(Std.int(phillyWindow.width * 0.85));
 		phillyWindow.updateHitbox();
+		stageVars.set('phillyWindow', phillyWindow);
 		add(phillyWindow);
 		phillyWindow.alpha = 0;
 
 		if(!ClientPrefs.data.lowQuality) {
 			var streetBehind:BGSprite = new BGSprite('philly/behindTrain', -40, 50);
+			stageVars.set('streetBehind', streetBehind);
 			add(streetBehind);
 		}
 
 		phillyTrain = new PhillyTrain(2000, 360);
+		stageVars.set('phillyTrain', phillyTrain);
 		add(phillyTrain);
 
 		phillyStreet = new BGSprite('philly/street', -40, 50);
+		stageVars.set('phillyStreet', phillyStreet);
 		add(phillyStreet);
 	}
 	override function eventPushed(event:objects.Note.EventNote)
 	{
+		if (PlayState.instance.curStage != "philly") 
+			return; 
+
 		switch(event.event)
 		{
 			case "Philly Glow":
@@ -77,6 +91,9 @@ class Philly extends BaseStage
 
 	override function update(elapsed:Float)
 	{
+		if (PlayState.instance.curStage != "philly") 
+			return; 
+
 		phillyWindow.alpha -= (Conductor.crochet / 1000) * elapsed * 1.5;
 		if(phillyGlowParticles != null)
 		{
@@ -90,6 +107,9 @@ class Philly extends BaseStage
 
 	override function beatHit()
 	{
+		if (PlayState.instance.curStage != "philly") 
+			return; 
+
 		phillyTrain.beatHit(curBeat);
 		if (curBeat % 4 == 0)
 		{
@@ -101,6 +121,9 @@ class Philly extends BaseStage
 
 	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
 	{
+		if (PlayState.instance.curStage != "philly") 
+			return; 
+
 		switch(eventName)
 		{
 			case "Philly Glow":

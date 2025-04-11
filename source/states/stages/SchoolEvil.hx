@@ -10,6 +10,11 @@ class SchoolEvil extends BaseStage
 {
 	override function create()
 	{
+		if (!PlayState.instance.variables.exists("stageVariables")){
+			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		}
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+
 		var _song = PlayState.SONG;
 		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pixel';
 		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'gameOver-pixel';
@@ -27,27 +32,36 @@ class SchoolEvil extends BaseStage
 
 		bg.scale.set(PlayState.daPixelZoom, PlayState.daPixelZoom);
 		bg.antialiasing = false;
+		stageVars.set('bg', bg);
 		add(bg);
 		setDefaultGF('gf-pixel');
 
-		FlxG.sound.playMusic(Paths.music('LunchboxScary'), 0);
-		FlxG.sound.music.fadeIn(1, 0, 0.8);
-		if(isStoryMode && !seenCutscene)
-		{
-			initDoof();
-			setStartCallback(schoolIntro);
+		if (PlayState.instance.startingSong){
+			FlxG.sound.playMusic(Paths.music('LunchboxScary'), 0);
+			FlxG.sound.music.fadeIn(1, 0, 0.8);
+			if(isStoryMode && !seenCutscene)
+			{
+				initDoof();
+				setStartCallback(schoolIntro);
+			}
 		}
 	}
 	override function createPost()
 	{
-		var trail:FlxTrail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
-		addBehindDad(trail);
+		if (dad.curCharacter == "spirit") {
+			var trail:FlxTrail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
+			PlayState.instance.variables.get("stageVariables").set('trail', trail);
+			addBehindDad(trail);
+		}
 	}
 
 	// Ghouls event
 	var bgGhouls:BGSprite;
 	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
 	{
+		if (PlayState.instance.curStage != "schoolevil") 
+			return; 
+
 		switch(eventName)
 		{
 			case "Trigger BG Ghouls":
@@ -60,6 +74,9 @@ class SchoolEvil extends BaseStage
 	}
 	override function eventPushed(event:objects.Note.EventNote)
 	{
+		if (PlayState.instance.curStage != "schoolevil") 
+			return; 
+
 		// used for preloading assets used on events
 		switch(event.event)
 		{
@@ -84,6 +101,8 @@ class SchoolEvil extends BaseStage
 	var doof:DialogueBox = null;
 	function initDoof()
 	{
+		if (PlayState.instance.curStage != "schoolevil") 
+			return; 
 		var file:String = Paths.txt('$songName/${songName}Dialogue_${ClientPrefs.data.language}'); //Checks for vanilla/Senpai dialogue
 		#if MODS_ALLOWED
 		if (!FileSystem.exists(file))
@@ -114,6 +133,8 @@ class SchoolEvil extends BaseStage
 	
 	function schoolIntro():Void
 	{
+		if (PlayState.instance.curStage != "schoolevil") 
+			return; 
 		inCutscene = true;
 		var red:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
 		red.scrollFactor.set();

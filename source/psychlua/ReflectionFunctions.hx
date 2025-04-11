@@ -380,6 +380,7 @@ class ReflectionFunctions
 			case ("Stage.dadXOffset"): newVariable = "DAD_X";
 			case ("Stage.dadYOffset"): newVariable = "DAD_Y";
 			case "Stage.hideGirlfriend": newVariable = "stageData.hide_girlfriend";
+			case "Stage.camZoom": newVariable = "stageData.defaultZoom";
 			// case "Stage.boyfriendCameraOffset": newVariable = game.stageData.camera_boyfriend; 
 			// case "Stage.opponentCameraOffset": newVariable = game.stageData.camera_opponent;
 			// case "Stage.girlfriendCameraOffset": newVariable = game.stageData.camera_girlfriend;

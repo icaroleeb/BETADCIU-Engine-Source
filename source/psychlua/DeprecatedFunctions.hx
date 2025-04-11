@@ -213,20 +213,20 @@ class DeprecatedFunctions
 			Reflect.getProperty(LuaUtils.getTargetInstance(), group)[index].updateHitbox();
 			FunkinLua.luaTrace('updateHitboxFromGroup is deprecated! Use updateHitbox instead.', false, true);
 		});
-		Lua_helper.add_callback(lua,"changeBFAuto", function(?id:String="bf") {
-			FunkinLua.changeBFAuto(id);
+		Lua_helper.add_callback(lua,"changeBFAuto", function(?id:String="bf", ?flipped:Bool=false) {
+			FunkinLua.changeBFAuto(id, flipped);
 			FunkinLua.luaTrace('changeBFAuto is deprecated! Use changeCharacter instead.', false, true);
 		});
-		Lua_helper.add_callback(lua,"changeBoyfriendAuto", function(?id:String="bf") {
-			FunkinLua.changeBFAuto(id);
+		Lua_helper.add_callback(lua,"changeBoyfriendAuto", function(?id:String="bf", ?flipped:Bool=false) {
+			FunkinLua.changeBFAuto(id, flipped);
 			FunkinLua.luaTrace('changeBoyfriendAuto is deprecated! Use changeCharacter instead.', false, true);
 		});
-		Lua_helper.add_callback(lua,"changeDadAuto", function(?id:String="bf") {
-			FunkinLua.changeDadAuto(id);
+		Lua_helper.add_callback(lua,"changeDadAuto", function(?id:String="bf", ?flipped:Bool=false) {
+			FunkinLua.changeDadAuto(id, flipped);
 			FunkinLua.luaTrace('changeDadAuto is deprecated! Use changeCharacter instead.', false, true);
 		});
-		Lua_helper.add_callback(lua,"changeGFAuto", function(?id:String="bf") {
-			FunkinLua.changeGFAuto(id);
+		Lua_helper.add_callback(lua,"changeGFAuto", function(?id:String="bf", ?flipped:Bool=false) {
+			FunkinLua.changeGFAuto(id, flipped);
 			FunkinLua.luaTrace('changeGFAuto is deprecated! Use changeCharacter instead.', false, true);
 		});		
 		Lua_helper.add_callback(lua, "changeLuaCharacter", function(tag:String, character:String){

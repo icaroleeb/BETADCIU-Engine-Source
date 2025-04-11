@@ -863,6 +863,78 @@ class FunkinLua {
 			camPosition.setPosition(x, y);
 			LuaUtils.cameraFromString(camera).focusOn(camPosition.getPosition());
 		});
+		Lua_helper.add_callback(lua,"getMapLength", function(obj:String) {
+			var killMe:Array<String> = obj.split('.');
+			var shit:Map<String, Dynamic> = Reflect.getProperty(LuaUtils.getTargetInstance(), obj);
+
+			if(killMe.length > 1)
+			{
+				shit = Reflect.getProperty(Type.resolveClass(killMe[0]), killMe[1]);
+
+				if (shit == null)
+					shit = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+	
+			var daArray:Array<String> = [];
+
+			for (key in shit.keys())
+				daArray.push(key);
+			
+			return daArray.length;
+		});
+		Lua_helper.add_callback(lua,"getMapKeys", function(obj:String, ?getValue:Bool = false) {
+			var killMe:Array<String> = obj.split('.');
+			var shit:Map<String, Dynamic> = Reflect.getProperty(LuaUtils.getTargetInstance(), obj);
+
+			if(killMe.length > 1)
+			{
+				shit = Reflect.getProperty(Type.resolveClass(killMe[0]), killMe[1]);
+
+				if (shit == null)
+					shit = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+
+			var daArray:Array<String> = [];
+
+			for (key in shit.keys())
+				daArray.push(key);
+
+			if (getValue)
+			{
+				for (i in 0...daArray.length)
+					daArray[i] = shit.get(daArray[i]);
+			}
+			
+			return daArray;
+		});
+		Lua_helper.add_callback(lua,"getMapKey", function(obj:String, valName:String) {
+			var killMe:Array<String> = obj.split('.');
+			var shit:Map<String, Dynamic> = Reflect.getProperty(LuaUtils.getTargetInstance(), obj);
+
+			if(killMe.length > 1)
+			{
+				shit = Reflect.getProperty(Type.resolveClass(killMe[0]), killMe[1]);
+
+				if (shit == null)
+					shit = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+
+			return shit[valName];
+		});
+		Lua_helper.add_callback(lua,"setMapKey", function(obj:String, valName:String, val:Dynamic) {
+			var killMe:Array<String> = obj.split('.');
+			var shit:Map<String, Dynamic> = Reflect.getProperty(LuaUtils.getTargetInstance(), obj);
+
+			if(killMe.length > 1)
+			{
+				shit = Reflect.getProperty(Type.resolveClass(killMe[0]), killMe[1]);
+
+				if (shit == null)
+					shit = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+
+			shit[valName] = val;
+		});
 		Lua_helper.add_callback(lua, "setRatingPercent", function(value:Float) {
 			game.ratingPercent = value;
 			game.setOnScripts('rating', game.ratingPercent);
