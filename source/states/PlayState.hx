@@ -4092,8 +4092,6 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		FlxG.camera.setFilters([]); // because phillyStreets & phillyBlazin has the rain shaders
-
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
 	
 		if (stageVars != null) {
