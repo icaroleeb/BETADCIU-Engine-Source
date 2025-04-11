@@ -2406,12 +2406,14 @@ class PlayState extends MusicBeatState
 				if(flValue2 == null) flValue2 = 1;
 				FlxG.sound.play(Paths.sound(value1), flValue2);
 			case "Change Stage":
-				removeStage(); // Remove current stage
+				if (value1 != null && value1 != ""){
+					removeStage(); // Remove current stage
 			
-				curStage = value1; // Set new stage name
-				stageData = StageData.getStageFile(curStage); 
-				addStage();
-				
+					curStage = value1; // Set new stage name
+					stageData = StageData.getStageFile(curStage); 
+					addStage();
+	
+				}
 		}
 
 		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, flValue1, flValue2, strumTime));
@@ -3990,6 +3992,12 @@ class PlayState extends MusicBeatState
 	public function setStageDetails(stageData:StageFile){
 		defaultCamZoom = stageData.defaultZoom;
 
+		var dir:String = stageData.directory;
+		if (dir != null) {
+			Paths.setCurrentLevel(dir);
+			trace('Setting asset folder to ' + dir);
+		}
+
 		stageUI = "normal";
 		if (stageData.stageUI != null && stageData.stageUI.trim().length > 0)
 			stageUI = stageData.stageUI;
@@ -4060,9 +4068,10 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public var hardcodedObjsThatForSomeReasonIsNotBeingDestoyedOnRemoveStage:Array<Dynamic> = [];
 	public function removeStage() {
+		stagesFunc(function(stage:BaseStage) stage.destroy());
 		removeObjects(stageData);
-
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
@@ -4085,8 +4094,24 @@ class PlayState extends MusicBeatState
 
 	public function addStage(?onlyLuas:Bool=false) {
 		setStageDetails(stageData);
-		addObjects(stageData);
 
+		switch (curStage.toLowerCase())
+		{
+			case 'stage': new StageWeek1(); 			//Week 1
+			case 'spooky': new Spooky();				//Week 2
+			case 'philly': new Philly();				//Week 3
+			case 'limo': new Limo();					//Week 4
+			case 'mall': new Mall();					//Week 5 - Cocoa, Eggnog
+			case 'mallevil': new MallEvil();			//Week 5 - Winter Horrorland
+			case 'school': new School();				//Week 6 - Senpai, Roses
+			case 'schoolevil': new SchoolEvil();		//Week 6 - Thorns
+			case 'tank': new Tank();					//Week 7 - Ugh, Guns, Stress
+			case 'phillystreets': new PhillyStreets(); 	//Weekend 1 - Darnell, Lit Up, 2Hot
+			case 'phillyblazin': new PhillyBlazin();	//Weekend 1 - Blazin
+		}
+
+		stagesFunc(function(stage:BaseStage) stage.createPost());
+		addObjects(stageData);
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED 

@@ -6,11 +6,17 @@ class Spooky extends BaseStage
 	var halloweenWhite:BGSprite;
 	override function create()
 	{
+		if (!PlayState.instance.variables.exists("stageVariables")){
+			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		}
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+
 		if(!ClientPrefs.data.lowQuality) {
 			halloweenBG = new BGSprite('halloween_bg', -200, -100, ['halloweem bg0', 'halloweem bg lightning strike']);
 		} else {
 			halloweenBG = new BGSprite('halloween_bg_low', -200, -100);
 		}
+		stageVars.set("halloweenBG", halloweenBG);
 		add(halloweenBG);
 
 		//PRECACHE SOUNDS
@@ -40,6 +46,8 @@ class Spooky extends BaseStage
 	var lightningOffset:Int = 8;
 	override function beatHit()
 	{
+		if (PlayState.instance.curStage != "spooky") 
+			return; 
 		if (FlxG.random.bool(10) && curBeat > lightningStrikeBeat + lightningOffset)
 		{
 			lightningStrikeShit();
@@ -48,6 +56,9 @@ class Spooky extends BaseStage
 
 	function lightningStrikeShit():Void
 	{
+		if (PlayState.instance.curStage != "spooky") 
+			return; 
+
 		FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
 		if(!ClientPrefs.data.lowQuality) halloweenBG.animation.play('halloweem bg lightning strike');
 
@@ -82,6 +93,9 @@ class Spooky extends BaseStage
 
 	function monsterCutscene()
 	{
+		if (PlayState.instance.curStage != "spooky") 
+			return; 
+		
 		inCutscene = true;
 		camHUD.visible = false;
 

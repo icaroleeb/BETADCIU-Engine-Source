@@ -10,32 +10,45 @@ class StageWeek1 extends BaseStage
 	var dadbattleFog:DadBattleFog;
 	override function create()
 	{
+		if (!PlayState.instance.variables.exists("stageVariables")){
+			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		}
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+
 		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
+		stageVars.set("bg", bg);
 		add(bg);
 
 		var stageFront:BGSprite = new BGSprite('stagefront', -650, 600, 0.9, 0.9);
 		stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
 		stageFront.updateHitbox();
+		stageVars.set("stageFront", stageFront);
 		add(stageFront);
 		if(!ClientPrefs.data.lowQuality) {
 			var stageLight:BGSprite = new BGSprite('stage_light', -125, -100, 0.9, 0.9);
 			stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
 			stageLight.updateHitbox();
+			stageVars.set("stageLight", stageLight);
 			add(stageLight);
 			var stageLight:BGSprite = new BGSprite('stage_light', 1225, -100, 0.9, 0.9);
 			stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
 			stageLight.updateHitbox();
 			stageLight.flipX = true;
+			stageVars.set("stageLight2", stageLight);
 			add(stageLight);
 
 			var stageCurtains:BGSprite = new BGSprite('stagecurtains', -500, -300, 1.3, 1.3);
 			stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.9));
 			stageCurtains.updateHitbox();
+			stageVars.set("stageCurtains", stageCurtains);
 			add(stageCurtains);
 		}
 	}
 	override function eventPushed(event:objects.Note.EventNote)
 	{
+		if (PlayState.instance.curStage != "stage" || PlayState.instance.curStage != "stageweek1") 
+			return; 
+
 		switch(event.event)
 		{
 			case "Dadbattle Spotlight":
@@ -43,22 +56,28 @@ class StageWeek1 extends BaseStage
 				dadbattleBlack.makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
 				dadbattleBlack.alpha = 0.25;
 				dadbattleBlack.visible = false;
+				PlayState.instance.variables.get("stageVariables").set("dadbattleBlack", dadbattleBlack);
 				add(dadbattleBlack);
 
 				dadbattleLight = new BGSprite('spotlight', 400, -400);
 				dadbattleLight.alpha = 0.375;
 				dadbattleLight.blend = ADD;
 				dadbattleLight.visible = false;
+				PlayState.instance.variables.get("stageVariables").set("dadbattleLight", dadbattleLight);
 				add(dadbattleLight);
 
 				dadbattleFog = new DadBattleFog();
 				dadbattleFog.visible = false;
+				PlayState.instance.variables.get("stageVariables").set("dadbattleFog", dadbattleFog);
 				add(dadbattleFog);
 		}
 	}
 
 	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
 	{
+		if (PlayState.instance.curStage != "stage" || PlayState.instance.curStage != "stageweek1") 
+			return; 
+
 		switch(eventName)
 		{
 			case "Dadbattle Spotlight":

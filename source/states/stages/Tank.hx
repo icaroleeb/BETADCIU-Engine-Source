@@ -14,7 +14,13 @@ class Tank extends BaseStage
 
 	override function create()
 	{
+		if (!PlayState.instance.variables.exists("stageVariables")){
+			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		}
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+
 		var sky:BGSprite = new BGSprite('tankSky', -400, -400, 0, 0);
+		stageVars.set("sky", sky);
 		add(sky);
 
 		if(!ClientPrefs.data.lowQuality)
@@ -22,47 +28,58 @@ class Tank extends BaseStage
 			var clouds:BGSprite = new BGSprite('tankClouds', FlxG.random.int(-700, -100), FlxG.random.int(-20, 20), 0.1, 0.1);
 			clouds.active = true;
 			clouds.velocity.x = FlxG.random.float(5, 15);
+			stageVars.set("clouds", clouds);
 			add(clouds);
 
 			var mountains:BGSprite = new BGSprite('tankMountains', -300, -20, 0.2, 0.2);
 			mountains.setGraphicSize(Std.int(1.2 * mountains.width));
 			mountains.updateHitbox();
+			stageVars.set("mountains", mountains);
 			add(mountains);
 
 			var buildings:BGSprite = new BGSprite('tankBuildings', -200, 0, 0.3, 0.3);
 			buildings.setGraphicSize(Std.int(1.1 * buildings.width));
 			buildings.updateHitbox();
+			stageVars.set("buildings", buildings);
 			add(buildings);
 		}
 
 		var ruins:BGSprite = new BGSprite('tankRuins',-200,0,.35,.35);
 		ruins.setGraphicSize(Std.int(1.1 * ruins.width));
 		ruins.updateHitbox();
+		stageVars.set("ruins", ruins);
 		add(ruins);
 
 		if(!ClientPrefs.data.lowQuality)
 		{
 			var smokeLeft:BGSprite = new BGSprite('smokeLeft', -200, -100, 0.4, 0.4, ['SmokeBlurLeft'], true);
+			stageVars.set("smokeLeft", smokeLeft);
 			add(smokeLeft);
 			var smokeRight:BGSprite = new BGSprite('smokeRight', 1100, -100, 0.4, 0.4, ['SmokeRight'], true);
+			stageVars.set("smokeRight", smokeRight);
 			add(smokeRight);
 
 			tankWatchtower = new BGSprite('tankWatchtower', 100, 50, 0.5, 0.5, ['watchtower gradient color']);
+			stageVars.set("tankWatchtower", tankWatchtower);
 			add(tankWatchtower);
 		}
 
 		tankGround = new BackgroundTank();
+		stageVars.set("tankGround", tankGround);
 		add(tankGround);
 
 		tankmanRun = new FlxTypedGroup<TankmenBG>();
+		stageVars.set("tankmanRun", tankmanRun);
 		add(tankmanRun);
 
 		var ground:BGSprite = new BGSprite('tankGround', -420, -150);
 		ground.setGraphicSize(Std.int(1.15 * ground.width));
 		ground.updateHitbox();
+		stageVars.set("ground", ground);
 		add(ground);
 
 		foregroundSprites = new FlxTypedGroup<BGSprite>();
+		stageVars.set("foregroundSprites", foregroundSprites);
 		foregroundSprites.add(new BGSprite('tank0', -500, 650, 1.7, 1.5, ['fg']));
 		if(!ClientPrefs.data.lowQuality) foregroundSprites.add(new BGSprite('tank1', -300, 750, 2, 0.2, ['fg']));
 		foregroundSprites.add(new BGSprite('tank2', 450, 940, 1.5, 1.5, ['foreground']));
@@ -99,6 +116,7 @@ class Tank extends BaseStage
 				if(gf.curCharacter == 'pico-speaker')
 				{
 					var firstTank:TankmenBG = new TankmenBG(20, 500, true);
+					PlayState.instance.variables.get("stageVariables").set("firstTank", firstTank);
 					firstTank.resetShit(20, 1500, true);
 					firstTank.strumTime = 10;
 					firstTank.visible = false;
@@ -110,6 +128,7 @@ class Tank extends BaseStage
 							var tankBih = tankmanRun.recycle(TankmenBG);
 							tankBih.strumTime = TankmenBG.animationNotes[i][0];
 							tankBih.resetShit(500, 200 + FlxG.random.int(50, 100), TankmenBG.animationNotes[i][1] < 2);
+							PlayState.instance.variables.get("stageVariables").set("tankBih", tankBih);
 							tankmanRun.add(tankBih);
 						}
 					}
@@ -119,10 +138,26 @@ class Tank extends BaseStage
 		}
 	}
 
-	override function countdownTick(count:Countdown, num:Int) if(num % 2 == 0) everyoneDance();
-	override function beatHit() everyoneDance();
+	override function destroy() { // sigh...
+		remove(tankmanRun);
+		remove(foregroundSprites);
+	}
+
+	override function countdownTick(count:Countdown, num:Int) {
+		if (PlayState.instance.curStage != "tank") 
+			return; 
+
+		if(num % 2 == 0) everyoneDance();
+	}
+	override function beatHit(){
+		if (PlayState.instance.curStage != "tank") 
+			return; 
+		everyoneDance();
+	} 
 	function everyoneDance()
 	{
+		if (PlayState.instance.curStage != "tank") 
+			return; 
 		if(!ClientPrefs.data.lowQuality) tankWatchtower.dance();
 		foregroundSprites.forEach(function(spr:BGSprite)
 		{
@@ -138,6 +173,8 @@ class Tank extends BaseStage
 	var audioPlaying:FlxSound;
 	function prepareCutscene()
 	{
+		if (PlayState.instance.curStage != "tank") 
+			return; 
 		cutsceneHandler = new CutsceneHandler();
 
 		dadGroup.alpha = 0.00001;
@@ -193,6 +230,8 @@ class Tank extends BaseStage
 
 	function ughIntro()
 	{
+		if (PlayState.instance.curStage != "tank") 
+			return; 
 		prepareCutscene();
 		cutsceneHandler.endTime = 12;
 		cutsceneHandler.music = 'DISTORTO';
@@ -246,6 +285,8 @@ class Tank extends BaseStage
 	}
 	function gunsIntro()
 	{
+		if (PlayState.instance.curStage != "tank") 
+			return; 
 		prepareCutscene();
 		cutsceneHandler.endTime = 11.5;
 		cutsceneHandler.music = 'DISTORTO';
@@ -279,6 +320,8 @@ class Tank extends BaseStage
 	var dualWieldAnimPlayed = 0;
 	function stressIntro()
 	{
+		if (PlayState.instance.curStage != "tank") 
+			return; 
 		prepareCutscene();
 		
 		cutsceneHandler.endTime = 35.5;
@@ -401,6 +444,8 @@ class Tank extends BaseStage
 
 	function zoomBack()
 	{
+		if (PlayState.instance.curStage != "tank") 
+			return; 
 		var calledTimes:Int = 0;
 		camFollow.setPosition(630, 425);
 		FlxG.camera.snapToTarget();
