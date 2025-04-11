@@ -58,7 +58,6 @@ class Limo extends BaseStage
 
 			grpLimoDancers = new FlxTypedGroup<BackgroundDancer>();
 			stageVars.set("grpLimoDancers", grpLimoDancers);
-			PlayState.instance.hardcodedObjsThatForSomeReasonIsNotBeingDestoyedOnRemoveStage.push(grpLimoDancers);
 			add(grpLimoDancers);
 
 			for (i in 0...5)
@@ -106,16 +105,19 @@ class Limo extends BaseStage
 		stageVars.set("limo", limo);
 	}
 
-	override function destroy() { // sigh...
-		remove(limo);
-		remove(fastCar);
-		remove(grpLimoDancers);
+	override public function destroy():Void {
+		if (grpLimoDancers != null) { // fuck u <3.
+			remove(grpLimoDancers);
+			grpLimoDancers.destroy();
+			grpLimoDancers = null;
+		}
+		super.destroy();
 	}
 
 	var limoSpeed:Float = 0;
 	override function update(elapsed:Float)
 	{
-		if (PlayState.instance.curStage != "limo") 
+		if (PlayState.instance.curStage.toLowerCase() != "limo") 
 			return; 
 		
 		if(!ClientPrefs.data.lowQuality) {
@@ -202,7 +204,7 @@ class Limo extends BaseStage
 
 	override function beatHit()
 	{
-		if (PlayState.instance.curStage != "limo") 
+		if (PlayState.instance.curStage.toLowerCase() != "limo") 
 			return; 
 
 		if(!ClientPrefs.data.lowQuality) {
@@ -219,7 +221,7 @@ class Limo extends BaseStage
 	// Substates for pausing/resuming tweens and timers
 	override function closeSubState()
 	{
-		if (PlayState.instance.curStage != "limo") 
+		if (PlayState.instance.curStage.toLowerCase() != "limo") 
 			return; 
 
 		if(paused)
@@ -230,7 +232,7 @@ class Limo extends BaseStage
 
 	override function openSubState(SubState:flixel.FlxSubState)
 	{
-		if (PlayState.instance.curStage != "limo") 
+		if (PlayState.instance.curStage.toLowerCase() != "limo") 
 			return; 
 
 		if(paused)
@@ -241,7 +243,7 @@ class Limo extends BaseStage
 
 	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage != "limo") 
+		if (PlayState.instance.curStage.toLowerCase() != "limo") 
 			return; 
 
 		switch(eventName)

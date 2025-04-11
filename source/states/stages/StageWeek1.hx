@@ -46,7 +46,7 @@ class StageWeek1 extends BaseStage
 	}
 	override function eventPushed(event:objects.Note.EventNote)
 	{
-		if (PlayState.instance.curStage != "stage" || PlayState.instance.curStage != "stageweek1") 
+		if (PlayState.instance.curStage.toLowerCase() != "stage" || PlayState.instance.curStage.toLowerCase() != "stageweek1") 
 			return; 
 
 		switch(event.event)
@@ -75,7 +75,7 @@ class StageWeek1 extends BaseStage
 
 	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage != "stage" || PlayState.instance.curStage != "stageweek1") 
+		if (PlayState.instance.curStage.toLowerCase() != "stage" || PlayState.instance.curStage.toLowerCase() != "stageweek1") 
 			return; 
 
 		switch(eventName)
@@ -112,5 +112,8 @@ class StageWeek1 extends BaseStage
 						FlxTween.tween(dadbattleFog, {alpha: 0}, 0.7, {onComplete: function(twn:FlxTween) dadbattleFog.visible = false});
 				}
 		}
+	}
+	override public function destroy():Void {
+		super.destroy();
 	}
 }

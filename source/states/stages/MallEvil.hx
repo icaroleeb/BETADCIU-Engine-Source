@@ -37,6 +37,10 @@ class MallEvil extends BaseStage
 		}
 	}
 
+	override public function destroy():Void {
+		super.destroy();
+	}
+
 	function winterHorrorlandCutscene()
 	{
 		camHUD.visible = false;

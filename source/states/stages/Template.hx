@@ -151,4 +151,8 @@ class Template extends BaseStage
 	{
 		// Code here
 	}
+
+	override public function destroy():Void {
+		// super.destroy(); // Use This to if you wanna do stage changing with hardcoded stages
+	}
 }
