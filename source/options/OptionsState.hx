@@ -23,8 +23,6 @@ class OptionsState extends MusicBeatState
 	function openSelectedSubstate(label:String) {
 		switch(label)
 		{
-			case 'BETADCIU':
-				openSubState(new options.BETADCIUOptionsSubState());
 			case 'Note Colors':
 				openSubState(new options.NotesColorSubState());
 			case 'Controls':
