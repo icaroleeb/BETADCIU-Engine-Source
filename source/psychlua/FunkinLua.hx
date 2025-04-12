@@ -2418,10 +2418,16 @@ class FunkinLua {
 		switch (type.toLowerCase())
 		{
 			case 'timer':
-				variables.remove(tag);
+				if (variables.get(tag) != null) variables.remove(tag);
 				if(PlayState.instance != null) PlayState.instance.callOnLuas('onTimerCompleted', [tag]);
 			default:
-				variables.remove(tag);
+				var twn:FlxTween = variables.get(tag);
+				if(twn != null)
+				{
+					twn.cancel();
+					twn.destroy();
+					variables.remove(tag);
+				}
 				if(PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
 		}
 	}
