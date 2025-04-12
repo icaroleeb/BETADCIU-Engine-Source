@@ -7,6 +7,7 @@ import states.editors.MasterEditorMenu;
 import options.OptionsState;
 
 import states.betadciu.BETADCIUState;
+import states.betadciu.BonusSongsState;
 
 enum MainMenuColumn {
 	LEFT;
@@ -335,7 +336,7 @@ class MainMenuState extends MusicBeatState
 						case 'betadciu':
 							MusicBeatState.switchState(new BETADCIUState());
 						case 'bonus_songs':
-							MusicBeatState.switchState(new FreeplayState());
+							MusicBeatState.switchState(new BonusSongsState());
 						case 'story_mode':
 							MusicBeatState.switchState(new StoryMenuState());
 						case 'freeplay':

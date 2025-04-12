@@ -29,6 +29,26 @@ class Paths
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT = "mp4";
 
+	#if desktop
+	public static var ignoreModFolders:Array<String> = [
+//		'BETADCIU',
+		'characters',
+		'custom_events',
+		'custom_notetypes',
+		'data',
+		'songs',
+		'music',
+		'sounds',
+		'videos',
+		'images',
+		'stages',
+		'weeks',
+		'fonts',
+		'scripts',
+		'achievements'
+	];
+	#end
+
 	private static var _previousErrorMessage:String = ""; // No more spammed errors
 
 	public static function excludeAsset(key:String) {
@@ -181,6 +201,11 @@ class Paths
 				return levelPath;
 		}
 		return getSharedPath(file);
+	}
+
+	inline public static function getPreloadPath(file:String = "")
+	{
+		return 'assets/$file';
 	}
 
 	inline static public function getFolderPath(file:String, folder = "shared")
@@ -518,6 +543,20 @@ class Paths
 				return fileToCheck;
 		}
 		return 'mods/' + key;
+	}
+
+	static public function getModDirectories():Array<String> {
+		var list:Array<String> = [];
+		var modsFolder:String = Paths.mods();
+		if(FileSystem.exists(modsFolder)) {
+			for (folder in FileSystem.readDirectory(modsFolder)) {
+				var path = haxe.io.Path.join([modsFolder, folder]);
+				if (sys.FileSystem.isDirectory(path) && !Paths.ignoreModFolders.contains(folder) && !list.contains(folder)) {
+					list.push(folder);
+				}
+			}
+		}
+		return list;
 	}
 	#end
 

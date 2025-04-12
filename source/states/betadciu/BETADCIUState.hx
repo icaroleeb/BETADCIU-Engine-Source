@@ -77,7 +77,7 @@ class BETADCIUState extends MusicBeatState
 		
 		persistentUpdate = true;
 		PlayState.isStoryMode = false;
-		WeekData.reloadWeekFiles(false);
+		WeekData.reloadWeekFiles(false, 1);
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
