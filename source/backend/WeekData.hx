@@ -103,7 +103,7 @@ class WeekData {
 		#if desktop
 		var disabledMods:Array<String> = [];
 		var modsListPath:String = 'modsList.txt';
-		var directories:Array<String> = [Paths.mods(), Paths.getPreloadPath()];
+		var directories:Array<String> = [Paths.mods(), Paths.getSharedPath()];
 		var originalLength:Int = directories.length;
 
 		switch(menuNo)
@@ -116,10 +116,10 @@ class WeekData {
 				switch (menuNo)
 				{
 					case 1: suf = '-betadciu'; //BETADCIU menu.
-					case 2: suf = '-bonus'; //Bonus Songs Menu
+					case 2: suf = '-bonus';    //Bonus Songs Menu
 					case 3: suf = '-neonight'; //Neonight Menu
-					case 4: suf = '-vitor'; //Vitor Menu
-					case 5: suf = '-guest'; //Other BETADCIU creators menu.
+					case 4: suf = '-vitor';    //Vitor Menu
+					case 5: suf = '-guest';    //Other BETADCIU creators menu.
 				}
 				#if desktop
 				var directory:String = Paths.modFolders('BETADCIU') + '/weeks/';
@@ -197,11 +197,11 @@ class WeekData {
 			}
 		}
 		#else
-		var directories:Array<String> = [Paths.getPreloadPath()];
+		var directories:Array<String> = [Paths.getSharedPath()];
 		var originalLength:Int = directories.length;
 		#end
 
-		var sexList:Array<String> = CoolUtil.coolTextFile(Paths.getPreloadPath('weeks/weekList.txt'));
+		var sexList:Array<String> = CoolUtil.coolTextFile(Paths.getSharedPath('weeks/weekList.txt'));
 		for (i in 0...sexList.length) {
 			for (j in 0...directories.length) {
 				var fileToCheck:String = directories[j] + 'weeks/' + sexList[i] + '.json';
