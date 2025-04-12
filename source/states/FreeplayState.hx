@@ -237,6 +237,11 @@ class FreeplayState extends MusicBeatState
 	var stopMusicPlay:Bool = false;
 	override function update(elapsed:Float)
 	{
+		PlayState.isBETADCIU = false; 
+		PlayState.isBonus = false; 
+		PlayState.isNeonight = false;
+		PlayState.isVitor = false;
+
 		if(WeekData.weeksList.length < 1)
 			return;
 

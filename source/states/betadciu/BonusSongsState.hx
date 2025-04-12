@@ -239,6 +239,13 @@ class BonusSongsState extends MusicBeatState
 	public var stopMusicPlay:Bool = false;
 	override function update(elapsed:Float)
 	{
+		PlayState.isBonus = true; //gotta move this cuz of the format thing
+
+		PlayState.isStoryMode = false;	
+		PlayState.isNeonight = false;
+		PlayState.isVitor = false;
+		PlayState.isBETADCIU = false; 
+
 		if(WeekData.weeksList.length < 1)
 			return;
 
