@@ -196,10 +196,10 @@ class Note extends FlxSprite
 		return value;
 	}
 
-	public function defaultRGB()
+	public function defaultRGB(?pixelShit:Bool=false)
 	{
 		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData];
-		if(PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixel[noteData];
+		if(pixelShit) arr = ClientPrefs.data.arrowRGBPixel[noteData];
 
 		if (arr != null && noteData > -1 && noteData <= arr.length)
 		{
@@ -388,7 +388,17 @@ class Note extends FlxSprite
 	public var isLegacyNoteSkin:Bool = false;
 
 	public function reloadNote(texture:String = '', postfix:String = '') {
-		if(texture == null) texture = '';
+		if(texture.length < 1) {
+			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
+				texture = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
+			} else texture = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
+
+			if(texture == null || texture.length < 1) texture = defaultNoteSkin + postfix;
+		}
+		else rgbShader.enabled = false;
+
+		if(texture == null) texture = 'noteSkins/NOTE_assets';
+		if(texture == "") texture = 'noteSkins/NOTE_assets'; // legacy charts bug fix
 		if(postfix == null) postfix = '';
 
 		separateSheets = false;
@@ -396,16 +406,16 @@ class Note extends FlxSprite
 		isLegacyNoteSkin = false;
 
 		var skin:String = texture + postfix;
-		if(texture.length < 1)
-		{
-			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
-				skin = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
-			} else skin = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
-						
-			if(skin == null || skin.length < 1)
-				skin = defaultNoteSkin + postfix;
+		var notePath:String = texture;
+		if (notePath == 'pixel') {
+			notePath = "NOTE_assets-pixel";
+			skin = texture + postfix;
+			notePath = texture;
+		} else if (texture == 'normal') {
+			texture = "NOTE_assets";
+			skin = texture + postfix;
+			notePath = texture;
 		}
-		else rgbShader.enabled = false;
 
 		var isCustomNoteSkin:Bool = false;
 		var CustomNoteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
@@ -419,6 +429,7 @@ class Note extends FlxSprite
 		}
 
 		var skinPixel:String = skin;
+		var isPixelNote:Bool = false;
 		var lastScaleY:Float = scale.y;
 		var skinPostfix:String = getNoteSkinPostfix();
 		var customSkin:String = skin + skinPostfix;
@@ -433,7 +444,7 @@ class Note extends FlxSprite
 
 		var curSkin = skin;
 
-		for(noteDirectory in ["noteSkins/", "notes/"]){
+		for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/Notes/"]) {
 			final fullPath = '$noteDirectory$skin';
 			final weekendPath = '$fullPath/notes';
 			var jsonPath = fullPath;
@@ -453,31 +464,36 @@ class Note extends FlxSprite
 
 			if (curSkin != skin){
 				isLegacyNoteSkin = (noteDirectory == "notes/");
+				if (noteDirectory.startsWith("pixelUI/") || StringTools.contains(skin, "-pixel")) {
+					isPixelNote = true;
+				}
 				break;
 			}
 		}
-
-		if (!skin.endsWith('normal') && !skin.endsWith('NOTE_assets') && !skin.endsWith('NOTE_assets-chip') && !skin.endsWith('NOTE_assets-future') && !isCustomNoteSkin) rgbShader.enabled = false;
 		
-		if(PlayState.isPixelStage) {
+		defaultRGB(isPixelNote);
+
+		if (!skin.endsWith('NOTE_assets') && !skin.endsWith('NOTE_assets-chip') && !skin.endsWith('NOTE_assets-future') && !isCustomNoteSkin) rgbShader.enabled = false;
+		
+		if(isPixelNote) {
 			if(isSustainNote) {
-				var graphic = Paths.image('pixelUI/' + skinPixel + 'ENDS' + skinPostfix);
+				var graphic = Paths.image(skin + 'ENDS' + skinPostfix);
 				try{
 					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
 				} catch(e) {
-					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin +  'ENDS' + skinPostfix);
+					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixelENDS' + skinPostfix);
 					graphic = fallbackShit;
 					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
 				}
 				originalHeight = graphic.height / 2;
 			} else {
-				var graphic = Paths.image('pixelUI/' + skinPixel + skinPostfix);
+				var graphic = Paths.image(skin + skinPostfix);
 				try {
 					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 				} catch(e) {
 					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + skinPostfix);
 					graphic = fallbackShit;
-					var graphic = Paths.image('pixelUI/' + Note.defaultNoteSkin + skinPostfix);
+					var graphic = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixel' + skinPostfix);
 					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 				}
 			}

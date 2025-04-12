@@ -179,6 +179,7 @@ class MainMenuState extends MusicBeatState
 	}
 
 	var selectedSomethin:Bool = false;
+	var isLeftItems:Bool = false;
 
 	var timeNotMoving:Float = 0;
 	override function update(elapsed:Float)
@@ -188,12 +189,14 @@ class MainMenuState extends MusicBeatState
 
 		if (!selectedSomethin)
 		{
-			if (controls.UI_UP_P){
-				changeItem(-1);
-			}
+			if(isLeftItems){
+				if (controls.UI_UP_P){
+					changeItem(-1);
+				}
 
-			if (controls.UI_DOWN_P){
-				changeItem(1);
+				if (controls.UI_DOWN_P){
+					changeItem(1);
+				}
 			}
 
 			var allowMouse:Bool = allowMouse;
@@ -269,27 +272,53 @@ class MainMenuState extends MusicBeatState
 			switch(curColumn)
 			{
 				case CENTER:
-					if(controls.UI_LEFT_P && leftOption != null)
+					
+					//if(controls.UI_RIGHT_P && leftOption != null)
+					//{
+					//	curColumn = LEFT;
+					//	changeItem();
+					//} 
+					/*/else/*/ 
+					if(controls.UI_RIGHT_P && rightOption != null)
 					{
-						curColumn = LEFT;
-						changeItem();
-					}
-					else if(controls.UI_RIGHT_P && rightOption != null)
-					{
+						isLeftItems = false;
 						curColumn = RIGHT;
 						changeItem();
 					}
 
 				case LEFT:
+					/*/
+					if(FlxG.keys.pressed.UP)
+					{
+						curColumn = CENTER;
+						changeItem();
+					}
+					/*/
+
+					/*/
 					if(controls.UI_RIGHT_P)
 					{
 						curColumn = CENTER;
 						changeItem();
 					}
+					/*/
 
 				case RIGHT:
+					if(FlxG.keys.pressed.UP)
+					{
+						isLeftItems = true;
+						curColumn = LEFT;
+						changeItem();
+					} else if(FlxG.keys.pressed.DOWN)
+					{
+						isLeftItems = true;
+						curColumn = RIGHT;
+						changeItem();
+					}
+
 					if(controls.UI_LEFT_P)
 					{
+						isLeftItems = true;
 						curColumn = CENTER;
 						changeItem();
 					}
@@ -419,8 +448,8 @@ class MainMenuState extends MusicBeatState
 		{
 			case CENTER:
 				selectedItem = menuItems.members[curSelected];
-				FlxTween.tween(selectedItem, {x: -340}, 0.26,{ease: FlxEase.expoOut, onComplete: function(flxTween:FlxTween){
-					selectedItem.x = -340;
+				FlxTween.tween(selectedItem, {x: -440}, 0.26,{ease: FlxEase.expoOut, onComplete: function(flxTween:FlxTween){
+					selectedItem.x = -440;
 				}});
 			case LEFT:
 				selectedItem = leftItem;

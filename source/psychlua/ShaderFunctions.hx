@@ -448,17 +448,32 @@ class ShaderFunctions
 
 	static function removeCameraShader(leObj:Dynamic, ?shader:String = ""){
 		var newCamEffects = [];
-		if (shader != "") {
-			var daFilters = leObj.filters != null ? leObj.filters : [];
-			var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
-			for (filter in daFilters) {
-				if (filter.shader.glFragmentSource == processFragmentSource(arr[0])) {
-					continue;
-				}
-				newCamEffects.push(filter);
+
+		if (shader != "" && shader.length > 0)
+		{
+			var daFilters = [];
+			var swagFilters = [];
+
+			if (leObj.filters != null){
+				daFilters = leObj.filters;
+				swagFilters = leObj.filters;
 			}
+
+			var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
+			
+			for (i in 0...daFilters.length){	
+				var filter:ShaderFilter = daFilters[i];
+
+				if (filter.shader.glFragmentSource == processFragmentSource(arr[0])){
+					swagFilters.remove(filter);
+					break;
+				}
+			}
+			
+			newCamEffects = swagFilters;
 		}
+		
 		leObj.setFilters(newCamEffects);
-}
+	}
 	#end
 }
