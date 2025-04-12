@@ -1,4 +1,4 @@
-package states;
+package states.betadciu;
 
 import backend.WeekData;
 import backend.Highscore;
@@ -6,6 +6,7 @@ import backend.Song;
 
 import objects.HealthIcon;
 import objects.MusicPlayer;
+import objects.MusicPlayerBETADCIU;
 
 import options.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
@@ -17,40 +18,40 @@ import openfl.utils.Assets;
 
 import haxe.Json;
 
-class FreeplayState extends MusicBeatState
+class BETADCIUState extends MusicBeatState
 {
-	var songs:Array<SongMetadata> = [];
+	public var songs:Array<SongMetadata> = [];
 
-	var selector:FlxText;
-	private static var curSelected:Int = 0;
-	var lerpSelected:Float = 0;
-	var curDifficulty:Int = -1;
-	private static var lastDifficultyName:String = Difficulty.getDefault();
+	public var selector:FlxText;
+	public static var curSelected:Int = 0;
+	public var lerpSelected:Float = 0;
+	public var curDifficulty:Int = -1;
+	public var lastDifficultyName:String = Difficulty.getDefault();
 
-	var scoreBG:FlxSprite;
-	var scoreText:FlxText;
-	var diffText:FlxText;
-	var lerpScore:Int = 0;
-	var lerpRating:Float = 0;
-	var intendedScore:Int = 0;
-	var intendedRating:Float = 0;
+	public var scoreBG:FlxSprite;
+	public var scoreText:FlxText;
+	public var diffText:FlxText;
+	public var lerpScore:Int = 0;
+	public var lerpRating:Float = 0;
+	public var intendedScore:Int = 0;
+	public var intendedRating:Float = 0;
 
-	private var grpSongs:FlxTypedGroup<Alphabet>;
-	private var curPlaying:Bool = false;
+	public var grpSongs:FlxTypedGroup<Alphabet>;
+	public var curPlaying:Bool = false;
 
-	private var iconArray:Array<HealthIcon> = [];
+	public var iconArray:Array<HealthIcon> = [];
 
-	var bg:FlxSprite;
-	var intendedColor:Int;
+	public var bg:FlxSprite;
+	public var intendedColor:Int;
 
-	var missingTextBG:FlxSprite;
-	var missingText:FlxText;
+	public var missingTextBG:FlxSprite;
+	public var missingText:FlxText;
 
-	var bottomString:String;
-	var bottomText:FlxText;
-	var bottomBG:FlxSprite;
+	public var bottomString:String;
+	public var bottomText:FlxText;
+	public var bottomBG:FlxSprite;
 
-	var player:MusicPlayer;
+	public var playerBETADCIU:MusicPlayerBETADCIU;
 
 	override function create()
 	{
@@ -80,7 +81,7 @@ class FreeplayState extends MusicBeatState
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("In the Menus", null);
+		DiscordClient.changePresence("In BETADCIU Menu", null);
 		#end
 
 		if(WeekData.weeksList.length < 1)
@@ -133,12 +134,12 @@ class FreeplayState extends MusicBeatState
 			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
 			songText.targetY = i;
 			grpSongs.add(songText);
-			
+
 			songText.screenCenter(X);
 			songText.changeX = false;
 
-			songText.scaleX = Math.min(1, 980 / songText.width);
-			songText.snapToPosition();
+			//songText.scaleX = Math.min(1, 980 / songText.width);
+			//songText.snapToPosition();
 
 			Mods.currentModDirectory = songs[i].folder;
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
@@ -203,8 +204,8 @@ class FreeplayState extends MusicBeatState
 		bottomText.scrollFactor.set();
 		add(bottomText);
 		
-		player = new MusicPlayer(this);
-		add(player);
+		playerBETADCIU = new MusicPlayerBETADCIU(this);
+		add(playerBETADCIU);
 		
 		changeSelection();
 		updateTexts();
@@ -229,12 +230,12 @@ class FreeplayState extends MusicBeatState
 		return (!leWeek.startUnlocked && leWeek.weekBefore.length > 0 && (!StoryMenuState.weekCompleted.exists(leWeek.weekBefore) || !StoryMenuState.weekCompleted.get(leWeek.weekBefore)));
 	}
 
-	var instPlaying:Int = -1;
+	public var instPlaying:Int = -1;
 	public static var vocals:FlxSound = null;
 	public static var opponentVocals:FlxSound = null;
-	var holdTime:Float = 0;
+	public var holdTime:Float = 0;
 
-	var stopMusicPlay:Bool = false;
+	public var stopMusicPlay:Bool = false;
 	override function update(elapsed:Float)
 	{
 		if(WeekData.weeksList.length < 1)
@@ -261,7 +262,7 @@ class FreeplayState extends MusicBeatState
 		var shiftMult:Int = 1;
 		if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
 
-		if (!player.playingMusic)
+		if (!playerBETADCIU.playingMusic)
 		{
 			scoreText.text = Language.getPhrase('personal_best', 'PERSONAL BEST: {1} ({2}%)', [lerpScore, ratingSplit.join('.')]);
 			positionHighscore();
@@ -322,15 +323,15 @@ class FreeplayState extends MusicBeatState
 
 		if (controls.BACK)
 		{
-			if (player.playingMusic)
+			if (playerBETADCIU.playingMusic)
 			{
 				FlxG.sound.music.stop();
 				destroyFreeplayVocals();
 				FlxG.sound.music.volume = 0;
 				instPlaying = -1;
 
-				player.playingMusic = false;
-				player.switchPlayMusic();
+				playerBETADCIU.playingMusic = false;
+				playerBETADCIU.switchPlayMusic();
 
 				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 				FlxTween.tween(FlxG.sound.music, {volume: 1}, 1);
@@ -343,14 +344,14 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
-		if(FlxG.keys.justPressed.CONTROL && !player.playingMusic)
+		if(FlxG.keys.justPressed.CONTROL && !playerBETADCIU.playingMusic)
 		{
 			persistentUpdate = false;
 			openSubState(new GameplayChangersSubstate());
 		}
 		else if(FlxG.keys.justPressed.SPACE)
 		{
-			if(instPlaying != curSelected && !player.playingMusic)
+			if(instPlaying != curSelected && !playerBETADCIU.playingMusic)
 			{
 				destroyFreeplayVocals();
 				FlxG.sound.music.volume = 0;
@@ -413,17 +414,17 @@ class FreeplayState extends MusicBeatState
 				FlxG.sound.music.pause();
 				instPlaying = curSelected;
 
-				player.playingMusic = true;
-				player.curTime = 0;
-				player.switchPlayMusic();
-				player.pauseOrResume(true);
+				playerBETADCIU.playingMusic = true;
+				playerBETADCIU.curTime = 0;
+				playerBETADCIU.switchPlayMusic();
+				playerBETADCIU.pauseOrResume(true);
 			}
-			else if (instPlaying == curSelected && player.playingMusic)
+			else if (instPlaying == curSelected && playerBETADCIU.playingMusic)
 			{
-				player.pauseOrResume(!player.playing);
+				playerBETADCIU.pauseOrResume(!playerBETADCIU.playing);
 			}
 		}
-		else if (controls.ACCEPT && !player.playingMusic)
+		else if (controls.ACCEPT && !playerBETADCIU.playingMusic)
 		{
 			persistentUpdate = false;
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
@@ -472,7 +473,7 @@ class FreeplayState extends MusicBeatState
 			DiscordClient.loadModRPC();
 			#end
 		}
-		else if(controls.RESET && !player.playingMusic)
+		else if(controls.RESET && !playerBETADCIU.playingMusic)
 		{
 			persistentUpdate = false;
 			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
@@ -509,7 +510,7 @@ class FreeplayState extends MusicBeatState
 
 	function changeDiff(change:Int = 0)
 	{
-		if (player.playingMusic)
+		if (playerBETADCIU.playingMusic)
 			return;
 
 		curDifficulty = FlxMath.wrap(curDifficulty + change, 0, Difficulty.list.length-1);
@@ -532,7 +533,7 @@ class FreeplayState extends MusicBeatState
 
 	function changeSelection(change:Int = 0, playSound:Bool = true)
 	{
-		if (player.playingMusic)
+		if (playerBETADCIU.playingMusic)
 			return;
 
 		curSelected = FlxMath.wrap(curSelected + change, 0, songs.length-1);
@@ -546,6 +547,9 @@ class FreeplayState extends MusicBeatState
 			FlxTween.cancelTweensOf(bg);
 			FlxTween.color(bg, 1, bg.color, intendedColor);
 		}
+
+		var bullShitX:Int = 0;
+		var bullShitY:Int = 0;
 
 		for (num => item in grpSongs.members)
 		{
@@ -581,7 +585,7 @@ class FreeplayState extends MusicBeatState
 	inline private function _updateSongLastDifficulty()
 		songs[curSelected].lastDifficulty = Difficulty.getString(curDifficulty, false);
 
-	private function positionHighscore()
+	public function positionHighscore()
 	{
 		scoreText.x = FlxG.width - scoreText.width - 6;
 		scoreBG.scale.x = FlxG.width - scoreText.x + 6;

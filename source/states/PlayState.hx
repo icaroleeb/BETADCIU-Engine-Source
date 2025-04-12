@@ -123,6 +123,7 @@ class PlayState extends MusicBeatState
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
 	public var curStage:String = '';
+
 	public static var stageUI(default, set):String = "normal";
 	public static var uiPrefix:String = "";
 	public static var uiPostfix:String = "";
@@ -146,6 +147,10 @@ class PlayState extends MusicBeatState
 
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
+	public static var isBETADCIU:Bool = false;
+	public static var isNeonight:Bool = false;
+	public static var isVitor:Bool = false;
+	public static var isBonus:Bool = false;
 	public static var storyWeek:Int = 0;
 	public static var storyPlaylist:Array<String> = [];
 	public static var storyDifficulty:Int = 1;

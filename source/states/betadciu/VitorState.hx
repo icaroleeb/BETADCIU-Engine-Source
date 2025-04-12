@@ -1,4 +1,4 @@
-package states;
+package states.betadciu;
 
 import backend.WeekData;
 import backend.Highscore;
@@ -17,7 +17,7 @@ import openfl.utils.Assets;
 
 import haxe.Json;
 
-class FreeplayState extends MusicBeatState
+class VitorState extends MusicBeatState
 {
 	var songs:Array<SongMetadata> = [];
 
@@ -608,7 +608,7 @@ class FreeplayState extends MusicBeatState
 		{
 			var item:Alphabet = grpSongs.members[i];
 			item.visible = item.active = true;
-			item.x = 450; //+ ((item.targetY - lerpSelected) * 0.01 * item.distancePerItem.x) + item.startPosition.x;
+			item.x = ((item.targetY - lerpSelected) * item.distancePerItem.x) + item.startPosition.x;
 			item.y = ((item.targetY - lerpSelected) * 1.3 * item.distancePerItem.y) + item.startPosition.y;
 
 			var icon:HealthIcon = iconArray[i];
