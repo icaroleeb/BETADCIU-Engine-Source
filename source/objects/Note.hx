@@ -546,8 +546,8 @@ class Note extends FlxSprite
 			try {
 				frames = Paths.getSparrowAtlas(skin);
 			} catch(e){
+				rgbShader.enabled = true;
 				texture = Note.defaultNoteSkin;
-				// rgbShader.enabled = true;
 			}
 		}
 	}
