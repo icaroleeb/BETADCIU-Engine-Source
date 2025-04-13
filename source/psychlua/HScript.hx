@@ -81,8 +81,10 @@ class HScript extends Iris
 	}
 	#end
 
+	public var scriptType:String = '';
+
 	public var origin:String;
-	override public function new(?parent:Dynamic, ?file:String, ?varsToBring:Any = null, ?manualRun:Bool = false)
+	override public function new(?parent:Dynamic, ?file:String, ?scriptType:String = "", ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
 		if (file == null)
 			file = '';
@@ -99,6 +101,8 @@ class HScript extends Iris
 		}
 		var scriptThing:String = file;
 		var scriptName:String = null;
+		var scriptType:String = null;
+
 		if(parent == null && file != null)
 		{
 			var f:String = file.replace('\\', '/');
@@ -358,19 +362,71 @@ class HScript extends Iris
 		set('Function_StopHScript', LuaUtils.Function_StopHScript);
 		set('Function_StopAll', LuaUtils.Function_StopAll);
 
-		set('add', function(obj:FlxBasic){
+		set('add', function(obj:FlxBasic, obj2:String = ""){
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					var variables = MusicBeatState.getVariables();
+
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageVariables");
+
+					stageVars.set(obj2, obj);
+				}
+
 			PlayState.instance.add(obj);
 		});
 
-		set('addBehindGF', function(obj:FlxBasic){
+		set('addBehindGF', function(obj:FlxBasic, obj2:String = ""){
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					var variables = MusicBeatState.getVariables();
+
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageVariables");
+
+					stageVars.set(obj2, obj);
+				}
+
 			PlayState.instance.addBehindGF(obj);
 		});
 
-		set('addBehindDad', function(obj:FlxBasic){
+		set('addBehindDad', function(obj:FlxBasic, obj2:String = ""){
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					var variables = MusicBeatState.getVariables();
+
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageVariables");
+
+					stageVars.set(obj2, obj);
+				}
+
 			PlayState.instance.addBehindDad(obj);
 		});
 
-		set('addBehindBF', function(obj:FlxBasic){
+		set('addBehindBF', function(obj:FlxBasic, obj2:String = ""){
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					var variables = MusicBeatState.getVariables();
+
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageVariables");
+
+					stageVars.set(obj2, obj);
+				}
+
 			PlayState.instance.addBehindBF(obj);
 		});
 
