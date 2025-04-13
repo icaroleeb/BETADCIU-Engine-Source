@@ -3609,7 +3609,7 @@ class PlayState extends MusicBeatState
 		{
 			if (Iris.instances.exists(scriptToLoad)) return false;
 
-			initHScript(scriptToLoad);
+			initHScript(scriptToLoad, scriptType);
 			return true;
 		}
 		return false;
@@ -3636,7 +3636,7 @@ class PlayState extends MusicBeatState
 			return false;
 		}
 
-	public function initHScript(file:String)
+	public function initHScript(file:String, ?scriptType:String = "")
 	{
 		var newScript:HScript = null;
 		try
@@ -3650,7 +3650,7 @@ class PlayState extends MusicBeatState
 		{
 			var pos:HScriptInfos = cast {fileName: file, showLine: false};
 			Iris.error(Printer.errorToString(e, false), pos);
-			var newScript:HScript = cast (Iris.instances.get(file), HScript);
+			var newScript:HScript = cast (Iris.instances.get(file), HScript, );
 			if(newScript != null)
 				newScript.destroy();
 		}
