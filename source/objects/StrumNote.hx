@@ -27,9 +27,6 @@ class StrumNote extends OffsettableSprite
 
 	// Weekend Note Implementation
 	public var separateSheets:Bool = false;
-
-	// I don't like using isPixelStage;
-	public var isPixel:Bool = false;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -82,6 +79,7 @@ class StrumNote extends OffsettableSprite
 	}
 
 	public var isLegacyNoteSkin:Bool = false;
+	public var isPixelNote:Bool = false; // Needs to be global since it's used in playAnim
 
 	public function reloadNote()
 	{
@@ -97,9 +95,9 @@ class StrumNote extends OffsettableSprite
 		if (notePath == 'normal') notePath = "NOTE_assets";
 
 		var curNotePath = notePath;
-		var isPixelNote:Bool = false;
+		isPixelNote = false;
 
-		for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/Notes/"]) {
+		for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/notes/"]) {
 			final fullPath = '$noteDirectory$notePath';
 			final weekendPath = '$fullPath/notes_strumline';
 			var jsonPath = fullPath;
@@ -143,39 +141,12 @@ class StrumNote extends OffsettableSprite
 			width = width / 4;
 			height = height / 5;
 			loadGraphic(Paths.image(notePath), true, Math.floor(width), Math.floor(height));
-
-			antialiasing = false;
-			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-
-			animation.add('green', [6]);
-			animation.add('red', [7]);
-			animation.add('blue', [5]);
-			animation.add('purple', [4]);
-			switch (Math.abs(noteData) % 4)
-			{
-				case 0:
-					animation.add('static', [0]);
-					animation.add('pressed', [4, 8], 12, false);
-					animation.add('confirm', [12, 16], 24, false);
-				case 1:
-					animation.add('static', [1]);
-					animation.add('pressed', [5, 9], 12, false);
-					animation.add('confirm', [13, 17], 24, false);
-				case 2:
-					animation.add('static', [2]);
-					animation.add('pressed', [6, 10], 12, false);
-					animation.add('confirm', [14, 18], 12, false);
-				case 3:
-					animation.add('static', [3]);
-					animation.add('pressed', [7, 11], 12, false);
-					animation.add('confirm', [15, 19], 24, false);
-			}
 		}
-		else
-		{
+		else{
 			frames = Paths.getSparrowAtlas(notePath);
-			loadNoteAnims();
 		}
+
+		loadNoteAnims(isPixelNote);
 		updateHitbox();
 
 		if (frames == null){ // Set to default if no frames found so it doesn't crash
@@ -230,7 +201,7 @@ class StrumNote extends OffsettableSprite
 			centerOrigin();
 		}
 
-		if (separateSheets && !isPixel){
+		if (separateSheets && !isPixelNote){
 			offset.x += 32;
 			offset.y += 20;
 		}
@@ -243,9 +214,25 @@ class StrumNote extends OffsettableSprite
 		if(useRGBShader) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
 	}
 
-	public function loadNoteAnims(isPixel:Bool = false){
-		if (isPixel){
+	public function loadNoteAnims(isPixelNote:Bool = false){
+		if (isPixelNote){
+			antialiasing = false;
+			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 
+			animation.add('green', [6]);
+			animation.add('red', [7]);
+			animation.add('blue', [5]);
+			animation.add('purple', [4]);
+
+			var index:Int = Std.int(Math.abs(noteData) % 4);
+			var staticFrame:Int = index;
+			var pressedFrames:Array<Int> = [index + 4, index + 8];
+			var confirmFrames:Array<Int> = [index + 12, index + 16];
+
+			// Add animations
+			animation.add('static', [staticFrame]);
+			animation.add('pressed', pressedFrames, 12, false);
+			animation.add('confirm', confirmFrames, 24, false);
 		}else{
 			if (separateSheets){
 				var dirArr:Array<String> = ["Left", "Down", "Up", "Right"];

@@ -157,7 +157,7 @@ class Note extends FlxSprite
 	public var noteAnimSuffixes:Array<String> = ["0", " hold piece", " hold end"]; // To accommodate for other namings
 
 	// I don't like using isPixelStage;
-	public var isPixel:Bool = false;
+	public var isPixelNote:Bool = false; // Needs to be global for use in other functions
 
 	public var hitsoundDisabled:Bool = false;
 	public var hitsoundChartEditor:Bool = true;
@@ -318,7 +318,7 @@ class Note extends FlxSprite
 
 			offsetX -= width / 2;
 
-			if (PlayState.isPixelStage)
+			if (isPixelNote)
 				offsetX += 30;
 
 			if (separateSheets)
@@ -332,7 +332,7 @@ class Note extends FlxSprite
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
 				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
 
-				if(PlayState.isPixelStage) {
+				if(isPixelNote) {
 					prevNote.scale.y *= 1.19;
 					prevNote.scale.y *= (6 / height); //Auto adjust note size
 				}
@@ -340,7 +340,7 @@ class Note extends FlxSprite
 				// prevNote.setGraphicSize();
 			}
 
-			if(PlayState.isPixelStage)
+			if(isPixelNote)
 			{
 				scale.y *= PlayState.daPixelZoom;
 				updateHitbox();
@@ -428,12 +428,12 @@ class Note extends FlxSprite
 			animName = animation.curAnim.name;
 		}
 
+		isPixelNote = false;
 		var skinPixel:String = skin;
-		var isPixelNote:Bool = false;
 		var lastScaleY:Float = scale.y;
 		var skinPostfix:String = getNoteSkinPostfix();
 		var customSkin:String = skin + skinPostfix;
-		var path:String = PlayState.isPixelStage ? 'pixelUI/' : '';
+		var path:String = isPixelNote ? 'pixelUI/' : '';
 		if(customSkin == _lastValidChecked || Paths.fileExists('images/' + path + customSkin + '.png', IMAGE))
 		{
 			skin = customSkin;
@@ -671,7 +671,7 @@ class Note extends FlxSprite
 			y = strumY + offsetY + correctionOffset + Math.sin(angleDir) * distance;
 			if(myStrum.downScroll && isSustainNote)
 			{
-				if(PlayState.isPixelStage)
+				if(isPixelNote)
 				{
 					y -= PlayState.daPixelZoom * 9.5;
 				}
