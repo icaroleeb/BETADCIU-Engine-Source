@@ -357,6 +357,30 @@ class HScript extends Iris
 		set('Function_StopLua', LuaUtils.Function_StopLua); //doesnt do much cuz HScript has a lower priority than Lua
 		set('Function_StopHScript', LuaUtils.Function_StopHScript);
 		set('Function_StopAll', LuaUtils.Function_StopAll);
+
+		set('add', function(obj:FlxBasic){
+			PlayState.instance.add(obj);
+		});
+
+		set('addBehindGF', function(obj:FlxBasic){
+			PlayState.instance.addBehindGF(obj);
+		});
+
+		set('addBehindDad', function(obj:FlxBasic){
+			PlayState.instance.addBehindDad(obj);
+		});
+
+		set('addBehindBF', function(obj:FlxBasic){
+			PlayState.instance.addBehindBF(obj);
+		});
+
+		set('insert', function(pos:Int, obj:FlxBasic){
+			PlayState.instance.insert(pos, obj);
+		});
+
+		set('remove', function(obj:FlxBasic, ?splice:Bool = false){
+			PlayState.instance.remove(obj, splice);
+		});
 	}
 
 	#if LUA_ALLOWED
