@@ -232,6 +232,14 @@ class FunkinLua {
 			return runningScripts;
 		});
 
+		Lua_helper.add_callback(lua, "getRunningHScripts", function(){
+			var runningScripts:Array<String> = [];
+			for (script in game.hscriptArray)
+				runningScripts.push(script.scriptName);
+
+			return runningScripts;
+		});
+
 		//stole from Wii Funkin' Matt V3
 		Lua_helper.add_callback(lua, "initAnalyzer", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
 			initAnalyzer(barCount, maxDelta, peakHold);

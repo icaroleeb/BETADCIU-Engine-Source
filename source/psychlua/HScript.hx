@@ -84,6 +84,7 @@ class HScript extends Iris
 	public var scriptType:String = '';
 
 	public var origin:String;
+	public var scriptName:String = null;
 	override public function new(?parent:Dynamic, ?file:String, ?scriptType:String = "", ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
 		if (file == null)
@@ -100,7 +101,6 @@ class HScript extends Iris
 			#end
 		}
 		var scriptThing:String = file;
-		var scriptName:String = null;
 
 		if(parent == null && file != null)
 		{

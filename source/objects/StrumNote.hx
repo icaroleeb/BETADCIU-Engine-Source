@@ -57,11 +57,11 @@ class StrumNote extends OffsettableSprite
 		super(x, y);
 
 		var skin:String = null;
-		var useLegacyArrowSkin:Bool = false;
+		var isLegacyNoteSkin:Bool = false;
 		if(PlayState.SONG != null && PlayState.SONG.noteStyle != null && PlayState.SONG.noteStyle.length > 1) { // old charts
-			useLegacyArrowSkin = true;
+			isLegacyNoteSkin = true;
 			skin = PlayState.SONG.noteStyle;
-		} else if(PlayState.SONG != null && PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1 && !useLegacyArrowSkin) skin = PlayState.SONG.arrowSkin;
+		} else if(PlayState.SONG != null && PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1 && !isLegacyNoteSkin) skin = PlayState.SONG.arrowSkin;
 		else skin = Note.defaultNoteSkin;
 
 		var customSkin:String = skin + Note.getNoteSkinPostfix();

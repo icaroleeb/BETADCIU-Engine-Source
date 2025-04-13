@@ -131,14 +131,12 @@ class FreeplayState extends MusicBeatState
 		for (i in 0...songs.length)
 		{
 			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
+			songText.centerItem = true;
 			songText.targetY = i;
 			grpSongs.add(songText);
-			
-			songText.screenCenter(X);
-			songText.changeX = false;
 
 			songText.scaleX = Math.min(1, 980 / songText.width);
-			songText.snapToPosition();
+			//songText.snapToPosition();
 
 			Mods.currentModDirectory = songs[i].folder;
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);

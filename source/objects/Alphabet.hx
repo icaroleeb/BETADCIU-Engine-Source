@@ -18,6 +18,7 @@ class Alphabet extends FlxSpriteGroup
 	public var letters:Array<AlphaCharacter> = [];
 
 	public var isMenuItem:Bool = false;
+	public var centerItem:Bool = false;
 	public var targetY:Int = 0;
 	public var changeX:Bool = true;
 	public var changeY:Bool = true;
@@ -172,6 +173,7 @@ class Alphabet extends FlxSpriteGroup
 			if(changeY)
 				y = FlxMath.lerp((targetY * 1.3 * distancePerItem.y) + startPosition.y, y, lerpVal);
 		}
+		if(centerItem) screenCenter(X);
 		super.update(elapsed);
 	}
 
@@ -184,6 +186,7 @@ class Alphabet extends FlxSpriteGroup
 			if(changeY)
 				y = (targetY * 1.3 * distancePerItem.y) + startPosition.y;
 		}
+		if(centerItem) screenCenter(X);
 	}
 
 	private static var Y_PER_ROW:Float = 85;
