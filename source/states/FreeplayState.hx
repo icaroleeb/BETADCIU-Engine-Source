@@ -56,10 +56,27 @@ class FreeplayState extends MusicBeatState
 	{
 		//Paths.clearStoredMemory();
 		//Paths.clearUnusedMemory();
+
+		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
+		{
+			FlxG.sound.music.volume = 1;
+			FlxG.sound.playMusic(Paths.music('songSelect'));
+		}
+
+		if (FlxG.sound.music.playing || MainMenuState.mainMusic)
+		{
+			FlxG.sound.playMusic(Paths.music('songSelect'));
+			MainMenuState.mainMusic = false;
+		}
+		if (!FlxG.sound.music.playing || MainMenuState.mainMusic == false)
+		{
+			FlxG.sound.playMusic(Paths.music('songSelect'));
+			MainMenuState.mainMusic = false;
+		}
 		
 		persistentUpdate = true;
 		PlayState.isStoryMode = false;
-		WeekData.reloadWeekFiles(false);
+		WeekData.reloadWeekFiles(false, 0);
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
@@ -116,6 +133,9 @@ class FreeplayState extends MusicBeatState
 			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
 			songText.targetY = i;
 			grpSongs.add(songText);
+			
+			songText.screenCenter(X);
+			songText.changeX = false;
 
 			songText.scaleX = Math.min(1, 980 / songText.width);
 			songText.snapToPosition();
@@ -217,6 +237,11 @@ class FreeplayState extends MusicBeatState
 	var stopMusicPlay:Bool = false;
 	override function update(elapsed:Float)
 	{
+		PlayState.isBETADCIU = false; 
+		PlayState.isBonus = false; 
+		PlayState.isNeonight = false;
+		PlayState.isVitor = false;
+
 		if(WeekData.weeksList.length < 1)
 			return;
 
@@ -588,7 +613,7 @@ class FreeplayState extends MusicBeatState
 		{
 			var item:Alphabet = grpSongs.members[i];
 			item.visible = item.active = true;
-			item.x = ((item.targetY - lerpSelected) * item.distancePerItem.x) + item.startPosition.x;
+			item.x = 450; //+ ((item.targetY - lerpSelected) * 0.01 * item.distancePerItem.x) + item.startPosition.x;
 			item.y = ((item.targetY - lerpSelected) * 1.3 * item.distancePerItem.y) + item.startPosition.y;
 
 			var icon:HealthIcon = iconArray[i];

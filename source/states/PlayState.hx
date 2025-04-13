@@ -123,6 +123,7 @@ class PlayState extends MusicBeatState
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
 	public var curStage:String = '';
+
 	public static var stageUI(default, set):String = "normal";
 	public static var uiPrefix:String = "";
 	public static var uiPostfix:String = "";
@@ -146,6 +147,10 @@ class PlayState extends MusicBeatState
 
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
+	public static var isBETADCIU:Bool = false;
+	public static var isNeonight:Bool = false;
+	public static var isVitor:Bool = false;
+	public static var isBonus:Bool = false;
 	public static var storyWeek:Int = 0;
 	public static var storyPlaylist:Array<String> = [];
 	public static var storyDifficulty:Int = 1;
@@ -796,7 +801,7 @@ class PlayState extends MusicBeatState
 	public function addCharacterToList(newCharacter:String, type:Int) {
 		var preloadChar = new Character(0, 0, newCharacter);
 		startCharacterScripts(preloadChar.curCharacter);
-		// preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
+		//preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
 		add(preloadChar);
 		remove(preloadChar);
 	}
@@ -1153,7 +1158,7 @@ class PlayState extends MusicBeatState
 		spr.screenCenter();
 		spr.antialiasing = antialias;
 		insert(members.indexOf(noteGroup), spr);
-		FlxTween.tween(spr, {/*y: spr.y + 100,*/ alpha: 0}, Conductor.crochet / 1000, {
+		FlxTween.tween(spr, {y: spr.y + 25, alpha: 0}, Conductor.crochet / 1000, {
 			ease: FlxEase.cubeInOut,
 			onComplete: function(twn:FlxTween)
 			{
@@ -2011,9 +2016,15 @@ class PlayState extends MusicBeatState
 				var icon:HealthIcon = iconScaleShit[i][0];
 				var scale:Float = iconScaleShit[i][1];
 				
-				var mult:Float = FlxMath.lerp((scale-0.2), icon.scale.x, Math.exp(-elapsed * 9 * playbackRate));
-				icon.scale.set(mult, mult);
-				icon.updateHitbox();
+				if(ClientPrefs.data.ogIconBop){
+					var mult:Float = FlxMath.lerp((scale-0.2), icon.scale.x, CoolUtil.boundTo((scale-0.2) - (elapsed * 9 * playbackRate), 0, 1));
+					icon.scale.set(mult, mult);
+					icon.updateHitbox();
+				}else{
+					var mult:Float = FlxMath.lerp((scale-0.2), icon.scale.x, Math.exp(-elapsed * 9 * playbackRate));
+					icon.scale.set(mult, mult);
+					icon.updateHitbox();
+				}
 			}
 		}
 	}
@@ -2021,8 +2032,15 @@ class PlayState extends MusicBeatState
 	public dynamic function updateIconsPosition()
 	{
 		var iconOffset:Int = 26;
-		iconP1.x = healthBar.barCenter + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
-		iconP2.x = healthBar.barCenter - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
+		var healthPercent:Float = FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01;
+		
+		if(ClientPrefs.data.ogIconBop){
+			iconP1.x = healthBar.x + (healthBar.width * healthPercent - iconOffset);
+			iconP2.x = healthBar.x + (healthBar.width * healthPercent) - (iconP2.width - iconOffset);
+		}else{
+			iconP1.x = healthBar.barCenter + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
+			iconP2.x = healthBar.barCenter - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
+		}
 	}
 
 	var iconsAnimations:Bool = true;
@@ -2405,13 +2423,13 @@ class PlayState extends MusicBeatState
 				FlxG.sound.play(Paths.sound(value1), flValue2);
 			case "Change Stage":
 				if (value1 != null && value1 != ""){
-					removeStage(); // Remove current stage
+ 					removeStage(); // Remove current stage
 			
 					curStage = value1; // Set new stage name
-					stageData = StageData.getStageFile(curStage); 
-					addStage();
-	
-				}
+ 					stageData = StageData.getStageFile(curStage); 
+ 					addStage();
+ 	
+ 				}
 		}
 
 		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, flValue1, flValue2, strumTime));
@@ -2732,7 +2750,7 @@ class PlayState extends MusicBeatState
 		if (stageData.ratingSkin != null && stageData.ratingSkin[1] != "") uiPostfix = stageData.ratingSkin[1];
 
 		if (!showRating || ratingsAlpha == 0){ //just don't run the rest if the rating is invisible
-			return;
+		  return;
 		}
 
 		rating.loadGraphic(Paths.image(uiFolder + daRating.image + uiPostfix));
@@ -3588,7 +3606,7 @@ class PlayState extends MusicBeatState
 		{
 			if (Iris.instances.exists(scriptToLoad)) return false;
 
-			initHScript(scriptToLoad);
+			initHScript(scriptToLoad, scriptType);
 			return true;
 		}
 		return false;
@@ -3615,12 +3633,12 @@ class PlayState extends MusicBeatState
 			return false;
 		}
 
-	public function initHScript(file:String)
+	public function initHScript(file:String, ?scriptType:String = "")
 	{
 		var newScript:HScript = null;
 		try
 		{
-			newScript = new HScript(null, file);
+			newScript = new HScript(null, file, scriptType);
 			if (newScript.exists('onCreate')) newScript.call('onCreate');
 			trace('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
@@ -3959,7 +3977,7 @@ class PlayState extends MusicBeatState
 			startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
 			add(preloadChar);
 			sprites.push(preloadChar);
-			// preloadChar.destroyAtlas();
+			//preloadChar.destroyAtlas();
 			trace('Character Loaded: $character!');
 		}
 
@@ -4067,7 +4085,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public var hardCodedStage:BaseStage;
-	public function removeStage() {
+	public function removeStage(){
 		removeObjects(stageData);
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
@@ -4076,7 +4094,7 @@ class PlayState extends MusicBeatState
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
-		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
+		//#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end // it don't work with hscript stage so I remove it
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
@@ -4095,7 +4113,6 @@ class PlayState extends MusicBeatState
 
 	public function addStage(?onlyLuas:Bool=false) {
 		setStageDetails(stageData);
-
 		switch (curStage.toLowerCase())
 		{
 			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1

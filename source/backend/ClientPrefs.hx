@@ -80,6 +80,7 @@ import states.TitleState;
 	public var loadingScreen:Bool = true;
 	public var language:String = 'en-US';
 	public var comboCam:String = "Game";// cam game by default because i like it.
+	public var ogIconBop:Bool = false;
 }
 
 class ClientPrefs {

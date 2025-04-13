@@ -49,6 +49,9 @@ import flixel.input.gamepad.FlxGamepadInputID;
 
 import haxe.Json;
 
+import funkin.vis.dsp.SpectralAnalyzer;
+import funkin.vis.audioclip.frontends.LimeAudioClip;
+
 class FunkinLua {
 	public var lua:State = null;
 	public var camTarget:FlxCamera;
@@ -63,6 +66,8 @@ class FunkinLua {
 
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	public var audioAnalyzer:SpectralAnalyzer;
 
 	public function new(scriptName:String, ?scriptType:String = "") {
 		lua = LuaL.newstate();
@@ -225,6 +230,16 @@ class FunkinLua {
 				runningScripts.push(script.scriptName);
 
 			return runningScripts;
+		});
+
+		//stole from Wii Funkin' Matt V3
+		Lua_helper.add_callback(lua, "initAnalyzer", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+			initAnalyzer(barCount, maxDelta, peakHold);
+			return true;
+		});
+
+		Lua_helper.add_callback(lua, "getAudioLevels", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+			return getAudioLevels();
 		});
 
 		addLocalCallback("setOnScripts", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
@@ -694,7 +709,7 @@ class FunkinLua {
 				color = color.substr(4); // Remove "0xFF"
 			}else{
 				var regex = new EReg("^#|^0x", "");
-    			color = regex.replace(color, "");
+				color = regex.replace(color, "");
 			}
 			
 			return FlxColor.fromString('#$color');
@@ -1167,6 +1182,7 @@ class FunkinLua {
 				object.scrollFactor.set(scrollX, scrollY);
 			}
 		});
+
 		Lua_helper.add_callback(lua, "objectColorTransform", function(obj:String, color:String) {
 			var spr:Dynamic = LuaUtils.getObjectDirectly(obj);
 
@@ -1188,6 +1204,7 @@ class FunkinLua {
 				spr.setColorTransform(0, 0, 0, 1, r, g, b, a);
 			}
 		});
+
 		Lua_helper.add_callback(lua, "inBetweenColor", function(color:String, color2:String, diff:Float, ?remove0:Bool = false) {
 			var color = FlxColor.interpolate(CoolUtil.colorFromString(color), CoolUtil.colorFromString(color2), diff);
 			var daColor = color.toHexString();
@@ -2422,14 +2439,31 @@ class FunkinLua {
 				if(PlayState.instance != null) PlayState.instance.callOnLuas('onTimerCompleted', [tag]);
 			default:
 				var twn:FlxTween = variables.get(tag);
-				if(twn != null)
-				{
-					twn.cancel();
-					twn.destroy();
-					variables.remove(tag);
-				}
+ 				if(twn != null)
+ 				{
+ 					twn.cancel();
+ 					twn.destroy();
+ 					variables.remove(tag);
+ 				}
 				if(PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
 		}
+	}
+
+	public function initAnalyzer(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+		@:privateAccess
+		if (FlxG.sound.music == null || FlxG.sound.music._channel == null || FlxG.sound.music._channel.__audioSource == null) return;
+
+		@:privateAccess
+		audioAnalyzer = new SpectralAnalyzer(FlxG.sound.music._channel.__audioSource, barCount, maxDelta, peakHold);
+
+		#if desktop
+		audioAnalyzer.fftN = 256;
+		#end
+	}
+
+	public function getAudioLevels() {
+		var levels = audioAnalyzer.getLevels();
+		return [for (i in levels) i.value];
 	}
 }
 #end

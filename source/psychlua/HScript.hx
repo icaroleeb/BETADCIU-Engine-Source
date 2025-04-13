@@ -81,8 +81,10 @@ class HScript extends Iris
 	}
 	#end
 
+	public var scriptType:String = '';
+
 	public var origin:String;
-	override public function new(?parent:Dynamic, ?file:String, ?varsToBring:Any = null, ?manualRun:Bool = false)
+	override public function new(?parent:Dynamic, ?file:String, ?scriptType:String = "", ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
 		if (file == null)
 			file = '';
@@ -99,6 +101,7 @@ class HScript extends Iris
 		}
 		var scriptThing:String = file;
 		var scriptName:String = null;
+
 		if(parent == null && file != null)
 		{
 			var f:String = file.replace('\\', '/');

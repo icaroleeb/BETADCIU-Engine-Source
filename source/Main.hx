@@ -156,6 +156,12 @@ class Main extends Sprite
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 		addChild(new FlxGame(game.width, game.height, game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
+		// FlxG.game._customSoundTray wants just the class, it calls new from
+ 		// create() in there, which gets called when it's added to stage
+ 		// which is why it needs to be added before addChild(game) here
+ 		@:privateAccess
+ 		FlxG.game._customSoundTray = objects.FunkinSoundTray;	
+
 		#if !mobile
 		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
 		addChild(fpsVar);

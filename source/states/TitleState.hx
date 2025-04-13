@@ -96,7 +96,11 @@ class TitleState extends MusicBeatState
 		}
 
 		FlxG.mouse.visible = false;
-		#if FREEPLAY
+		#if BETADCIU
+		MusicBeatState.switchState(new BETADCIUState());
+		#elseif FREEPLAY
+		MusicBeatState.switchState(new BonusSongsState());
+		#elseif FREEPLAY
 		MusicBeatState.switchState(new FreeplayState());
 		#elseif CHARTING
 		MusicBeatState.switchState(new ChartingState());
@@ -576,6 +580,18 @@ class TitleState extends MusicBeatState
 	var increaseVolume:Bool = false;
 	function skipIntro():Void
 	{
+		logoBl.y += 1500;
+		logoBl.angle = -4;
+		FlxTween.tween(logoBl,{y: -100}, 1.4, {ease: FlxEase.expoInOut});
+
+		new FlxTimer().start(0.01, function(tmr:FlxTimer)
+		{
+			if(logoBl.angle == -4) 
+				FlxTween.angle(logoBl, logoBl.angle, 4, 4, {ease: FlxEase.quartInOut});
+			if (logoBl.angle == 4) 
+				FlxTween.angle(logoBl, logoBl.angle, -4, 4, {ease: FlxEase.quartInOut});
+		}, 0);
+
 		if (!skippedIntro)
 		{
 			#if TITLE_SCREEN_EASTER_EGG

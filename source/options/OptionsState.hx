@@ -6,6 +6,7 @@ import backend.StageData;
 class OptionsState extends MusicBeatState
 {
 	var options:Array<String> = [
+		'BETADCIU',
 		'Note Colors',
 		'Controls',
 		'Adjust Delay and Combo',

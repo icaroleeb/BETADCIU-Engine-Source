@@ -67,7 +67,6 @@ class PsychUINumericStepper extends PsychUIInputText
 				}
 
 				value += step * multiplier;
-
 				_internalOnChange();
 			}
 			else if(buttonMinus != null && buttonMinus.exists && FlxG.mouse.overlaps(buttonMinus, camera))

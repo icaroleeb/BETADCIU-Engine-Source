@@ -152,7 +152,7 @@
 		}
 	],
 	"no_antialiasing": false,
-	"image": "characters/Pico_FNF_assetss",
+	"image": "characters/Pico_FNF_assetss, characters/picoAnims/Pico_Intro, characters/picoAnims/Pico_Shooting",
 	"position": [
 		-40,
 		300
@@ -173,8 +173,8 @@
 		0
 	],
 	"player_camera_position": [
-		300,
-		0
+		200,
+		40
 	],
 	"noteSkin": null,
 	"sing_duration": 4,
