@@ -179,7 +179,7 @@ class MainMenuState extends MusicBeatState
 	}
 
 	var selectedSomethin:Bool = false;
-	var isLeftItems:Bool = false;
+	var isLeftItems:Bool = true;
 
 	var timeNotMoving:Float = 0;
 	override function update(elapsed:Float)

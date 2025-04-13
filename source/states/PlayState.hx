@@ -1497,7 +1497,6 @@ class PlayState extends MusicBeatState
 				swagNote.noteType = noteType;
 				if (gottaHitNote && playerSectionNoteStyle != "") swagNote.texture = playerSectionNoteStyle;
 				else if (!gottaHitNote && opponentSectionNoteStyle != "") swagNote.texture = opponentSectionNoteStyle;
-				if (!swagNote.isLegacyNoteSkin) swagNote.rgbShader.enabled = true;
 	
 				swagNote.scrollFactor.set();
 				unspawnNotes.push(swagNote);
@@ -1520,7 +1519,6 @@ class PlayState extends MusicBeatState
 						sustainNote.parent = swagNote;
 						if (gottaHitNote && playerSectionNoteStyle != "") sustainNote.texture = playerSectionNoteStyle;
 						else if (!gottaHitNote && opponentSectionNoteStyle != "") sustainNote.texture = opponentSectionNoteStyle;
-						if (!sustainNote.isLegacyNoteSkin) sustainNote.rgbShader.enabled = true;
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
