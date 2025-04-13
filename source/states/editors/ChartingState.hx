@@ -536,7 +536,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		loadSection(lastVisitedSection);
 		Conductor.songPosition = FlxG.sound.music.time = cachedSectionTimes[curSec] - Conductor.offset + 0.000001;
-
 		super.create();
 	}
 

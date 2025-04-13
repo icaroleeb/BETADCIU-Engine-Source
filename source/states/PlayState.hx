@@ -374,16 +374,16 @@ class PlayState extends MusicBeatState
 		switch (curStage.toLowerCase())
 		{
 			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
- 			case 'spooky': hardCodedStage = new Spooky();				//Week 2
- 			case 'philly': hardCodedStage = new Philly();				//Week 3
- 			case 'limo': hardCodedStage = new Limo();					//Week 4
- 			case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
- 			case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
- 			case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
- 			case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
- 			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
- 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
- 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
+			case 'spooky': hardCodedStage = new Spooky();				//Week 2
+			case 'philly': hardCodedStage = new Philly();				//Week 3
+			case 'limo': hardCodedStage = new Limo();					//Week 4
+			case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
+			case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
+			case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
+			case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
+			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
+			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
+			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
 		}
 		if(isPixelStage) introSoundsSuffix = '-pixel';
 
@@ -2430,7 +2430,6 @@ class PlayState extends MusicBeatState
  					addStage();
  	
  				}
-				
 		}
 
 		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, flValue1, flValue2, strumTime));
@@ -2751,7 +2750,7 @@ class PlayState extends MusicBeatState
 		if (stageData.ratingSkin != null && stageData.ratingSkin[1] != "") uiPostfix = stageData.ratingSkin[1];
 
 		if (!showRating || ratingsAlpha == 0){ //just don't run the rest if the rating is invisible
-		return;
+		  return;
 		}
 
 		rating.loadGraphic(Paths.image(uiFolder + daRating.image + uiPostfix));
@@ -4114,25 +4113,23 @@ class PlayState extends MusicBeatState
 
 	public function addStage(?onlyLuas:Bool=false) {
 		setStageDetails(stageData);
-
 		switch (curStage.toLowerCase())
 		{
 			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
- 			case 'spooky': hardCodedStage = new Spooky();				//Week 2
- 			case 'philly': hardCodedStage = new Philly();				//Week 3
- 			case 'limo': hardCodedStage = new Limo();					//Week 4
- 			case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
- 			case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
- 			case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
- 			case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
- 			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
- 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
- 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
+			case 'spooky': hardCodedStage = new Spooky();				//Week 2
+			case 'philly': hardCodedStage = new Philly();				//Week 3
+			case 'limo': hardCodedStage = new Limo();					//Week 4
+			case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
+			case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
+			case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
+			case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
+			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
+			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
+			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
 		}
 
 		stagesFunc(function(stage:BaseStage) stage.createPost());
 		addObjects(stageData);
-
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED 
