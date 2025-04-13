@@ -106,63 +106,6 @@ class WeekData {
 		var directories:Array<String> = [Paths.mods(), Paths.getSharedPath()];
 		var originalLength:Int = directories.length;
 
-		switch(menuNo)
-		{
-			case 0: disabledMods.push('BETADCIU');//freeplay. continue checking but skip all BETADCIU stuff.
-			case 1 | 2 | 3 | 4 | 5:
-			{
-				var suf:String = "";
-
-				switch (menuNo)
-				{
-					case 1: suf = '-betadciu'; //BETADCIU menu.
-					case 2: suf = '-bonus';    //Bonus Songs Menu
-					case 3: suf = '-neonight'; //Neonight Menu
-					case 4: suf = '-vitor';    //Vitor Menu
-					case 5: suf = '-guest';    //Other BETADCIU creators menu.
-				}
-				#if desktop
-				var directory:String = Paths.modFolders('BETADCIU') + '/weeks/';
-				var i:Int = 0;
-				var curI:Int = 0;
-
-				if(FileSystem.exists(directory)) {
-					var listOfWeeks:Array<String> = [];
-	
-					if (FileSystem.exists(directory + 'weekList.txt'))
-						listOfWeeks = CoolUtil.coolTextFile(directory + 'weekList.txt');
-	
-					for (daWeek in listOfWeeks)
-					{
-						var path:String = directory + daWeek + '.json';
-
-						if(sys.FileSystem.exists(path) && path.endsWith(suf+'.json'))
-						{
-							addWeek(daWeek, path, Paths.modFolders('BETADCIU') + '/', i, 0);
-						}
-					}
-
-					for (file in FileSystem.readDirectory(directory))
-					{
-						var path = haxe.io.Path.join([directory, file]);
-						if (!sys.FileSystem.isDirectory(path) && file.endsWith(suf+'.json'))
-						{
-							addWeek(file.substr(0, file.length - 5), path, Paths.modFolders('BETADCIU') + '/', i, 0);
-						}
-
-						curI++;
-
-						if (curI % 3 == 0)
-							i++;
-					}
-				}
-				#end
-			}
-		}
-
-		if (menuNo != 0)
-			return;
-
 		if(FileSystem.exists(modsListPath))
 		{
 			var stuff:Array<String> = CoolUtil.coolTextFile(modsListPath);
@@ -201,6 +144,53 @@ class WeekData {
 		var originalLength:Int = directories.length;
 		#end
 
+		switch(menuNo)
+		{
+			case 1 | 2 | 3 | 4 | 5:
+			{
+				var suf:String = "";
+
+				switch (menuNo)
+				{
+					case 1: suf = '-betadciu'; //BETADCIU menu.
+					case 2: suf = '-bonus';    //Bonus Songs Menu
+				}
+				
+				#if desktop
+				for (i in 0...directories.length) {
+					var directory:String = directories[i] + 'weeks/';
+					if(FileSystem.exists(directory)) {
+						var listOfWeeks:Array<String> = [];
+		
+						if (FileSystem.exists(directory + 'weekList.txt'))
+							listOfWeeks = CoolUtil.coolTextFile(directory + 'weekList.txt');
+		
+						for (daWeek in listOfWeeks)
+						{
+							var path:String = directory + daWeek + '.json';
+							if(sys.FileSystem.exists(path) && path.endsWith(suf+'.json'))
+							{
+								addWeek(daWeek, path, directories[i], i, originalLength);
+							}
+						}
+		
+						for (file in FileSystem.readDirectory(directory))
+						{
+							var path = haxe.io.Path.join([directory, file]);
+							if (!sys.FileSystem.isDirectory(path) && file.endsWith(suf+'.json'))
+							{
+								addWeek(file.substr(0, file.length - 5), path, directories[i], i, originalLength);
+							}
+						}
+					}
+				}		
+				#end
+			}
+		}
+
+		if (menuNo != 0)
+			return;
+
 		var sexList:Array<String> = CoolUtil.coolTextFile(Paths.getSharedPath('weeks/weekList.txt'));
 		for (i in 0...sexList.length) {
 			for (j in 0...directories.length) {
@@ -237,7 +227,7 @@ class WeekData {
 				for (daWeek in listOfWeeks)
 				{
 					var path:String = directory + daWeek + '.json';
-					if(sys.FileSystem.exists(path))
+					if(sys.FileSystem.exists(path) && path.endsWith('-betadciu.json') || sys.FileSystem.exists(path) && path.endsWith('-bonus.json'))
 					{
 						addWeek(daWeek, path, directories[i], i, originalLength);
 					}
@@ -246,7 +236,7 @@ class WeekData {
 				for (file in FileSystem.readDirectory(directory))
 				{
 					var path = haxe.io.Path.join([directory, file]);
-					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json'))
+					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json') && !path.endsWith('-betadciu.json') && !path.endsWith('-bonus.json'))
 					{
 						addWeek(file.substr(0, file.length - 5), path, directories[i], i, originalLength);
 					}
