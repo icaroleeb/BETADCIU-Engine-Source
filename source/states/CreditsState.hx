@@ -41,6 +41,8 @@ class CreditsState extends MusicBeatState
 			['BETADCIU Engine Credits'],
 			['Blantados',			'blantad',			'Main Programmer and Head of BETADCIU Engine',				'https://twitter.com/Blantados',		'64b3fe'],
             ['Ryiuu',				'ryv',				'Contributor to BETADCIU Engine',			 				'https://twitter.com/Ryiuu01',		    '0f2a49'],
+			["Special Thanks"],
+            ['Icaro Lee',				'icarolee',				'Ported legacy Main Menu, Options and Fixed some Stuff',			 				'https://twitter.com/Icarofnf',		    '5f0000'],
 			[""],
 			["Psych Engine Team"],
 			["Shadow Mario",		"shadowmario",		"Main Programmer and Head of Psych Engine",					"https://ko-fi.com/shadowmario",	"444444"],
