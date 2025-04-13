@@ -1449,7 +1449,6 @@ class PlayState extends MusicBeatState
 				for (i in 0...stuff.length){
 					var data:Array<String> = stuff[i].split(' ');
 					// notesToLoad.push(data[1]); // not implemented yet
-					if (data[1] == 'normal') data[1] = "noteSkins/NOTE_assets";
 					if (daSection == Std.parseInt(data[0])){
 						(data[2] == 'dad' ? opponentSectionNoteStyle = data[1] : playerSectionNoteStyle = data[1]);
 					}
@@ -1486,7 +1485,6 @@ class PlayState extends MusicBeatState
 						}
 					}
 				}
-				var daNoteTex:String = 'noteSkins/NOTE_assets'; // default note in case the game can't find the note on the txt
 				var swagNote:Note = new Note(spawnTime, noteColumn, oldNote);
 				var isAlt: Bool = section.altAnim && !gottaHitNote;
 				swagNote.gfNote = (section.gfSection && gottaHitNote == section.mustHitSection);

@@ -388,6 +388,11 @@ class Note extends FlxSprite
 	public var isLegacyNoteSkin:Bool = false;
 
 	public function reloadNote(texture:String = '', postfix:String = '') {
+		rgbShader.enabled = true; // It should always set back to true in case texture is empty or texture.length < 1;
+
+		if(texture == null) texture = "";
+		if(postfix == null) postfix = '';
+
 		if(texture.length < 1) {
 			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
 				texture = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
@@ -396,10 +401,6 @@ class Note extends FlxSprite
 			if(texture == null || texture.length < 1) texture = defaultNoteSkin + postfix;
 		}
 		else rgbShader.enabled = false;
-
-		if(texture == null) texture = 'noteSkins/NOTE_assets';
-		if(texture == "") texture = 'noteSkins/NOTE_assets'; // legacy charts bug fix
-		if(postfix == null) postfix = '';
 
 		separateSheets = false;
 		separateXMLExists = false;
@@ -411,7 +412,8 @@ class Note extends FlxSprite
 			notePath = "NOTE_assets-pixel";
 			skin = texture + postfix;
 			notePath = texture;
-		} else if (texture == 'normal') {
+		}else if (texture == 'normal') {
+			rgbShader.enabled = true;
 			texture = "NOTE_assets";
 			skin = texture + postfix;
 			notePath = texture;
@@ -546,7 +548,6 @@ class Note extends FlxSprite
 			try {
 				frames = Paths.getSparrowAtlas(skin);
 			} catch(e){
-				rgbShader.enabled = true;
 				texture = Note.defaultNoteSkin;
 			}
 		}
