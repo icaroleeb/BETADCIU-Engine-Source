@@ -101,7 +101,6 @@ class HScript extends Iris
 		}
 		var scriptThing:String = file;
 		var scriptName:String = null;
-		var scriptType:String = null;
 
 		if(parent == null && file != null)
 		{
@@ -362,71 +361,19 @@ class HScript extends Iris
 		set('Function_StopHScript', LuaUtils.Function_StopHScript);
 		set('Function_StopAll', LuaUtils.Function_StopAll);
 
-		set('add', function(obj:FlxBasic, obj2:String = ""){
-			switch(scriptType.toLowerCase()){
-				case "stage":
-					var variables = MusicBeatState.getVariables();
-
-					if (!variables.exists("stageVariables")){
-						variables.set("stageVariables", new Map<String, FlxSprite>());
-					}
-
-					var stageVars = variables.get("stageVariables");
-
-					stageVars.set(obj2, obj);
-				}
-
+		set('add', function(obj:FlxBasic){
 			PlayState.instance.add(obj);
 		});
 
-		set('addBehindGF', function(obj:FlxBasic, obj2:String = ""){
-			switch(scriptType.toLowerCase()){
-				case "stage":
-					var variables = MusicBeatState.getVariables();
-
-					if (!variables.exists("stageVariables")){
-						variables.set("stageVariables", new Map<String, FlxSprite>());
-					}
-
-					var stageVars = variables.get("stageVariables");
-
-					stageVars.set(obj2, obj);
-				}
-
+		set('addBehindGF', function(obj:FlxBasic){
 			PlayState.instance.addBehindGF(obj);
 		});
 
-		set('addBehindDad', function(obj:FlxBasic, obj2:String = ""){
-			switch(scriptType.toLowerCase()){
-				case "stage":
-					var variables = MusicBeatState.getVariables();
-
-					if (!variables.exists("stageVariables")){
-						variables.set("stageVariables", new Map<String, FlxSprite>());
-					}
-
-					var stageVars = variables.get("stageVariables");
-
-					stageVars.set(obj2, obj);
-				}
-
+		set('addBehindDad', function(obj:FlxBasic){
 			PlayState.instance.addBehindDad(obj);
 		});
 
 		set('addBehindBF', function(obj:FlxBasic, obj2:String = ""){
-			switch(scriptType.toLowerCase()){
-				case "stage":
-					var variables = MusicBeatState.getVariables();
-
-					if (!variables.exists("stageVariables")){
-						variables.set("stageVariables", new Map<String, FlxSprite>());
-					}
-
-					var stageVars = variables.get("stageVariables");
-
-					stageVars.set(obj2, obj);
-				}
-
 			PlayState.instance.addBehindBF(obj);
 		});
 
