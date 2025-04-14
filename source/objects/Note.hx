@@ -41,7 +41,7 @@ typedef NoteAnimArray = {
     @:optional var indices:Array<Int>;
 }
 
-typedef NoteFile = {
+typedef NoteConfig = {
 	@:optional var strumAnimations:Array<NoteAnimArray>;
 	@:optional var strumOffset:Array<Float>;
 	@:optional var rgbEnabled:Bool;
@@ -460,7 +460,7 @@ class Note extends FlxSprite
 			}
 
 			if (Paths.fileExists('images/$jsonPath.json', TEXT)) {
-				final json = getNoteFile('images/$jsonPath');
+				final json = getNoteConfig('images/$jsonPath');
 				rgbShader.enabled = json.rgbEnabled != null ? json.rgbEnabled : false;
 			}
 
@@ -719,7 +719,7 @@ class Note extends FlxSprite
 		return rect;
 	}
 
-	public static function dummy():NoteFile
+	public static function dummy():NoteConfig
 	{
 		return {
 			strumAnimations: [
@@ -753,7 +753,7 @@ class Note extends FlxSprite
 		};
 	}
 
-	public static function getNoteFile(jsonPath:String){
+	public static function getNoteConfig(jsonPath:String){
 		try
 		{
 			return cast tjson.TJSON.parse(Paths.getTextFromFile('$jsonPath.json'));
