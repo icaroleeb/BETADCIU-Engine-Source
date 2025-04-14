@@ -10,7 +10,7 @@ import haxe.format.JsonParser;
 
 using StringTools;
 
-typedef StrumNoteFile = {
+typedef StrumNoteConfig = {
 	var strumAnimations:Array<Note.NoteAnimArray>;
 	var strumOffset:Array<Float>;
 }
@@ -111,7 +111,7 @@ class StrumNote extends OffsettableSprite
 			}
 
 			if (Paths.fileExists('images/$jsonPath.json', TEXT)) {
-				final json = Note.getNoteFile('images/$jsonPath');
+				final json = Note.getNoteConfig('images/$jsonPath');
 				if (json.strumAnimations != null) {
 					for (anim in json.strumAnimations) {
 						addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
@@ -121,9 +121,7 @@ class StrumNote extends OffsettableSprite
 		
 			if (curNotePath != notePath) {
 				isLegacyNoteSkin = (noteDirectory == "notes/");
-				if (noteDirectory.startsWith("pixelUI/") || StringTools.contains(notePath, "-pixel")) {
-					isPixelNote = true;
-				}
+				isPixelNote = (noteDirectory.startsWith("pixelUI/") || StringTools.contains(notePath, "-pixel"));
 				break;
 			}
 		}
