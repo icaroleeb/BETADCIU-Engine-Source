@@ -389,7 +389,7 @@ class Note extends FlxSprite
 
 	public function reloadNote(texture:String = '', postfix:String = '') {
 		rgbShader.enabled = true; // It should always set back to true in case texture is empty or texture.length < 1;
- 
+
 		if(texture == null) texture = "";
 		if(postfix == null) postfix = '';
 

@@ -237,8 +237,6 @@ class FreeplayState extends MusicBeatState
 	{
 		PlayState.isBETADCIU = false; 
 		PlayState.isBonus = false; 
-		PlayState.isNeonight = false;
-		PlayState.isVitor = false;
 
 		if(WeekData.weeksList.length < 1)
 			return;
