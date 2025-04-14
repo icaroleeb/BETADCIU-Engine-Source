@@ -239,8 +239,6 @@ class BETADCIUState extends MusicBeatState
 		PlayState.isBETADCIU = true; //gotta move this cuz of the format thing
 		
 		PlayState.isStoryMode = false;	
-		PlayState.isNeonight = false;
-		PlayState.isVitor = false;
 		PlayState.isBonus = false;
 
 		if(WeekData.weeksList.length < 1)

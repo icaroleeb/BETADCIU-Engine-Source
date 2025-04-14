@@ -56,6 +56,10 @@ import crowplexus.hscript.Expr.Error as IrisError;
 import crowplexus.hscript.Printer;
 #end
 
+#if VIDEOS_ALLOWED
+import objects.PsychVideoSprite;
+#end
+
 /**
  * This is where all the Gameplay stuff happens and is managed
  *
@@ -148,8 +152,6 @@ class PlayState extends MusicBeatState
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
 	public static var isBETADCIU:Bool = false;
-	public static var isNeonight:Bool = false;
-	public static var isVitor:Bool = false;
 	public static var isBonus:Bool = false;
 	public static var storyWeek:Int = 0;
 	public static var storyPlaylist:Array<String> = [];
@@ -351,6 +353,8 @@ class PlayState extends MusicBeatState
 
 		if (isStoryMode)
 			detailsText = "Story Mode: " + WeekData.getCurrentWeek().weekName;
+		else if (isBETADCIU)
+			detailsText =  SONG.song + " But Every Turn A Different Cover is Used";
 		else
 			detailsText = "Freeplay";
 
@@ -1354,7 +1358,13 @@ class PlayState extends MusicBeatState
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
-		if(autoUpdateRPC) DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
+		if(autoUpdateRPC) 
+			if (isBETADCIU) {
+				DiscordClient.changePresence(detailsText, " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
+			} else {
+				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
+			}
+
 		#end
 		setOnScripts('songLength', songLength);
 		callOnScripts('onSongStart');
@@ -1723,6 +1733,9 @@ class PlayState extends MusicBeatState
 			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished) twn.active = true);
 
 			paused = false;
+			#if VIDEOS_ALLOWED
+			PsychVideoSprite.globalResume();
+			#end
 			callOnScripts('onResume');
 			resetRPC(startTimer != null && startTimer.finished);
 		}
@@ -1756,9 +1769,17 @@ class PlayState extends MusicBeatState
 		if(!autoUpdateRPC) return;
 
 		if (showTime)
-			DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.data.noteOffset);
+			if (isBETADCIU) {
+				DiscordClient.changePresence(detailsText, " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.data.noteOffset);
+			} else {
+				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.data.noteOffset);
+			}
 		else
-			DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+			if (isBETADCIU) {
+				DiscordClient.changePresence(detailsText, " (" + storyDifficultyText + ")", iconP2.getCharacter());
+			} else {
+				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+			}
 		#end
 	}
 
@@ -2085,10 +2106,18 @@ class PlayState extends MusicBeatState
 					note.resetAnim = 0;
 				}
 		}
+		#if VIDEOS_ALLOWED
+		PsychVideoSprite.globalPause();
+		#end
 		openSubState(new PauseSubState());
 
 		#if DISCORD_ALLOWED
-		if(autoUpdateRPC) DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+		if(autoUpdateRPC) 
+			if (isBETADCIU) {
+				DiscordClient.changePresence(detailsPausedText, " (" + storyDifficultyText + ")", iconP2.getCharacter());
+			} else {
+				DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+			}
 		#end
 	}
 
@@ -2354,16 +2383,16 @@ class PlayState extends MusicBeatState
 				var charType:Int = 0;
 				switch(value1.toLowerCase().trim()) {
 					case 'gf' | 'girlfriend' | "2":
-						FunkinLua.changeGFAuto(value2, gf.flipMode);
+						FunkinLua.changeGFAuto(value2);
 					case 'dad' | "opponent" | "1":
-						FunkinLua.changeDadAuto(value2, dad.flipMode);
+						FunkinLua.changeDadAuto(value2);
 					case 'boyfriend' | 'bf' | "0":
-						FunkinLua.changeBFAuto(value2, boyfriend.flipMode);
+						FunkinLua.changeBFAuto(value2);
 					default: // lua chars
 					{
 						var char = modchartCharacters.get(value1);	
 						if (char != null){
-							FunkinLua.makeLuaCharacter(value1, value2, char.isPlayer, char.flipMode);
+							FunkinLua.makeLuaCharacter(value1, value2, char.isPlayer, false);
 						}
 					}
 				}
@@ -2587,7 +2616,7 @@ class PlayState extends MusicBeatState
 				if (storyPlaylist.length <= 0)
 				{
 					Mods.loadTopMod();
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					// FlxG.sound.playMusic(Paths.music('freakyMenu'));
 					#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
 					canResync = false;
@@ -2632,8 +2661,13 @@ class PlayState extends MusicBeatState
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
 				canResync = false;
-				MusicBeatState.switchState(new FreeplayState());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				if (isBETADCIU)
+					MusicBeatState.switchState(new states.betadciu.BETADCIUState());
+				else if (isBonus)
+					MusicBeatState.switchState(new states.betadciu.BonusSongsState());
+				else
+					MusicBeatState.switchState(new FreeplayState());
+				// FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				changedDifficulty = false;
 			}
 			transitioning = true;
@@ -2744,11 +2778,23 @@ class PlayState extends MusicBeatState
 			antialias = !isPixelStage;
 		}
 
-		if (stageData.ratingSkin != null) uiFolder = stageData.ratingSkin[0];
-		if (stageData.ratingSkin != null && stageData.ratingSkin[1] != "") uiPostfix = stageData.ratingSkin[1];
+		var UISufShit = uiPostfix;
+
+		var customRatingSkin:Bool = false;
+
+		if (stageData.ratingSkin != null) {
+			uiFolder = stageData.ratingSkin[0];
+			if (uiFolder != "") {
+				customRatingSkin = true;
+				uiPostfix = stageData.ratingSkin[1];
+			}
+		}
+
+		if (uiPostfix == '-pixel')
+			antialias = false;
 
 		if (!showRating || ratingsAlpha == 0){ //just don't run the rest if the rating is invisible
-		  return;
+			return;
 		}
 
 		rating.loadGraphic(Paths.image(uiFolder + daRating.image + uiPostfix));
@@ -2772,7 +2818,9 @@ class PlayState extends MusicBeatState
 			i.alpha = ratingsAlpha;
 		}
 
-		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiFolder + 'combo' + uiPostfix));
+		var comboSpr:FlxSprite = new FlxSprite();
+		
+		if (showCombo) comboSpr = new FlxSprite().loadGraphic(Paths.image(uiFolder + 'combo' + uiPostfix)); // don't render if we don't need it	
 		comboSpr.screenCenter();
 		comboSpr.x = placement;
 		comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
@@ -2785,15 +2833,15 @@ class PlayState extends MusicBeatState
 		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
 		comboGroup.add(rating);
 
-		if (!PlayState.isPixelStage)
-		{
-			rating.setGraphicSize(Std.int(rating.width * 0.7));
-			comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
-		}
-		else
+		if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
+		}
+		else
+		{
+			rating.setGraphicSize(Std.int(rating.width * 0.7));
+			comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
 		}
 
 		comboSpr.updateHitbox();
@@ -2817,8 +2865,8 @@ class PlayState extends MusicBeatState
 				numScore.y = 450 + (30 + offsetY);
 			}
 
-			if (!PlayState.isPixelStage) numScore.setGraphicSize(Std.int(numScore.width * 0.5));
-			else numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
+			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel') numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
+			else numScore.setGraphicSize(Std.int(numScore.width * 0.5));
 			numScore.updateHitbox();
 
 			numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;

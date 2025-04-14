@@ -235,6 +235,20 @@ class DeprecatedFunctions
 			else FunkinLua.luaTrace("changeLuaCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			FunkinLua.luaTrace('changeLuaCharacter is deprecated! Use changeCharacter instead.', false, true);
 		});
+		Lua_helper.add_callback(lua,"setCamFollow", function(?x:Float, ?y:Float) {
+			var trueX = x;
+			var trueY = y;
+			PlayState.instance.isCameraOnForcedPos = false;
+			if(trueX != null || trueX != null)
+			{
+				PlayState.instance.isCameraOnForcedPos = true;
+				PlayState.instance.camFollow.x = trueX;
+				PlayState.instance.camFollow.y = trueY;
+				FunkinLua.luaTrace('setCamFollow is deprecated! Use setCameraFollowPoint instead.', false, true);
+				return;
+			}
+			FunkinLua.luaTrace('setCamFollow: Camera Follow Cannot be set to null.', false, true, FlxColor.RED);
+		});
 		Lua_helper.add_callback(lua, "getActorXMidpoint", function(variable:String) { // im not porting the other kade reflect stuff. im just porting this because some scripts still uses this... yeah, even with the getMidPointX available
 			var killMe:Array<String> = variable.split('.');
 			var obj:FlxSprite = LuaUtils.getObjectDirectly(killMe[0]);

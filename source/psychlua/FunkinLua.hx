@@ -27,6 +27,7 @@ import objects.Note;
 import objects.NoteSplash;
 import objects.Character;
 import objects.HealthIcon;
+import objects.PsychVideoSprite;
 
 import states.MainMenuState;
 import states.StoryMenuState;
@@ -1104,6 +1105,56 @@ class FunkinLua {
 
 			leSprite.active = true;
 		});
+		Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String="camGame", ?shouldLoop:Bool=false, ?muted:Bool=true) {
+			// I hate you FlxVideoSprite....
+			#if VIDEOS_ALLOWED
+			var variables = MusicBeatState.getVariables();
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+			var leVSprite:PsychVideoSprite = null;
+			if(FileSystem.exists(Paths.video(videoFile)) && videoFile != null && videoFile.length > 0) {
+
+				leVSprite = new PsychVideoSprite();
+				leVSprite.addCallback('onFormat',()->{
+					leVSprite.setPosition(x,y);
+					leVSprite.cameras = [LuaUtils.cameraFromString(camera)];
+				});
+				leVSprite.addCallback('onEnd',()->{
+					if (variables.exists(tag)) {
+						variables.get(tag).destroy();
+						variables.remove(tag);
+					}
+						
+					game.callOnLuas('onVideoFinished', [tag]);
+				});
+				var options:Array<String> = [];
+				if (shouldLoop) options.push(PsychVideoSprite.looping);
+				if (muted) options.push(PsychVideoSprite.muted);
+
+				leVSprite.load(Paths.video(videoFile), options);
+				leVSprite.antialiasing = true;
+				leVSprite.play();
+
+				variables.set(tag, leVSprite);
+				
+				switch(scriptType.toLowerCase()){
+					case "stage":
+						if (!variables.exists("stageVariables")){
+							variables.set("stageVariables", new Map<String, PsychVideoSprite>());
+						}
+			
+						var stageVars = variables.get("stageVariables");
+						stageVars.set(tag, leVSprite);
+				}
+			} else {
+				luaTrace('makeVideoSprite: The video file "' + videoFile + '" cannot be found!', FlxColor.RED);
+				return;
+			}
+			leVSprite.active = true;
+			#else
+			luaTrace('Nuh Uh!!... - Platform not supported!');
+			#end
+		});
 		Lua_helper.add_callback(lua, "addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) { // no way this shit worked without changing anything
 			var killMe:Array<String> = obj.split('.');
 			var object:FlxSprite = LuaUtils.getObjectDirectly(killMe[0]);
@@ -1250,7 +1301,7 @@ class FunkinLua {
 					changeBFAuto(character, flipped);	
 				default: 
 					var shit:Character = PlayState.instance.modchartCharacters.get(tag);
-					if (flipped == null && shit != null) flipped = shit.flipMode;
+					if (flipped == null && shit != null) shit.flipMode = flipped;
 					if(shit != null) makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
 					else luaTrace("changeCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);		
 			}
