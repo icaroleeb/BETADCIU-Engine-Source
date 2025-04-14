@@ -1155,6 +1155,75 @@ class FunkinLua {
 			luaTrace('Nuh Uh!!... - Platform not supported!');
 			#end
 		});
+		Lua_helper.add_callback(lua, "makeLuaCamera", function(tag:String, ?x:Float = 0.0, ?y:Float = 0.0, ?resX:Int = 1280, ?resY:Int = 720, ?zoom:Float = 1.0) { // creates the camera
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+
+			var leCamera:FlxCamera = new FlxCamera(x, y, resX, resY, zoom);
+			leCamera.bgColor = 0x00000000; // transparent bg for the camera
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leCamera);
+		});
+		Lua_helper.add_callback(lua, "setupCameraFollow", function(tag:String, ?x:Float=null, ?y:Float=null) { // creates the camera follow point
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+
+			// sets to the og camPos if it's null
+			if (x == null) x = PlayState.instance.girlfriendCameraOffset[0] + PlayState.instance.gf.getGraphicMidpoint().x + PlayState.instance.gf.cameraPosition[0];
+			if (y == null) y = PlayState.instance.girlfriendCameraOffset[1] + PlayState.instance.gf.getGraphicMidpoint().y + PlayState.instance.gf.cameraPosition[1];
+
+			var leFollowPoint:FlxObject = new FlxObject();
+    		leFollowPoint.setPosition(x, y);
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leFollowPoint);
+		});
+		Lua_helper.add_callback(lua, "setCameraFollow", function(tag:String, ?followPoint:String=null, ?speed:Float=0) { // sets the follow point to the camera
+			var variables = MusicBeatState.getVariables();
+
+			var leCamera:FlxCamera = game.getLuaObject(tag);
+			var daFollow:FlxObject = game.getLuaObject(followPoint);
+			var daSpeed:Float = speed;
+
+			if (leCamera == null) {
+				luaTrace("setCameraFollow: Camera " + tag + " doesn't exist!", false, false, FlxColor.RED);
+				return;
+			}
+
+			if (daFollow == null) daFollow = game.camFollow;
+			if (daSpeed == 0) daSpeed = (game.cameraSpeed*0.04) * game.playbackRate;
+
+			leCamera.follow(daFollow, FlxCameraFollowStyle.LOCKON, daSpeed);
+		});
+		Lua_helper.add_callback(lua, "addLuaCamera", function(tag:String, ?copyGame:Bool=false) { // add the camera
+			var leCamera:FlxCamera = game.getLuaObject(tag);
+			
+			if (leCamera != null)
+				FlxG.cameras.add(leCamera, copyGame)
+			else
+				luaTrace("addLuaCamera: Camera " + tag + " doesn't exist!", false, false, FlxColor.RED);
+		});
+		Lua_helper.add_callback(lua, "reorderCameras", function(cameraNames:Array<String>) { // beta, doesn't work that well
+			var validCameras:Array<FlxCamera> = [];
+			for (camName in cameraNames) {
+				var cam:FlxCamera = LuaUtils.cameraFromString(camName);
+				if (cam != null && !validCameras.contains(cam)) {
+					validCameras.push(cam);
+				}
+			}
+
+			for (cam in FlxG.cameras.list) {
+				FlxG.cameras.remove(cam, false);
+			}
+
+			for (i in 0...validCameras.length) {
+				trace(validCameras[i]);
+				var leCamera:FlxCamera = validCameras[i];
+				var isDefault = (leCamera == LuaUtils.cameraFromString("camGame"));
+				FlxG.cameras.add(leCamera, isDefault);
+			}
+		});
 		Lua_helper.add_callback(lua, "addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) { // no way this shit worked without changing anything
 			var killMe:Array<String> = obj.split('.');
 			var object:FlxSprite = LuaUtils.getObjectDirectly(killMe[0]);
