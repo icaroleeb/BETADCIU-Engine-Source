@@ -349,10 +349,12 @@ class PlayState extends MusicBeatState
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		storyDifficultyText = Difficulty.getString();
 
-		if (isStoryMode)
-			detailsText = "Story Mode: " + WeekData.getCurrentWeek().weekName;
-		else
-			detailsText = "Freeplay";
+		if (isStoryMode) detailsText = "Story Mode: " + WeekData.getCurrentWeek().weekName;
+		else if(isBETADCIU) detailsText = "BETADCIU (But Every Turn A Different Cover Is Used)";
+		else if(isBonus) detailsText = "Bonus Songs";
+		else if(isNeonight) detailsText = "Neonight";
+		else if(isVitor) detailsText = "Neonight";
+		else detailsText = "Freeplay";
 
 		// String for when the game is paused
 		detailsPausedText = "Paused - " + detailsText;
