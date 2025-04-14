@@ -291,6 +291,7 @@ class PlayState extends MusicBeatState
 	public static var nextReloadAll:Bool = false;
 
 	public var stageData:StageFile;
+	public var pauseCameraEffects:Bool = false;
 
 	override public function create()
 	{
