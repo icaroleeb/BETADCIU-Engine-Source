@@ -1205,23 +1205,24 @@ class FunkinLua {
 				luaTrace("addLuaCamera: Camera " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua, "reorderCameras", function(cameraNames:Array<String>) { // beta, doesn't work that well
-			var validCameras:Array<FlxCamera> = [];
 			for (camName in cameraNames) {
-				var cam:FlxCamera = LuaUtils.cameraFromString(camName);
-				if (cam != null && !validCameras.contains(cam)) {
-					validCameras.push(cam);
+				var leCamera:FlxCamera = LuaUtils.cameraFromString(camName);
+
+				if (leCamera != null){
+					// trace("REMOVING " + camName);
+					FlxG.cameras.remove(leCamera, false);
+				}	
+			}
+
+			for (camName in cameraNames) {
+			
+				var leCamera:FlxCamera = LuaUtils.cameraFromString(camName);
+				var isDefault = (camName.toLowerCase() == "camgame" || camName.toLowerCase() == "game");
+
+				if (leCamera != null){
+					// trace("ADDING " + camName);
+					FlxG.cameras.add(leCamera, isDefault);
 				}
-			}
-
-			for (cam in FlxG.cameras.list) {
-				FlxG.cameras.remove(cam, false);
-			}
-
-			for (i in 0...validCameras.length) {
-				trace(validCameras[i]);
-				var leCamera:FlxCamera = validCameras[i];
-				var isDefault = (leCamera == LuaUtils.cameraFromString("camGame"));
-				FlxG.cameras.add(leCamera, isDefault);
 			}
 		});
 		Lua_helper.add_callback(lua, "addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) { // no way this shit worked without changing anything
