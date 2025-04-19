@@ -190,7 +190,9 @@ class Note extends FlxSprite
 	}
 
 	private function set_texture(value:String):String {
-		if(texture != value) reloadNote(value);
+		if(texture != value){
+			value = reloadNote(value); // Value could be updated inside reloadNote
+		}
 
 		texture = value;
 		return value;
@@ -527,6 +529,8 @@ class Note extends FlxSprite
 
 		if(animName != null)
 			animation.play(animName, true);
+
+		return texture;
 	}
 
 	public static function getNoteSkinPostfix()
