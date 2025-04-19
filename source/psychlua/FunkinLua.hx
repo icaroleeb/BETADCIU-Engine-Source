@@ -565,7 +565,11 @@ class FunkinLua {
 				spr.frames = Paths.getMultiAtlas(images);
 			}
 		});
-
+		Lua_helper.add_callback(lua, "animExists", function(tag:String, anim:String){
+			var shit:Dynamic = LuaUtils.getObjectDirectly(tag);
+			
+			return shit.animation.getByName(anim) != null;
+		});
 		//shitass stuff for epic coders like me B)  *image of obama giving himself a medal*
 		Lua_helper.add_callback(lua, "getObjectOrder", function(obj:String, ?group:String = null) {
 			var leObj:FlxBasic = LuaUtils.getObjectDirectly(obj);

@@ -243,8 +243,10 @@ class NoteSplash extends FlxSprite
 		if (babyArrow != null)
 			setPosition(babyArrow.x - Note.swagWidth * 0.95, babyArrow.y - Note.swagWidth); // To prevent it from being misplaced for one game tick
 
-		if (note != null)
+		if (note != null) {
 			noteData = note.noteData;
+			config.allowPixel = note.isPixelNote;
+		}
 
 		if (randomize && maxAnims > 1)
 			noteData = noteData % Note.colArray.length + (FlxG.random.int(0, maxAnims - 1) * Note.colArray.length);
@@ -270,7 +272,7 @@ class NoteSplash extends FlxSprite
 							if (i > 2) break;
 
 							var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData % Note.colArray.length];
-							if (PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixel[noteData % Note.colArray.length];
+							if (note.isPixelNote) arr = ClientPrefs.data.arrowRGBPixel[noteData % Note.colArray.length];
 
 							var rgb = colors[i];
 							if (rgb == null)
@@ -309,7 +311,7 @@ class NoteSplash extends FlxSprite
 		}
 		rgbShader.copyValues(tempShader);
 		if (!config.allowPixel) rgbShader.pixelAmount = 1;
-		else if (PlayState.isPixelStage) rgbShader.pixelAmount = 6;
+		else if (note.isPixelNote) rgbShader.pixelAmount = 6;
 
 		offset.set(10, 10);
 		var conf:NoteSplashAnim = config.animations.get(anim);
@@ -330,8 +332,10 @@ class NoteSplash extends FlxSprite
 		if (note != null) alpha = note.noteSplashData.a;
 
 		antialiasing = ClientPrefs.data.antialiasing;
-		if (note != null) antialiasing = note.noteSplashData.antialiasing;
-		if (PlayState.isPixelStage && config.allowPixel) antialiasing = false;
+		if (note != null) {
+			antialiasing = note.noteSplashData.antialiasing;
+			if (note.isPixelNote && config.allowPixel) antialiasing = false;
+		}
 
 		var minFps:Int = 22;
 		var maxFps:Int = 26;
