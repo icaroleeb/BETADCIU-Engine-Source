@@ -57,13 +57,12 @@ class NoteSplash extends FlxSprite
 		loadSplash(splash);
 	}
 	public var isLegacyNoteSkin:Bool = false;
-	var daRGBShader:Bool = true;
 	public var maxAnims(default, set):Int = 0;
+
 	public function loadSplash(?splash:String)
 	{
 		config = null;
 		maxAnims = 0;
-
 		if(splash == null)
 		{
 			splash = defaultNoteSplash + getSplashSkinPostfix();
@@ -144,6 +143,12 @@ class NoteSplash extends FlxSprite
 		var anim:String = 'note splash';
 		var fps:Array<Null<Int>> = [22, 26];
 		var offsets:Array<Array<Float>> = [[0, 0]];
+
+		if (checkForAnim("note impact 1 purple")){ // Just assume if one exists, it all exists
+			anim = "note impact";
+			tempConfig.allowRGB = false;
+		}
+		
 		if (Paths.fileExists('$path.txt', TEXT)) // Backwards compatibility with 0.7 splash txts
 		{
 			var configFile:Array<String> = CoolUtil.listFromString(Paths.getTextFromFile('$path.txt'));
@@ -182,7 +187,8 @@ class NoteSplash extends FlxSprite
 		{
 			for (v in Note.colArray)
 			{
-				if (!checkForAnim('$anim $v ${maxAnims+1}'))
+				var animName:String = (anim == "note impact") ? '$anim ${maxAnims+1} $v' : '$anim $v ${maxAnims+1}';
+				if (!checkForAnim(animName))
 				{
 					failedToFind = true;
 					break;
@@ -199,7 +205,9 @@ class NoteSplash extends FlxSprite
 				var data:Int = i % Note.colArray.length + (animNum * Note.colArray.length);
 				var name:String = animNum > 0 ? '$col' + (animNum + 1) : col;
 				var offset:Array<Float> = offsets[FlxMath.wrap(data, 0, Std.int(offsets.length-1))];
-				addAnimationToConfig(tempConfig, 1, name, '$anim $col ${animNum + 1}', fps, offset, [], data);
+				var finalPrefix:String = (anim == "note impact") ? '$anim ${animNum + 1} $col' : '$anim $col ${animNum + 1}';
+
+				addAnimationToConfig(tempConfig, 1, name, finalPrefix, fps, offset, [], data);
 			}
 		}
 
@@ -217,9 +225,15 @@ class NoteSplash extends FlxSprite
 		if (!inEditor)
 		{
 			var loadedTexture:String = defaultNoteSplash + getSplashSkinPostfix();
-			if (note != null && note.noteSplashData.texture != null) loadedTexture = note.noteSplashData.texture;
-			else if (note != null && note.texture != null) loadedTexture = note.texture;
-			else if (PlayState.SONG != null && PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) loadedTexture = PlayState.SONG.splashSkin;
+			if (note != null && note.noteSplashData.texture != null) {
+				loadedTexture = note.noteSplashData.texture;
+			}
+			else if (note != null && note.texture != null){
+				loadedTexture = note.texture;
+			}
+			else if (PlayState.SONG != null && PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0){
+				loadedTexture = PlayState.SONG.splashSkin;
+			}
 
 			if (texture != loadedTexture) loadSplash(loadedTexture);
 		}
