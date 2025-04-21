@@ -4141,7 +4141,7 @@ class PlayState extends MusicBeatState
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
-		//#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end // it don't work with hscript stage so I remove it
+		//#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end // when you restart the song it don't work hope in the future 
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");

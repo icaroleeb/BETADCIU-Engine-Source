@@ -62,6 +62,11 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		this._goToPlayState = goToPlayState;
 		if(this._char == null) this._char = Character.DEFAULT_CHARACTER;
 
+		if (char.contains("-embed")){
+			trace('THIS FILE COTAINS EMBED, SORRY!');
+			char = "bf";
+		}
+
 		super();
 	}
 

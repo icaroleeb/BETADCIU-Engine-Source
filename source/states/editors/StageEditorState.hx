@@ -47,6 +47,11 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 	{
 		lastLoadedStage = stageToLoad;
 		stageJson = cachedJson;
+
+		if(stageToLoad.contains("-embed")){
+			trace('THIS FILE COTAINS EMBED, SORRY!');
+			stageToLoad = "stage";
+		}
 		super();
 	}
 
