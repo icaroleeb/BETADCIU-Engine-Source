@@ -809,13 +809,13 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			else if(sender == positionCameraXStepper)
 			{
 				character.cameraPosition[0] = positionCameraXStepper.value;
-				updatePointerPos();
+				updatePointerPos(false);
 				unsavedProgress = true;
 			}
 			else if(sender == positionCameraYStepper)
 			{
 				character.cameraPosition[1] = positionCameraYStepper.value;
-				updatePointerPos();
+				updatePointerPos(false);
 				unsavedProgress = true;
 			}
 			else if(sender == playerPositionCameraXStepper)

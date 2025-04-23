@@ -60,6 +60,25 @@ import crowplexus.hscript.Printer;
 import objects.PsychVideoSprite;
 #end
 
+import sys.thread.Thread;
+
+#if sys
+import sys.FileSystem;
+#end
+
+typedef PreloadResult = {
+	var thread:Thread;
+	var asset:String;
+	@:optional var terminated:Bool;
+}
+
+typedef AssetPreload = {
+	var path:String;
+	@:optional var type:String;
+	@:optional var library:String;
+	@:optional var terminate:Bool;
+}
+
 /**
  * This is where all the Gameplay stuff happens and is managed
  *
@@ -3998,8 +4017,221 @@ class PlayState extends MusicBeatState
 
 	public var stagesToLoad:Array<String> = [];
 	public var charactersToLoad:Array<String> = [];
+	public var imagesToLoad:Array<String> = [];
 
 	function preload() { // certainly changing this later
+		grabStuffToPreload();
+
+		if (charactersToLoad.length > 1) charactersToLoad = CoolUtil.removeDupe(charactersToLoad);
+		if (stagesToLoad.length > 1) stagesToLoad = CoolUtil.removeDupe(stagesToLoad);
+		if (imagesToLoad.length > 1) imagesToLoad = CoolUtil.removeDupe(imagesToLoad);
+
+		var stagesPreloaded:Bool = false; // because this is looping for some reason?
+
+		for(stage in stagesToLoad){ // loading stages without the multithread because it didn't worked that well with it
+		var ogStage:String =  "";
+		if (curStage != null) ogStage = curStage;
+			if (!stagesPreloaded) {
+				for (stage in stagesToLoad) {
+					removeStage();
+					curStage = stage;
+					stageData = StageData.getStageFile(curStage); 
+					addStage(true);
+					trace('Stage Loaded: ' + stage + '!');
+				}
+				removeStage();
+				curStage = ogStage;
+				stageData = StageData.getStageFile(curStage); 
+				addStage(true);
+				stagesPreloaded = true;
+				trace('Stage Preloading Finished.');
+			}
+		}
+
+		if (ClientPrefs.data.multicoreLoading && !ClientPrefs.data.cacheOnGPU) { // ported from Sonic Legacy	
+			trace('multicore preload starting');
+
+			var shitToLoad:Array<AssetPreload> = [
+				{path: "sick"},
+				{path: "good"},
+				{path: "bad"},
+				{path: "shit"},
+				{path: "noteSkins/NOTE_assets"},
+				// {path: "bruhtf"}
+			];
+
+			for (number in 0...10)
+				shitToLoad.push({path: 'num$number'});
+
+			for(character in charactersToLoad){
+				shitToLoad.push({
+					path: '$character',
+					type: 'CHARACTER'
+				});	
+			}
+
+			shitToLoad.push({
+				path: '${Paths.formatToSongPath(SONG.song)}/Inst',
+				type: 'SONG'
+			});
+
+			if (SONG.needsVoices) {
+				shitToLoad.push({
+					path: '${Paths.formatToSongPath(SONG.song)}/Voices',
+					type: 'SONG'
+				});
+			}
+
+			for(image in imagesToLoad){
+				shitToLoad.push({
+					path: '$image'
+				});
+			}
+
+			// TODO: go through shitToLoad and clear it of repeats as to not waste time loadin shit that already exists
+			var dupes:Array<String> = [];
+			for(shit in shitToLoad) {
+				if (dupes.contains(shit.path)) {
+					shitToLoad.remove(shit);
+					trace('heh. just removed a dupe of ${shit.path}. no need to thank me');
+					continue;
+				}
+				dupes.push(shit.path);
+			}
+			
+			var threadLimit:Int = ClientPrefs.data.loadingThreads; //Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")));
+			if(shitToLoad.length>0 && threadLimit > 1){
+				// thanks shubs -neb
+				for(shit in shitToLoad)
+					if(shit.terminate)shit.terminate=false; // do not
+
+				var count = shitToLoad.length;
+
+				if(threadLimit > shitToLoad.length)threadLimit=shitToLoad.length; // only use as many as it needs
+
+				var sprites:Array<FlxSprite> = [];
+				var threads:Array<Thread> = [];
+
+				var finished:Bool = false;
+				trace("loading " + count + " items with " + threadLimit + " threads");
+				var main = Thread.current();
+				var loadIdx:Int = 0;
+				for (i in 0...threadLimit) {
+					var thread:Thread = Thread.create( () -> {
+						while(true){
+							var toLoad:Null<AssetPreload> = Thread.readMessage(true); // get the next thing that should be loaded
+							if(toLoad!=null){
+								if(toLoad.terminate==true)break;
+								// just loads the graphic
+								switch(toLoad.type){
+									case 'SOUND':
+										Paths.sound("sounds/"+toLoad.path);
+									case 'MUSIC':
+										Paths.sound("music/"+toLoad.path);
+									case 'SONG':
+										Paths.sound("songs/"+toLoad.path);
+									case 'CHARACTER':
+										var preloadChar = new Character(0, 0, toLoad.path);
+										preloadChar.visible = false;
+										startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
+										add(preloadChar);
+										sprites.push(preloadChar);
+										//preloadChar.destroyAtlas();
+										trace('Character Loaded: ${toLoad.path}!');
+									default:
+										var image = Paths.image(toLoad.path);
+										if (image != null) {
+											var dummy = new FlxSprite().loadGraphic(image);
+											dummy.visible = false;
+											add(dummy);
+											sprites.push(dummy);
+											trace('Image Loaded: ' + toLoad.path);
+										}
+								}
+								main.sendMessage({ // send message so that it can get the next thing to load
+									thread: Thread.current(),
+									asset: toLoad,
+									terminated: false
+								});
+							}
+						}
+						main.sendMessage({ // send message so that it can get the next thing to load
+							thread: Thread.current(),
+							asset: '',
+							terminated: true
+						});
+						return;
+					});
+					threads.push(thread);
+				}
+				for(thread in threads)
+					thread.sendMessage(shitToLoad.pop()); // gives the thread the top thing to load
+
+				while(loadIdx < count){
+					var res:Null<PreloadResult> = Thread.readMessage(true); // whenever a thread loads its asset, it sends a message to get a new asset for it to load
+					if(res!=null){
+						if(res.terminated){
+							if(threads.contains(res.thread)){
+								threads.remove(res.thread); // so it wont have a message sent at the end
+							}
+						}else{
+							loadIdx++;
+							if(shitToLoad.length > 0)
+								res.thread.sendMessage(shitToLoad.pop()); // gives the thread the next thing it should load
+							else
+								res.thread.sendMessage({path: '', library:'', terminate: true}); // terminate the thread
+
+						}
+
+					}
+				};
+				trace(loadIdx, count);
+				var idx:Int = 0;
+				for(t in threads){
+					t.sendMessage({path: '', library: '', terminate: true}); // terminate all threads
+					trace("terminating thread " + idx);
+					idx++;
+				}
+	
+				finished = true;
+				new FlxTimer().start(0.05, function(_) { // adding this timer so the game can actually render the assets before removing it
+					for(sprite in sprites)
+						remove(sprite);
+				});
+			}
+			trace('multicore preload finished');
+		} else {
+			var sprites:Array<FlxSprite> = [];
+			for(character in charactersToLoad){
+				var preloadChar = new Character(0, 0, character);
+				preloadChar.visible = false;
+				startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
+				add(preloadChar);
+				sprites.push(preloadChar);
+				//preloadChar.destroyAtlas();
+				trace('Character Loaded: $character!');
+			}
+
+			// images
+			for (img in imagesToLoad) {
+				var image = Paths.image(img);
+				if (image != null) {
+					var dummy = new FlxSprite().loadGraphic(image);
+					dummy.visible = false;
+					add(dummy);
+					sprites.push(dummy);
+					trace('Image Loaded: ' + img);
+				}
+			}
+
+			new FlxTimer().start(0.1, function(_) { // adding this timer so the game can actually render the assets before removing it
+				for(sprite in sprites)
+					remove(sprite);
+			});
+		}
+	}
+
+	function grabStuffToPreload() {
 		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"))) {
 			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"));
 				for (i in 0...characters.length) {
@@ -4016,40 +4248,39 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		var sprites:Array<FlxSprite> = [];
+		var jsonPath:String = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase() + "/preload";
 
-		for(character in charactersToLoad){
-			var preloadChar = new Character(0, 0, character);
-			preloadChar.alpha = 0.0001;
-			startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
-			add(preloadChar);
-			sprites.push(preloadChar);
-			//preloadChar.destroyAtlas();
-			trace('Character Loaded: $character!');
-		}
+		if (FileSystem.exists(Paths.json(jsonPath))) {
+			var jsonString:String;
 
-		var ogStage:String =  "";
-		if (curStage != null) ogStage = curStage;
-		for (stage in 0...stagesToLoad.length) {
-			if (stagesToLoad.length > 0) {
-				removeStage();
-				curStage = stagesToLoad[stage];
-				stageData = StageData.getStageFile(curStage); 
-				addStage(true);
-				trace('Stage Loaded: ' + stagesToLoad[stage] + '!');
+			#if MODS_ALLOWED
+			jsonString = File.getContent(Paths.json(jsonPath));
+			#else
+			jsonString = File.getContent(Assets.getText(jsonPath));
+			#end
+			
+			try {
+				var data:Dynamic = Json.parse(jsonString);
+
+				var characters:Array<String> = data.character != null ? cast data.character : [];
+				var stages:Array<String> = data.stage != null ? cast data.stage : [];
+				var images:Array<String> = data.image != null ? cast data.image : [];
+
+				for (char in characters) {
+					charactersToLoad.push(char);
+				}
+				for (stage in stages) {
+					stagesToLoad.push(stage);
+				}
+				for (img in images) {
+					imagesToLoad.push(img);
+				}
+			} catch (e:Dynamic) {
+				trace("Erro ao parsear JSON: " + e);
 			}
+		} else {
+			trace('JSON não encontrado: ' + Paths.json(jsonPath));
 		}
-		removeStage();
-		curStage = ogStage;
-		stageData = StageData.getStageFile(curStage); 
-		addStage(true);
-		trace('Stage Preloading Finished.');
-
-		new FlxTimer().start(0.1, function(_) { // adding this timer so the game can actually render the assets before removing it
-			for(sprite in sprites)
-				remove(sprite);
-		});
-
 	}
 
 	public function setStageDetails(stageData:StageFile){

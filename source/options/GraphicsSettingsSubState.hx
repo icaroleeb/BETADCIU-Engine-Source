@@ -39,6 +39,29 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 
+		var maxThreads:Int = Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")); //trying to implement this cool thing i found on Sonic Legacy's source code
+		if (maxThreads > 1) {
+			var option:Option = new Option('Multi-thread Loading',
+			"If checked, the engine can use multiple threads to speed up loading times on some songs.\nRecommended to leave off for better performance, unless it causes crashing\nOnly Works with GPU Caching disabled.",
+			'multicoreLoading',
+			BOOL);
+			addOption(option);
+
+			option.defaultValue = false;
+
+			var option:Option = new Option('Loading Threads',
+			'How many threads the game can use to load graphics when using Multi-thread Loading.\nThe maximum amount of threads depends on your processor\nWARNING: Higher count of threads can cause crashes while loading.',
+			'loadingThreads',
+			INT);
+
+			option.defaultValue = Math.floor(maxThreads/2);
+			option.minValue = 1;
+			option.maxValue = Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"));
+			option.displayFormat = '%v';
+
+			addOption(option);
+		}
+
 		var option:Option = new Option('GPU Caching', //Name
 			"If checked, allows the GPU to be used for caching textures, decreasing RAM usage.\nDon't turn this on if you have a shitty Graphics Card.", //Description
 			'cacheOnGPU',

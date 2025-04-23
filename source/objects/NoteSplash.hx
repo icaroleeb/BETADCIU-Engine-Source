@@ -69,6 +69,7 @@ class NoteSplash extends FlxSprite
 			if (PlayState.SONG != null && PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) splash = PlayState.SONG.splashSkin;
 		}
 
+		if (splash == 'noteSkins/NOTE_assets') splash  = 'noteSplashes/noteSplashes'; // lets avoid some problems with the default stuff.
 		texture = splash;
 		var splashPaths:Array<String> = [
 			'notes/noteSplashes-$texture',
@@ -272,7 +273,7 @@ class NoteSplash extends FlxSprite
 							if (i > 2) break;
 
 							var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData % Note.colArray.length];
-							if (note.isPixelNote) arr = ClientPrefs.data.arrowRGBPixel[noteData % Note.colArray.length];
+							if (note != null && note.isPixelNote) arr = ClientPrefs.data.arrowRGBPixel[noteData % Note.colArray.length];
 
 							var rgb = colors[i];
 							if (rgb == null)
@@ -311,7 +312,7 @@ class NoteSplash extends FlxSprite
 		}
 		rgbShader.copyValues(tempShader);
 		if (!config.allowPixel) rgbShader.pixelAmount = 1;
-		else if (note.isPixelNote) rgbShader.pixelAmount = 6;
+		else if (note != null && note.isPixelNote) rgbShader.pixelAmount = 6;
 
 		offset.set(10, 10);
 		var conf:NoteSplashAnim = config.animations.get(anim);
