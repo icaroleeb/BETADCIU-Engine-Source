@@ -164,6 +164,18 @@ class CoolUtil
 		return Math.max(min, Math.min(max, value));
 	}
 
+	public static  function removeDupe(arr:Array<String>):Array<String> {
+		var result:Array<String> = [];
+		for (item in arr) {
+			if (!result.contains(item)) {
+				result.push(item);
+			} else {
+				trace('heh. just removed a dupe of ${item}. no need to thank me');
+			}
+		}
+		return result;
+	}
+	
 	/**
 		Helper Function to Fix Save Files for Flixel 5
 
