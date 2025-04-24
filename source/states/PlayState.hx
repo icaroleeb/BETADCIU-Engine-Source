@@ -4018,13 +4018,15 @@ class PlayState extends MusicBeatState
 	public var stagesToLoad:Array<String> = [];
 	public var charactersToLoad:Array<String> = [];
 	public var imagesToLoad:Array<String> = [];
+	public var soundsToLoad:Array<String> = []; // why not?
 
-	function preload() { // certainly changing this later
+	function preload() {
 		grabStuffToPreload();
 
 		if (charactersToLoad.length > 1) charactersToLoad = CoolUtil.removeDupe(charactersToLoad);
 		if (stagesToLoad.length > 1) stagesToLoad = CoolUtil.removeDupe(stagesToLoad);
 		if (imagesToLoad.length > 1) imagesToLoad = CoolUtil.removeDupe(imagesToLoad);
+		if (soundsToLoad.length > 1) soundsToLoad = CoolUtil.removeDupe(soundsToLoad);
 
 		var stagesPreloaded:Bool = false; // because this is looping for some reason?
 
@@ -4048,8 +4050,9 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (ClientPrefs.data.multicoreLoading && !ClientPrefs.data.cacheOnGPU) { // ported from Sonic Legacy	
+		if (ClientPrefs.data.multicoreLoading) { // ported from Sonic Legacy	
 			trace('multicore preload starting');
+			var sprites:Array<FlxSprite> = [];
 
 			var shitToLoad:Array<AssetPreload> = [
 				{path: "sick"},
@@ -4064,10 +4067,20 @@ class PlayState extends MusicBeatState
 				shitToLoad.push({path: 'num$number'});
 
 			for(character in charactersToLoad){
-				shitToLoad.push({
-					path: '$character',
-					type: 'CHARACTER'
-				});	
+				if (ClientPrefs.data.cacheOnGPU) {
+					var preloadChar = new Character(0, 0, character);
+					preloadChar.visible = false;
+					startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
+					add(preloadChar);
+					sprites.push(preloadChar);
+					//preloadChar.destroyAtlas();
+					trace('Character Loaded: ${character}!');
+				} else {
+					shitToLoad.push({
+						path: '$character',
+						type: 'CHARACTER'
+					});	
+				}
 			}
 
 			shitToLoad.push({
@@ -4083,22 +4096,29 @@ class PlayState extends MusicBeatState
 			}
 
 			for(image in imagesToLoad){
+				if (ClientPrefs.data.cacheOnGPU) {
+					var image = Paths.image(image);
+					if (image != null) {
+						var dummy = new FlxSprite().loadGraphic(image);
+						dummy.visible = false;
+						add(dummy);
+						sprites.push(dummy);
+						trace('Image Loaded: ' + image);
+					}
+				} else {
+					shitToLoad.push({
+						path: '$image'
+					});
+				}
+			}
+
+			for(sound in soundsToLoad){
 				shitToLoad.push({
-					path: '$image'
+					path: '$sound',
+					type: 'SOUND'
 				});
 			}
 
-			// TODO: go through shitToLoad and clear it of repeats as to not waste time loadin shit that already exists
-			var dupes:Array<String> = [];
-			for(shit in shitToLoad) {
-				if (dupes.contains(shit.path)) {
-					shitToLoad.remove(shit);
-					trace('heh. just removed a dupe of ${shit.path}. no need to thank me');
-					continue;
-				}
-				dupes.push(shit.path);
-			}
-			
 			var threadLimit:Int = ClientPrefs.data.loadingThreads; //Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")));
 			if(shitToLoad.length>0 && threadLimit > 1){
 				// thanks shubs -neb
@@ -4109,7 +4129,6 @@ class PlayState extends MusicBeatState
 
 				if(threadLimit > shitToLoad.length)threadLimit=shitToLoad.length; // only use as many as it needs
 
-				var sprites:Array<FlxSprite> = [];
 				var threads:Array<Thread> = [];
 
 				var finished:Bool = false;
@@ -4126,6 +4145,7 @@ class PlayState extends MusicBeatState
 								switch(toLoad.type){
 									case 'SOUND':
 										Paths.sound("sounds/"+toLoad.path);
+										trace('Sound Loaded: ${toLoad.path}');
 									case 'MUSIC':
 										Paths.sound("music/"+toLoad.path);
 									case 'SONG':
@@ -4139,13 +4159,15 @@ class PlayState extends MusicBeatState
 										//preloadChar.destroyAtlas();
 										trace('Character Loaded: ${toLoad.path}!');
 									default:
-										var image = Paths.image(toLoad.path);
-										if (image != null) {
-											var dummy = new FlxSprite().loadGraphic(image);
-											dummy.visible = false;
-											add(dummy);
-											sprites.push(dummy);
-											trace('Image Loaded: ' + toLoad.path);
+										if (!ClientPrefs.data.cacheOnGPU) {
+											var image = Paths.image(toLoad.path);
+											if (image != null) {
+												var dummy = new FlxSprite().loadGraphic(image);
+												dummy.visible = false;
+												add(dummy);
+												sprites.push(dummy);
+												trace('Image Loaded: ' + toLoad.path);
+											}
 										}
 								}
 								main.sendMessage({ // send message so that it can get the next thing to load
@@ -4265,6 +4287,7 @@ class PlayState extends MusicBeatState
 				var characters:Array<String> = data.character != null ? cast data.character : [];
 				var stages:Array<String> = data.stage != null ? cast data.stage : [];
 				var images:Array<String> = data.image != null ? cast data.image : [];
+				var sounds:Array<String> = data.sound != null ? cast data.sound : [];
 
 				for (char in characters) {
 					charactersToLoad.push(char);
@@ -4275,11 +4298,12 @@ class PlayState extends MusicBeatState
 				for (img in images) {
 					imagesToLoad.push(img);
 				}
+				for (snd in images) {
+					soundsToLoad.push(snd);
+				}
 			} catch (e:Dynamic) {
-				trace("Erro ao parsear JSON: " + e);
+				trace("Error parsing JSON: " + e); // forgot to translate this to english mb -- Ryiuu
 			}
-		} else {
-			trace('JSON não encontrado: ' + Paths.json(jsonPath));
 		}
 	}
 

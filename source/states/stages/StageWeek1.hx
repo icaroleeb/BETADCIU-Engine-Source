@@ -8,39 +8,47 @@ class StageWeek1 extends BaseStage
 	var dadbattleBlack:BGSprite;
 	var dadbattleLight:BGSprite;
 	var dadbattleFog:DadBattleFog;
+
+	var inGameplay:Bool = false;
 	override function create()
 	{
-		if (!PlayState.instance.variables.exists("stageVariables")){
-			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		var stageVars:Map<String, FlxSprite> = new Map<String, FlxSprite>(); // offset menu fix.
+
+		if (FlxG.state is PlayState) inGameplay = true;
+		
+		if (inGameplay){
+			if (!PlayState.instance.variables.exists("stageVariables")){
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+			}
+			var stageVars = PlayState.instance.variables.get("stageVariables");
 		}
-		var stageVars = PlayState.instance.variables.get("stageVariables");
 
 		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
-		stageVars.set("bg", bg);
+		if (inGameplay) stageVars.set("bg", bg);
 		add(bg);
 
 		var stageFront:BGSprite = new BGSprite('stagefront', -650, 600, 0.9, 0.9);
 		stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
 		stageFront.updateHitbox();
-		stageVars.set("stageFront", stageFront);
+		if (inGameplay) stageVars.set("stageFront", stageFront);
 		add(stageFront);
 		if(!ClientPrefs.data.lowQuality) {
 			var stageLight:BGSprite = new BGSprite('stage_light', -125, -100, 0.9, 0.9);
 			stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
 			stageLight.updateHitbox();
-			stageVars.set("stageLight", stageLight);
+			if (inGameplay) stageVars.set("stageLight", stageLight);
 			add(stageLight);
 			var stageLight:BGSprite = new BGSprite('stage_light', 1225, -100, 0.9, 0.9);
 			stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
 			stageLight.updateHitbox();
 			stageLight.flipX = true;
-			stageVars.set("stageLight2", stageLight);
+			if (inGameplay) stageVars.set("stageLight2", stageLight);
 			add(stageLight);
 
 			var stageCurtains:BGSprite = new BGSprite('stagecurtains', -500, -300, 1.3, 1.3);
 			stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.9));
 			stageCurtains.updateHitbox();
-			stageVars.set("stageCurtains", stageCurtains);
+			if (inGameplay) stageVars.set("stageCurtains", stageCurtains);
 			add(stageCurtains);
 		}
 	}
