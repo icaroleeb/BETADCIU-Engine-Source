@@ -87,7 +87,7 @@ class PhillyBlazin extends BaseStage
 			add(additionalLighten);
 		}
 
-		abot = new ABotSpeaker(gfGroup.x, gfGroup.y + 550);
+		abot = new ABotSpeaker(gfGroup.x + 40, gfGroup.y + 327);
 		stageVars.set('abot', abot);
 		add(abot);
 		
@@ -160,7 +160,7 @@ class PhillyBlazin extends BaseStage
 
 	override function beatHit()
 	{
-		//if(curBeat % 2 == 0) abot.beatHit();
+		if(curBeat % PlayState.instance.gfSpeed == 0) abot.beatHit();
 	}
 	
 	override function startSong()

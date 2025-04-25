@@ -682,7 +682,8 @@ class PhillyStreets extends BaseStage
 		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
-		//if(curBeat % 2 == 0) abot.beatHit();
+		if(curBeat % PlayState.instance.gfSpeed == 0) abot.beatHit();
+
 		switch(currentNeneState) {
 			case STATE_READY:
 				if (blinkCountdown == 0)

@@ -96,19 +96,36 @@ class ABotSpeaker extends FlxSpriteGroup
 		levelMax = 0;
 		for (i in 0...Std.int(Math.min(vizSprites.length, levels.length)))
 		{
-			var animFrame:Int = Math.round(levels[i].value * 5);
-			animFrame = Std.int(Math.abs(FlxMath.bound(animFrame, 0, 5) - 5)); // shitty dumbass flip, cuz dave got da shit backwards lol!
+			var animFrame:Int = Math.round(levels[i].value * 6);
+
+			// don't display if we're at 0 volume from the level
+			vizSprites[i].visible = animFrame > 0;
+
+			// decrement our animFrame, so we can get a value from 0-5 for animation frames
+			animFrame -= 1;
+
+			#if desktop
+			// Web version scales with the Flixel volume level.
+			// This line brings platform parity but looks worse.
+			// animFrame = Math.round(animFrame * FlxG.sound.volume);
+			#end
+
+			animFrame = Math.floor(Math.min(5, animFrame));
+			animFrame = Math.floor(Math.max(0, animFrame));
+	  
+			animFrame = Std.int(Math.abs(animFrame - 5)); // shitty dumbass flip, cuz dave got da shit backwards lol!
 		
 			vizSprites[i].animation.curAnim.curFrame = animFrame;
-			levelMax = Std.int(Math.max(levelMax, 5 - animFrame));
 		}
 
+		/*/
 		if(levelMax >= 4)
 		{
 			//trace(levelMax);
 			if(oldLevelMax <= levelMax && (levelMax >= 5 || speaker.anim.curFrame >= 3))
 				beatHit();
 		}
+		/*/
 	}
 	#end
 
@@ -122,6 +139,12 @@ class ABotSpeaker extends FlxSpriteGroup
 	{
 		@:privateAccess
 		analyzer = new SpectralAnalyzer(snd._channel.__audioSource, 7, 0.1, 40);
+    	// A-Bot tuning...
+		analyzer.minDb = -65;
+		analyzer.maxDb = -25;
+		analyzer.maxFreq = 22000;
+		// we use a very low minFreq since some songs use low low subbass like a boss
+		analyzer.minFreq = 10;
 	
 		#if desktop
 		// On desktop it uses FFT stuff that isn't as optimized as the direct browser stuff we use on HTML5
@@ -141,5 +164,10 @@ class ABotSpeaker extends FlxSpriteGroup
 	{
 		if(!lookingAtRight) eyes.anim.play('lookright', true);
 		lookingAtRight = true;
+	}
+
+	static inline function min(x:Int, y:Int):Int
+	{
+		return x > y ? y : x;
 	}
 }
