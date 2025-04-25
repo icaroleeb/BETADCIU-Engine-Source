@@ -57,7 +57,6 @@ class StrumNote extends OffsettableSprite
 		super(x, y);
 
 		var skin:String = null;
-		var isLegacyNoteSkin:Bool = false;
 		if(PlayState.SONG != null && PlayState.SONG.noteStyle != null && PlayState.SONG.noteStyle.length > 1) { // old charts
 			isLegacyNoteSkin = true;
 			skin = PlayState.SONG.noteStyle;
@@ -209,7 +208,8 @@ class StrumNote extends OffsettableSprite
 		offset.x += daOffsets[0];
 		offset.y += daOffsets[1];
 		
-		if(useRGBShader) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
+		if(useRGBShader && !isLegacyNoteSkin) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
+		else if (isLegacyNoteSkin) rgbShader.enabled = false;
 	}
 
 	public function loadNoteAnims(isPixelNote:Bool = false){

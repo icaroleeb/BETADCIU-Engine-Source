@@ -83,7 +83,7 @@ class NoteSplash extends FlxSprite
 		for (path in splashPaths) {
 			if (Paths.fileExists('images/$path.png', IMAGE)) {
 				texture = path;
-				isLegacyNoteSkin = (path == 'notes/noteSplashes-$texture');
+				isLegacyNoteSkin = (path == 'notes/noteSplashes-$splash');
 				break;
 			}
 		}
@@ -147,9 +147,11 @@ class NoteSplash extends FlxSprite
 
 		if (checkForAnim("note impact 1 purple")){ // Just assume if one exists, it all exists
 			anim = "note impact";
-			tempConfig.allowRGB = false;
+			// tempConfig.allowRGB = false;
 		}
 		
+		if (isLegacyNoteSkin) tempConfig.allowRGB = false;
+
 		if (Paths.fileExists('$path.txt', TEXT)) // Backwards compatibility with 0.7 splash txts
 		{
 			var configFile:Array<String> = CoolUtil.listFromString(Paths.getTextFromFile('$path.txt'));

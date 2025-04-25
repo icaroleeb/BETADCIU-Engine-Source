@@ -251,7 +251,7 @@ class StageData {
 						if (!ignoreFilters && !validateVisibility(data.filters)) continue;
 
 						// Check if sprite already exists before trying to remove it
-						trace("REMOVING SPRITE " + data.name);
+						// trace("REMOVING SPRITE " + data.name);
 						var spriteToRemove:FlxSprite = addedObjects.get(data.name);
 					
 						if (spriteToRemove != null)

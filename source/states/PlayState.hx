@@ -1469,6 +1469,7 @@ class PlayState extends MusicBeatState
 		var opponentSectionNoteStyle:String = "";
 		var playerSectionNoteStyle:String = "";	
 		var daSection:Int = 0;
+		var lastNoteSkin:String = "";
 
 		for (section in sectionsData)
 		{
@@ -1525,6 +1526,8 @@ class PlayState extends MusicBeatState
 				swagNote.noteType = noteType;
 				if (gottaHitNote && playerSectionNoteStyle != "") swagNote.texture = playerSectionNoteStyle;
 				else if (!gottaHitNote && opponentSectionNoteStyle != "") swagNote.texture = opponentSectionNoteStyle;
+				if (lastNoteSkin != swagNote.texture) spawnNoteSplash(-100000, -100000, swagNote.noteData, swagNote); // noteSplash lag fix?
+				lastNoteSkin = swagNote.texture;
 	
 				swagNote.scrollFactor.set();
 				unspawnNotes.push(swagNote);
