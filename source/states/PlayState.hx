@@ -296,7 +296,10 @@ class PlayState extends MusicBeatState
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 	private var luaDebugGroup:FlxTypedGroup<psychlua.DebugLuaText>;
 	#end
+	public var introSoundsPath:String = '';
 	public var introSoundsSuffix:String = '';
+
+	public var introAlts:Array<String> = ['ready', 'set', 'go'];
 
 	// Less laggy controls
 	private var keysArray:Array<String>;
@@ -1033,6 +1036,7 @@ class PlayState extends MusicBeatState
 	var finishTimer:FlxTimer = null;
 
 	// For being able to mess with the sprites on Lua
+	public var countdownOnYourMarks:FlxSprite;
 	public var countdownReady:FlxSprite;
 	public var countdownSet:FlxSprite;
 	public var countdownGo:FlxSprite;
@@ -1111,7 +1115,7 @@ class PlayState extends MusicBeatState
 				startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
 				{
 					characterBopper(tmr.loopsLeft);
-
+					/*/
 					var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
 					var introImagesArray:Array<String> = switch(stageUI) {
 						case "pixel": ['pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel'];
@@ -1121,25 +1125,33 @@ class PlayState extends MusicBeatState
 					introAssets.set(stageUI, introImagesArray);
 
 					var introAlts:Array<String> = introAssets.get(stageUI);
+					/*/
 					var antialias:Bool = (ClientPrefs.data.antialiasing && !isPixelStage);
 					var tick:Countdown = THREE;
+
+					if (stageData.countdownAssets != null){
+						introAlts = stageData.countdownAssets;
+					}
 
 					switch (swagCounter)
 					{
 						case 0:
-							FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
+							var dedicatedPath = (introAlts.length > 3 ? introAlts[0] : "notes/noStrums");
+
+							countdownOnYourMarks = createCountdownSprite(dedicatedPath, antialias);
+							FlxG.sound.play(Paths.sound(introSoundsPath + 'intro3' + introSoundsSuffix), 0.6);
 							tick = THREE;
 						case 1:
-							countdownReady = createCountdownSprite(introAlts[0], antialias);
-							FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
+							countdownReady = createCountdownSprite(introAlts[introAlts.length - 3], antialias);
+							FlxG.sound.play(Paths.sound(introSoundsPath + 'intro2' + introSoundsSuffix), 0.6);
 							tick = TWO;
 						case 2:
-							countdownSet = createCountdownSprite(introAlts[1], antialias);
-							FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
+							countdownSet = createCountdownSprite(introAlts[introAlts.length - 2], antialias);
+							FlxG.sound.play(Paths.sound(introSoundsPath + 'intro1' + introSoundsSuffix), 0.6);
 							tick = ONE;
 						case 3:
-							countdownGo = createCountdownSprite(introAlts[2], antialias);
-							FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
+							countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias);
+							FlxG.sound.play(Paths.sound(introSoundsPath + 'introGo' + introSoundsSuffix), 0.6);
 							tick = GO;
 						case 4:
 							tick = START;
