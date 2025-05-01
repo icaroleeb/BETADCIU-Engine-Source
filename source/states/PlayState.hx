@@ -378,6 +378,8 @@ class PlayState extends MusicBeatState
 			detailsText = "Story Mode: " + WeekData.getCurrentWeek().weekName;
 		else if (isBETADCIU)
 			detailsText =  SONG.song + " But Every Turn A Different Cover is Used";
+		else if (isBonus)
+			detailsText = "Bonus Songs";
 		else
 			detailsText = "Freeplay";
 
