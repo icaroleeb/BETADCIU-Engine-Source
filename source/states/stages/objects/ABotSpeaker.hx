@@ -26,6 +26,11 @@ class ABotSpeaker extends FlxSpriteGroup
 	{
 		snd = changed;
 		#if funkin.vis
+		
+		for (i in 0...Std.int(Math.min(vizSprites.length, levels.length))){
+			vizSprites[i].visible = true;
+		}
+
 		initAnalyzer();
 		#end
 		return snd;
@@ -58,6 +63,7 @@ class ABotSpeaker extends FlxSpriteGroup
 			vizSprites.push(viz);
 			viz.updateHitbox();
 			viz.centerOffsets();
+			viz.visible = false;
 			add(viz);
 		}
 
