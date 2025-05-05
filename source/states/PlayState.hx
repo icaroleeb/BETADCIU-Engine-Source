@@ -3697,24 +3697,24 @@ class PlayState extends MusicBeatState
 
 	public function stopHScriptsNamed(scriptFile:String, ?scriptType:String = "")
 		{
-		#if MODS_ALLOWED
-		var scriptToLoad:String = Paths.modFolders(scriptFile);
-		if(!FileSystem.exists(scriptToLoad))
-			scriptToLoad = Paths.getSharedPath(scriptFile);
-		#else
-		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
-		#end
-
-		if(FileSystem.exists(scriptToLoad))
-		{
-			if (Iris.instances.exists(scriptToLoad)){
-				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
-				hscriptArray.remove(script);
-				return true;
-			};
+			#if MODS_ALLOWED
+			var scriptToLoad:String = Paths.modFolders(scriptFile);
+			if(!FileSystem.exists(scriptToLoad))
+				scriptToLoad = Paths.getSharedPath(scriptFile);
+			#else
+			var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+			#end
+	
+			if(FileSystem.exists(scriptToLoad))
+			{
+				if (Iris.instances.exists(scriptToLoad)){
+					var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+					hscriptArray.remove(script);
+					return true;
+				};
+			}
+			return false;
 		}
-		return false;
-	}
 
 	public function initHScript(file:String, ?scriptType:String = "")
 	{
