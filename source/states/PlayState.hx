@@ -3697,24 +3697,24 @@ class PlayState extends MusicBeatState
 
 	public function stopHScriptsNamed(scriptFile:String, ?scriptType:String = "")
 		{
-			#if MODS_ALLOWED
-			var scriptToLoad:String = Paths.modFolders(scriptFile);
-			if(!FileSystem.exists(scriptToLoad))
-				scriptToLoad = Paths.getSharedPath(scriptFile);
-			#else
-			var scriptToLoad:String = Paths.getSharedPath(scriptFile);
-			#end
-	
-			if(FileSystem.exists(scriptToLoad))
-			{
-				if (Iris.instances.exists(scriptToLoad)){
-					var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
-					hscriptArray.remove(script);
-					return true;
-				};
-			}
-			return false;
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad))
+		{
+			if (Iris.instances.exists(scriptToLoad)){
+				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+				hscriptArray.remove(script);
+				return true;
+			};
 		}
+		return false;
+	}
 
 	public function initHScript(file:String, ?scriptType:String = "")
 	{
@@ -4413,7 +4413,7 @@ class PlayState extends MusicBeatState
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
-		//#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end // when you restart the stage won't load the stage (Blantados & Ryiuu fix this pls)
+		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end // when you restart the stage won't load the stage (Blantados & Ryiuu fix this pls)
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
