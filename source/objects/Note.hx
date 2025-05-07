@@ -113,7 +113,7 @@ class Note extends FlxSprite
 	public static var SUSTAIN_SIZE:Int = 44;
 	public static var swagWidth:Float = 160 * 0.7;
 	public static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
-	public static var defaultNoteSkin(default, never):String = 'noteSkins/NOTE_assets';
+	public static var defaultNoteSkin(default, never):String = 'NOTE_assets';
 
 	public var noteSplashData:NoteSplashData = {
 		disabled: false,
@@ -320,12 +320,8 @@ class Note extends FlxSprite
 
 			offsetX -= width / 2;
 
-			if (isPixelNote)
+			if (isPixelNote || separateSheets)
 				offsetX += 30;
-
-			if (separateSheets)
-				offsetX += 30;
-
 
 			if (prevNote.isSustainNote)
 			{
@@ -396,11 +392,11 @@ class Note extends FlxSprite
 		if(postfix == null) postfix = '';
 
 		if(texture.length < 1) {
-			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
-				texture = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
-			} else{
-				texture = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
-			}
+			// if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
+			// 	texture = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
+			// } else{
+			// 	texture = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
+			// }
 
 			if(texture == null || texture.length < 1) texture = defaultNoteSkin + postfix;
 		}
@@ -411,17 +407,16 @@ class Note extends FlxSprite
 		isLegacyNoteSkin = false;
 
 		var skin:String = texture + postfix;
-		var notePath:String = texture;
-		if (notePath == 'pixel') {
-			notePath = "NOTE_assets-pixel";
+		if (texture == 'pixel') {
+			rgbShader.enabled = true;
+			texture = "NOTE_assets-pixel";
 			skin = texture + postfix;
-			notePath = texture;
 		}else if (texture == 'normal') {
 			rgbShader.enabled = true;
 			texture = "NOTE_assets";
 			skin = texture + postfix;
-			notePath = texture;
 		}
+		var notePath:String = texture;
 
 		var isCustomNoteSkin:Bool = false;
 		var CustomNoteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
@@ -434,6 +429,7 @@ class Note extends FlxSprite
 			animName = animation.curAnim.name;
 		}
 
+		var wasPixelNote:Bool = isPixelNote;
 		isPixelNote = false;
 		var skinPixel:String = skin;
 		var lastScaleY:Float = scale.y;
@@ -479,7 +475,7 @@ class Note extends FlxSprite
 		
 		defaultRGB(isPixelNote);
 
-		if (!skin.endsWith('NOTE_assets') && !skin.endsWith('NOTE_assets-chip') && !skin.endsWith('NOTE_assets-future') && !isCustomNoteSkin) rgbShader.enabled = false;
+		if (isLegacyNoteSkin && !isCustomNoteSkin) rgbShader.enabled = false;
 		
 		if(isPixelNote) {
 			if(isSustainNote) {
@@ -524,6 +520,8 @@ class Note extends FlxSprite
 
 		if(isSustainNote) {
 			scale.y = lastScaleY;
+			if (wasPixelNote && !isPixelNote) offsetX += 30;
+			if (isPixelNote && !wasPixelNote) offsetX -= 5;
 		}
 		updateHitbox();
 

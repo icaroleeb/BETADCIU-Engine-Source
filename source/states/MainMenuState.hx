@@ -19,7 +19,7 @@ class MainMenuState extends MusicBeatState
 {
 	public static var finishedFunnyMove:Bool = false;
 	public static var psychEngineVersion:String = '1.0.4';
-	public static var betadciuVer:String = "0.2"; // This is also used for Discord RPC
+	public static var betadciuVer:String = "1.0"; // This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 	public static var curColumn:MainMenuColumn = CENTER;
 	public static var mainMusic = true;
@@ -120,7 +120,7 @@ class MainMenuState extends MusicBeatState
 		fnfVer.scrollFactor.set();
 		fnfVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(fnfVer);
-		var betadciuVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "BETADCIU Engine Reworked v" + betadciuVer + " BETA", 12); // Reworked sounds better than "Reboot"
+		var betadciuVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "BETADCIU Engine Reworked v" + betadciuVer + " Pre-Release", 12); // Reworked sounds better than "Reboot"
 		betadciuVer.scrollFactor.set();
 		betadciuVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(betadciuVer);
@@ -179,7 +179,6 @@ class MainMenuState extends MusicBeatState
 	}
 
 	var selectedSomethin:Bool = false;
-	var isLeftItems:Bool = true;
 
 	var timeNotMoving:Float = 0;
 	override function update(elapsed:Float)
@@ -189,16 +188,6 @@ class MainMenuState extends MusicBeatState
 
 		if (!selectedSomethin)
 		{
-			if(isLeftItems){
-				if (controls.UI_UP_P){
-					changeItem(-1);
-				}
-
-				if (controls.UI_DOWN_P){
-					changeItem(1);
-				}
-			}
-
 			var allowMouse:Bool = allowMouse;
 			if (allowMouse && ((FlxG.mouse.deltaScreenX != 0 && FlxG.mouse.deltaScreenY != 0) || FlxG.mouse.justPressed)) //FlxG.mouse.deltaScreenX/Y checks is more accurate than FlxG.mouse.justMoved
 			{
@@ -272,53 +261,45 @@ class MainMenuState extends MusicBeatState
 			switch(curColumn)
 			{
 				case CENTER:
-					
-					//if(controls.UI_RIGHT_P && leftOption != null)
-					//{
-					//	curColumn = LEFT;
-					//	changeItem();
-					//} 
-					/*/else/*/ 
-					if(controls.UI_RIGHT_P && rightOption != null)
+					if(controls.UI_UP_P)
 					{
-						isLeftItems = false;
-						curColumn = RIGHT;
+						changeItem(-1);
+					}
+
+					if(controls.UI_DOWN_P)
+					{
+						curColumn = LEFT;
+						changeItem(1);
+					}
+
+					if(controls.UI_RIGHT_P && leftOption != null)
+					{
+						curColumn = LEFT;
 						changeItem();
 					}
 
 				case LEFT:
-					/*/
-					if(FlxG.keys.pressed.UP)
+					if((controls.UI_DOWN_P || controls.UI_UP_P) && rightOption != null)
 					{
-						curColumn = CENTER;
-						changeItem();
-					}
-					/*/
-
-					/*/
-					if(controls.UI_RIGHT_P)
-					{
-						curColumn = CENTER;
-						changeItem();
-					}
-					/*/
-
-				case RIGHT:
-					if(FlxG.keys.pressed.UP)
-					{
-						isLeftItems = true;
-						curColumn = LEFT;
-						changeItem();
-					} else if(FlxG.keys.pressed.DOWN)
-					{
-						isLeftItems = true;
 						curColumn = RIGHT;
 						changeItem();
 					}
 
 					if(controls.UI_LEFT_P)
 					{
-						isLeftItems = true;
+						curColumn = CENTER;
+						changeItem();
+					}
+
+				case RIGHT:
+					if((controls.UI_DOWN_P || controls.UI_UP_P) && leftOption != null)
+					{
+						curColumn = LEFT;
+						changeItem();
+					}
+
+					if(controls.UI_LEFT_P)
+					{
 						curColumn = CENTER;
 						changeItem();
 					}
@@ -432,6 +413,7 @@ class MainMenuState extends MusicBeatState
 
 		for (item in menuItems)
 		{
+			FlxTween.cancelTweensOf(item);
 			FlxTween.tween(item, {x: -620}, 0.26,{ease: FlxEase.expoOut, onComplete: function(flxTween:FlxTween){}});
 			item.animation.play('idle');
 			item.centerOffsets();
@@ -448,6 +430,7 @@ class MainMenuState extends MusicBeatState
 		{
 			case CENTER:
 				selectedItem = menuItems.members[curSelected];
+				FlxTween.cancelTweensOf(selectedItem);
 				FlxTween.tween(selectedItem, {x: -440}, 0.26,{ease: FlxEase.expoOut, onComplete: function(flxTween:FlxTween){
 					selectedItem.x = -440;
 				}});
@@ -458,6 +441,6 @@ class MainMenuState extends MusicBeatState
 		}
 		selectedItem.animation.play('selected');
 		selectedItem.centerOffsets();
-		camFollow.y = selectedItem.getGraphicMidpoint().y;
+		if (selectedItem != leftItem && selectedItem != rightItem) camFollow.y = selectedItem.getGraphicMidpoint().y;
 	}
 }

@@ -1570,7 +1570,7 @@ class FunkinLua {
 			luaTrace("setBlendMode: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
-		Lua_helper.add_callback(lua, "screenCenter", function(obj:String, pos:String = 'xy') {
+		Lua_helper.add_callback(lua, "screenCenter", function(obj:String, ?pos:String = 'xy') {
 			var spr:FlxObject = game.getLuaObject(obj);
 
 			if(spr==null){
@@ -1998,6 +1998,7 @@ class FunkinLua {
 		CustomSubstate.implement(this);
 		ShaderFunctions.implement(this);
 		DeprecatedFunctions.implement(this);
+		SpriteGroupFunctions.implement(this);
 
 		for (name => func in customFunctions)
 		{

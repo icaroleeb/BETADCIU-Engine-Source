@@ -2949,6 +2949,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		copyLastSecStepper = new PsychUINumericStepper(objX + 110, objY + 2, 1, 1, -999, 999, 0);
 
 		DTypeStepper = new PsychUINumericStepper(objX + 200, objY + 2, 1, 0, 0, 999, 2);
+		DTypeStepper.onValueChange = function()
+		{
+			var sec = getCurChartSection();
+			if(sec != null)
+			{
+				var oldTimes:Array<Float> = cachedSectionTimes.copy();
+				sec.dType = Std.int(DTypeStepper.value);
+				// adaptNotesToNewTimes(oldTimes); // i don't think i need this
+			}
+		};
 		
 		objY += 40;
 		var swapSectionButton:PsychUIButton = new PsychUIButton(objX, objY, 'Swap Section', function()

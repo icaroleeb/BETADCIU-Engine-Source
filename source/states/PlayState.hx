@@ -296,6 +296,7 @@ class PlayState extends MusicBeatState
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 	private var luaDebugGroup:FlxTypedGroup<psychlua.DebugLuaText>;
 	#end
+	public var introSoundsPrefix:String = '';
 	public var introSoundsSuffix:String = '';
 
 	// Less laggy controls
@@ -375,6 +376,8 @@ class PlayState extends MusicBeatState
 			detailsText = "Story Mode: " + WeekData.getCurrentWeek().weekName;
 		else if (isBETADCIU)
 			detailsText =  SONG.song + " But Every Turn A Different Cover is Used";
+		else if (isBonus) // adding one for bonus songs too because i want
+			detailsText =  "Bonus Song";
 		else
 			detailsText = "Freeplay";
 
@@ -1033,6 +1036,7 @@ class PlayState extends MusicBeatState
 	var finishTimer:FlxTimer = null;
 
 	// For being able to mess with the sprites on Lua
+	public var countdownOnYourMarks:FlxSprite; // adding this one because some old scripts uses this
 	public var countdownReady:FlxSprite;
 	public var countdownSet:FlxSprite;
 	public var countdownGo:FlxSprite;
@@ -1050,10 +1054,10 @@ class PlayState extends MusicBeatState
 		var introAlts:Array<String> = introAssets.get(stageUI);
 		for (asset in introAlts) Paths.image(asset);
 
-		Paths.sound('intro3' + introSoundsSuffix);
-		Paths.sound('intro2' + introSoundsSuffix);
-		Paths.sound('intro1' + introSoundsSuffix);
-		Paths.sound('introGo' + introSoundsSuffix);
+		Paths.sound(introSoundsPrefix + 'intro3' + introSoundsSuffix);
+		Paths.sound(introSoundsPrefix + 'intro2' + introSoundsSuffix);
+		Paths.sound(introSoundsPrefix + 'intro1' + introSoundsSuffix);
+		Paths.sound(introSoundsPrefix + 'introGo' + introSoundsSuffix);
 	}
 
 	public var stopCountdown = false;
@@ -1120,26 +1124,33 @@ class PlayState extends MusicBeatState
 					}
 					introAssets.set(stageUI, introImagesArray);
 
+					var isCustomCountdown:Bool = false;
 					var introAlts:Array<String> = introAssets.get(stageUI);
+					if (stageData.countdownAssets != null && stageData.countdownAssets != []) {
+						introAlts = stageData.countdownAssets;
+						isCustomCountdown = true;
+					}
+
 					var antialias:Bool = (ClientPrefs.data.antialiasing && !isPixelStage);
 					var tick:Countdown = THREE;
 
 					switch (swagCounter)
 					{
 						case 0:
-							FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
+							countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
+							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro3' + introSoundsSuffix), 0.6);
 							tick = THREE;
 						case 1:
-							countdownReady = createCountdownSprite(introAlts[0], antialias);
-							FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
+							countdownReady = createCountdownSprite(introAlts[0], antialias, isCustomCountdown);
+							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro2' + introSoundsSuffix), 0.6);
 							tick = TWO;
 						case 2:
-							countdownSet = createCountdownSprite(introAlts[1], antialias);
-							FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
+							countdownSet = createCountdownSprite(introAlts[1], antialias, isCustomCountdown);
+							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro1' + introSoundsSuffix), 0.6);
 							tick = ONE;
 						case 3:
-							countdownGo = createCountdownSprite(introAlts[2], antialias);
-							FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
+							countdownGo = createCountdownSprite(introAlts[2], antialias, isCustomCountdown);
+							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'introGo' + introSoundsSuffix), 0.6);
 							tick = GO;
 						case 4:
 							tick = START;
@@ -1169,15 +1180,13 @@ class PlayState extends MusicBeatState
 		return true;
 	}
 
-	inline private function createCountdownSprite(image:String, antialias:Bool):FlxSprite
+	inline private function createCountdownSprite(image:String, antialias:Bool, ?custom:Bool=false):FlxSprite
 	{
 		var spr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(image));
 		spr.cameras = [camHUD];
 		spr.scrollFactor.set();
 		spr.updateHitbox();
-
-		if (PlayState.isPixelStage)
-			spr.setGraphicSize(Std.int(spr.width * daPixelZoom));
+		if (PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel")) spr.setGraphicSize(Std.int(spr.width * daPixelZoom)); // bruh
 
 		spr.screenCenter();
 		spr.antialiasing = antialias;
@@ -1471,6 +1480,19 @@ class PlayState extends MusicBeatState
 		var daSection:Int = 0;
 		var lastNoteSkin:String = "";
 
+		if (stuff == []) {
+			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
+				opponentSectionNoteStyle = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
+				playerSectionNoteStyle = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
+			} else if (PlayState.SONG != null && PlayState.SONG.arrowSkin != null) {
+				opponentSectionNoteStyle = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
+				playerSectionNoteStyle = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
+			}
+
+			if (opponentSectionNoteStyle == null || opponentSectionNoteStyle == "") opponentSectionNoteStyle = 'normal';
+			if (playerSectionNoteStyle == null || playerSectionNoteStyle == "") playerSectionNoteStyle = 'normal';
+		}
+
 		for (section in sectionsData)
 		{
 			if (section.changeBPM != null && section.changeBPM && section.bpm != null && daBpm != section.bpm)
@@ -1526,7 +1548,7 @@ class PlayState extends MusicBeatState
 				swagNote.noteType = noteType;
 				if (gottaHitNote && playerSectionNoteStyle != "") swagNote.texture = playerSectionNoteStyle;
 				else if (!gottaHitNote && opponentSectionNoteStyle != "") swagNote.texture = opponentSectionNoteStyle;
-				if (lastNoteSkin != swagNote.texture) spawnNoteSplash(-100000, -100000, swagNote.noteData, swagNote); // noteSplash lag fix?
+				if (lastNoteSkin != swagNote.texture) spawnNoteSplash(-100000, -100000, swagNote.noteData, swagNote); // gotta preload that noteSplash
 				lastNoteSkin = swagNote.texture;
 	
 				swagNote.scrollFactor.set();
@@ -1554,24 +1576,21 @@ class PlayState extends MusicBeatState
 						swagNote.tail.push(sustainNote);
 
 						sustainNote.correctionOffset = swagNote.height / 2;
-						if(!PlayState.isPixelStage)
-						{
+						// if(!sustainNote.isPixelNote)
+						// {
 							if(oldNote.isSustainNote)
 							{
 								oldNote.scale.y *= Note.SUSTAIN_SIZE / oldNote.frameHeight;
 								oldNote.scale.y /= playbackRate;
 								oldNote.resizeByRatio(curStepCrochet / Conductor.stepCrochet);
 							}
-
-							if(ClientPrefs.data.downScroll)
-								sustainNote.correctionOffset = 0;
-						}
-						else if(oldNote.isSustainNote)
-						{
-							oldNote.scale.y /= playbackRate;
-							oldNote.resizeByRatio(curStepCrochet / Conductor.stepCrochet);
-						}
-
+							if(ClientPrefs.data.downScroll && !sustainNote.isPixelNote) sustainNote.correctionOffset = 0;
+						// }
+						// else if(oldNote.isSustainNote)
+						// {
+						// 	oldNote.scale.y /= playbackRate;
+						// 	oldNote.resizeByRatio(curStepCrochet / Conductor.stepCrochet);
+						// }						
 						if (sustainNote.mustPress) sustainNote.x += FlxG.width / 2; // general offset
 						else if(ClientPrefs.data.middleScroll)
 						{
@@ -2807,6 +2826,7 @@ class PlayState extends MusicBeatState
 
 		if (stageData.ratingSkin != null) {
 			uiFolder = stageData.ratingSkin[0];
+			if (uiFolder.startsWith("weeb/")) uiFolder = uiFolder.substring("weeb/".length); // we don't use the "weeb" path on this new version so yeah.
 			if (uiFolder != "") {
 				customRatingSkin = true;
 				uiPostfix = stageData.ratingSkin[1];
@@ -3428,10 +3448,6 @@ class PlayState extends MusicBeatState
 	public function spawnNoteSplash(x:Float = 0, y:Float = 0, ?data:Int = 0, ?note:Note, ?strum:StrumNote) {
 		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
 		splash.babyArrow = strum;
-		// if (strum.texture != splash.texture && strum.isLegacyNoteSkin) {
-		// 	splash.loadSplash(strum.texture);
-		// 	splash.spawnSplashNote(x, y, data, note);
-		// } else splash.spawnSplashNote(x, y, data, note);
 		splash.spawnSplashNote(x, y, data, note);
 		grpNoteSplashes.add(splash);
 	}
@@ -4147,12 +4163,12 @@ class PlayState extends MusicBeatState
 								// just loads the graphic
 								switch(toLoad.type){
 									case 'SOUND':
-										Paths.sound("sounds/"+toLoad.path);
+										Paths.sound(toLoad.path);
 										trace('Sound Loaded: ${toLoad.path}');
 									case 'MUSIC':
-										Paths.sound("music/"+toLoad.path);
+										Paths.music(toLoad.path);
 									case 'SONG':
-										Paths.sound("songs/"+toLoad.path);
+										Paths.song(toLoad.path);
 									case 'CHARACTER':
 										var preloadChar = new Character(0, 0, toLoad.path);
 										preloadChar.visible = false;

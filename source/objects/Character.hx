@@ -620,6 +620,7 @@ class Character extends OffsettableSprite
 
 	public override function destroy()
 	{
+		if (missingText != null) missingText.visible = false; // this should fix some weird bugs when a character is missing
 		destroyAtlas();
 		super.destroy();
 	}
