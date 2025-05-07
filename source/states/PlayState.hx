@@ -1464,10 +1464,10 @@ class PlayState extends MusicBeatState
 		}
 		catch(e:Dynamic) {}
 
-		var stuff:Array<String> = [];
+		var arrowSwitches:Array<String> = [];
 
 		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"))){
-			stuff = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"));
+			arrowSwitches = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"));
 		}
 
 		var oldNote:Note = null;
@@ -1480,7 +1480,7 @@ class PlayState extends MusicBeatState
 		var daSection:Int = 0;
 		var lastNoteSkin:String = "";
 
-		if (stuff == []) {
+		if (arrowSwitches == null || arrowSwitches.length == 0){
 			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
 				opponentSectionNoteStyle = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
 				playerSectionNoteStyle = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
@@ -1498,9 +1498,9 @@ class PlayState extends MusicBeatState
 			if (section.changeBPM != null && section.changeBPM && section.bpm != null && daBpm != section.bpm)
 				daBpm = section.bpm;
 
-			if (stuff != []) {
-				for (i in 0...stuff.length){
-					var data:Array<String> = stuff[i].split(' ');
+			if (arrowSwitches != []) {
+				for (i in 0...arrowSwitches.length){
+					var data:Array<String> = arrowSwitches[i].split(' ');
 					// notesToLoad.push(data[1]); // not implemented yet
 					if (daSection == Std.parseInt(data[0])){
 						(data[2] == 'dad' ? opponentSectionNoteStyle = data[1] : playerSectionNoteStyle = data[1]);
