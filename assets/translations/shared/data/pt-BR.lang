@@ -230,6 +230,8 @@ setting_discord_rich_presence: "Discord Rich Presence"
 description_discord_rich_presence: "Desmarque esta caixa para evitar leaks acidentais do seu Mod,\nIsso irá esconder o que você está jogando para os outros."
 setting_combo_stacking: "Acúmulo de Combo"
 description_combo_stacking: "Se desmarcado, números de combo não irão empilhar\nao acertar uma nota, isso torna o jogo mais legível."
+setting_og_icon_bop: "Icon Bop Original"
+description_og_icon_bop: "Se marcado, a animação dos icones será a mesma da BETADCIU Engine Legacy."
 
 // Gameplay Settings
 setting_downscroll: "Downscroll"

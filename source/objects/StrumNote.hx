@@ -89,9 +89,10 @@ class StrumNote extends OffsettableSprite
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
 
+		if (texture == 'pixel') texture = "NOTE_assets-pixel";
+		if (texture == 'normal') texture = "NOTE_assets";
+
 		var notePath:String = texture;
-		if (notePath == 'pixel') notePath = "NOTE_assets-pixel";
-		if (notePath == 'normal') notePath = "NOTE_assets";
 
 		var curNotePath = notePath;
 		isPixelNote = false;
@@ -147,8 +148,8 @@ class StrumNote extends OffsettableSprite
 		updateHitbox();
 
 		if (frames == null){ // Set to default if no frames found so it doesn't crash
-			texture = Note.defaultNoteSkin;
 			rgbShader.enabled = true;
+			texture = Note.defaultNoteSkin;
 		} 
 
 		if(lastAnim != null)

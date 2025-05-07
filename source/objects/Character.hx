@@ -13,7 +13,6 @@ import backend.Song;
 import states.stages.objects.TankmenBG;
 
 typedef CharacterFile = {
-	@:optional var playerAnimations:Array<AnimArray>; //bcuz garcello
 	var animations:Array<AnimArray>;
 	var image:String;
 	var scale:Float;
@@ -235,10 +234,6 @@ class Character extends OffsettableSprite
 		// animations
 		var itHasPlayerOfs:Bool = false;
 		animationsArray = json.animations;
-
-		if (isPlayer && json.playerAnimations != null)
-			animationsArray = json.playerAnimations;
-
 		if(animationsArray != null && animationsArray.length > 0) {
 			for (anim in animationsArray) {
 				var animAnim:String = '' + anim.anim;
@@ -625,6 +620,7 @@ class Character extends OffsettableSprite
 
 	public override function destroy()
 	{
+		if (missingText != null) missingText.visible = false; // this should fix some weird bugs when a character is missing
 		destroyAtlas();
 		super.destroy();
 	}

@@ -62,9 +62,9 @@ class PsychUINumericStepper extends PsychUIInputText
 					multiplier = 1;
 				}
 
-				if (step < 3) {
-					multiplier *= 10;
-				}
+				// if (step < 3) {
+				// 	multiplier *= 10;
+				// }
 
 				value += step * multiplier;
 				_internalOnChange();
@@ -80,9 +80,9 @@ class PsychUINumericStepper extends PsychUIInputText
 					multiplier = 1;
 				}
 
-				if (step < 3) {
-					multiplier *= 10;
-				}
+				// if (step < 3) {
+				// 	multiplier *= 10;
+				// }
 
 				value -= step * multiplier;
 				_internalOnChange();

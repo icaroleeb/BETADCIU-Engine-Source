@@ -82,7 +82,7 @@ class BonusSongsState extends MusicBeatState
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("In Bonus Songs Menu", null);
+		DiscordClient.changePresence("In Bonus Song Menu", null);
 		#end
 
 		if(WeekData.weeksList.length < 1)

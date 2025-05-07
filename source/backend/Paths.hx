@@ -244,6 +244,9 @@ class Paths
 	inline static public function sound(key:String, ?modsAllowed:Bool = true):Sound
 		return returnSound('sounds/$key', modsAllowed);
 
+	inline static public function song(key:String, ?modsAllowed:Bool = true):Sound
+		return returnSound('songs/$key', modsAllowed);
+
 	inline static public function music(key:String, ?modsAllowed:Bool = true):Sound
 		return returnSound('music/$key', modsAllowed);
 

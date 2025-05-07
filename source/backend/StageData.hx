@@ -21,8 +21,8 @@ typedef StageFile = {
 	var camera_girlfriend:Array<Float>;
 	var camera_speed:Null<Float>;
 
-	@:optional var ratingSkin:Dynamic;
 	@:optional var countdownAssets:Array<String>;
+	@:optional var ratingSkin:Dynamic;
 	@:optional var preload:Dynamic;
 	@:optional var objects:Array<Dynamic>;
 	@:optional var _editorMeta:Dynamic;
