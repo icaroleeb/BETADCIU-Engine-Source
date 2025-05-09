@@ -82,16 +82,16 @@
 	"no_antialiasing": true,
 	"image": "characters/gfPixel",
 	"position": [
-		295,
-		305
+		0,
+		0
 	],
 	"player_camera_position": [
 		-350,
 		-150
 	],
 	"playerposition": [
-		300,
-		300
+		0,
+		0
 	],
 	"healthicon": "gf",
 	"flip_x": false,
@@ -101,8 +101,8 @@
 		77
 	],
 	"camera_position": [
-		-350,
-		-150
+		-20,
+		80
 	],
 	"noteSkin": null,
 	"sing_duration": 4,

@@ -32,12 +32,42 @@
 		},
 		{
 			"offsets": [
+				15,
+				68
+			],
+			"loop": true,
+			"fps": 24,
+			"anim": "singUP-loop",
+			"indices": [],
+			"name": "Mom Up Pose0",
+			"playerOffsets": [
+				-42,
+				58
+			]
+		},
+		{
+			"offsets": [
 				20,
 				-170
 			],
 			"loop": false,
 			"fps": 24,
 			"anim": "singDOWN",
+			"indices": [],
+			"name": "MOM DOWN POSE0",
+			"playerOffsets": [
+				-10,
+				-180
+			]
+		},
+		{
+			"offsets": [
+				20,
+				-170
+			],
+			"loop": true,
+			"fps": 24,
+			"anim": "singDOWN-loop",
 			"indices": [],
 			"name": "MOM DOWN POSE0",
 			"playerOffsets": [
@@ -62,6 +92,26 @@
 		},
 		{
 			"offsets": [
+				180,
+				-31
+			],
+			"loop": true,
+			"fps": 24,
+			"anim": "singLEFT-loop",
+			"indices": [
+				12,
+				13,
+				14,
+				15
+			],
+			"name": "Mom Left Pose0",
+			"playerOffsets": [
+				150,
+				-59
+			]
+		},
+		{
+			"offsets": [
 				50,
 				-68
 			],
@@ -69,6 +119,26 @@
 			"fps": 24,
 			"anim": "singRIGHT",
 			"indices": [],
+			"name": "Mom Pose Left0",
+			"playerOffsets": [
+				-49,
+				-22
+			]
+		},
+		{
+			"offsets": [
+				50,
+				-68
+			],
+			"loop": true,
+			"fps": 24,
+			"anim": "singRIGHT-loop",
+			"indices": [
+				58,
+				59,
+				60,
+				61
+			],
 			"name": "Mom Pose Left0",
 			"playerOffsets": [
 				-49,
