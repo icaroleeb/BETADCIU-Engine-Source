@@ -148,7 +148,7 @@
 	"healthicon": "tankman",
 	"flip_x": true,
 	"healthbar_colors": [44, 45, 65],
-	"camera_position": [100, 0],
+	"camera_position": [0, 0],
 	"sing_duration": 4,
 	"isPlayerChar": false,
 	"scale": 1,

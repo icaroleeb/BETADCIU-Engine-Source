@@ -4449,6 +4449,7 @@ class PlayState extends MusicBeatState
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
 		}
 
+		//stagesFunc(function(stage:BaseStage) stage.create());
 		stagesFunc(function(stage:BaseStage) stage.createPost());
 		addObjects(stageData);
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)

@@ -1,6 +1,7 @@
 package states.editors;
 
 import flixel.graphics.FlxGraphic;
+import psychlua.FunkinLua;
 
 import flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
 import flixel.util.FlxDestroyUtil;
@@ -61,6 +62,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		this._char = char;
 		this._goToPlayState = goToPlayState;
 		if(this._char == null) this._char = Character.DEFAULT_CHARACTER;
+
+		if (char.contains("-embed")){
+			char = "bf";
+		}
 
 		super();
 	}

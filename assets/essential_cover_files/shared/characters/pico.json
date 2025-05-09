@@ -1,182 +1,147 @@
 {
 	"animations": [
 		{
-			"offsets": [
-				0,
-				0
-			],
-			"indices": [],
-			"fps": 24,
+			"loop": false,
+			"offsets": [0, 0],
 			"anim": "idle",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [0, 0],
 			"name": "Pico Idle Dance",
-			"playerOffsets": [
-				0,
-				0
-			]
+			"indices": []
 		},
 		{
-			"offsets": [
-				-46,
-				22
-			],
-			"indices": [],
-			"fps": 24,
+			"loop": false,
+			"offsets": [-46, 22],
 			"anim": "singUP",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [21, 27],
 			"name": "pico Up note0",
-			"playerOffsets": [
-				19,
-				23
-			]
+			"indices": []
 		},
 		{
-			"offsets": [
-				190,
-				-81
-			],
-			"indices": [],
-			"fps": 24,
+			"loop": false,
+			"offsets": [190, -81],
 			"anim": "singDOWN",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [84, -80],
 			"name": "Pico Down Note0",
-			"playerOffsets": [
-				95,
-				-80
-			]
+			"indices": []
 		},
 		{
-			"offsets": [
-				119,
-				-81
-			],
-			"indices": [],
-			"fps": 24,
+			"loop": false,
+			"offsets": [119, -81],
 			"anim": "singDOWN-alt",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [154, -79],
 			"name": "Pico Shoot0",
-			"playerOffsets": [
-				165,
-				-80
-			]
+			"indices": []
 		},
 		{
-			"offsets": [
-				56,
-				1
-			],
-			"indices": [],
-			"fps": 24,
+			"loop": false,
+			"offsets": [56, 1],
 			"anim": "singLEFT",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [85, -10],
 			"name": "Pico Note Right0",
-			"playerOffsets": [
-				80,
-				-11
-			]
+			"indices": []
 		},
 		{
-			"offsets": [
-				-82,
-				-12
-			],
-			"indices": [],
-			"fps": 24,
+			"loop": false,
+			"offsets": [-82, -12],
 			"anim": "singRIGHT",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [-48, 2],
 			"name": "Pico NOTE LEFT0",
-			"playerOffsets": [
-				-50,
-				1
-			]
+			"indices": []
 		},
 		{
-			"offsets": [
-				-73,
-				24
-			],
-			"indices": [],
-			"fps": 24,
+			"loop": false,
+			"offsets": [-73, 24],
 			"anim": "singRIGHTmiss",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [-45, 50],
 			"name": "Pico NOTE LEFT miss",
-			"playerOffsets": [
-				-44,
-				51
-			]
+			"indices": []
 		},
 		{
-			"offsets": [
-				60,
-				48
-			],
-			"indices": [],
-			"fps": 24,
+			"loop": false,
+			"offsets": [60, 48],
 			"anim": "singLEFTmiss",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [83, 28],
 			"name": "Pico Note Right Miss",
-			"playerOffsets": [
-				80,
-				27
-			]
+			"indices": []
 		},
 		{
-			"offsets": [
-				-21,
-				59
-			],
-			"indices": [],
-			"fps": 24,
+			"loop": false,
+			"offsets": [-21, 59],
 			"anim": "singUPmiss",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [28, 67],
 			"name": "pico Up note miss",
-			"playerOffsets": [
-				24,
-				69
-			]
+			"indices": []
 		},
 		{
-			"offsets": [
-				190,
-				-38
-			],
+			"loop": false,
+			"offsets": [190, -38],
+			"anim": "singDOWNmiss",
+			"fps": 24,
+			"playerOffsets": [80, -38],
+			"name": "Pico Down Note MISS",
+			"indices": []
+		},
+		{
+			"offsets": [0, 0],
 			"indices": [],
 			"fps": 24,
-			"anim": "singDOWNmiss",
+			"anim": "cock",
 			"loop": false,
-			"name": "Pico Down Note MISS",
-			"playerOffsets": [
-				81,
-				-34
-			]
+			"name": "Pico Reload0",
+			"playerOffsets": [0, 0]
+		},
+		{
+			"offsets": [0, 0],
+			"indices": [],
+			"fps": 24,
+			"anim": "intro1",
+			"loop": false,
+			"name": "Pico Gets Pissed0",
+			"playerOffsets": [60, 0]
+		},
+		{
+			"offsets": [0, 0],
+			"indices": [],
+			"fps": 24,
+			"anim": "cockCutscene",
+			"loop": false,
+			"name": "cutscene cock0",
+			"playerOffsets": [0, 0]
+		},
+		{
+			"offsets": [0, 0],
+			"indices": [],
+			"fps": 24,
+			"anim": "intro2",
+			"loop": false,
+			"name": "shoot and return0",
+			"playerOffsets": [255, 231]
 		}
 	],
+	"vocals_file": "",
 	"no_antialiasing": false,
 	"image": "characters/Pico_FNF_assetss, characters/picoAnims/Pico_Intro, characters/picoAnims/Pico_Shooting",
-	"position": [
-		-40,
-		300
-	],
+	"position": [-40, 300],
+	"player_camera_position": [200, 0],
 	"playerposition": [
 		0,
 		300
 	],
 	"healthicon": "pico",
 	"flip_x": true,
-	"healthbar_colors": [
-		183,
-		216,
-		85
-	],
-	"camera_position": [
-		0,
-		0
-	],
-	"player_camera_position": [
-		200,
-		0
-	],
-	"noteSkin": null,
+	"healthbar_colors": [183, 216, 85],
+	"camera_position": [0, 0],
 	"sing_duration": 4,
-	"scale": 1
+	"isPlayerChar": false,
+	"scale": 1,
+	"_editor_isPlayer": true
 }
