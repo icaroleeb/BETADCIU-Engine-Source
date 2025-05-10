@@ -465,12 +465,12 @@ class PlayState extends MusicBeatState
 			if(gf != null)
 				gf.visible = false;
 		}
-		
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
 		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
-
+		
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// CHARACTER SCRIPTS
 		if(gf != null) startCharacterScripts(gf.curCharacter);
 		startCharacterScripts(dad.curCharacter);
@@ -4454,9 +4454,14 @@ class PlayState extends MusicBeatState
 		addObjects(stageData);
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
-		#if LUA_ALLOWED 
-		startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
+		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
-	}	
+	}
+
+	public function setupStageVariables(){ // making this because this one is for HScript
+		if (!variables.exists("stageVariables")){
+        	variables.set("stageVariables", new Map<String, FlxSprite>());
+    	}
+	}
 }

@@ -120,6 +120,9 @@ class FunkinLua {
 		set('isStoryMode', PlayState.isStoryMode);
 		set('difficulty', PlayState.storyDifficulty);
 
+		set('isBETADCIU', PlayState.isBETADCIU);
+		set('isBonus', PlayState.isBonus);
+
 		set('difficultyName', Difficulty.getString(false));
 		set('difficultyPath', Difficulty.getFilePath());
 		set('difficultyNameTranslation', Difficulty.getString(true));
@@ -1403,7 +1406,7 @@ class FunkinLua {
 			PlayState.instance.curStage = id; // Set new stage name
 			PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
 			PlayState.instance.addStage();
-	});
+		});
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
 			makeIcon(tag, character, player);
 		});
