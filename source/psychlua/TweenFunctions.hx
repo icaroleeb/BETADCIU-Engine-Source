@@ -35,7 +35,12 @@ class TweenFunctions
 			}
 			return oldTweenFunction(tag, camera, {zoom: value}, duration, ease, 'doTweenZoom');
 		});
-
+		Lua_helper.add_callback(lua, "doTweenWidth", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			oldTweenFunction(tag, vars, {width: value}, duration, ease, 'doTweenWidth');
+		});
+		Lua_helper.add_callback(lua, "doTweenHeight", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			oldTweenFunction(tag, vars, {height: value}, duration, ease, 'doTweenHeight');
+		});
 		Lua_helper.add_callback(lua, "startTween", function(tag:String, vars:String, values:Any = null, duration:Float, ?options:Any = null) {
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 			if(penisExam != null)

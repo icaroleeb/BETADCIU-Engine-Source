@@ -383,6 +383,8 @@ class ReflectionFunctions
 			case "Stage.camZoom": newVariable = "stageData.defaultZoom";
 			case "Stage.altPrefix": newVariable = "introSoundsPrefix";
 			case "Stage.altSuffix": newVariable = "introSoundsSuffix";
+			case "Stage.pixelShitPart1": newVariable = "uiPrefix";
+			case "Stage.pixelShitPart2": newVariable = "uiPostfix";
 			// case "Stage.boyfriendCameraOffset": newVariable = game.stageData.camera_boyfriend; 
 			// case "Stage.opponentCameraOffset": newVariable = game.stageData.camera_opponent;
 			// case "Stage.girlfriendCameraOffset": newVariable = game.stageData.camera_girlfriend;

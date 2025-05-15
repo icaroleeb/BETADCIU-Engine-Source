@@ -1399,7 +1399,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 							trace('Added event at time: $strumTime');
 							var didAdd:Bool = false;
 
-							var eventAdded:EventMetaNote = createEvent([strumTime, [[eventsList[Std.int(Math.max(eventDropDown.selectedIndex, 0))][0], value1InputText.text, value2InputText.text]]]);
+							var eventAdded:EventMetaNote = createEvent([strumTime, [[eventsList[Std.int(Math.max(eventDropDown.selectedIndex, 0))][0], value1InputText.text, value2InputText.text, value3InputText.text]]]);
 							for (num in sectionFirstEventID...events.length)
 							{
 								var event = events[num];
@@ -1714,13 +1714,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			eventDropDown.selectedLabel = '';
 			value1InputText.text = '';
 			value2InputText.text = '';
+			value3InputText.text = '';
 		}
 		forceDataUpdate = true;
 	}
 
 	function updateSelectedEventText()
 	{
-		if(selectedNotes.length == 1 && selectedNotes[0].isEvent)
+		if(selectedNotes.length == 2 && selectedNotes[0].isEvent)
 		{
 			var eventNote:EventMetaNote = cast (selectedNotes[0], EventMetaNote);
 			curEventSelected = Std.int(FlxMath.bound(curEventSelected, 0, eventNote.events.length - 1));
@@ -1741,6 +1742,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				}
 				value1InputText.text = (myEvent[1] != null) ? myEvent[1] : '';
 				value2InputText.text = (myEvent[2] != null) ? myEvent[2] : '';
+				value3InputText.text = (myEvent[3] != null) ? myEvent[3] : '';
 			}
 		}
 		else selectedEventText.visible = false;
@@ -2528,6 +2530,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var eventDropDown:PsychUIDropDownMenu;
 	var value1InputText:PsychUIInputText;
 	var value2InputText:PsychUIInputText;
+	var value3InputText:PsychUIInputText;
 	var selectedEventText:FlxText;
 	var eventDescriptionText:FlxText;
 
@@ -2608,7 +2611,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			genericEventButton(function(event:EventMetaNote)
 			{
-				event.events.push([eventsList[Std.int(Math.max(eventDropDown.selectedIndex, 0))][0], value1InputText.text, value2InputText.text]);
+				event.events.push([eventsList[Std.int(Math.max(eventDropDown.selectedIndex, 0))][0], value1InputText.text, value2InputText.text, value3InputText.text]);
 				event.updateEventText();
 				curEventSelected++;
 			});
@@ -2655,6 +2658,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		value1InputText.onChange = function(old:String, cur:String) changeEventsValue(cur, 1);
 		value2InputText = new PsychUIInputText(objX + 150, objY, 120, '', 8);
 		value2InputText.onChange = function(old:String, cur:String) changeEventsValue(cur, 2);
+		value3InputText = new PsychUIInputText(objX, objY + 40, 120, '', 8);
+		value3InputText.onChange = function(old:String, cur:String) changeEventsValue(cur, 3);
 
 		objY += 40;
 		eventDescriptionText = new FlxText(objX, objY, 280, defaultEvents[0][1]);
@@ -2662,6 +2667,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(new FlxText(eventDropDown.x, eventDropDown.y - 15, 80, 'Event:'));
 		tab_group.add(new FlxText(value1InputText.x, value1InputText.y - 15, 80, 'Value 1:'));
 		tab_group.add(new FlxText(value2InputText.x, value2InputText.y - 15, 80, 'Value 2:'));
+		tab_group.add(new FlxText(value3InputText.x, value3InputText.y - 15, 80, 'Value 3:'));
 
 		tab_group.add(removeButton);
 		tab_group.add(addButton);
@@ -2671,6 +2677,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		tab_group.add(value1InputText);
 		tab_group.add(value2InputText);
+		tab_group.add(value3InputText);
 		tab_group.add(eventDescriptionText);
 		
 		tab_group.add(eventDropDown); //lowest priority to display properly

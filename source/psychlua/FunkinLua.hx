@@ -730,7 +730,9 @@ class FunkinLua {
 			
 			return FlxColor.fromString('#$color');
 		});
-
+		Lua_helper.add_callback(lua, "RGBColor", function (r:Int,g:Int,b:Int, alpha:Int = 255) {
+			return FlxColor.fromRGB(r, g, b, alpha);
+		});
 		// precaching
 		Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:String) {
 			var charType:Int = 0;
@@ -751,8 +753,8 @@ class FunkinLua {
 		});
 
 		// others
-		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '') {
-			game.triggerEvent(name, value1, value2, Conductor.songPosition);
+		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '', ?value3:String = '') {
+			game.triggerEvent(name, value1, value2, value3, Conductor.songPosition);
 			//trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2);
 			return true;
 		});
