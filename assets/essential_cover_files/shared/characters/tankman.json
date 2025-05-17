@@ -139,11 +139,11 @@
 	"vocals_file": "",
 	"no_antialiasing": false,
 	"image": "characters/tankmanCaptain",
-	"position": [-50, 175],
+	"position": [0, 200],
 	"player_camera_position": [0, 0],
 	"playerposition": [
-		-10,
-		180
+		0,
+		200
 	],
 	"healthicon": "tankman",
 	"flip_x": true,

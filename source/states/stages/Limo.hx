@@ -67,7 +67,6 @@ class Limo extends BaseStage
 				grpLimoDancers.add(dancer);
 				stageVars.set("dancer" + i, dancer);
 			}
-			
 
 			limoLight = new BGSprite('gore/coldHeartKiller', limoMetalPole.x - 180, limoMetalPole.y - 80, 0.4, 0.4);
 			stageVars.set("limoLight", limoLight);
@@ -101,7 +100,7 @@ class Limo extends BaseStage
 		addBehindGF(fastCar);
 		
 		limo = new BGSprite('limo/limoDrive', -120, 550, 1, 1, ['Limo stage'], true);
-		addBehindGF(limo); //Shitty layering but whatev it works LOL
+		addBehindDad(limo); //Shitty layering but whatev it works LOL
 		stageVars.set("limo", limo);
 	}
 

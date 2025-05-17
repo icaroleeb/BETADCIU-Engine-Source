@@ -91,6 +91,24 @@
 			"indices": []
 		},
 		{
+			"offsets": [256, 232],
+			"playerOffsets": [256, 232],
+			"indices": [],
+			"fps": 24,
+			"anim": "shoot",
+			"loop": false,
+			"name": "Pico Shoot Hip Full0"
+		},
+		{
+			"offsets": [0, 0],
+			"playerOffsets": [0, 0],
+			"indices": [],
+			"fps": 24,
+			"anim": "shootMISS",
+			"loop": false,
+			"name": "Pico Hit Can0"
+		},
+		{
 			"offsets": [0, 0],
 			"indices": [],
 			"fps": 24,

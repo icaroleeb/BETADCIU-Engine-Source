@@ -1011,7 +1011,7 @@ class PhillyStreets extends BaseStage
 				dad.specialAnim = true;
 				kickCanSnd.play(true, sndTime - 50);
 				spraycan.playCanStart();
-				camFollow.x += 250;
+				camFollow.x += 495;
 				game.cameraSpeed = 1.5;
 				game.defaultCamZoom -= 0.1;
 				
