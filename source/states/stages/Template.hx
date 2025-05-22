@@ -9,6 +9,11 @@ class Template extends BaseStage
 
 	override function create()
 	{
+		if (!PlayState.instance.variables.exists("stageVariables")){
+			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		}
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+		
 		// Spawn your stage sprites here.
 		// Characters are not ready yet on this function, so you can't add things above them yet.
 		// Use createPost() if that's what you want to do.

@@ -2501,7 +2501,6 @@ class PlayState extends MusicBeatState
 			case "Change Stage":
 				if (value1 != null && value1 != ""){
  					removeStage(); // Remove current stage
-			
 					curStage = value1; // Set new stage name
  					stageData = StageData.getStageFile(curStage); 
  					addStage();
@@ -4456,8 +4455,6 @@ class PlayState extends MusicBeatState
 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
 		}
-
-		//stagesFunc(function(stage:BaseStage) stage.create());
 		stagesFunc(function(stage:BaseStage) stage.createPost());
 		addObjects(stageData);
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
