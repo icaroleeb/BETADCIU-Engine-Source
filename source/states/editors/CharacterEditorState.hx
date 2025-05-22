@@ -420,7 +420,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				camera_position: [0, 0],
 				player_camera_position: [0, 0],
 				position: [0, 0],
-				playerposition: [0, 0],
+				player_position: [0, 0],
 				isPlayerChar: false,
 				vocals_file: null
 			};
@@ -1396,7 +1396,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			"healthicon": character.healthIcon,
 
 			"position":	character.positionArray,
-			"playerposition": character.playerPositionArray,
+			"player_position": character.playerPositionArray,
 			"camera_position": character.cameraPosition,
 			"player_camera_position": character.playerCameraPosition,
 

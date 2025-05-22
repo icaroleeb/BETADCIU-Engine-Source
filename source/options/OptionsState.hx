@@ -11,9 +11,11 @@ class OptionsState extends MusicBeatState
 		'Adjust Delay and Combo',
 		'Graphics',
 		'Visuals',
-		'Gameplay'
+		'Gameplay',
+		"Modpack Maker"
 		#if TRANSLATIONS_ALLOWED , 'Language' #end
 	];
+
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
@@ -36,6 +38,9 @@ class OptionsState extends MusicBeatState
 				MusicBeatState.switchState(new options.NoteOffsetState());
 			case 'Language':
 				openSubState(new options.LanguageSubState());
+			case 'Modpack Maker':
+				// Still working on this
+				// MusicBeatState.switchState(new options.ModpackMakerState());
 		}
 	}
 
