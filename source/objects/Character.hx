@@ -13,7 +13,6 @@ import backend.Song;
 import states.stages.objects.TankmenBG;
 
 typedef CharacterFile = {
-	@:optional var playerAnimations:Array<AnimArray>; //bcuz garcello
 	var animations:Array<AnimArray>;
 	var image:String;
 	var scale:Float;
@@ -21,7 +20,8 @@ typedef CharacterFile = {
 	var healthicon:String;
 
 	var position:Array<Float>;
-	var playerposition:Array<Float>; //bcuz dammit some of em don't exactly flip right
+	@:optional var player_position:Array<Float>; // New preferred field
+	@:optional var playerposition:Array<Float>;  // Legacy fallback
 	var camera_position:Array<Float>;
 	var player_camera_position:Array<Float>;
 
@@ -29,7 +29,8 @@ typedef CharacterFile = {
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
 	var vocals_file:String;
-	var isPlayerChar:Bool; //porting just the variable for backwards compatibility with some chars -- Ryiuu.
+	var isPlayerChar:Bool;
+	
 	@:optional var _editor_isPlayer:Null<Bool>;
 }
 
@@ -80,6 +81,7 @@ class Character extends OffsettableSprite
 	public var playerCameraPosition:Array<Float> = [0, 0];
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 	public var iconColor:String;
+
 	public var curColor:FlxColor = 0xFFFFFFFF; // i was thinking about using this but nvm
 
 	public var missingCharacter:Bool = false;
@@ -123,6 +125,9 @@ class Character extends OffsettableSprite
 		animOffsets = [];
 		curCharacter = character;
 		isPsychPlayer = false;
+
+		curColor = 0xFFFFFFFF;
+
 		var characterPath:String = 'characters/$character.json';
 
 		var path:String = Paths.getPath(characterPath, TEXT);
@@ -209,8 +214,10 @@ class Character extends OffsettableSprite
 		}
 
 		// positioning
-		positionArray = ((!debugMode && isPlayer && json.playerposition != null) ? json.playerposition : json.position);
-		playerPositionArray = (json.playerposition != null ?  json.playerposition : json.position);
+		var playerPosition:Array<Float> = CharacterFileUtil.getPlayerPosition(json);
+
+		positionArray = ((!debugMode && isPlayer && playerPosition != null) ? playerPosition : json.position);
+		playerPositionArray = (playerPosition != null ?  playerPosition : json.position);
 		cameraPosition = (isPlayer && json.player_camera_position != null ? json.player_camera_position : json.camera_position);
 		playerCameraPosition = (json.player_camera_position != null ? json.player_camera_position : json.camera_position);
 
@@ -235,10 +242,6 @@ class Character extends OffsettableSprite
 		// animations
 		var itHasPlayerOfs:Bool = false;
 		animationsArray = json.animations;
-
-		if (isPlayer && json.playerAnimations != null)
-			animationsArray = json.playerAnimations;
-
 		if(animationsArray != null && animationsArray.length > 0) {
 			for (anim in animationsArray) {
 				var animAnim:String = '' + anim.anim;
@@ -436,12 +439,23 @@ class Character extends OffsettableSprite
 			}
 			else if(hasAnimation('idle' + idleSuffix))
 				playAnim('idle' + idleSuffix);
+
+			if (color != curColor && !hasMissAnimations)
+				color = curColor;
 		}
 	}
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
 		specialAnim = false;
+		var useFallbackMiss:Bool = false;
+
+		if (AnimName.endsWith('miss') && !hasAnimation(AnimName))
+		{
+			AnimName = AnimName.substr(0, AnimName.length - 4);
+			useFallbackMiss = true;
+		}
+
 		if(!isAnimateAtlas)
 		{
 			animation.play(AnimName, Force, Reversed, Frame);
@@ -473,6 +487,15 @@ class Character extends OffsettableSprite
 
 			if (AnimName == 'singUP' || AnimName == 'singDOWN')
 				danced = !danced;
+		}
+
+		if (useFallbackMiss){
+			var realCurColor:FlxColor = curColor;
+			color = CoolUtil.blendColors(curColor, 0xFFCFAFFF);
+			curColor = realCurColor;
+		}
+		else if (color != curColor && !hasMissAnimations){
+			color = curColor;
 		}
 	}
 
@@ -555,6 +578,11 @@ class Character extends OffsettableSprite
 			return false;
 	}
 
+	override function set_color(Color:FlxColor):Int
+	{
+		curColor = Color;
+		return super.set_color(Color);
+	}
 
 	// Atlas support
 	// special thanks ne_eo for the references, you're the goat!!
@@ -636,4 +664,12 @@ class Character extends OffsettableSprite
 			atlas = FlxDestroyUtil.destroy(atlas);
 	}	
 	#end
+}
+
+// Why does the old naming convention use camelCase or have no underline :(
+
+class CharacterFileUtil {
+	public static function getPlayerPosition(charData:CharacterFile):Array<Float> {
+		return charData.player_position != null ? charData.player_position : charData.playerposition;
+	}
 }

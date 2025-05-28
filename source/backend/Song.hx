@@ -43,6 +43,7 @@ typedef SwagSection =
 	@:optional var gfSection:Bool;
 	@:optional var bpm:Float;
 	@:optional var changeBPM:Bool;
+	@:optional var playerAltAnim:Bool;
 }
 
 class Song
