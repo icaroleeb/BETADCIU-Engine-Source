@@ -123,6 +123,7 @@ class Character extends OffsettableSprite
 	{
 		animationsArray = [];
 		animOffsets = [];
+		animPlayerOffsets = [];
 		curCharacter = character;
 		isPsychPlayer = false;
 
@@ -268,20 +269,21 @@ class Character extends OffsettableSprite
 				#end
 
 				var offsets:Array<Int> = anim.offsets;
-				var playerOffsets:Array<Int> = anim.playerOffsets;
+				var playerOffsets:Array<Int> = (anim.playerOffsets != null && anim.playerOffsets.length > 1)
+					? anim.playerOffsets
+					: anim.offsets;
 				var swagOffsets:Array<Int> = offsets;
 
-				if (!debugMode && isPlayer && playerOffsets != null && playerOffsets.length > 1){
+				if (isPlayer && playerOffsets != null && playerOffsets.length > 1){
 					itHasPlayerOfs = true;
 					swagOffsets = playerOffsets;
 				}
 				
-
 				if(swagOffsets != null && anim.offsets.length > 1) addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 				else addOffset(anim.anim, 0, 0);
 
-				if(itHasPlayerOfs && playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(anim.anim, playerOffsets[0], playerOffsets[1]);
-				else addPlayerOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+				if(playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(anim.anim, playerOffsets[0], playerOffsets[1]);
+				else addPlayerOffset(anim.anim, 0, 0);
 			}
 
 			if (isPlayer) {
@@ -456,8 +458,7 @@ class Character extends OffsettableSprite
 			useFallbackMiss = true;
 		}
 
-		if(!isAnimateAtlas)
-		{
+		if(!isAnimateAtlas){
 			animation.play(AnimName, Force, Reversed, Frame);
 		}
 		else

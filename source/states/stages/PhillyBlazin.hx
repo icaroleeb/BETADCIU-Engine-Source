@@ -42,11 +42,10 @@ class PhillyBlazin extends BaseStage
 
 		if(!ClientPrefs.data.lowQuality)
 		{
-			var skyImage = Paths.image('phillyBlazin/skyBlur');
-			scrollingSky = new FlxTiledSprite(skyImage, Std.int(skyImage.width * 1.1) + 475, Std.int(skyImage.height / 1.1), true, false);
+			scrollingSky = new FlxTiledSprite(Paths.image('phillyBlazin/skyBlur'), 2000, 359, true, false);
 			scrollingSky.antialiasing = ClientPrefs.data.antialiasing;
 			scrollingSky.setPosition(-500, -120);
-			scrollingSky.scrollFactor.set();
+			scrollingSky.scrollFactor.set(0, 0);
 			stageVars.set('scrollingSky', scrollingSky);
 			add(scrollingSky);
 
@@ -188,10 +187,7 @@ class PhillyBlazin extends BaseStage
 		}
 
 		filters.push(new ShaderFilter(rainShader));
-			PlayState.instance.camGame.setFilters(filters);
-
-
-		// FlxG.camera.setFilters([new ShaderFilter(rainShader)]);
+		PlayState.instance.camGame.filters = filters;
 	}
 
 	function precache()
@@ -321,7 +317,7 @@ class PhillyBlazin extends BaseStage
 				var shaderF = Std.downcast(f, ShaderFilter);
 				return shaderF == null || shaderF.shader != rainShader;
 			});
-			PlayState.instance.camGame.setFilters(filters);
+			PlayState.instance.camGame.filters = filters;
 		}
 		super.destroy();
 	}

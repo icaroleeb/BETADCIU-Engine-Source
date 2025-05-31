@@ -55,8 +55,7 @@ class PhillyStreets extends BaseStage
 
 		if(!ClientPrefs.data.lowQuality)
 		{
-			var skyImage = Paths.image('phillyStreets/phillySkybox');
-			scrollingSky = new FlxTiledSprite(skyImage, skyImage.width + 400, skyImage.height, true, false);
+			scrollingSky = new FlxTiledSprite(Paths.image('phillyStreets/phillySkybox'), 2922, 718, true, false);
 			scrollingSky.antialiasing = ClientPrefs.data.antialiasing;
 			scrollingSky.setPosition(-650, -375);
 			scrollingSky.scrollFactor.set(0.1, 0.1);
@@ -246,7 +245,7 @@ class PhillyStreets extends BaseStage
 					var shaderF = Std.downcast(f, ShaderFilter);
 					return shaderF == null || shaderF.shader != rainShader;
 				});
-				PlayState.instance.camGame.setFilters(filters);
+				PlayState.instance.camGame.filters = filters;
 			}
 		}
 		super.destroy();
@@ -580,9 +579,7 @@ class PhillyStreets extends BaseStage
 		}
 
 		filters.push(new ShaderFilter(rainShader));
-			PlayState.instance.camGame.setFilters(filters);
-
-		// FlxG.camera.setFilters([new ShaderFilter(rainShader)]);
+		PlayState.instance.camGame.filters = filters;
 	}
 	
 	var currentNeneState:NeneState = STATE_DEFAULT;
