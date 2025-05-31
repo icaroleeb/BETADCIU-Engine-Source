@@ -803,7 +803,7 @@ class PlayState extends MusicBeatState
 	}
 
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	public function addTextToDebug(text:String, color:FlxColor) {
+	public function addTextToDebug(text:String, color:FlxColor = FlxColor.WHITE) {
 		var newText:psychlua.DebugLuaText = luaDebugGroup.recycle(psychlua.DebugLuaText);
 		newText.text = text;
 		newText.color = color;
@@ -2231,7 +2231,8 @@ class PlayState extends MusicBeatState
 				persistentDraw = false;
 				FlxTimer.globalManager.clear();
 				FlxTween.globalManager.clear();
-				FlxG.camera.setFilters([]);
+				
+				FlxG.camera.filters = [];
 
 				if(GameOverSubstate.deathDelay > 0)
 				{
@@ -3492,7 +3493,7 @@ class PlayState extends MusicBeatState
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 
-		FlxG.camera.setFilters([]);
+		FlxG.camera.filters = [];
 
 		#if FLX_PITCH FlxG.sound.music.pitch = 1; #end
 		FlxG.animationTimeScale = 1;

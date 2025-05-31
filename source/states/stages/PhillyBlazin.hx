@@ -188,10 +188,7 @@ class PhillyBlazin extends BaseStage
 		}
 
 		filters.push(new ShaderFilter(rainShader));
-			PlayState.instance.camGame.setFilters(filters);
-
-
-		// FlxG.camera.setFilters([new ShaderFilter(rainShader)]);
+		PlayState.instance.camGame.filters = filters;
 	}
 
 	function precache()
@@ -321,7 +318,7 @@ class PhillyBlazin extends BaseStage
 				var shaderF = Std.downcast(f, ShaderFilter);
 				return shaderF == null || shaderF.shader != rainShader;
 			});
-			PlayState.instance.camGame.setFilters(filters);
+			PlayState.instance.camGame.filters = filters;
 		}
 		super.destroy();
 	}

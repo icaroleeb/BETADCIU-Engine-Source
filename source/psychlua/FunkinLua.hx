@@ -672,7 +672,7 @@ class FunkinLua {
 			
 			var originalTag:String = tag;
 			tag = LuaUtils.formatVariable('timer_$tag');
-			variables.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer)
+			variables.set(tag, new FlxTimer().start(time / (game != null ? game.playbackRate : 1), function(tmr:FlxTimer)
 			{
 				if(tmr.finished) variables.remove(tag);
 				game.callOnLuas('onTimerCompleted', [originalTag, tmr.loops, tmr.loopsLeft]);

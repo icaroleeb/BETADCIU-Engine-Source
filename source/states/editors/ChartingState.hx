@@ -895,7 +895,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						setSongPlaying(false);
 
 					// because now alt is in use
-					var shiftAdd:Int = FlxG.keys.pressed.CONTROL ? 16 : (FlxG.keys.pressed.SHIFT ? 4 : 1);
+					var shiftAdd:Int = FlxG.keys.pressed.TAB ? 16 : (FlxG.keys.pressed.SHIFT ? 4 : 1);
 
 					if(FlxG.keys.justPressed.A)
 					{

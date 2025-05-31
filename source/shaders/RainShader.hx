@@ -553,9 +553,13 @@ class RainShader extends FlxShader
 
 	public function updateFrameInfo(frame:FlxFrame)
 	{
-		// NOTE: uv.width is actually the right pos and uv.height is the bottom pos
-		uFrameBounds.value = [frame.uv.x, frame.uv.y, frame.uv.width, frame.uv.height];
+		#if (flixel >= "6.0.0")
+			uFrameBounds.value = [frame.uv.left, frame.uv.right, frame.uv.top, frame.uv.bottom];
+		#else
+			uFrameBounds.value = [frame.uv.x, frame.uv.y, frame.uv.width, frame.uv.height];
+		#end
 	}
+
   
 	/*override function __createGLProgram(vertexSource:String, fragmentSource:String):GLProgram
 	{
