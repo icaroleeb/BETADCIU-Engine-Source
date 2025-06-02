@@ -626,6 +626,7 @@ class Character extends OffsettableSprite
 			missingText.x = getMidpoint().x - 150;
 			missingText.y = getMidpoint().y - 10;
 			missingText.draw();
+			if (alpha < 0.6) missingText.alpha = alpha;
 		}
 	}
 

@@ -778,12 +778,16 @@ class FunkinLua {
 
 			if(PlayState.isStoryMode)
 				MusicBeatState.switchState(new StoryMenuState());
+			else if (PlayState.isBETADCIU)
+				MusicBeatState.switchState(new states.betadciu.BETADCIUState());
+			else if (PlayState.isBonus)
+				MusicBeatState.switchState(new states.betadciu.BonusSongsState());
 			else
 				MusicBeatState.switchState(new FreeplayState());
 
 			#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			// FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			PlayState.changedDifficulty = false;
 			PlayState.chartingMode = false;
 			game.transitioning = true;
@@ -2411,17 +2415,19 @@ class FunkinLua {
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;				
 		
-		if (PlayState.instance.boyfriend.isAnimateAtlas){
-			if (PlayState.instance.boyfriend.getAnimationName().startsWith('sing')) {
-				animationName = Std.string(PlayState.instance.boyfriend.atlas.anim.curInstance);
-				animationFrame = Std.int(PlayState.instance.boyfriend.atlas.anim.curFrame);
-			}
-		} else {
-			if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing')) {
-				animationName = PlayState.instance.boyfriend.animation.curAnim.name;
-				animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
-			}		
-		}
+		// apparently this is crashing some native psych mods so i'll disable it for now
+
+		// if (PlayState.instance.boyfriend.isAnimateAtlas){
+		// 	if (PlayState.instance.boyfriend.getAnimationName().startsWith('sing')) {
+		// 		animationName = Std.string(PlayState.instance.boyfriend.atlas.anim.curInstance);
+		// 		animationFrame = Std.int(PlayState.instance.boyfriend.atlas.anim.curFrame);
+		// 	}
+		// } else {
+		// 	if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing')) {
+		// 		animationName = PlayState.instance.boyfriend.animation.curAnim.name;
+		// 		animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
+		// 	}		
+		// }
 		
 		PlayState.instance.boyfriend.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.boyfriend);
@@ -2467,17 +2473,19 @@ class FunkinLua {
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
 
-		if (PlayState.instance.dad.isAnimateAtlas){
-			if (PlayState.instance.dad.getAnimationName().startsWith('sing')) {
-				animationName = Std.string(PlayState.instance.dad.atlas.anim.curInstance);
-				animationFrame = Std.int(PlayState.instance.dad.atlas.anim.curFrame);
-			}
-		} else {
-			if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing')) {
-				animationName = PlayState.instance.dad.animation.curAnim.name;
-				animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
-			}		
-		}
+		// apparently this is crashing some native psych mods so i'll disable it for now
+
+		// if (PlayState.instance.dad.isAnimateAtlas){
+		// 	if (PlayState.instance.dad.getAnimationName().startsWith('sing')) {
+		// 		animationName = Std.string(PlayState.instance.dad.atlas.anim.curInstance);
+		// 		animationFrame = Std.int(PlayState.instance.dad.atlas.anim.curFrame);
+		// 	}
+		// } else {
+		// 	if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing')) {
+		// 		animationName = PlayState.instance.dad.animation.curAnim.name;
+		// 		animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
+		// 	}		
+		// }
 
 		PlayState.instance.dad.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.dad);
@@ -2526,17 +2534,19 @@ class FunkinLua {
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;		
 
-		if (PlayState.instance.gf.isAnimateAtlas){
-			if (PlayState.instance.gf.getAnimationName().startsWith('sing')) {
-				animationName = Std.string(PlayState.instance.gf.atlas.anim.curInstance);
-				animationFrame = Std.int(PlayState.instance.gf.atlas.anim.curFrame);
-			}
-		} else {
-			if (PlayState.instance.gf.animation.curAnim.name.startsWith('sing')) {
-				animationName = PlayState.instance.gf.animation.curAnim.name;
-				animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
-			}		
-		}
+		// apparently this is crashing some native psych mods so i'll disable it for now
+
+		// if (PlayState.instance.gf.isAnimateAtlas){
+		// 	if (PlayState.instance.gf.getAnimationName().startsWith('sing')) {
+		// 		animationName = Std.string(PlayState.instance.gf.atlas.anim.curInstance);
+		// 		animationFrame = Std.int(PlayState.instance.gf.atlas.anim.curFrame);
+		// 	}
+		// } else {
+		// 	if (PlayState.instance.gf.animation.curAnim.name.startsWith('sing')) {
+		// 		animationName = PlayState.instance.gf.animation.curAnim.name;
+		// 		animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
+		// 	}		
+		// }
 
 		PlayState.instance.gf.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.gf);

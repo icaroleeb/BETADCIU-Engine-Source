@@ -574,7 +574,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 			songText.scaleX = Math.min(1, 980 / songText.width);
 			songText.snapToPosition();
 
-			var icon:HealthIcon = new HealthIcon(weekFile.songs[i][1]);
+			var icon:HealthIcon = new HealthIcon(weekFile.songs[i][1], false, false);
 			icon.sprTracker = songText;
 
 			// using a FlxGroup is too much fuss!
@@ -637,7 +637,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 		if(id == PsychUIInputText.CHANGE_EVENT && (sender is PsychUIInputText))
 		{
 			weekFile.songs[curSelected][1] = iconInputText.text;
-			iconArray[curSelected].changeIcon(iconInputText.text);
+			iconArray[curSelected].changeIcon(iconInputText.text, false);
 		}
 		else if(id == PsychUINumericStepper.CHANGE_EVENT && (sender is PsychUINumericStepper))
 		{
@@ -686,6 +686,15 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 			}
 		});
 
+		var useIconColor:PsychUIButton = new PsychUIButton(140, bgColorStepperR.y + 70, "Use Icon Color", function()
+		{
+			var coolColor:FlxColor = FlxColor.fromInt(CoolUtil.dominantColor(iconArray[curSelected]));
+			bgColorStepperR.value = coolColor.red;
+			bgColorStepperG.value = coolColor.green;
+			bgColorStepperB.value = coolColor.blue;
+			updateBG();
+		});
+
 		iconInputText = new PsychUIInputText(10, bgColorStepperR.y + 70, 100, '', 8);
 
 		var hideFreeplayCheckbox:PsychUICheckBox = new PsychUICheckBox(10, iconInputText.y + 30, "Hide Week from Freeplay?", 100);
@@ -703,6 +712,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 		tab_group.add(bgColorStepperB);
 		tab_group.add(copyColor);
 		tab_group.add(pasteColor);
+		tab_group.add(useIconColor);
 		tab_group.add(iconInputText);
 		tab_group.add(hideFreeplayCheckbox);
 	}
