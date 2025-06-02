@@ -95,7 +95,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			"What should the Time Bar display?",
 			'timeBarType',
 			STRING,
-			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
+			['Time Left', 'Time Elapsed', 'Song Name', 'Song Name And Time', 'Disabled']);
 		addOption(option);
 
 		var option:Option = new Option('Combo Camera:',

@@ -420,13 +420,14 @@ class PlayState extends MusicBeatState
 		add(luaDebugGroup);
 		#end
 
-		if (!stageData.hide_girlfriend)
-		{
+		// if (!stageData.hide_girlfriend)
+		// {
 			if(SONG.gfVersion == null || SONG.gfVersion.length < 1) SONG.gfVersion = 'gf'; //Fix for the Chart Editor
+			if (stageData.hide_girlfriend) SONG.gfVersion = 'emptygf'; // quick change to prevent the null gf bug
 			gf = new Character(0, 0, SONG.gfVersion);
 			startCharacterPos(gf);
 			gf.scrollFactor.set(0.95, 0.95);
-		}
+		// }
 
 		dad = new Character(0, 0, SONG.player2);
 		startCharacterPos(dad, true);
@@ -510,6 +511,10 @@ class PlayState extends MusicBeatState
 
 		if(ClientPrefs.data.timeBarType == 'Song Name')
 		{
+			timeTxt.size = 24;
+			timeTxt.y += 3;
+		}else if(ClientPrefs.data.timeBarType == 'Song Name And Time'){
+			timeTxt.text = SONG.song + "(0:00)";
 			timeTxt.size = 24;
 			timeTxt.y += 3;
 		}
@@ -1296,7 +1301,7 @@ class PlayState extends MusicBeatState
 		{
 			if (bads > 0 || shits > 0) ratingFC = 'FC';
 			else if (goods > 0) ratingFC = 'GFC';
-			else if (sicks > 0) ratingFC = 'SFC';
+			else if (sicks > 0) ratingFC = 'MFC';
 		}
 		else {
 			if (songMisses < 10) ratingFC = 'SDCB';
@@ -1944,8 +1949,8 @@ class PlayState extends MusicBeatState
 			var secondsTotal:Int = Math.floor(songCalc / 1000);
 			if(secondsTotal < 0) secondsTotal = 0;
 
-			if(ClientPrefs.data.timeBarType != 'Song Name')
-				timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+			if(ClientPrefs.data.timeBarType != 'Song Name' || ClientPrefs.data.timeBarType != 'Song Name And Time' ) timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+			if (ClientPrefs.data.timeBarType == "Song Name And Time") timeTxt.text = SONG.song + "(" + FlxStringUtil.formatTime(secondsTotal, false) + ")";
 		}
 
 		if (camZooming)
@@ -2763,6 +2768,8 @@ class PlayState extends MusicBeatState
 			Paths.image(uiFolder + 'num' + i + uiPostfix);
 	}
 
+	public var NVScoreTween:Bool = false; // (NV = Nightmare Vision) some people likes this, and its good for recreating mods made on it.
+
 	private function popUpScore(note:Note = null):Void
 	{
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.data.ratingOffset);
@@ -2897,6 +2904,11 @@ class PlayState extends MusicBeatState
 
 		comboSpr.updateHitbox();
 		rating.updateHitbox();
+
+		if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel'){
+			rating.scale.set(0.785, 0.785);	
+			FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.5, {ease: FlxEase.expoOut});	
+		}
 
 		var daLoop:Int = 0;
 		var xThing:Float = 0;
@@ -4383,11 +4395,11 @@ class PlayState extends MusicBeatState
 				if(!StageData.reservedNames.contains(key))
 					variables.remove(key);
 		}else{
-			remove(gfGroup);
+			if (gf != null) remove(gfGroup);
 			remove(dadGroup); 
 			remove(boyfriendGroup);
 
-			remove(gf);
+			if (gf != null) remove(gf);
 			remove(dad);
 			remove(boyfriend);
 		}

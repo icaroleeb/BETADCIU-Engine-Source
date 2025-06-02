@@ -1217,8 +1217,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			updateSelectionBox();
 		}
 		
-		if(FlxG.mouse.justPressed && (FlxG.mouse.overlaps(mainBox.bg) || FlxG.mouse.overlaps(infoBox.bg)))
+		if(FlxG.mouse.justPressed && (FlxG.mouse.overlaps(mainBox.bg, camUI) || FlxG.mouse.overlaps(infoBox.bg, camUI))){
 			ignoreClickForThisFrame = true;
+		}
+		
 
 		var minX:Float = gridBg.x;
 		if(SHOW_EVENT_COLUMN && lockedEvents) minX += GRID_SIZE;
@@ -2486,13 +2488,34 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 			if(changed)
 			{
-				var textureLoad:String = 'images/${noteTextureInputText.text}.png';
+				var notePath:String = '${noteTextureInputText.text}';
+				var skin:String = '${noteTextureInputText.text}'; // so this one doesn't get changed
+
+				for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/Notes/"]) {
+					final fullPath = '$noteDirectory${noteTextureInputText.text}';
+					if (Paths.fileExists('images/$fullPath.png', IMAGE)) notePath = fullPath;
+				}
+
+				var textureLoad:String = 'images/${notePath}.png';
 				if(Paths.fileExists(textureLoad, IMAGE) || noteTextureInputText.text.trim() == '')
 				{
 					for (note in notes)
 					{
 						if(note == null) continue;
-						note.reloadNote(note.texture);
+						note.reloadNote(skin);
+
+						var strumNote:StrumNote = strumLineNotes.members[note.songData[1]];
+						if(strumNote != null && vortexEnabled)
+						{
+							strumNote.texture = skin;
+
+							if(strumNote.width > strumNote.height)
+								strumNote.setGraphicSize(GRID_SIZE);
+							else
+								strumNote.setGraphicSize(0, GRID_SIZE);
+
+							strumNote.updateHitbox();
+						}
 		
 						if(note.width > note.height)
 							note.setGraphicSize(GRID_SIZE);

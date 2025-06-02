@@ -85,6 +85,8 @@ class NoteSplash extends FlxSprite
 				texture = path;
 				isLegacyNoteSkin = (path == 'notes/noteSplashes-$splash');
 				break;
+			} else {
+				texture = "noteSplashes/noteSplashes"; // default if couldn't find anything
 			}
 		}
 
