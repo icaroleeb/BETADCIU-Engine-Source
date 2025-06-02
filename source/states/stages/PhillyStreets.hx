@@ -45,7 +45,6 @@ class PhillyStreets extends BaseStage
 	var spraycanPile:BGSprite;
 
 	var darkenable:Array<FlxSprite> = [];
-	var abot:ABotSpeaker;
 	override function create()
 	{
 		if (!PlayState.instance.variables.exists("stageVariables")){
@@ -153,11 +152,6 @@ class PhillyStreets extends BaseStage
 			add(picoFade);
 			darkenable.push(picoFade);
 		}
-
-		abot = new ABotSpeaker(gfGroup.x + 40, gfGroup.y + 327);
-		stageVars.set('abot', abot);
-		updateABotEye(true);
-		add(abot);
 		
 		if(ClientPrefs.data.shaders)
 			setupRainShader();
@@ -432,25 +426,10 @@ class PhillyStreets extends BaseStage
 		FlxG.camera.fade(FlxColor.BLACK, 2, true, null, true);
 	}
 
-	function updateABotEye(finishInstantly:Bool = false)
-	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
-			return; 
-
-		if(PlayState.SONG.notes[Std.int(FlxMath.bound(curSection, 0, PlayState.SONG.notes.length - 1))].mustHitSection == true)
-			abot.lookRight();
-		else
-			abot.lookLeft();
-
-		if(finishInstantly) abot.eyes.anim.curFrame = abot.eyes.anim.length - 1;
-	}
-
 	override function startSong()
 	{
 		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
 			return; 
-
-		abot.snd = FlxG.sound.music;
 		gf.animation.finishCallback = onNeneAnimationFinished;
 	}
 	
@@ -658,14 +637,6 @@ class PhillyStreets extends BaseStage
 		}
 	}
 
-	override function sectionHit()
-	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
-			return; 
-
-		updateABotEye();
-	}
-
 	var lightsStop:Bool = false;
 	var lastChange:Int = 0;
 	var changeInterval:Int = 8;
@@ -678,8 +649,6 @@ class PhillyStreets extends BaseStage
 	{
 		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
 			return; 
-
-		if(curBeat % PlayState.instance.gfSpeed == 0) abot.beatHit();
 
 		switch(currentNeneState) {
 			case STATE_READY:
