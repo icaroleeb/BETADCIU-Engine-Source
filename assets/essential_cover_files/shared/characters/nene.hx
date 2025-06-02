@@ -11,23 +11,19 @@ var PUPIL_STATE_LEFT = 1;
 function onCreate(){
     stereoBG = new FlxSprite(0, 0).loadGraphic(Paths.image('characters/abot/stereoBG'));
     stereoBG.scrollFactor.set(0.95, 0.95);
-	addBehindGF(stereoBG);
 
     setupAbotViz();
 
     eyeWhites = new FlxSprite(0, 0).makeGraphic(160, 60, 0xFFFFFFFF);
     eyeWhites.scrollFactor.set(0.95, 0.95);
-    addBehindGF(eyeWhites);
 
     pupil = new FlxAnimate(0, 0);
     Paths.loadAnimateAtlas(pupil, 'characters/abot/systemEyes');
     pupil.scrollFactor.set(0.95, 0.95);
-    addBehindGF(pupil);
 
     abot = new FlxAnimate(0, 0);
     Paths.loadAnimateAtlas(abot, 'characters/abot/abotSystem');
     abot.scrollFactor.set(0.95, 0.95);
-    addBehindGF(abot);
 
     abot.antialiasing = ClientPrefs.data.antialiasing;
     eyeWhites.antialiasing = ClientPrefs.data.antialiasing;
@@ -51,11 +47,58 @@ function onCreate(){
     stereoBG.y = abot.y + 30;
 }
 
+function onCreatePost(){
+    if(gf.curCharacter == 'nene'){
+        stereoBG.visible = true;
+        eyeWhites.visible = true;
+        abotViz.visible = true;
+        pupil.visible = true;
+        abot.visible = true;
+    }else{
+        stereoBG.visible = false;
+        eyeWhites.visible = false;
+        abotViz.visible = false;
+        pupil.visible = false;
+        abot.visible = false;
+    }
+
+    addBehindGF(stereoBG);
+    addBehindGF(abotViz);
+    addBehindGF(eyeWhites);
+    addBehindGF(pupil);
+    addBehindGF(abot);
+}
+
+function onEvent(n, v1, v2, v3){
+    if(n == "Change Character"){
+        if(v1 == "gf"){
+            if(v2 == "nene"){
+                gf.scrollFactor.set(0.95, 0.95);
+            }
+        }
+    }
+}
 function onSongStart(){
     initAnalyzer(); // LET'S GO!!! IT WORKS!
 }
 
 function onUpdatePost(elapsed){
+    if (pupil.anim.isPlaying){
+        switch (pupilState){
+            case PUPIL_STATE_NORMAL:
+            if (pupil.anim.curFrame >= 17){
+                pupilState = PUPIL_STATE_LEFT;
+                pupil.anim.pause();
+            }
+
+            case PUPIL_STATE_LEFT:
+            if (pupil.anim.curFrame >= 30){
+                pupilState = PUPIL_STATE_NORMAL;
+                pupil.anim.pause();
+            }
+        }
+    }
+
     if(analyzer == null) return;
 
     var levels = analyzer.getLevels();
@@ -76,22 +119,6 @@ function onUpdatePost(elapsed){
         animFrame = Std.int(Math.abs(animFrame - 5));
 
         abotViz.members[i].animation.curAnim.curFrame = animFrame;
-    }
-
-    if (pupil.anim.isPlaying){
-        switch (pupilState){
-            case PUPIL_STATE_NORMAL:
-            if (pupil.anim.curFrame >= 17){
-                pupilState = PUPIL_STATE_LEFT;
-                pupil.anim.pause();
-            }
-
-            case PUPIL_STATE_LEFT:
-            if (pupil.anim.curFrame >= 30){
-                pupilState = PUPIL_STATE_NORMAL;
-                pupil.anim.pause();
-            }
-        }
     }
 }
 
@@ -196,7 +223,13 @@ function setupAbotViz():Void{
     vis6.visible = false;
     vis7.visible = false;
 
-    game.addBehindGF(abotViz);
+    vis1.antialiasing = ClientPrefs.data.antialiasing;
+    vis2.antialiasing = ClientPrefs.data.antialiasing;
+    vis3.antialiasing = ClientPrefs.data.antialiasing;
+    vis4.antialiasing = ClientPrefs.data.antialiasing;
+    vis5.antialiasing = ClientPrefs.data.antialiasing;
+    vis6.antialiasing = ClientPrefs.data.antialiasing;
+    vis7.antialiasing = ClientPrefs.data.antialiasing;
 }
 
 
@@ -212,13 +245,13 @@ function onMoveCamera(focus:String)
 
 function movePupilsLeft() {
 		if (pupilState == PUPIL_STATE_LEFT) return;
-		pupil.anim.play('');
+		pupil.anim.play('lookleft');
 		pupil.anim.curFrame = 0;
 }
 
 function movePupilsRight() {
 		if (pupilState == PUPIL_STATE_NORMAL) return;
-		pupil.anim.play('');
+		pupil.anim.play('lookright');
 		pupil.anim.curFrame = 17;
 }
 

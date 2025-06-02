@@ -2561,7 +2561,7 @@ class FunkinLua {
 		var stageData:StageFile = PlayState.instance.stageData;
 		PlayState.instance.gf.x = stageData.girlfriend[0] + PlayState.instance.gf.positionArray[0];
 		PlayState.instance.gf.y = stageData.girlfriend[1] + PlayState.instance.gf.positionArray[1];
-		// PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
+		PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
 		PlayState.instance.add(PlayState.instance.gf);
 
 		if (PlayState.instance.gf.animOffsets.exists(animationName))
