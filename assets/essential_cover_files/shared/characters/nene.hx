@@ -71,9 +71,21 @@ function onCreatePost(){
 
 function onEvent(n, v1, v2, v3){
     if(n == "Change Character"){
-        if(v1 == "gf"){
+        if(v1 == "gf" || v1 == 'girlfriend' || v1 == '2'){
             if(v2 == "nene"){
                 gf.scrollFactor.set(0.95, 0.95);
+
+                remove(stereoBG);
+                remove(abotViz);
+                remove(eyeWhites);
+                remove(pupil);
+                remove(abot);
+
+                addBehindGF(stereoBG);
+                addBehindGF(abotViz);
+                addBehindGF(eyeWhites);
+                addBehindGF(pupil);
+                addBehindGF(abot);
             }
         }
     }
