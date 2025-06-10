@@ -2503,7 +2503,7 @@ class PlayState extends MusicBeatState
 					curStage = value1; // Set new stage name
  					stageData = StageData.getStageFile(curStage); 
  					addStage();
- 	
+					setOnScripts('curStage', curStage);
  				}
 		}
 
