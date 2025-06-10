@@ -5539,7 +5539,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	}
 
 	function resetIdle(){
-		lilBf.animation.play("idle");
-		lilOpp.animation.play("idle");
+		if (lilBf != null) lilBf.animation.play("idle");
+		if (lilOpp != null) lilOpp.animation.play("idle");
 	}
 }
