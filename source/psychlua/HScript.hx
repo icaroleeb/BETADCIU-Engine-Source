@@ -81,14 +81,19 @@ class HScript extends Iris
 	}
 	#end
 
-	public var scriptType:String = '';
-
 	public var origin:String;
 	public var scriptName:String = null;
-	override public function new(?parent:Dynamic, ?file:String, ?scriptType:String = "", ?varsToBring:Any = null, ?manualRun:Bool = false)
+	override public function new(?parent:Dynamic, ?file:String, ?scriptType:String, ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
 		if (file == null)
 			file = '';
+		
+		switch(scriptType.toLowerCase()){
+			case "stage":
+				PlayState.instance.setupStageVariables();
+			case null:
+				scriptType = "";
+		}
 
 		filePath = file;
 		if (filePath != null && filePath.length > 0)

@@ -470,7 +470,7 @@ class PlayState extends MusicBeatState
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
 		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
-		
+
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// CHARACTER SCRIPTS
 		if(gf != null) startCharacterScripts(gf.curCharacter);
@@ -2510,7 +2510,8 @@ class PlayState extends MusicBeatState
 					curStage = value1; // Set new stage name
  					stageData = StageData.getStageFile(curStage); 
  					addStage();
- 	
+					
+					setOnScripts('curStage', curStage);
  				}
 		}
 
