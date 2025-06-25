@@ -304,6 +304,116 @@ class ReflectionFunctions
 			if(className != null) retStr += '::$className';
 			return retStr;
 		});
+
+		// Old Kade Reflect Stuff
+		Lua_helper.add_callback(lua,"getActorX", function (id:String) {
+			return LuaUtils.getObjectDirectly(id).x;
+		});
+
+		Lua_helper.add_callback(lua,"getActorY", function (id:String, ?bg:Bool = false) {
+			return LuaUtils.getObjectDirectly(id).y;
+		});
+
+			
+		Lua_helper.add_callback(lua,"getActorAngle", function(id:String) {
+			return LuaUtils.getObjectDirectly(id).angle;
+		});
+
+		Lua_helper.add_callback(lua,"getActorWidth", function (id:String) {
+			return LuaUtils.getObjectDirectly(id).width;
+		});
+
+		Lua_helper.add_callback(lua,"getActorHeight", function (id:String) {
+			return LuaUtils.getObjectDirectly(id).height;
+		});
+
+		Lua_helper.add_callback(lua,"getActorAlpha", function(id:String) {
+			return LuaUtils.getObjectDirectly(id).alpha;
+		});
+
+		Lua_helper.add_callback(lua,"getActorXMidpoint", function (id:String, ?graphic:Bool = false) {
+			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
+
+			if (graphic)
+				return shit.getGraphicMidpoint().x;
+
+			return shit.getMidpoint().x;
+		});
+
+		Lua_helper.add_callback(lua,"getActorYMidpoint", function (id:String, ?graphic:Bool = false) {
+			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
+
+			if (graphic)
+				return shit.getGraphicMidpoint().y;
+
+			return shit.getMidpoint().y;
+		});
+
+		Lua_helper.add_callback(lua,"setActorX", function(x:Int,id:String, ?bg:Bool = false) {
+			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
+			shit.x = x;
+		});
+
+		Lua_helper.add_callback(lua,"setActorY", function(y:Int,id:String, ?bg:Bool = false) {
+			LuaUtils.getActorByName(id).y = y;
+		});
+
+		Lua_helper.add_callback(lua,"setActorAlpha", function(alpha:Float,id:String, ?bg:Bool = false) {
+			LuaUtils.getActorByName(id).alpha = alpha;
+		});
+
+		Lua_helper.add_callback(lua,"setActorVisibility", function(alpha:Bool,id:String, ?bg:Bool = false) {
+			LuaUtils.getActorByName(id).visible = alpha;
+		});
+
+		Lua_helper.add_callback(lua,"setActorAccelerationY", function(y:Int,id:String) {
+			LuaUtils.getActorByName(id).acceleration.y = y;
+		});
+		
+		Lua_helper.add_callback(lua,"setActorDragY", function(y:Int,id:String) {
+			LuaUtils.getActorByName(id).drag.y = y;
+		});
+		
+		Lua_helper.add_callback(lua,"setActorVelocityY", function(y:Int,id:String) {
+			LuaUtils.getActorByName(id).velocity.y = y;
+		});
+		
+		Lua_helper.add_callback(lua,"setActorAngle", function(angle:Int,id:String) {
+			LuaUtils.getActorByName(id).angle = angle;
+		});
+
+		Lua_helper.add_callback(lua,"setActorScale", function(scale:Float, id:String, ?updateHitbox:Bool = false) {
+			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
+			shit.setGraphicSize(Std.int(shit.width * scale));
+			if(updateHitbox) shit.updateHitbox();	
+		});
+		
+		Lua_helper.add_callback(lua, "setActorScaleXY", function(scaleX:Float, scaleY:Float, id:String)
+		{
+			LuaUtils.getActorByName(id).setGraphicSize(Std.int(LuaUtils.getActorByName(id).width * scaleX), Std.int(LuaUtils.getActorByName(id).height * scaleY));
+		});
+
+		Lua_helper.add_callback(lua, "setActorFlipX", function(flip:Bool, id:String)
+		{
+			LuaUtils.getActorByName(id).flipX = flip;
+		});
+
+		Lua_helper.add_callback(lua, "setActorFlipY", function(flip:Bool, id:String)
+		{
+			LuaUtils.getActorByName(id).flipY = flip;
+		});
+
+		Lua_helper.add_callback(lua,"setActorAccelerationX", function(x:Int,id:String) {
+			LuaUtils.getActorByName(id).acceleration.x = x;
+		});
+		
+		Lua_helper.add_callback(lua,"setActorDragX", function(x:Int,id:String) {
+			LuaUtils.getActorByName(id).drag.x = x;
+		});
+		
+		Lua_helper.add_callback(lua,"setActorVelocityX", function(x:Int,id:String, ?bg:Bool = false) {
+			LuaUtils.getActorByName(id).velocity.x = x;			
+		});
 	}
 
 	static function parseInstanceArray(arg:Array<Dynamic>) {

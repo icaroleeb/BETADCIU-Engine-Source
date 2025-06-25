@@ -1279,8 +1279,18 @@ class PlayState extends MusicBeatState
 		}
 
 		var tempScore:String;
-		if(!instakillOnMiss) tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [songScore, songMisses, str]);
-		else tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [songScore, str]);
+		if(!instakillOnMiss){
+			if(ClientPrefs.data.scoreComma) 
+				tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [numberWithCommas(songScore), songMisses, str]);
+			else
+				tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [songScore, songMisses, str]);
+		}else {
+			if(ClientPrefs.data.scoreComma) 
+				tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [numberWithCommas(songScore), str]);
+			else
+				tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [songScore, str]);
+		}
+
 		scoreTxt.text = tempScore;
 	}
 
@@ -4488,4 +4498,19 @@ class PlayState extends MusicBeatState
         	variables.set("stageVariables", new Map<String, FlxSprite>());
     	}
 	}
+
+	static function numberWithCommas(x:Int):String { // I'M A GENIUS!!
+        var integerPart = Std.string(x);
+
+        var result = new StringBuf();
+        var length = integerPart.length;
+        for (i in 0...length) {
+            if (i > 0 && (length - i) % 3 == 0) {
+                result.add(',');
+            }
+            result.add(integerPart.charAt(i));
+        }
+
+        return Std.string(result);
+    }
 }

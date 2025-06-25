@@ -174,8 +174,14 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('OG Icon Bop',
-		"If checked, The Icon will Bop Like in BETADCIU Engine Legacy",
-		'ogIconBop',
+			"If checked, The Icon will Bop Like in BETADCIU Engine Legacy",
+			'ogIconBop',
+			BOOL);
+		addOption(option);
+
+		var option:Option = new Option('Score Number With Comma',
+			"If checked, will activate the Score Number With Comma",
+			'scoreComma',
 			BOOL);
 		addOption(option);
 
