@@ -355,31 +355,31 @@ class ReflectionFunctions
 		});
 
 		Lua_helper.add_callback(lua,"setActorY", function(y:Int,id:String, ?bg:Bool = false) {
-			LuaUtils.getActorByName(id).y = y;
+			LuaUtils.getObjectDirectly(id).y = y;
 		});
 
 		Lua_helper.add_callback(lua,"setActorAlpha", function(alpha:Float,id:String, ?bg:Bool = false) {
-			LuaUtils.getActorByName(id).alpha = alpha;
+			LuaUtils.getObjectDirectly(id).alpha = alpha;
 		});
 
 		Lua_helper.add_callback(lua,"setActorVisibility", function(alpha:Bool,id:String, ?bg:Bool = false) {
-			LuaUtils.getActorByName(id).visible = alpha;
+			LuaUtils.getObjectDirectly(id).visible = alpha;
 		});
 
 		Lua_helper.add_callback(lua,"setActorAccelerationY", function(y:Int,id:String) {
-			LuaUtils.getActorByName(id).acceleration.y = y;
+			LuaUtils.getObjectDirectly(id).acceleration.y = y;
 		});
 		
 		Lua_helper.add_callback(lua,"setActorDragY", function(y:Int,id:String) {
-			LuaUtils.getActorByName(id).drag.y = y;
+			LuaUtils.getObjectDirectly(id).drag.y = y;
 		});
 		
 		Lua_helper.add_callback(lua,"setActorVelocityY", function(y:Int,id:String) {
-			LuaUtils.getActorByName(id).velocity.y = y;
+			LuaUtils.getObjectDirectly(id).velocity.y = y;
 		});
 		
 		Lua_helper.add_callback(lua,"setActorAngle", function(angle:Int,id:String) {
-			LuaUtils.getActorByName(id).angle = angle;
+			LuaUtils.getObjectDirectly(id).angle = angle;
 		});
 
 		Lua_helper.add_callback(lua,"setActorScale", function(scale:Float, id:String, ?updateHitbox:Bool = false) {
@@ -390,29 +390,29 @@ class ReflectionFunctions
 		
 		Lua_helper.add_callback(lua, "setActorScaleXY", function(scaleX:Float, scaleY:Float, id:String)
 		{
-			LuaUtils.getActorByName(id).setGraphicSize(Std.int(LuaUtils.getActorByName(id).width * scaleX), Std.int(LuaUtils.getActorByName(id).height * scaleY));
+			LuaUtils.getObjectDirectly(id).setGraphicSize(Std.int(LuaUtils.getActorByName(id).width * scaleX), Std.int(LuaUtils.getActorByName(id).height * scaleY));
 		});
 
 		Lua_helper.add_callback(lua, "setActorFlipX", function(flip:Bool, id:String)
 		{
-			LuaUtils.getActorByName(id).flipX = flip;
+			LuaUtils.getObjectDirectly(id).flipX = flip;
 		});
 
 		Lua_helper.add_callback(lua, "setActorFlipY", function(flip:Bool, id:String)
 		{
-			LuaUtils.getActorByName(id).flipY = flip;
+			LuaUtils.getObjectDirectly(id).flipY = flip;
 		});
 
 		Lua_helper.add_callback(lua,"setActorAccelerationX", function(x:Int,id:String) {
-			LuaUtils.getActorByName(id).acceleration.x = x;
+			LuaUtils.getObjectDirectly(id).acceleration.x = x;
 		});
 		
 		Lua_helper.add_callback(lua,"setActorDragX", function(x:Int,id:String) {
-			LuaUtils.getActorByName(id).drag.x = x;
+			LuaUtils.getObjectDirectly(id).drag.x = x;
 		});
 		
 		Lua_helper.add_callback(lua,"setActorVelocityX", function(x:Int,id:String, ?bg:Bool = false) {
-			LuaUtils.getActorByName(id).velocity.x = x;			
+			LuaUtils.getObjectDirectly(id).velocity.x = x;			
 		});
 	}
 
