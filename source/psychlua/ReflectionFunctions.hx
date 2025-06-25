@@ -390,7 +390,7 @@ class ReflectionFunctions
 		
 		Lua_helper.add_callback(lua, "setActorScaleXY", function(scaleX:Float, scaleY:Float, id:String)
 		{
-			LuaUtils.getObjectDirectly(id).setGraphicSize(Std.int(LuaUtils.getActorByName(id).width * scaleX), Std.int(LuaUtils.getActorByName(id).height * scaleY));
+			LuaUtils.getObjectDirectly(id).setGraphicSize(Std.int(LuaUtils.getObjectDirectly(id).width * scaleX), Std.int(LuaUtils.getObjectDirectly(id).height * scaleY));
 		});
 
 		Lua_helper.add_callback(lua, "setActorFlipX", function(flip:Bool, id:String)
