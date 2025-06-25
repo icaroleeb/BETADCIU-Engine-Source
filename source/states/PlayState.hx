@@ -1897,6 +1897,7 @@ class PlayState extends MusicBeatState
 
 		if (!startingSong) {
 			setOnScripts('songPos',Conductor.songPosition);
+			callOnScripts('update', [elapsed]);
 		}
 
 		setOnScripts('curDecStep', curDecStep);
@@ -2544,15 +2545,19 @@ class PlayState extends MusicBeatState
 		{
 			moveCameraToGirlfriend();
 			callOnScripts('onMoveCamera', ['gf']);
+			(SONG.notes[sec].mustHitSection ? callOnScripts('playerOneTurn') : callOnScripts('playerTwoTurn'));
 			return;
 		}
 
 		var isDad:Bool = (SONG.notes[sec].mustHitSection != true);
 		moveCamera(isDad);
-		if (isDad)
+		if (isDad){
 			callOnScripts('onMoveCamera', ['dad']);
-		else
+			callOnScripts('playerTwoTurn');
+		}else{
 			callOnScripts('onMoveCamera', ['boyfriend']);
+			callOnScripts('playerOneTurn');
+		}
 	}
 	
 	public function moveCameraToGirlfriend()
@@ -3552,6 +3557,7 @@ class PlayState extends MusicBeatState
 
 		lastStepHit = curStep;
 		setOnScripts('curStep', curStep);
+		callOnScripts('stepHit');
 		callOnScripts('onStepHit');
 	}
 
@@ -3585,6 +3591,7 @@ class PlayState extends MusicBeatState
 		lastBeatHit = curBeat;
 
 		setOnScripts('curBeat', curBeat);
+		callOnScripts('beatHit');
 		callOnScripts('onBeatHit');
 	}
 

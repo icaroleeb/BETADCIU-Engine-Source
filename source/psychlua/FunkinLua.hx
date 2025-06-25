@@ -2047,6 +2047,7 @@ class FunkinLua {
 		}
 		trace('lua file loaded succesfully:' + scriptName);
 
+		call('start', []); // ported from kade engine
 		call('onCreate', []);
 	}
 
