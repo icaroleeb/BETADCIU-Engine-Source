@@ -14,7 +14,7 @@ class DiscordClient
 {
 	public static var isInitialized:Bool = false;
 	// private static final _defaultID:String = "863222024192262205";// psych ID
-	private static final _defaultID:String = "1291228150658891808";
+	private static final _defaultID:String = "1387255803010093177";
 	public static var clientID(default, set):String = _defaultID;
 	private static var presence:DiscordPresence = new DiscordPresence();
 	// hides this field from scripts and reflection in general
