@@ -9,6 +9,7 @@ import backend.Song;
 import openfl.Lib;
 import openfl.utils.Assets;
 import openfl.display.BitmapData;
+import lime.app.Application;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxState;
@@ -52,6 +53,8 @@ import haxe.Json;
 
 import funkin.vis.dsp.SpectralAnalyzer;
 import funkin.vis.audioclip.frontends.LimeAudioClip;
+
+import flixel.effects.FlxFlicker;
 
 class FunkinLua {
 	public var lua:State = null;
@@ -134,7 +137,6 @@ class FunkinLua {
 		// Screen stuff
 		set('screenWidth', FlxG.width);
 		set('screenHeight', FlxG.height);
-
 
 		// PlayState-only variables
 		if(game != null)
@@ -226,8 +228,8 @@ class FunkinLua {
 
 		// build target (windows, mac, linux, etc.)
 		set('buildTarget', LuaUtils.getBuildTarget());
-
 		//
+
 		Lua_helper.add_callback(lua, "getRunningScripts", function() {
 			var runningScripts:Array<String> = [];
 			for (script in game.luaArray)
@@ -235,7 +237,6 @@ class FunkinLua {
 
 			return runningScripts;
 		});
-
 		Lua_helper.add_callback(lua, "getRunningHScripts", function(){
 			var runningScripts:Array<String> = [];
 			for (script in game.hscriptArray)
@@ -243,17 +244,14 @@ class FunkinLua {
 
 			return runningScripts;
 		});
-
 		//stole from Wii Funkin' Matt V3
 		Lua_helper.add_callback(lua, "initAnalyzer", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
 			initAnalyzer(barCount, maxDelta, peakHold);
 			return true;
 		});
-
 		Lua_helper.add_callback(lua, "getAudioLevels", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
 			return getAudioLevels();
 		});
-
 		addLocalCallback("setOnScripts", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
 			if(exclusions == null) exclusions = [];
 			if(ignoreSelf && !exclusions.contains(scriptName)) exclusions.push(scriptName);
@@ -285,7 +283,6 @@ class FunkinLua {
 			if(ignoreSelf && !excludeScripts.contains(scriptName)) excludeScripts.push(scriptName);
 			return game.callOnHScript(funcName, args, ignoreStops, excludeScripts, excludeValues);
 		});
-
 		Lua_helper.add_callback(lua, "callScript", function(luaFile:String, funcName:String, ?args:Array<Dynamic> = null) {
 			if(args == null){
 				args = [];
@@ -424,7 +421,6 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getVar", function(varName:String) {
 			return MusicBeatState.getVariables().get(varName);
 		});
-
 		Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) {
 			var luaPath:String = findScript(luaFile);
 			if(luaPath != null)
@@ -507,7 +503,6 @@ class FunkinLua {
 			luaTrace("removeHScript: HScript is not supported on this platform!", false, false, FlxColor.RED);
 			#end
 		});
-
 		Lua_helper.add_callback(lua, "loadSong", function(?name:String = null, ?difficultyNum:Int = -1) {
 			if(name == null || name.length < 1)
 				name = Song.loadedSongName;
@@ -529,7 +524,6 @@ class FunkinLua {
 			}
 			FlxG.camera.followLerp = 0;
 		});
-
 		Lua_helper.add_callback(lua, "loadGraphic", function(variable:String, image:String, ?gridX:Int = 0, ?gridY:Int = 0) {
 			var split:Array<String> = variable.split('.');
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
@@ -668,7 +662,6 @@ class FunkinLua {
 			}
 			return released;
 		});
-
 		Lua_helper.add_callback(lua, "runTimer", function(tag:String, time:Float = 1, loops:Int = 1) {
 			LuaUtils.cancelTimer(tag);
 			var variables = MusicBeatState.getVariables();
@@ -807,41 +800,41 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getCharacterX", function(type:String) {
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					return game.dadGroup.x;
+					return game.dad.x;
 				case 'gf' | 'girlfriend':
-					return game.gfGroup.x;
+					return game.gf.x;
 				default:
-					return game.boyfriendGroup.x;
+					return game.boyfriend.x;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterX", function(type:String, value:Float) {
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					game.dadGroup.x = value;
+					game.dad.x = value;
 				case 'gf' | 'girlfriend':
-					game.gfGroup.x = value;
+					game.gf.x = value;
 				default:
-					game.boyfriendGroup.x = value;
+					game.boyfriend.x = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "getCharacterY", function(type:String) {
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					return game.dadGroup.y;
+					return game.dad.y;
 				case 'gf' | 'girlfriend':
-					return game.gfGroup.y;
+					return game.gf.y;
 				default:
-					return game.boyfriendGroup.y;
+					return game.boyfriend.y;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterY", function(type:String, value:Float) {
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					game.dadGroup.y = value;
+					game.dad.y = value;
 				case 'gf' | 'girlfriend':
-					game.gfGroup.y = value;
+					game.gf.y = value;
 				default:
-					game.boyfriendGroup.y = value;
+					game.boyfriend.y = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
@@ -978,7 +971,31 @@ class FunkinLua {
 			var cam:FlxCamera = LuaUtils.cameraFromString(camera);
 			return FlxG.mouse.getScreenPosition(cam).y;
 		});
-
+		Lua_helper.add_callback(lua,"setWindowPos",function(x:Int,y:Int) {
+			Application.current.window.x = x;
+			Application.current.window.y = y;
+		});
+		Lua_helper.add_callback(lua,"getWindowX", function() {
+			return Application.current.window.x;
+		});
+		Lua_helper.add_callback(lua,"getWindowY", function() {
+			return Application.current.window.y;
+		});
+		Lua_helper.add_callback(lua,"resizeWindow", function(Width:Int, Height:Int) {
+			Application.current.window.resize(Width,Height);
+		});
+		Lua_helper.add_callback(lua,"getScreenWidth", function() {
+			return Application.current.window.display.currentMode.width;
+		});
+		Lua_helper.add_callback(lua,"getScreenHeight", function() {
+			return Application.current.window.display.currentMode.height;
+		});
+		Lua_helper.add_callback(lua,"getWindowWidth", function() {
+			return Application.current.window.width;
+		});
+		Lua_helper.add_callback(lua,"getWindowHeight", function() {
+			return Application.current.window.height;
+		});
 		Lua_helper.add_callback(lua, "getMidpointX", function(variable:String) {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
@@ -1046,7 +1063,6 @@ class FunkinLua {
 				default: game.boyfriend.dance();
 			}
 		});
-
 		Lua_helper.add_callback(lua, "makeLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
@@ -1150,16 +1166,16 @@ class FunkinLua {
 
 				variables.set(tag, leVSprite);
 				
-				switch(scriptType.toLowerCase()){
-					case "stage":
-						if (!variables.exists("stageVariables")){
-							variables.set("stageVariables", new Map<String, PsychVideoSprite>());
-						}
-			
-						var stageVars = variables.get("stageVariables");
-						stageVars.set(tag, leVSprite);
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, PsychVideoSprite>());
+					}
+		
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leVSprite);
 				}
-			} else {
+			}else{
 				luaTrace('makeVideoSprite: The video file "' + videoFile + '" cannot be found!', FlxColor.RED);
 				return;
 			}
@@ -1257,6 +1273,24 @@ class FunkinLua {
 				return true;
 			}
 			luaTrace("addClipRect: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
+			return false;
+		});
+		Lua_helper.add_callback(lua, "setClipRectAngle", function(obj:String, degrees:Float) {
+			var daRect:FlxRect = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop([obj, 'clipRect']), 'clipRect');
+
+			if(daRect != null) {
+				daRect.getRotatedBounds(degrees);
+
+				var killMe:Array<String> = obj.split('.');
+				var object:FlxSprite = LuaUtils.getObjectDirectly(killMe[0]);
+				if(killMe.length > 1) {
+					object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+				}
+
+				object.clipRect = daRect;
+				return true;
+			}
+			luaTrace("setClipRectAngle: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
 		Lua_helper.add_callback(lua, "makeGraphic", function(obj:String, width:Int = 256, height:Int = 256, color:String = 'FFFFFF') {
@@ -1392,6 +1426,21 @@ class FunkinLua {
 					if(shit != null) makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
 					else luaTrace("changeCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);		
 			}
+		});
+		Lua_helper.add_callback(lua, "changeGFCharacter", function(id:String, x:Float, y:Float) {
+			changeGFAuto(id);
+			PlayState.instance.gf.x = x;
+			PlayState.instance.gf.y = y;
+		});
+		Lua_helper.add_callback(lua, "changeDadCharacter", function(id:String, x:Float, y:Float) {
+			changeDadAuto(id, false, false);
+			PlayState.instance.dad.x = x;
+			PlayState.instance.dad.y = y;
+		});
+		Lua_helper.add_callback(lua, "changeBoyfriendCharacter", function(id:String, x:Float, y:Float) {
+			changeBFAuto(id, false, false);
+			PlayState.instance.gf.x = x;
+			PlayState.instance.gf.y = y;
 		});
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
 			makeLuaCharacter(tag, character, isPlayer, flipped);
@@ -1685,6 +1734,11 @@ class FunkinLua {
 			newShader.hue = hue / 360;
 			shit.shader = newShader.shader;
 		});
+		Lua_helper.add_callback(lua,"flickerSprite", function(id:String, duration:Float, interval:Float) {
+			if(PlayState.instance == FlxG.state){duration = duration / PlayState.instance.playbackRate;}
+			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
+			FlxFlicker.flicker(shit, duration, interval);
+		});
 		Lua_helper.add_callback(lua, "startDialogue", function(dialogueFile:String, ?music:String = null) {
 			var path:String;
 			var songPath:String = Paths.formatToSongPath(Song.loadedSongName);
@@ -1756,7 +1810,6 @@ class FunkinLua {
 			return true;
 			#end
 		});
-
 		Lua_helper.add_callback(lua, "playMusic", function(sound:String, ?volume:Float = 1, ?loop:Bool = false) {
 			FlxG.sound.playMusic(Paths.music(sound), volume, loop);
 		});
@@ -1973,7 +2026,6 @@ class FunkinLua {
 			luaTrace("setSoundPitch: Sound Pitch is not supported on this platform!", false, false, FlxColor.RED);
 			#end
 		});
-
 		// mod settings
 		addLocalCallback("getModSetting", function(saveTag:String, ?modName:String = null) {
 			#if MODS_ALLOWED
@@ -1992,7 +2044,6 @@ class FunkinLua {
 			#end
 		});
 		//
-
 		Lua_helper.add_callback(lua, "debugPrint", function(text:Dynamic = '', color:String = 'WHITE') PlayState.instance.addTextToDebug(text, CoolUtil.colorFromString(color)));
 
 		addLocalCallback("close", function() {

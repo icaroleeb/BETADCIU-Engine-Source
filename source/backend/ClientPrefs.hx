@@ -84,6 +84,7 @@ import states.TitleState;
 	public var comboCam:String = "Game";// cam game by default because i like it.
 	public var ogIconBop:Bool = false;
 	public var scoreComma:Bool = false;
+	public var missesOrComboBreaks:String = 'Misses';
 }
 
 class ClientPrefs {

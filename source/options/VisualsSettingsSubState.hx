@@ -185,6 +185,13 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 
+		var option:Option = new Option('Misses or Combo Breaks:',
+			'which one wanna call "Misses" or "Combo Breaks"',
+			"missesOrComboBreaks",
+			STRING,
+			['Misses', 'Combo Breaks']);
+		addOption(option);
+
 		super();
 		add(notes);
 		add(splashes);

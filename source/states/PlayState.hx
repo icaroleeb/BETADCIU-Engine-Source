@@ -1279,8 +1279,15 @@ class PlayState extends MusicBeatState
 		}
 
 		var tempScore:String;
+		var daScoreText:String;
+
+		if(ClientPrefs.data.missesOrComboBreaks == "Combo Breaks")
+			daScoreText = 'Score: {1} | Combo Breaks: {2} | Rating: {3}';
+		else
+			daScoreText = 'Score: {1} | Misses: {2} | Rating: {3}';
+
 		if(!instakillOnMiss)
-			tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [ClientPrefs.data.scoreComma ? numberWithCommas(songScore) : songScore, songMisses, str]);
+			tempScore = Language.getPhrase('score_text', daScoreText, [ClientPrefs.data.scoreComma ? numberWithCommas(songScore) : songScore, songMisses, str]);
 		else
 			tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [ClientPrefs.data.scoreComma ? numberWithCommas(songScore) : songScore, str]);
 
@@ -1390,8 +1397,8 @@ class PlayState extends MusicBeatState
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
-		FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+		if(timeBar != null) FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+		if(timeTxt != null) FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
