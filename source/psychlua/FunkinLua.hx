@@ -796,7 +796,6 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getSongPosition", function() {
 			return Conductor.songPosition;
 		});
-
 		Lua_helper.add_callback(lua, "getCharacterX", function(type:String) {
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
@@ -848,7 +847,6 @@ class FunkinLua {
 					game.moveCamera(false);
 			}
 		});
-
 		Lua_helper.add_callback(lua, "setCameraScroll", function(x:Float, y:Float) FlxG.camera.scroll.set(x - FlxG.width/2, y - FlxG.height/2));
 		Lua_helper.add_callback(lua, "setCameraFollowPoint", function(x:Float, y:Float) game.camFollow.setPosition(x, y));
 		Lua_helper.add_callback(lua, "addCameraScroll", function(?x:Float = 0, ?y:Float = 0) FlxG.camera.scroll.add(x, y));
@@ -1384,7 +1382,6 @@ class FunkinLua {
 				spr.setColorTransform(0, 0, 0, 1, r, g, b, a);
 			}
 		});
-
 		Lua_helper.add_callback(lua, "inBetweenColor", function(color:String, color2:String, diff:Float, ?remove0:Bool = false) {
 			var color = FlxColor.interpolate(CoolUtil.colorFromString(color), CoolUtil.colorFromString(color2), diff);
 			var daColor = color.toHexString();
@@ -1561,7 +1558,6 @@ class FunkinLua {
 				obj.destroy();
 			}
 		});
-
 		Lua_helper.add_callback(lua, "luaSpriteExists", function(tag:String) {
 			var obj:FlxSprite = MusicBeatState.getVariables().get(tag);
 			return (obj != null && (Std.isOfType(obj, ModchartSprite) || Std.isOfType(obj, ModchartAnimateSprite)));

@@ -133,12 +133,12 @@ class Bar extends FlxSpriteGroup
 			);
 		}
 		leftBar.loadGraphic(FlxGraphic.fromBitmapData(fillBmp));
-	
+
 		leftBar.antialiasing = ClientPrefs.data.antialiasing;
 		rightBar.antialiasing = ClientPrefs.data.antialiasing;
-	
+
 		regenerateClips();
-	
+
 		return this;
 	}
 
