@@ -143,9 +143,9 @@ class PhillyStreets extends BaseStage
 		add(phillyForeground);
 		darkenable.push(phillyForeground);
 
-		spraycanPile = new BGSprite('SpraycanPile', 920, 1045, 1, 1);
+		spraycanPile = new BGSprite('SpraycanPile', 920, 1045, 1, 1); // moved to create instead of createPost because it won't remove in createPost
 		stageVars.set("spraycanPile", spraycanPile);
-		
+
 		if(!ClientPrefs.data.lowQuality)
 		{
 			picoFade = new FlxSprite();
@@ -193,7 +193,6 @@ class PhillyStreets extends BaseStage
 		var stageVars = PlayState.instance.variables.get("stageVariables");
 
 		if (PlayState.instance.curStage.toLowerCase() == 'phillystreets') precache();
-		
 		add(spraycanPile);
 		darkenable.push(spraycanPile);
 
