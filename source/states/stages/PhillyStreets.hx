@@ -142,8 +142,8 @@ class PhillyStreets extends BaseStage
 		stageVars.set('phillyForeground', phillyForeground);
 		add(phillyForeground);
 		darkenable.push(phillyForeground);
-
-		spraycanPile = new BGSprite('SpraycanPile', 920, 1045, 1, 1); // moved to create instead of createPost because it won't remove in createPost
+		
+		spraycanPile = new BGSprite('SpraycanPile', 920, 1045, 1, 1);
 		stageVars.set("spraycanPile", spraycanPile);
 
 		if(!ClientPrefs.data.lowQuality)
@@ -190,12 +190,6 @@ class PhillyStreets extends BaseStage
 	var noteTypes:Array<String> = [];
 	override function createPost()
 	{
-		var stageVars = PlayState.instance.variables.get("stageVariables");
-
-		if (PlayState.instance.curStage.toLowerCase() == 'phillystreets') precache();
-		add(spraycanPile);
-		darkenable.push(spraycanPile);
-
 		var unspawnNotes:Array<Note> = cast game.unspawnNotes;
 		for (note in unspawnNotes)
 		{
@@ -209,6 +203,10 @@ class PhillyStreets extends BaseStage
 			}
 			if(!noteTypes.contains(note.noteType)) noteTypes.push(note.noteType);
 		}
+
+		if (PlayState.instance.curStage.toLowerCase() == 'phillystreets') precache();
+		add(spraycanPile);
+		darkenable.push(spraycanPile);
 
 		if(gf != null)
 		{
@@ -230,14 +228,6 @@ class PhillyStreets extends BaseStage
 	}
 
 	override public function destroy():Void {
-		/*/
-		if (spraycanPile != null) { 
-			remove(spraycanPile); // because its not being removed after a stage change for some reason (????)
-			spraycanPile.destroy();
-			spraycanPile = null;
-		}
-		/*/
-
 		if (PlayState.instance.camGame.filters != null) {
 			var filters = PlayState.instance.camGame.filters;
 
@@ -472,12 +462,9 @@ class PhillyStreets extends BaseStage
 		function createCan()
 		{
 			if(didCreateCan) return;
-			var stageVars = PlayState.instance.variables.get("stageVariables");
 			spraycan = new SpraycanAtlasSprite(spraycanPile.x + 530, spraycanPile.y - 240);
-			stageVars.set("spraycan", spraycan);
 			add(spraycan);
 
-			if(didCreateCan) return;
 			lightCanSnd = new FlxSound();
 			FlxG.sound.list.add(lightCanSnd);
 			lightCanSnd.loadEmbedded(Paths.sound('Darnell_Lighter'));
