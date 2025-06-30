@@ -132,9 +132,7 @@ class TweenFunctions
 			else FunkinLua.luaTrace('doTweenColor: Couldnt find object: ' + vars, false, false, FlxColor.RED);
 			return null;
 		});
-
-
-		Lua_helper.add_callback(lua,"doTweenColor2", function(tag:String, vars:String, duration:Float, initColor:FlxColor, finalColor:FlxColor) {
+		Lua_helper.add_callback(lua,"doTweenColor2", function(tag:String, vars:String, initColor:FlxColor, finalColor:FlxColor, duration:Float, ?ease:String = 'linear') {
 			if (game != null){duration = duration / game.playbackRate;}
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 			if(penisExam != null) {
@@ -143,7 +141,7 @@ class TweenFunctions
 					var originalTag:String = tag;
 					tag = LuaUtils.formatVariable('tween_$tag');
 					var variables = MusicBeatState.getVariables();
-					variables.set(tag, FlxTween.color(penisExam, duration, initColor, finalColor, {ease: LuaUtils.getTweenEaseByString("cubeout"),
+					variables.set(tag, FlxTween.color(penisExam, duration, initColor, finalColor, {ease: LuaUtils.getTweenEaseByString(ease),
 						onComplete: function(twn:FlxTween)
 						{
 							variables.remove(tag);
@@ -158,7 +156,6 @@ class TweenFunctions
 			}
 			return null;
 		});
-
 		Lua_helper.add_callback(lua, "doTweenNum", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			if (game != null){duration = duration / game.playbackRate;}
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
@@ -183,7 +180,6 @@ class TweenFunctions
 			}
 			return null;
 		});
-
 		Lua_helper.add_callback(lua, "objectColorTween", function(obj:String, duration:Float, color:String, color2:String, ?ease:String = 'linear') {
 			var spr:Dynamic = LuaUtils.getObjectDirectly(obj);
 
@@ -191,7 +187,6 @@ class TweenFunctions
 				FlxTween.color(spr, duration, CoolUtil.colorFromString(color), CoolUtil.colorFromString(color2), {ease: LuaUtils.getTweenEaseByString()});
 			}
 		});
-
 		//Tween shit, but for strums
 		Lua_helper.add_callback(lua, "noteTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(tag, note, {x: value}, duration, ease);
@@ -208,8 +203,6 @@ class TweenFunctions
 		Lua_helper.add_callback(lua, "noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(tag, note, {direction: value}, duration, ease);
 		});
-
-		
 		// Tween color... the last one
 		Lua_helper.add_callback(lua,"tweenColor", function(vars:String, duration:Float, initColor:FlxColor, finalColor:FlxColor, ?tag:String) {
 			if (game != null){duration = duration / game.playbackRate;}
