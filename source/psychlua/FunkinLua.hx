@@ -16,6 +16,7 @@ import flixel.FlxState;
 import flixel.math.FlxRect;
 
 import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxTiledSprite;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
@@ -55,6 +56,7 @@ import funkin.vis.dsp.SpectralAnalyzer;
 import funkin.vis.audioclip.frontends.LimeAudioClip;
 
 import flixel.effects.FlxFlicker;
+import flixel.addons.effects.FlxTrail;
 
 class FunkinLua {
 	public var lua:State = null;
@@ -1132,6 +1134,31 @@ class FunkinLua {
 
 			leSprite.active = true;
 		});
+		// ALPHA. so it won't work yet.
+		Lua_helper.add_callback(lua, "makeLuaTiledSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?repeatX:Bool = true, ?repeatY:Bool = true){
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+			var leSprite:FlxTiledSprite = new FlxTiledSprite("", Std.int(x), Std.int(y), repeatX, repeatY);
+			if(image != null && image.length > 0)
+			{
+				leSprite.loadGraphic(Paths.image(image));
+			}
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leSprite);
+
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+		
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leSprite);
+			}
+
+			leSprite.active = true;
+		});
 		Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String="camGame", ?shouldLoop:Bool=false, ?muted:Bool=true) {
 			// I hate you FlxVideoSprite....
 			#if VIDEOS_ALLOWED
@@ -1680,6 +1707,26 @@ class FunkinLua {
 
 			if(spr != null) return spr.pixels.getPixel32(x, y);
 			return FlxColor.BLACK;
+		});
+		// yeah, it's different from the legacy.
+		Lua_helper.add_callback(lua, "makeLuaTrail", function(tag:String, obj:String, ?length:Int = 10, ?delay:Int = 3, ?alpha:Float = 0.4, ?diff:Float = 0.05){
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+
+			var leTrail:FlxTrail = new FlxTrail(LuaUtils.getObjectDirectly(obj), null, length, delay, alpha, diff);
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leTrail);
+
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxTrail>());
+					}
+
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leTrail);
+			}
 		});
 		//change individual values
 		Lua_helper.add_callback(lua,"changeHue", function(id:String, hue:Int) {

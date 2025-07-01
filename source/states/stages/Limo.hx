@@ -93,15 +93,15 @@ class Limo extends BaseStage
 		stageVars.set("fastCar", fastCar);
 		fastCar.active = true;
 
+		limo = new BGSprite('limo/limoDrive', -120, 550, 1, 1, ['Limo stage'], true); // moved to create instead of createPost because it won't remove during stage switch
+		stageVars.set("limo", limo);
 	}
 	override function createPost()
 	{
 		var stageVars = PlayState.instance.variables.get("stageVariables");
 		addBehindGF(fastCar);
-		
-		limo = new BGSprite('limo/limoDrive', -120, 550, 1, 1, ['Limo stage'], true);
+
 		addBehindDad(limo); //Shitty layering but whatev it works LOL
-		stageVars.set("limo", limo);
 	}
 
 	override public function destroy():Void {
