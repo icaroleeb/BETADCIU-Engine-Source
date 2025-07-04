@@ -239,8 +239,7 @@ class PlayState extends MusicBeatState
 	public var pressMissDamage:Float = 0.05;
 
 	public var botplaySine:Float = 0;
-	public var botplayTxt:FlxText;
-
+	
 	public var playDad:Bool = true;
 	public var playBF:Bool = true;
 
@@ -572,15 +571,6 @@ class PlayState extends MusicBeatState
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		add(scoreTxt);
-
-		botplayTxt = new FlxText(400, healthBar.y - 90, FlxG.width - 800, Language.getPhrase("Botplay").toUpperCase(), 32);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		// botplayTxt.visible = cpuControlled;
-		// add(botplayTxt);
-		if(ClientPrefs.data.downScroll)
-			botplayTxt.y = healthBar.y + 70;
 
 		add(uiGroup); // leaving the ui group for scripts
 
@@ -1902,11 +1892,6 @@ class PlayState extends MusicBeatState
 
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
-
-		if(botplayTxt != null && botplayTxt.visible) {
-			botplaySine += 180 * elapsed;
-			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
-		}
 
 		if (controls.PAUSE && startedCountdown && canPause)
 		{
@@ -3741,25 +3726,26 @@ class PlayState extends MusicBeatState
 	}
 
 	public function stopHScriptsNamed(scriptFile:String, ?scriptType:String = "")
-		{
-			#if MODS_ALLOWED
-			var scriptToLoad:String = Paths.modFolders(scriptFile);
-			if(!FileSystem.exists(scriptToLoad))
-				scriptToLoad = Paths.getSharedPath(scriptFile);
-			#else
-			var scriptToLoad:String = Paths.getSharedPath(scriptFile);
-			#end
-	
-			if(FileSystem.exists(scriptToLoad))
-			{
-				if (Iris.instances.exists(scriptToLoad)){
-					var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
-					hscriptArray.remove(script);
-					return true;
-				};
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+		
+		if(FileSystem.exists(scriptToLoad)){
+			if (Iris.instances.exists(scriptToLoad)){
+				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+				script.destroy();
+				hscriptArray.remove(script);
+				return true;
 			}
-			return false;
 		}
+			
+		return false;
+	}
 
 	public function initHScript(file:String, ?scriptType:String = "")
 	{
@@ -4458,7 +4444,7 @@ class PlayState extends MusicBeatState
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
-		//#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end // it don't work with hscript stage so I remove it
+		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end // it don't work with hscript stages so I remove it
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
