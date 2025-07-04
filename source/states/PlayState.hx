@@ -3752,6 +3752,7 @@ class PlayState extends MusicBeatState
 		try
 		{
 			newScript = new HScript(null, file, scriptType);
+			if (scriptType.toLowerCase() == 'stage') callOnHScript('onCreate'); // why this shit won't work on HScript?!
 			if (newScript.exists('onCreate')) newScript.call('onCreate');
 			trace('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
