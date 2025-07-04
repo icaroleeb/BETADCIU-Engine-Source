@@ -226,4 +226,19 @@ class CoolUtil
 
         return (Std.int(alpha) << 24) | (Std.int(red) << 16) | (Std.int(green) << 8) | Std.int(blue);
     }
+
+	public static function numberWithCommas(x:Int):String { // I'M A GENIUS!!
+        var integerPart = Std.string(x);
+
+        var result = new StringBuf();
+        var length = integerPart.length;
+        for (i in 0...length) {
+            if (i > 0 && (length - i) % 3 == 0) {
+                result.add(',');
+            }
+            result.add(integerPart.charAt(i));
+        }
+
+        return Std.string(result);
+    }
 }

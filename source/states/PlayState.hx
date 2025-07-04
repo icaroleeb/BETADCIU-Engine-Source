@@ -1287,9 +1287,9 @@ class PlayState extends MusicBeatState
 			daScoreText = 'Score: {1} | Misses: {2} | Rating: {3}';
 
 		if(!instakillOnMiss)
-			tempScore = Language.getPhrase('score_text', daScoreText, [ClientPrefs.data.scoreComma ? numberWithCommas(songScore) : songScore, songMisses, str]);
+			tempScore = Language.getPhrase('score_text', daScoreText, [ClientPrefs.data.scoreComma ? CoolUtil.numberWithCommas(songScore) : songScore, songMisses, str]);
 		else
-			tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [ClientPrefs.data.scoreComma ? numberWithCommas(songScore) : songScore, str]);
+			tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [ClientPrefs.data.scoreComma ? CoolUtil.numberWithCommas(songScore) : songScore, str]);
 
 		scoreTxt.text = tempScore;
 	}
@@ -1481,8 +1481,8 @@ class PlayState extends MusicBeatState
 
 		var arrowSwitches:Array<String> = [];
 
-		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"))){
-			arrowSwitches = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"));
+		if (FileSystem.exists(Paths.txt(songName + "/" + "arrowswitches".toLowerCase()))){
+			arrowSwitches = CoolUtil.coolTextFile(Paths.txt(songName + "/" + "arrowswitches".toLowerCase()));
 		}
 
 		var oldNote:Note = null;
@@ -4316,23 +4316,23 @@ class PlayState extends MusicBeatState
 	}
 
 	function grabStuffToPreload() {
-		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"))) {
-			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"));
+		if (FileSystem.exists(Paths.txt(songName + "/" + "preload".toLowerCase()))) {
+			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(songName + "/" + "preload".toLowerCase()));
 				for (i in 0...characters.length) {
 				var data:Array<String> = characters[i].split(' ');
 				charactersToLoad.push(characters[i]);
 			}
 		}
 
-		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload-stage"))) {
-			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload-stage"));
+		if (FileSystem.exists(Paths.txt(songName + "/" + "preload-stage".toLowerCase()))) {
+			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(songName + "/" + "preload-stage".toLowerCase()));
 			for (i in 0...stages.length) {
 				var data:Array<String> = stages[i].split(' ');
 				stagesToLoad.push(stages[i]);
 			}
 		}
 
-		var jsonPath:String = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase() + "/preload";
+		var jsonPath:String = songName + "/preload".toLowerCase();
 
 		if (FileSystem.exists(Paths.json(jsonPath))) {
 			var jsonString:String;
@@ -4493,6 +4493,7 @@ class PlayState extends MusicBeatState
 		}
 		addObjects(stageData);
 		stagesFunc(function(stage:BaseStage) stage.createPost());
+		callOnScripts('onCreatePost'); // Idk, I supposed put this.
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
@@ -4505,19 +4506,4 @@ class PlayState extends MusicBeatState
         	variables.set("stageVariables", new Map<String, FlxSprite>());
     	}
 	}
-
-	static function numberWithCommas(x:Int):String { // I'M A GENIUS!!
-        var integerPart = Std.string(x);
-
-        var result = new StringBuf();
-        var length = integerPart.length;
-        for (i in 0...length) {
-            if (i > 0 && (length - i) % 3 == 0) {
-                result.add(',');
-            }
-            result.add(integerPart.charAt(i));
-        }
-
-        return Std.string(result);
-    }
 }

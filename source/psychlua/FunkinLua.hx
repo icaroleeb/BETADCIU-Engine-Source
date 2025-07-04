@@ -123,10 +123,10 @@ class FunkinLua {
 		set('curStage', PlayState.SONG.stage);
 
 		set('isStoryMode', PlayState.isStoryMode);
-		set('difficulty', PlayState.storyDifficulty);
-
 		set('isBETADCIU', PlayState.isBETADCIU);
 		set('isBonus', PlayState.isBonus);
+
+		set('difficulty', PlayState.storyDifficulty);
 
 		set('difficultyName', Difficulty.getString(false));
 		set('difficultyPath', Difficulty.getFilePath());
@@ -1134,6 +1134,30 @@ class FunkinLua {
 
 			leSprite.active = true;
 		});
+		Lua_helper.add_callback(lua, "makeAnimatedLuaBackdrop", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?axes:String = "XY", ?spriteType:String = 'auto') {
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+			var leSprite:FlxBackdrop = new FlxBackdrop("", FlxAxes.fromString(axes), Std.int(x), Std.int(y));
+			if(image != null && image.length > 0)
+			{
+				LuaUtils.loadFrames(leSprite, image, spriteType);
+			}
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leSprite);
+
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+		
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leSprite);
+			}
+
+			leSprite.active = true;
+		});
 		// ALPHA. so it won't work yet.
 		Lua_helper.add_callback(lua, "makeLuaTiledSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?repeatX:Bool = true, ?repeatY:Bool = true){
 			tag = tag.replace('.', '');
@@ -1162,52 +1186,53 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String="camGame", ?shouldLoop:Bool=false, ?muted:Bool=true) {
 			// I hate you FlxVideoSprite....
 			#if VIDEOS_ALLOWED
-			var variables = MusicBeatState.getVariables();
-			tag = tag.replace('.', '');
-			LuaUtils.destroyObject(tag);
-			var leVSprite:PsychVideoSprite = null;
-			if(FileSystem.exists(Paths.video(videoFile)) && videoFile != null && videoFile.length > 0) {
+				var variables = MusicBeatState.getVariables();
+				tag = tag.replace('.', '');
+				LuaUtils.destroyObject(tag);
+				var leVSprite:PsychVideoSprite = null;
+				if(FileSystem.exists(Paths.video(videoFile)) && videoFile != null && videoFile.length > 0) {
 
-				leVSprite = new PsychVideoSprite();
-				leVSprite.addCallback('onFormat',()->{
-					leVSprite.setPosition(x,y);
-					leVSprite.cameras = [LuaUtils.cameraFromString(camera)];
-				});
-				leVSprite.addCallback('onEnd',()->{
-					if (variables.exists(tag)) {
-						variables.get(tag).destroy();
-						variables.remove(tag);
-					}
-						
-					game.callOnLuas('onVideoFinished', [tag]);
-				});
-				var options:Array<String> = [];
-				if (shouldLoop) options.push(PsychVideoSprite.looping);
-				if (muted) options.push(PsychVideoSprite.muted);
+					leVSprite = new PsychVideoSprite();
+					leVSprite.addCallback('onFormat',()->{
+						leVSprite.setPosition(x,y);
+						leVSprite.cameras = [LuaUtils.cameraFromString(camera)];
+					});
+					leVSprite.addCallback('onEnd',()->{
+						if (variables.exists(tag)) {
+							variables.get(tag).destroy();
+							variables.remove(tag);
+						}
+							
+						game.callOnLuas('onVideoFinished', [tag]);
+					});
+					var options:Array<String> = [];
+					if (shouldLoop) options.push(PsychVideoSprite.looping);
+					if (muted) options.push(PsychVideoSprite.muted);
 
-				leVSprite.load(Paths.video(videoFile), options);
-				leVSprite.antialiasing = true;
-				leVSprite.play();
+					leVSprite.load(Paths.video(videoFile), options);
+					leVSprite.antialiasing = true;
+					leVSprite.play();
 
-				variables.set(tag, leVSprite);
+					variables.set(tag, leVSprite);
 				
-			switch(scriptType.toLowerCase()){
-				case "stage":
-					if (!variables.exists("stageVariables")){
-						variables.set("stageVariables", new Map<String, PsychVideoSprite>());
+				switch(scriptType.toLowerCase()){
+					case "stage":
+						if (!variables.exists("stageVariables")){
+							variables.set("stageVariables", new Map<String, PsychVideoSprite>());
+						}
+
+						var stageVars = variables.get("stageVariables");
+						stageVars.set(tag, leVSprite);
 					}
-		
-					var stageVars = variables.get("stageVariables");
-					stageVars.set(tag, leVSprite);
-				}
-			}else{
-				luaTrace('makeVideoSprite: The video file "' + videoFile + '" cannot be found!', FlxColor.RED);
-				return;
-			}
-			leVSprite.active = true;
-			#else
-			luaTrace('Nuh Uh!!... - Platform not supported!');
-			#end
+					}else{
+						luaTrace('makeVideoSprite: The video file "' + videoFile + '" cannot be found!', FlxColor.RED);
+						return;
+					}
+
+					leVSprite.active = true;
+				#else
+					luaTrace('Nuh Uh!!... - Platform not supported!');
+				#end
 		});
 		Lua_helper.add_callback(lua, "makeLuaCamera", function(tag:String, ?x:Float = 0.0, ?y:Float = 0.0, ?resX:Int = 1280, ?resY:Int = 720, ?zoom:Float = 1.0) { // creates the camera
 			tag = tag.replace('.', '');
