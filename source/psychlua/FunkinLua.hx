@@ -2444,19 +2444,21 @@ class FunkinLua {
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;				
 		
-		// apparently this is crashing some native psych mods so i'll disable it for now
-
-		// if (PlayState.instance.boyfriend.isAnimateAtlas){
-		// 	if (PlayState.instance.boyfriend.getAnimationName().startsWith('sing')) {
-		// 		animationName = Std.string(PlayState.instance.boyfriend.atlas.anim.curInstance);
-		// 		animationFrame = Std.int(PlayState.instance.boyfriend.atlas.anim.curFrame);
-		// 	}
-		// } else {
-		// 	if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing')) {
-		// 		animationName = PlayState.instance.boyfriend.animation.curAnim.name;
-		// 		animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
-		// 	}		
-		// }
+		try {
+			if (PlayState.instance.boyfriend.isAnimateAtlas){
+				if (PlayState.instance.boyfriend.getAnimationName().startsWith('sing')) {
+					animationName = Std.string(PlayState.instance.boyfriend.atlas.anim.curInstance);
+					animationFrame = Std.int(PlayState.instance.boyfriend.atlas.anim.curFrame);
+				}
+			} else {
+				if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing')) {
+					animationName = PlayState.instance.boyfriend.animation.curAnim.name;
+					animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
+				}		
+			}
+		} catch (e:Dynamic) {
+			// do absolutely nothing
+		}
 		
 		PlayState.instance.boyfriend.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.boyfriend);
@@ -2502,19 +2504,21 @@ class FunkinLua {
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
 
-		// apparently this is crashing some native psych mods so i'll disable it for now
-
-		// if (PlayState.instance.dad.isAnimateAtlas){
-		// 	if (PlayState.instance.dad.getAnimationName().startsWith('sing')) {
-		// 		animationName = Std.string(PlayState.instance.dad.atlas.anim.curInstance);
-		// 		animationFrame = Std.int(PlayState.instance.dad.atlas.anim.curFrame);
-		// 	}
-		// } else {
-		// 	if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing')) {
-		// 		animationName = PlayState.instance.dad.animation.curAnim.name;
-		// 		animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
-		// 	}		
-		// }
+		try {
+			if (PlayState.instance.dad.isAnimateAtlas){
+				if (PlayState.instance.dad.getAnimationName().startsWith('sing')) {
+					animationName = Std.string(PlayState.instance.dad.atlas.anim.curInstance);
+					animationFrame = Std.int(PlayState.instance.dad.atlas.anim.curFrame);
+				}
+			} else {
+				if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing')) {
+					animationName = PlayState.instance.dad.animation.curAnim.name;
+					animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
+				}		
+			}
+		} catch (e:Dynamic) {
+			// do absolutely nothing
+		}
 
 		PlayState.instance.dad.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.dad);
@@ -2563,19 +2567,21 @@ class FunkinLua {
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;		
 
-		// apparently this is crashing some native psych mods so i'll disable it for now
-
-		// if (PlayState.instance.gf.isAnimateAtlas){
-		// 	if (PlayState.instance.gf.getAnimationName().startsWith('sing')) {
-		// 		animationName = Std.string(PlayState.instance.gf.atlas.anim.curInstance);
-		// 		animationFrame = Std.int(PlayState.instance.gf.atlas.anim.curFrame);
-		// 	}
-		// } else {
-		// 	if (PlayState.instance.gf.animation.curAnim.name.startsWith('sing')) {
-		// 		animationName = PlayState.instance.gf.animation.curAnim.name;
-		// 		animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
-		// 	}		
-		// }
+		try {
+			if (PlayState.instance.gf.isAnimateAtlas){
+				if (PlayState.instance.gf.getAnimationName().startsWith('sing')) {
+					animationName = Std.string(PlayState.instance.gf.atlas.anim.curInstance);
+					animationFrame = Std.int(PlayState.instance.gf.atlas.anim.curFrame);
+				}
+			} else {
+				if (PlayState.instance.gf.animation.curAnim.name.startsWith('sing')) {
+					animationName = PlayState.instance.gf.animation.curAnim.name;
+					animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
+				}		
+			}
+		} catch (e:Dynamic) {
+			// do absolutely nothing
+		}
 
 		PlayState.instance.gf.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.gf);
