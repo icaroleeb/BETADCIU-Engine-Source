@@ -410,6 +410,7 @@ class PlayState extends MusicBeatState
 			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
+			case 'stageerect': hardCodedStage = new StageErectWeek1();	//Week 1 Erect
 		}
 		if(isPixelStage) introSoundsSuffix = '-pixel';
 
@@ -1918,7 +1919,7 @@ class PlayState extends MusicBeatState
 			health = healthBar.bounds.max;
 
 		updateIconsScale(elapsed);
-		updateIconsPosition();
+		if (canIconMove) updateIconsPosition();
 
 		if (startedCountdown && !paused)
 		{
@@ -3551,6 +3552,7 @@ class PlayState extends MusicBeatState
 	public var playerIconScale:Float = 1.2;
 	public var iconBopSpeed:Int = 1;
 	public var canIconBop:Bool = true;//this is useful, change my mind.
+	public var canIconMove:Bool = true;
 
 	override function beatHit()
 	{
@@ -4476,6 +4478,7 @@ class PlayState extends MusicBeatState
 			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
+			case 'stageerect': hardCodedStage = new StageErectWeek1();	//Week 1 Erect
 		}
 		addObjects(stageData);
 		stagesFunc(function(stage:BaseStage) stage.createPost());

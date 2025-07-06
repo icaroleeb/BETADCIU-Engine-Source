@@ -23,6 +23,7 @@ function onCreate(){
 
     abot = new FlxAnimate(0, 0);
     Paths.loadAnimateAtlas(abot, 'characters/abot/abotSystem');
+    abot.anim.addBySymbol('anim', 'Abot System', 24, false);
     abot.scrollFactor.set(0.95, 0.95);
 
     abot.antialiasing = ClientPrefs.data.antialiasing;
@@ -61,6 +62,12 @@ function onCreatePost(){
         pupil.visible = false;
         abot.visible = false;
     }
+
+    remove(stereoBG);
+    remove(abotViz);
+    remove(eyeWhites);
+    remove(pupil);
+    remove(abot);
 
     addBehindGF(stereoBG);
     addBehindGF(abotViz);
@@ -152,8 +159,8 @@ function onUpdatePost(elapsed){
 
 function onBeatHit(){
     if (curBeat % gfSpeed == 0){
-	    abot.anim.play("");
-    	abot.anim.curFrame = 1;
+	    abot.anim.play("anim", true);
+    	//abot.anim.curFrame = 1;
     }
 }
 
