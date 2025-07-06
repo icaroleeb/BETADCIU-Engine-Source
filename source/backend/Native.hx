@@ -83,7 +83,8 @@ class Native
 		#end
 	}
 
-	private static var fixedScaling:Bool = false;
+	// Now compatible with the resolution option
+	public static var fixedScaling:Bool = false;
 	public static function fixScaling():Void
 	{
 		if (fixedScaling) return;
@@ -93,9 +94,28 @@ class Native
 		final display:Null<Display> = System.getDisplay(0);
 		if (display != null)
 		{
-			final dpiScale:Float = display.dpi / 96;
-			@:privateAccess Application.current.window.width = Std.int(Main.game.width * dpiScale);
-			@:privateAccess Application.current.window.height = Std.int(Main.game.height * dpiScale);
+			var resStr:String = ClientPrefs.data.gameResolution;
+			var width:Int = 0;
+    		var height:Int = 0;
+
+			if (resStr == null || resStr == "Native")
+			{
+				final dpiScale:Float = display.dpi / 96;
+				width = Std.int(Main.game.width * dpiScale);
+				height = Std.int(Main.game.height * dpiScale);
+			}
+			else
+			{
+				var res:Array<String> = resStr.split("x");
+				if (res.length == 2)
+				{
+					width = Std.parseInt(res[0]);
+					height = Std.parseInt(res[1]);
+				}
+			}
+
+			@:privateAccess Application.current.window.width = width;
+			@:privateAccess Application.current.window.height = height;
 
 			Application.current.window.x = Std.int((Application.current.window.display.bounds.width - Application.current.window.width) / 2);
 			Application.current.window.y = Std.int((Application.current.window.display.bounds.height - Application.current.window.height) / 2);

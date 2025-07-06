@@ -75,6 +75,10 @@ class TitleState extends MusicBeatState
 		{
 			ClientPrefs.loadPrefs();
 			Language.reloadPhrases();
+
+			#if (cpp && windows)
+			backend.Native.fixScaling();
+			#end
 		}
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());

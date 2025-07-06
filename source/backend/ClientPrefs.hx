@@ -83,6 +83,7 @@ import states.TitleState;
 	public var language:String = 'en-US';
 	public var comboCam:String = "Game";// cam game by default because i like it.
 	public var ogIconBop:Bool = false;
+	public var gameResolution:String = 'Native'; // Adding a resolution option
 }
 
 class ClientPrefs {

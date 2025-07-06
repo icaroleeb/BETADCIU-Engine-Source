@@ -66,6 +66,8 @@ import sys.thread.Thread;
 import sys.FileSystem;
 #end
 
+import flixel.addons.plugin.screengrab.FlxScreenGrab;
+
 typedef PreloadResult = {
 	var thread:Thread;
 	var asset:String;

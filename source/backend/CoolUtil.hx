@@ -2,6 +2,8 @@ package backend;
 
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
+import lime.media.AudioBuffer;
+import haxe.io.Bytes;
 
 class CoolUtil
 {
@@ -203,6 +205,8 @@ class CoolUtil
 				text.borderStyle = OUTLINE;
 			case 'outline_fast', 'outlinefast':
 				text.borderStyle = OUTLINE_FAST;
+			case 'outline_full', 'outlinefull':
+				text.borderStyle = OUTLINE_FULL;
 			default:
 				text.borderStyle = NONE;
 		}
@@ -226,4 +230,37 @@ class CoolUtil
 
         return (Std.int(alpha) << 24) | (Std.int(red) << 16) | (Std.int(green) << 8) | Std.int(blue);
     }
+
+	// Just in case this would have a use anywhere else
+	public static function returnSampleLevelAtTime(buffer:AudioBuffer, curTime:Float = 0){
+		var sampleMult:Float = buffer.sampleRate / 44100;
+		var index:Int = Std.int(curTime * sampleMult);
+		var drawIndex:Int = 0;
+		var samplesPerRow = 1;
+		var waveBytes:Bytes = buffer.data.toBytes();
+
+		var min:Float = 0;
+		var max:Float = 0;
+		
+		var byte:Int = waveBytes.getUInt16(index * 4);
+
+		if (byte > 65535 / 2)
+			byte -= 65535;
+
+		var sample:Float = (byte / 65535);
+
+		if (sample > 0)
+		{
+			if (sample > max)
+				max = sample;
+		}
+		else if (sample < 0)
+		{
+			if (sample < min)
+				min = sample;
+		}
+
+		return max + min;
+	}
+
 }

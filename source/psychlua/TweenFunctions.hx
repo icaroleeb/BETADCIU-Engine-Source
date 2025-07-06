@@ -37,6 +37,8 @@ class TweenFunctions
 		});
 
 		Lua_helper.add_callback(lua, "startTween", function(tag:String, vars:String, values:Any = null, duration:Float, ?options:Any = null) {
+			if (game != null){duration = duration / game.playbackRate;}
+			
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 			if(penisExam != null)
 			{

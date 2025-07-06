@@ -82,6 +82,8 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		option.displayFormat = '%v FPS';
 		option.onChange = onChangeFramerate;
 		#end
+		
+	
 
 		super();
 		insert(1, boyfriend);
@@ -116,5 +118,5 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 	{
 		super.changeSelection(change);
 		boyfriend.visible = (antialiasingOption == curSelected);
-	}
+	}	
 }
