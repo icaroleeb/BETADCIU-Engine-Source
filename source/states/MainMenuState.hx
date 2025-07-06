@@ -120,7 +120,7 @@ class MainMenuState extends MusicBeatState
 		fnfVer.scrollFactor.set();
 		fnfVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(fnfVer);
-		var betadciuVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "BETADCIU Engine Reworked v" + betadciuVer + " Pre-Release", 12); // Reworked sounds better than "Reboot"
+		var betadciuVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "BETADCIU Engine Reworked v" + betadciuVer + "", 12); // Reworked sounds better than "Reboot"
 		betadciuVer.scrollFactor.set();
 		betadciuVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(betadciuVer);

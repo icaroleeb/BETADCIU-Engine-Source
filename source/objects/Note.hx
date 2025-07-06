@@ -473,7 +473,7 @@ class Note extends FlxSprite
 			}
 		}
 		
-		defaultRGB(isPixelNote);
+		if (noteType != 'Hurt Note') defaultRGB(isPixelNote);
 
 		if (isLegacyNoteSkin && !isCustomNoteSkin) rgbShader.enabled = false;
 		
