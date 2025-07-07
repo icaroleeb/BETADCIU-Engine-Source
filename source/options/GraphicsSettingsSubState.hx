@@ -83,6 +83,8 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		option.onChange = onChangeFramerate;
 		#end
 
+
+
 		super();
 		insert(1, boyfriend);
 	}
@@ -116,5 +118,5 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 	{
 		super.changeSelection(change);
 		boyfriend.visible = (antialiasingOption == curSelected);
-	}
+	}	
 }

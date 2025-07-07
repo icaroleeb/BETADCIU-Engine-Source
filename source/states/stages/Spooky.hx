@@ -39,6 +39,7 @@ class Spooky extends BaseStage
 		halloweenWhite.makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.WHITE);
 		halloweenWhite.alpha = 0;
 		halloweenWhite.blend = ADD;
+		PlayState.instance.variables.get("stageVariables").set("halloweenWhite", halloweenWhite);
 		add(halloweenWhite);
 	}
 

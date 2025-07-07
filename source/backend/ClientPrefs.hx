@@ -85,6 +85,7 @@ import states.TitleState;
 	public var ogIconBop:Bool = false;
 	public var scoreComma:Bool = false;
 	public var missesOrComboBreaks:String = 'Misses';
+	public var gameResolution:String = 'Native'; // Adding a resolution option
 }
 
 class ClientPrefs {

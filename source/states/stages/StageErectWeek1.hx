@@ -10,17 +10,15 @@ import shaders.AdjustColorShader;
 
 class StageErectWeek1 extends BaseStage
 {
-	var backDark:BGSprite;
-	var crowd:BGSprite;
-	var brightLightSmall:BGSprite;
-	var bg:BGSprite;
-	var server:BGSprite;
-	var lightgreen:BGSprite;
-	var lightred:BGSprite;
+
+	var colorShaderBf:AdjustColorShader;
+	var colorShaderDad:AdjustColorShader;
+	var colorShaderGf:AdjustColorShader;
 	var lights:BGSprite;
-	var orangeLight:BGSprite;
 	var lightAbove:BGSprite;
-	
+
+	var crowd:BGSprite;
+
 	override function create()
 	{
 		if (!PlayState.instance.variables.exists("stageVariables")){
@@ -68,53 +66,68 @@ class StageErectWeek1 extends BaseStage
 
 		setDefaultGF('gf');
 
-		//if(ClientPrefs.data.shaders) setupShaders();
-	}
-
-	override function createPost()
-	{
-		var lights:BGSprite = new BGSprite('erect/lights', -601, -147, 1.2, 1.2);
+		lights = new BGSprite('erect/lights', -601, -147, 1.2, 1.2);
 		stageVars.set("lights", lights);
-		add(lights);
 
-		var lightAbove:BGSprite = new BGSprite('erect/lightAbove', 804, -117, 1, 1);
+		lightAbove = new BGSprite('erect/lightAbove', 804, -117, 1, 1);
 		lightAbove.blend = ADD;
 		stageVars.set("lightAbove", lightAbove);
-		add(lightAbove);
 	}
 
-	function setupShaders(){
+	override function createPost(){
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+
+		add(lights);
+		add(lightAbove);
+
+		if(ClientPrefs.data.shaders) setupCharactersShaders();
+	}
+
+	function setupCharactersShaders(){
 		if (PlayState.instance.curStage.toLowerCase() != "stageerect") 
 			return;
 
-		//gf.shader = makeCoolShader(-9,0,-30,-4);
-		//dad.shader = makeCoolShader(-32,0,-33,-23);
-		//boyfriend.shader = makeCoolShader(12,0,-23,7);
+		var colorShaderBf = new AdjustColorShader();
+		var colorShaderDad = new AdjustColorShader();
+		var colorShaderGf = new AdjustColorShader();
+
+		colorShaderBf.brightness = -23;
+		colorShaderBf.hue = 12;
+		colorShaderBf.contrast = 7;
+		colorShaderBf.saturation = 0;
+
+    	colorShaderGf.brightness = -30;
+   		colorShaderGf.hue = -9;
+    	colorShaderGf.contrast = -4;
+		colorShaderGf.saturation = 0;
+
+    	colorShaderDad.brightness = -33;
+    	colorShaderDad.hue = -32;
+    	colorShaderDad.contrast = -23;
+		colorShaderDad.saturation = 0;
+
+		// this is not final version yet!
+		var bfShaders = [];
+		var dadShaders = [];
+		var gfShaders = [];
+
+		boyfriend.shader = colorShaderBf.shader;
+		dad.shader = colorShaderDad.shader;
+		gf.shader = colorShaderGf.shader;
 	}
 
-	/*/
-	function makeCoolShader(hue:Float,sat:Float,bright:Float,contrast:Float) {
-        var coolShader = new AdjustColorShader();
-        coolShader.hue = hue;
-        coolShader.saturation = sat;
-        coolShader.brightness = bright;
-        coolShader.contrast = contrast;
-
-		var shaders = [];
-
-        return coolShader;
-    }
-	/*/
-
 	override public function destroy():Void {
-		if(lights != null){
-			remove(lights);
-		}
+		// this is not final version yet!
 
-		if(lightAbove != null){
-			remove(lightAbove);
+		if (boyfriend.shader != null) {
+			boyfriend.shader = null;
 		}
-
+		if (dad.shader != null) {
+			dad.shader = null;
+		}
+		if (gf.shader != null) {
+			gf.shader = null;
+		}
 		super.destroy();
 	}
 }

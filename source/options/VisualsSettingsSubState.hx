@@ -178,6 +178,26 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			'ogIconBop',
 			BOOL);
 		addOption(option);
+		
+		#if (cpp && windows)
+		var resolutions = [
+			'Native',      // triggers DPI scaling
+			'1280x720',
+			'1366x768',
+			'1600x900',
+			'1920x1080',
+			'2560x1440',
+		];
+
+		var option:Option = new Option('Resolution',
+			"Sets the game's window resolution.\nRequires a restart to take full effect.",
+			'gameResolution',
+			STRING,
+			resolutions);
+		option.onChange = onChangeResolution;
+		option.displayFormat = '%v';
+		addOption(option);
+		#end
 
 		var option:Option = new Option('Score Number With Comma',
 			"If checked, will activate the Score Number With Comma",
@@ -326,4 +346,10 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			Main.fpsVar.visible = ClientPrefs.data.showFPS;
 	}
 	#end
+
+	function onChangeResolution()
+	{
+		backend.Native.fixedScaling = false;
+		backend.Native.fixScaling();
+	}
 }

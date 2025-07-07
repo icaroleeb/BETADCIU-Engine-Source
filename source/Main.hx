@@ -71,9 +71,9 @@ class Main extends Sprite
 	{
 		super();
 
-		#if (cpp && windows)
-		backend.Native.fixScaling();
-		#end
+		// #if (cpp && windows)
+		// backend.Native.fixScaling();
+		// #end
 
 		// Credits to MAJigsaw77 (he's the og author for this code)
 		#if android

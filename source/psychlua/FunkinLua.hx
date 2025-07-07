@@ -1642,10 +1642,16 @@ class FunkinLua {
 			game.timeBar.setColors(left_color, right_color);
 		});
 
-		Lua_helper.add_callback(lua, "setObjectCamera", function(obj:String, camera:String = 'game') {
+		Lua_helper.add_callback(lua, "setObjectCamera", function(obj:String, camera:Dynamic = 'game') {
 			var real:FlxBasic = game.getLuaObject(obj);
+			var realCam:Dynamic = camera;
+
+			if (Std.isOfType(realCam, String)){
+				realCam = LuaUtils.cameraFromString(camera);
+			}
+			
 			if(real != null) {
-				real.cameras = [LuaUtils.cameraFromString(camera)];
+				real.cameras = [realCam];
 				return true;
 			}
 
@@ -1656,7 +1662,7 @@ class FunkinLua {
 			}
 
 			if(object != null) {
-				object.cameras = [LuaUtils.cameraFromString(camera)];
+				object.cameras = [realCam];
 				return true;
 			}
 			luaTrace("setObjectCamera: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
@@ -1733,6 +1739,28 @@ class FunkinLua {
 			if(spr != null) return spr.pixels.getPixel32(x, y);
 			return FlxColor.BLACK;
 		});
+
+		// Returns the actual object itself. I modified setObjectCamera to accept the actual camera object too.
+		Lua_helper.add_callback(lua, "getObjectCamera", function(obj:String) {
+			var real:FlxBasic = game.getLuaObject(obj);
+			
+			if(real != null) {
+				return real.camera;
+			}
+
+			var split:Array<String> = obj.split('.');
+			var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
+			if(split.length > 1) {
+				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
+			}
+
+			if(object != null) {
+				return object.camera;
+			}
+			luaTrace("getObjectCamera: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
+			return game.camGame;
+		});
+		
 		// yeah, it's different from the legacy.
 		Lua_helper.add_callback(lua, "makeLuaTrail", function(tag:String, obj:String, ?length:Int = 10, ?delay:Int = 3, ?alpha:Float = 0.4, ?diff:Float = 0.05){
 			tag = tag.replace('.', '');

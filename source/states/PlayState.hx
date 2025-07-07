@@ -66,6 +66,8 @@ import sys.thread.Thread;
 import sys.FileSystem;
 #end
 
+import flixel.addons.plugin.screengrab.FlxScreenGrab;
+
 typedef PreloadResult = {
 	var thread:Thread;
 	var asset:String;
@@ -4443,6 +4445,9 @@ class PlayState extends MusicBeatState
 			hardCodedStage.destroy();
 			hardCodedStage = null;
 		}
+		
+		stagesFunc(function(stage:BaseStage) stage.destroy());
+
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
