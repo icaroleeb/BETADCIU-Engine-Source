@@ -413,6 +413,7 @@ class PlayState extends MusicBeatState
 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
 			case 'stageerect': hardCodedStage = new StageErectWeek1();	//Week 1 Erect
+			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect();	//Weekend 1 Erect
 		}
 		if(isPixelStage) introSoundsSuffix = '-pixel';
 
@@ -4484,6 +4485,7 @@ class PlayState extends MusicBeatState
 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
 			case 'stageerect': hardCodedStage = new StageErectWeek1();	//Week 1 Erect
+			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect();	//Weekend 1 Erect
 		}
 		addObjects(stageData);
 		stagesFunc(function(stage:BaseStage) stage.createPost());

@@ -8,6 +8,7 @@ import openfl.utils.Assets as OpenFlAssets;
 
 class SchoolEvil extends BaseStage
 {
+	var trail:FlxTrail;
 	override function create()
 	{
 		if (!PlayState.instance.variables.exists("stageVariables")){
@@ -49,7 +50,7 @@ class SchoolEvil extends BaseStage
 	override function createPost()
 	{
 		if (dad.curCharacter == "spirit") {
-			var trail:FlxTrail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
+			var trail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
 			PlayState.instance.variables.get("stageVariables").set('trail', trail);
 			addBehindDad(trail);
 		}
@@ -188,6 +189,12 @@ class SchoolEvil extends BaseStage
 		});
 	}
 	override public function destroy():Void {
+		if(trail != null){
+			trail.destroy();
+			remove(trail);
+			var trail = null;
+		}
+
 		super.destroy();
 	}
 }

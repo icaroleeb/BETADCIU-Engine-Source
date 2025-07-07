@@ -63,6 +63,20 @@ function onCreatePost(){
         abot.visible = false;
     }
 
+    abot.shader = gf.shader;
+    eyeWhites.shader = gf.shader;
+    pupil.shader = gf.shader;
+    stereoBG.shader = gf.shader;
+    abotViz.shader = gf.shader;
+
+    vis1.shader = gf.shader;
+    vis2.shader = gf.shader;
+    vis3.shader = gf.shader;
+    vis4.shader = gf.shader;
+    vis5.shader = gf.shader;
+    vis6.shader = gf.shader;
+    vis7.shader = gf.shader;
+
     remove(stereoBG);
     remove(abotViz);
     remove(eyeWhites);
@@ -78,6 +92,12 @@ function onCreatePost(){
 
 function onEvent(n, v1, v2, v3){
     if(n == "Change Stage"){
+        abot.shader = gf.shader;
+        eyeWhites.shader = gf.shader;
+        pupil.shader = gf.shader;
+        stereoBG.shader = gf.shader;
+        abotViz.shader = gf.shader;
+        
         gf.scrollFactor.set(0.95, 0.95);
 
         remove(stereoBG);
@@ -96,6 +116,12 @@ function onEvent(n, v1, v2, v3){
     if(n == "Change Character"){
         if(v1 == "gf" || v1 == 'girlfriend' || v1 == '2'){
             if(v2 == "nene"){
+                abot.shader = gf.shader;
+                eyeWhites.shader = gf.shader;
+                pupil.shader = gf.shader;
+                stereoBG.shader = gf.shader;
+                abotViz.shader = gf.shader;
+
                 gf.scrollFactor.set(0.95, 0.95);
 
                 remove(stereoBG);
@@ -201,49 +227,49 @@ function setupAbotViz():Void{
     abotViz = new FlxTypedSpriteGroup(gf.x + 100, gf.y + 400);
     abotViz.scrollFactor.set(0.95, 0.95);
 
-    var vis1 = new FlxSprite(0, 0);
+    vis1 = new FlxSprite(0, 0);
     vis1.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
     vis1.animation.addByPrefix('vis', 'viz1', 0, false);
     vis1.animation.play('vis', false, false, 6);
     vis1.antialiasing = false;
     abotViz.add(vis1);
 
-    var vis2 = new FlxSprite(59, -8);
+    vis2 = new FlxSprite(59, -8);
     vis2.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
     vis2.animation.addByPrefix('vis', 'viz2', 0, false);
     vis2.animation.play('vis', false, false, 6);
     vis2.antialiasing = false;
     abotViz.add(vis2);
 
-    var vis3 = new FlxSprite(115, -11.5);
+    vis3 = new FlxSprite(115, -11.5);
     vis3.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
     vis3.animation.addByPrefix('vis', 'viz3', 0, false);
     vis3.animation.play('vis', false, false, 6);
     vis3.antialiasing = false;
     abotViz.add(vis3);
 
-    var vis4 = new FlxSprite(181, -11.9);
+    vis4 = new FlxSprite(181, -11.9);
     vis4.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
     vis4.animation.addByPrefix('vis', 'viz4', 0, false);
     vis4.animation.play('vis', false, false, 6);
     vis4.antialiasing = false;
     abotViz.add(vis4);
 
-    var vis5 = new FlxSprite(235, -11.4);
+    vis5 = new FlxSprite(235, -11.4);
     vis5.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
     vis5.animation.addByPrefix('vis', 'viz5', 0, false);
     vis5.animation.play('vis', false, false, 6);
     vis5.antialiasing = false;
     abotViz.add(vis5);
 
-    var vis6 = new FlxSprite(287, -6.7);
+    vis6 = new FlxSprite(287, -6.7);
     vis6.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
     vis6.animation.addByPrefix('vis', 'viz6', 0, false);
     vis6.animation.play('vis', false, false, 6);
     vis6.antialiasing = false;
     abotViz.add(vis6);
 
-    var vis7 = new FlxSprite(338, 0.3);
+    vis7 = new FlxSprite(338, 0.3);
     vis7.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
     vis7.animation.addByPrefix('vis', 'viz7', 0, false);
     vis7.animation.play('vis', false, false, 6);
