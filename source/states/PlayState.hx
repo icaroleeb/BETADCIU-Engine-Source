@@ -4320,10 +4320,10 @@ class PlayState extends MusicBeatState
 			try {
 				var data:Dynamic = Json.parse(jsonString);
 
-				var characters:Array<String> = data.character != null ? cast data.character : [];
-				var stages:Array<String> = data.stage != null ? cast data.stage : [];
-				var images:Array<String> = data.image != null ? cast data.image : [];
-				var sounds:Array<String> = data.sound != null ? cast data.sound : [];
+				var characters:Array<String> = data.characters != null ? cast data.characters : [];
+				var stages:Array<String> = data.stages != null ? cast data.stages : [];
+				var images:Array<String> = data.images != null ? cast data.images : [];
+				var sounds:Array<String> = data.sounds != null ? cast data.sounds : [];
 
 				for (char in characters) {
 					charactersToLoad.push(char);

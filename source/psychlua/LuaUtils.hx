@@ -258,10 +258,15 @@ class LuaUtils
 				}
 
 				var daState:Dynamic = null;
+				var obj:Dynamic = null;
+
 				if(PlayState.instance != null) daState = PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
 				
-				var obj:Dynamic = daState.getLuaObject(objectName);
-				if(obj == null) obj = getVarInArray(MusicBeatState.getState(), objectName, allowMaps);
+				if (daState != null){
+					obj = daState.getLuaObject(objectName);
+					if(obj == null) obj = getVarInArray(MusicBeatState.getState(), objectName, allowMaps);
+				}
+	
 				return obj;
 		}
 	}

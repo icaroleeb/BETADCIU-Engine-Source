@@ -53,6 +53,8 @@ import haxe.Json;
 import funkin.vis.dsp.SpectralAnalyzer;
 import funkin.vis.audioclip.frontends.LimeAudioClip;
 
+import options.ModpackMakerState.ModpackAssetRegistry;
+
 class FunkinLua {
 	public var lua:State = null;
 	public var camTarget:FlxCamera;
@@ -104,18 +106,18 @@ class FunkinLua {
 
 		// Song/Week shit
 		set('curBpm', Conductor.bpm);
-		set('bpm', PlayState.SONG.bpm); // kade scripts.
-		set('scrollSpeed', PlayState.SONG.speed);
+		
+
 		set('crochet', Conductor.crochet);
 		set('stepCrochet', Conductor.stepCrochet);
 		set('songLength', FlxG.sound.music.length);
-		set('songName', PlayState.SONG.song);
-		set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
+	
+	
 		set('loadedSongName', Song.loadedSongName);
 		set('loadedSongPath', Paths.formatToSongPath(Song.loadedSongName));
 		set('chartPath', Song.chartPath);
 		set('startedCountdown', false);
-		set('curStage', PlayState.SONG.stage);
+	
 
 		set('isStoryMode', PlayState.isStoryMode);
 		set('difficulty', PlayState.storyDifficulty);
@@ -126,8 +128,19 @@ class FunkinLua {
 		set('weekRaw', PlayState.storyWeek);
 		set('week', WeekData.weeksList[PlayState.storyWeek]);
 		set('seenCutscene', PlayState.seenCutscene);
-		set('hasVocals', PlayState.SONG.needsVoices);
 
+
+		// Song stuff
+		if (PlayState.SONG != null){
+			set('bpm', PlayState.SONG.bpm); // kade scripts.
+			set('scrollSpeed', PlayState.SONG.speed);
+			set('songName', PlayState.SONG.song);
+			set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
+			set('curStage', PlayState.SONG.stage);
+			set('hasVocals', PlayState.SONG.needsVoices);
+		}
+
+		
 		// Screen stuff
 		set('screenWidth', FlxG.width);
 		set('screenHeight', FlxG.height);
@@ -528,6 +541,11 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "loadGraphic", function(variable:String, image:String, ?gridX:Int = 0, ?gridY:Int = 0) {
+			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+				ModpackAssetRegistry.instance.addAsset("images", image);
+				return;
+			}
+			
 			var split:Array<String> = variable.split('.');
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
 			var animated = gridX != 0 || gridY != 0;
@@ -675,7 +693,10 @@ class FunkinLua {
 			variables.set(tag, new FlxTimer().start(time / (game != null ? game.playbackRate : 1), function(tmr:FlxTimer)
 			{
 				if(tmr.finished) variables.remove(tag);
-				game.callOnLuas('onTimerCompleted', [originalTag, tmr.loops, tmr.loopsLeft]);
+
+				if (game != null){
+					game.callOnLuas('onTimerCompleted', [originalTag, tmr.loops, tmr.loopsLeft]);
+				}
 				//trace('Timer Completed: ' + tag);
 			}, loops));
 			return tag;
@@ -738,9 +759,19 @@ class FunkinLua {
 			game.addCharacterToList(name, charType);
 		});
 		Lua_helper.add_callback(lua, "precacheImage", function(name:String, ?allowGPU:Bool = true) {
+			if (scriptType.toLowerCase() == "modpack" && name != null && name.length > 0){
+				ModpackAssetRegistry.instance.addAsset("images", name);
+				return;
+			}
+
 			Paths.image(name, allowGPU);
 		});
 		Lua_helper.add_callback(lua, "precacheSound", function(name:String) {
+			if (scriptType.toLowerCase() == "modpack" && name != null && name.length > 0){
+				ModpackAssetRegistry.instance.addAsset("sounds", name);
+				return;
+			}
+
 			Paths.sound(name);
 		});
 		Lua_helper.add_callback(lua, "precacheMusic", function(name:String) {
@@ -1043,6 +1074,11 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "makeLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {
+			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+				ModpackAssetRegistry.instance.addAsset("images", image);
+				return;
+			}
+
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
@@ -1067,6 +1103,11 @@ class FunkinLua {
 			leSprite.active = true;
 		});
 		Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?spriteType:String = 'auto') {
+			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+				ModpackAssetRegistry.instance.addAsset("images", image);
+				return;
+			}
+			
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
@@ -1090,6 +1131,11 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?axes:String = "XY") {
+			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+				ModpackAssetRegistry.instance.addAsset("images", image);
+				return;
+			}
+			
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 			var leSprite:FlxBackdrop = new FlxBackdrop("", FlxAxes.fromString(axes), Std.int(x), Std.int(y));
@@ -1116,6 +1162,11 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String="camGame", ?shouldLoop:Bool=false, ?muted:Bool=true) {
 			// I hate you FlxVideoSprite....
 			#if VIDEOS_ALLOWED
+			if (scriptType.toLowerCase() == "modpack"){
+				ModpackAssetRegistry.instance.addAsset("videos", videoFile);
+				return;
+			}
+
 			var variables = MusicBeatState.getVariables();
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
@@ -1410,6 +1461,11 @@ class FunkinLua {
 			PlayState.instance.setOnScripts('curStage', PlayState.instance.curStage);
 		});
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
+			if (scriptType.toLowerCase() == "modpack"){
+				ModpackAssetRegistry.instance.addAsset("images", 'icons/icon-'+character);
+				return;
+			}
+
 			makeIcon(tag, character, player);
 		});
 		Lua_helper.add_callback(lua, "changeIcon", function(tag:String, character:String){
@@ -1446,7 +1502,7 @@ class FunkinLua {
 			luaTrace('setGraphicSize: Couldnt find object: ' + obj, false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua, "scaleObject", function(obj:String, x:Float, y:Float, updateHitbox:Bool = true) {
-			if(game.getLuaObject(obj)!=null) {
+			if(game != null && game.getLuaObject(obj)!=null) {
 				var shit:FlxSprite = game.getLuaObject(obj);
 				shit.scale.set(x, y);
 				if(updateHitbox) shit.updateHitbox();
@@ -1536,28 +1592,31 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "setObjectCamera", function(obj:String, camera:Dynamic = 'game') {
-			var real:FlxBasic = game.getLuaObject(obj);
-			var realCam:Dynamic = camera;
+			if (game != null){
+				var real:FlxBasic = game.getLuaObject(obj);
+				var realCam:Dynamic = camera;
 
-			if (Std.isOfType(realCam, String)){
-				realCam = LuaUtils.cameraFromString(camera);
-			}
+				if (Std.isOfType(realCam, String)){
+					realCam = LuaUtils.cameraFromString(camera);
+				}
 
-			if(real != null) {
-				real.cameras = [realCam];
-				return true;
-			}
+				if(real != null) {
+					real.cameras = [realCam];
+					return true;
+				}
 
-			var split:Array<String> = obj.split('.');
-			var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
-			if(split.length > 1) {
-				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
-			}
+				var split:Array<String> = obj.split('.');
+				var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
+				if(split.length > 1) {
+					object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
+				}
 
-			if(object != null) {
-				object.cameras = [realCam];
-				return true;
+				if(object != null) {
+					object.cameras = [realCam];
+					return true;
+				}
 			}
+		
 			luaTrace("setObjectCamera: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
@@ -1747,6 +1806,11 @@ class FunkinLua {
 			#if VIDEOS_ALLOWED
 			if(FileSystem.exists(Paths.video(videoFile)))
 			{
+				if (scriptType.toLowerCase() == "modpack"){
+					ModpackAssetRegistry.instance.addAsset("videos", videoFile);
+					return true;
+				}
+
 				if(game.videoCutscene != null)
 				{
 					game.remove(game.videoCutscene);
@@ -1779,6 +1843,11 @@ class FunkinLua {
 			FlxG.sound.playMusic(Paths.music(sound), volume, loop);
 		});
 		Lua_helper.add_callback(lua, "playSound", function(sound:String, ?volume:Float = 1, ?tag:String = null, ?loop:Bool = false) {
+			if (scriptType.toLowerCase() == "modpack" && sound != null && sound.length > 0){
+				ModpackAssetRegistry.instance.addAsset("sounds", sound);
+				return null;
+			}
+
 			if(tag != null && tag.length > 0)
 			{
 				var originalTag:String = tag;

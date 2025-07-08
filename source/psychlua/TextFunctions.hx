@@ -1,5 +1,7 @@
 package psychlua;
 
+import options.ModpackMakerState.ModpackAssetRegistry;
+
 class TextFunctions
 {
 	public static function implement(funk:FunkinLua)
@@ -99,6 +101,11 @@ class TextFunctions
 			return false;
 		});
 		Lua_helper.add_callback(lua, "setTextFont", function(tag:String, newFont:String) {
+			if (funk.scriptType == "modpack"){
+				ModpackAssetRegistry.instance.addAsset("fonts", newFont);
+				return true;
+			}
+
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1])) : LuaUtils.getObjectDirectly(split[0]);
 			if(obj != null)
