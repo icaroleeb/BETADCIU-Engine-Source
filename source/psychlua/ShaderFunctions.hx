@@ -14,6 +14,8 @@ import openfl.filters.ShaderFilter;
 import shaders.ErrorHandledShader;
 import sys.io.File;
 
+import options.ModpackMakerState.ModpackAssetRegistry;
+
 class ShaderFunctions
 {
 	// Found these in FlxGraphicsShader for some reason???
@@ -77,6 +79,11 @@ class ShaderFunctions
 		
 		funk.addLocalCallback("setSpriteShader", function(obj:String, shader:String, ?keepOtherShaders:Bool = true) {
 			if(!ClientPrefs.data.shaders) return false;
+
+			if (funk.scriptType == "modpack"){
+				ModpackAssetRegistry.instance.addAsset("shaders", shader);
+				return true;
+			}
 
 			#if (!flash && sys)
 			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader))

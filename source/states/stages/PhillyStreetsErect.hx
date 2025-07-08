@@ -308,15 +308,15 @@ class PhillyStreetsErect extends BaseStage
 
 		rainShader = new RainShader();
 		rainShader.scale = FlxG.height / 200;
-		switch (songName.contains())
+		switch (songName.toLowerCase())
 		{
-			case 'darnell':
+			case 'darnell' | 'darnell erect' | 'darnell (bf mix)':
 				rainShaderStartIntensity = 0;
 				rainShaderEndIntensity = 0.01;
-			case 'lit up':
+			case 'lit up' | 'lit up erect' | 'lit up (bf mix)':
 				rainShaderStartIntensity = 0.01;
 				rainShaderEndIntensity = 0.02;
-			case '2hot':
+			case '2hot' | '2hot erect' | '2hot (bf mix)':
 				rainShaderStartIntensity = 0.02;
 				rainShaderEndIntensity = 0.04;
 		}

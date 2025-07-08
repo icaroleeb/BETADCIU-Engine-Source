@@ -35,12 +35,16 @@ class ReflectionFunctions
 			}
 
 			var split:Array<String> = variable.split('.');
-			var result:Dynamic = (split.length > 1)
-				? LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowMaps)
-				: LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
+			var result:Dynamic = null;
+			
+			if (funk.scriptType != "modpack"){
+				result = (split.length > 1)
+					? LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowMaps)
+					: LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
 
-			if (offsets.exists(originalVar)) {
-				result -= offsets.get(originalVar);
+				if (offsets.exists(originalVar)) {
+					result -= offsets.get(originalVar);
+				}
 			}
 
 			return result;

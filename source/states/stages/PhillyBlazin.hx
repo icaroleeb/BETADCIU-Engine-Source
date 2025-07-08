@@ -121,21 +121,10 @@ class PhillyBlazin extends BaseStage
 		FlxG.camera.focusOn(camFollow.getPosition());
 		FlxG.camera.fade(FlxColor.BLACK, 1.5, true, null, true);
 
-		for (character in boyfriendGroup.members)
-		{
-			if(character == null) continue;
-			character.color = 0xFFDEDEDE;
-		}
-		for (character in dadGroup.members)
-		{
-			if(character == null) continue;
-			character.color = 0xFFDEDEDE;
-		}
-		for (character in gfGroup.members)
-		{
-			if(character == null) continue;
-			character.color = 0xFF888888;
-		}
+
+		if(boyfriend != null) boyfriend.color = 0xFFDEDEDE;
+		if(dad != null) dad.color = 0xFFDEDEDE;
+		if(gf != null) gf.color = 0xFF888888;
 
 		var unspawnNotes:Array<Note> = cast game.unspawnNotes;
 		for (note in unspawnNotes)

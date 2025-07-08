@@ -41,6 +41,7 @@ class PhillyStreets extends BaseStage
 	var phillyCars2:BGSprite;
 
 	var picoFade:FlxSprite;
+	var phillyForeground:BGSprite;
 	var spraycan:SpraycanAtlasSprite;
 	var spraycanPile:BGSprite;
 
@@ -138,7 +139,7 @@ class PhillyStreets extends BaseStage
 			darkenable.push(phillyTrafficLightmap);
 		}
 
-		var phillyForeground:BGSprite = new BGSprite('phillyStreets/phillyForeground', 88, 317, 1, 1);
+		var phillyForeground = new BGSprite('phillyStreets/phillyForeground', 88, 317, 1, 1);
 		stageVars.set('phillyForeground', phillyForeground);
 		add(phillyForeground);
 		darkenable.push(phillyForeground);
@@ -532,15 +533,15 @@ class PhillyStreets extends BaseStage
 
 		rainShader = new RainShader();
 		rainShader.scale = FlxG.height / 200;
-		switch (songName)
+		switch (songName.toLowerCase())
 		{
-			case 'darnell':
+			case 'darnell' | 'darnell erect' | 'darnell (bf mix)':
 				rainShaderStartIntensity = 0;
 				rainShaderEndIntensity = 0.1;
-			case 'lit-up':
+			case 'lit up' | 'lit up erect' | 'lit up (bf mix)':
 				rainShaderStartIntensity = 0.1;
 				rainShaderEndIntensity = 0.2;
-			case '2hot':
+			case '2hot' | '2hot erect' | '2hot (bf mix)':
 				rainShaderStartIntensity = 0.2;
 				rainShaderEndIntensity = 0.4;
 		}
