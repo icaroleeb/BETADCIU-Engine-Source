@@ -4378,7 +4378,7 @@ class PlayState extends MusicBeatState
 		else if (stageData.isPixelStage == true) //Backward compatibility
 			stageUI = "pixel";
 
-		if (stageData.isVSliceStage == true){ // VSlice Positions compatibles. (the Positions is kinda hard to make that so I made this)
+		if (stageData.isVSlicePosition == true){ // VSlice Positions compatibles. (the Positions is kinda hard to make that so I made this)
 			BF_X = stageData.boyfriend[0] - 219.5;
 			BF_Y = stageData.boyfriend[1] - 785;
 			GF_X = stageData.girlfriend[0] - 351.5;
