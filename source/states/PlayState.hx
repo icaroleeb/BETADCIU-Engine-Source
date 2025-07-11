@@ -137,6 +137,8 @@ class PlayState extends MusicBeatState
 	public var GF_X:Float = 400;
 	public var GF_Y:Float = 130;
 
+	public var isVSliceStage:Bool = false;
+
 	public var songSpeedTween:FlxTween;
 	public var songSpeed(default, set):Float = 1;
 	public var songSpeedType:String = "multiplicative";
@@ -4375,12 +4377,21 @@ class PlayState extends MusicBeatState
 		else if (stageData.isPixelStage == true) //Backward compatibility
 			stageUI = "pixel";
 
-		BF_X = stageData.boyfriend[0];
-		BF_Y = stageData.boyfriend[1];
-		GF_X = stageData.girlfriend[0];
-		GF_Y = stageData.girlfriend[1];
-		DAD_X = stageData.opponent[0];
-		DAD_Y = stageData.opponent[1];
+		if (stageData.isVSliceStage == true){ // VSlice Positions compatibles. (the Positions is kinda hard to make that so I made this)
+			BF_X = stageData.boyfriend[0] - 219.5;
+			BF_Y = stageData.boyfriend[1] - 785;
+			GF_X = stageData.girlfriend[0] - 351.5;
+			GF_Y = stageData.girlfriend[1] - 670;
+			DAD_X = stageData.opponent[0] - 215;
+			DAD_Y = stageData.opponent[1] - 756;
+		}else{
+			BF_X = stageData.boyfriend[0];
+			BF_Y = stageData.boyfriend[1];
+			GF_X = stageData.girlfriend[0];
+			GF_Y = stageData.girlfriend[1];
+			DAD_X = stageData.opponent[0];
+			DAD_Y = stageData.opponent[1];
+		}
 
 		if(stageData.camera_speed != null)
 			cameraSpeed = stageData.camera_speed;
@@ -4440,6 +4451,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public var hardCodedStage:BaseStage;
+	public var addedStages:Array<String> = [];
 	public function removeStage(){
 		removeObjects(stageData);
 		if (hardCodedStage != null) {
@@ -4451,7 +4463,10 @@ class PlayState extends MusicBeatState
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
-		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
+		#if LUA_ALLOWED
+		stopLuasNamed('stages/' + curStage + '.lua', "stage");
+		for (stage in addedStages) stopLuasNamed(stage, "stage");
+		#end
 		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 

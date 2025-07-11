@@ -435,8 +435,11 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getVar", function(varName:String) {
 			return MusicBeatState.getVariables().get(varName);
 		});
-		Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) {
+		Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false, ?type:String = "") {
+			var cervix = luaFile + ".lua";
+			if(luaFile.endsWith(".lua"))cervix=luaFile;
 			var luaPath:String = findScript(luaFile);
+			if (type == "modpack") type = ""; // just preventing some weird stuff
 			if(luaPath != null)
 			{
 				if(!ignoreAlreadyRunning)
@@ -447,12 +450,17 @@ class FunkinLua {
 							return;
 						}
 
-				new FunkinLua(luaPath);
+				new FunkinLua(luaPath, type);
+				if (type == "stage") {
+					game.addedStages.push(cervix);
+					// trace('pushing $cervix');
+				}
+				// if (type != "") trace('Script added as: $type');
 				return;
 			}
 			luaTrace("addLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
 		});
-		Lua_helper.add_callback(lua, "addHScript", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false) {
+		Lua_helper.add_callback(lua, "addHScript", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false, ?type:String = "") {
 			#if HSCRIPT_ALLOWED
 			var scriptPath:String = findScript(scriptFile, '.hx');
 			if(scriptPath != null)
@@ -465,7 +473,7 @@ class FunkinLua {
 							return;
 						}
 
-				PlayState.instance.initHScript(scriptPath);
+				PlayState.instance.initHScript(scriptPath, type);
 				return;
 			}
 			luaTrace("addHScript: Script doesn't exist!", false, false, FlxColor.RED);

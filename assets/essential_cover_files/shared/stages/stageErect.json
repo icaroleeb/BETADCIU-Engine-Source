@@ -2,10 +2,11 @@
 	"directory": "week1",
 	"defaultZoom": 0.85,
 	"stageUI": "",
+	"isVSlicePosition": true,
 
-	"boyfriend": [757.5, 80],
-	"girlfriend": [220, 155],
-	"opponent": [-175, 80],
+	"boyfriend": [977.5, 865],
+	"girlfriend": [501.5, 825],
+	"opponent": [40, 860],
 	"hide_girlfriend": false,
 
 	"camera_boyfriend": [0, -50],

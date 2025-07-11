@@ -10,6 +10,7 @@ typedef StageFile = {
 	var defaultZoom:Float;
 	@:optional var isPixelStage:Null<Bool>;
 	var stageUI:String;
+	@:optional var isVSlicePosition:Bool;
 
 	var boyfriend:Array<Dynamic>;
 	var girlfriend:Array<Dynamic>;
