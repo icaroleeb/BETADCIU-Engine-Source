@@ -435,8 +435,11 @@ class FunkinLua {
 			return MusicBeatState.getVariables().get(varName);
 		});
 
-		Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) {
+		Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false, ?type:String = "") {
+			var cervix = luaFile + ".lua";
+			if(luaFile.endsWith(".lua"))cervix=luaFile;
 			var luaPath:String = findScript(luaFile);
+			if (type == "modpack") type = ""; // just preventing some weird stuff
 			if(luaPath != null)
 			{
 				if(!ignoreAlreadyRunning)
@@ -447,7 +450,12 @@ class FunkinLua {
 							return;
 						}
 
-				new FunkinLua(luaPath);
+				new FunkinLua(luaPath, type);
+				if (type == "stage") {
+					game.addedStages.push(cervix);
+					// trace('pushing $cervix');
+				}
+				// if (type != "") trace('Script added as: $type');
 				return;
 			}
 			luaTrace("addLuaScript: Script doesn't exist!", false, false, FlxColor.RED);

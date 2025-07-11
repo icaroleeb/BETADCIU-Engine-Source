@@ -27,6 +27,7 @@ import states.editors.ChartingState;
 import states.editors.CharacterEditorState;
 
 import substates.PauseSubState;
+// import substates.PauseSubStateNew as PauseSubState;
 import substates.GameOverSubstate;
 
 #if !flash
@@ -4423,6 +4424,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public var hardCodedStage:BaseStage;
+	public var addedStages:Array<String> = [];
 	public function removeStage(){
 		removeObjects(stageData);
 		if (hardCodedStage != null) {
@@ -4431,7 +4433,10 @@ class PlayState extends MusicBeatState
 		}
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
-		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage"); #end
+		#if LUA_ALLOWED
+		stopLuasNamed('stages/' + curStage + '.lua', "stage");
+		for (stage in addedStages) stopLuasNamed(stage, "stage");
+		#end
 		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
