@@ -27,6 +27,7 @@ import states.editors.ChartingState;
 import states.editors.CharacterEditorState;
 
 import substates.PauseSubState;
+// import substates.PauseSubStateNew as PauseSubState;
 import substates.GameOverSubstate;
 
 #if !flash
