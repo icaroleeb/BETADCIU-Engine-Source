@@ -105,6 +105,8 @@ class Paths
 				currentTrackedTexts.remove(key);
 			}
 		}
+		
+		openfl.Assets.cache.clear("fonts");
 
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];

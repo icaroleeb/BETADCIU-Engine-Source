@@ -9,3 +9,5 @@ schoolEvil
 tank
 phillyStreets
 phillyBlazin
+stageErect
+phillyStreetsErect

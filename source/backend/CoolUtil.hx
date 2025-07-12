@@ -231,6 +231,12 @@ class CoolUtil
         return (Std.int(alpha) << 24) | (Std.int(red) << 16) | (Std.int(green) << 8) | Std.int(blue);
     }
 
+	public static function toTitleCase(str:String):String {
+		return str.split(" ").map(function(word) {
+			return (word.length > 0) ? word.charAt(0).toUpperCase() + word.substr(1).toLowerCase() : "";
+		}).join(" ");
+	}
+
 	public static function numberWithCommas(x:Int):String { // I'M A GENIUS!!
         var integerPart = Std.string(x);
 

@@ -19,6 +19,10 @@ import objects.Character.CharacterFile;
 import backend.Song.SwagSong;
 import backend.StageData.StageFile;
 
+#if cpp
+import sys.thread.Thread;
+#end
+
 using StringTools;
 
 class ModpackMakerState extends MusicBeatState {
@@ -35,11 +39,10 @@ class ModpackMakerState extends MusicBeatState {
     var swagDirectory:String;
     var swagSongDirectory:String;
     var swagSuf:String = "";
-    var songIsBETADCIU:Bool = false;
-
-    private var blockPressWhileScrolling:Array<Dynamic> = [];
 
     public var luaDebugGroup:FlxTypedGroup<DebugLuaText>;
+
+    public static var selectedSongName:String = ""; // I screwed myself over by using dofile
 
     public function new() {
         super();
@@ -80,6 +83,7 @@ class ModpackMakerState extends MusicBeatState {
         reloadSetupOptions();
 
         new ModpackAssetRegistry();
+        PlayState.instance = new DummyPlayState();
 
         super.create();
     }
@@ -113,23 +117,39 @@ class ModpackMakerState extends MusicBeatState {
         return txt;
     }
 
+    var weekFileNameInput:PsychUIInputText;
+    var modpackNameInput:PsychUIInputText; // Add this at class level if you want to access it later
+
     function addSetupUI():Void {
         var tabGroup = UI_box.getTab("Setup").menu;
 
         directoryDropDown = new PsychUIDropDownMenu(15, 45, [''], onDirectorySelected);
-        blockPressWhileScrolling.push(directoryDropDown);
-
         songDirectoryDropDown = new PsychUIDropDownMenu(directoryDropDown.x + 170, 45, [''], onSongDirectorySelected);
-        blockPressWhileScrolling.push(songDirectoryDropDown);
+
+        // Modpack Name input field
+        modpackNameInput = new PsychUIInputText(15, 105, 200, "Modpack", 8);
+
+        // Week File Name input field
+        weekFileNameInput = new PsychUIInputText(15, 165, 200, "", 8);
 
         var createButton = new FlxButton(directoryDropDown.x, 275, "Create Modpack", copyAndWriteFiles);
         createButton.setGraphicSize(80, 30);
         createButton.updateHitbox();
 
+        // Labels
         tabGroup.add(new FlxText(directoryDropDown.x, directoryDropDown.y - 18, 0, 'Mod Directory:'));
         tabGroup.add(new FlxText(songDirectoryDropDown.x, songDirectoryDropDown.y - 18, 0, 'Song Directory:'));
+        tabGroup.add(new FlxText(modpackNameInput.x, modpackNameInput.y - 18, 0, 'Modpack Name:'));
+        tabGroup.add(new FlxText(weekFileNameInput.x, weekFileNameInput.y - 18, 0, 'Week File Name:'));
 
-        for (item in [directoryDropDown, songDirectoryDropDown, createButton])
+        // Add all UI elements
+        for (item in [
+            modpackNameInput,
+            weekFileNameInput,
+            directoryDropDown,
+            songDirectoryDropDown,
+            createButton
+        ])
             tabGroup.add(item);
     }
 
@@ -139,37 +159,75 @@ class ModpackMakerState extends MusicBeatState {
         reloadDirectoryDropDown("data");
     }
 
-    private function onSongDirectorySelected(selected:Int, pressed:String):Void {
+    private function onSongDirectorySelected(index:Int, label:String):Void {
         swagSongDirectory = songDirectoryDropDown.selectedLabel;
+
+        var defaultName = swagSongDirectory + "-betadciu";
+        var weeksFolder = Paths.modFolders(modpackNameInput.text + "/weeks/");
+
+        var foundBetadciu:Bool = false;
+        var songName:String = "";
+
+        if (FileSystem.exists(weeksFolder)) {
+            for (file in FileSystem.readDirectory(weeksFolder)) {
+                if (file.endsWith("-betadciu.json")) {
+                    try {
+                        var filePath = weeksFolder + file;
+                        var raw = File.getContent(filePath).trim();
+                        var json:Dynamic = Json.parse(raw);
+
+                        if (Reflect.hasField(json, "songs") && json.songs.length > 0 && json.songs[0].length > 0) {
+                            songName = json.songs[0][0].toLowerCase(); // First song
+                            foundBetadciu = true;
+                            break;
+                        }
+                    } catch (e:Dynamic) {
+                        trace("Error reading week file: " + e);
+                    }
+                }
+            }
+        }
+
+        selectedSongName = swagSongDirectory;
+
+        if (foundBetadciu && songName != "") {
+            defaultName = songName + "-bonus";
+        }
+
+        if (weekFileNameInput != null) {
+            weekFileNameInput.text = defaultName;
+        }
     }
 
     function copyAndWriteFiles():Void {
         for (dataType in ["data", "songs"]) {
             var folder = Paths.modFolders(swagDirectory + "/" + dataType + "/" + swagSongDirectory + "/");
-            var modpackFolder = Paths.modFolders("Da Modpack/" + dataType + "/" + swagSongDirectory + "/");
+            var modpackFolder = Paths.modFolders(modpackNameInput.text + "/" + dataType + "/" + swagSongDirectory + "/");
             processFolder(folder, modpackFolder, dataType);
         }
 
-        ModpackAssetRegistry.instance.processAll(swagDirectory);
+        ModpackAssetRegistry.instance.processAll(swagDirectory, modpackNameInput.text);
         createWeekFile();
+
+        FlxG.sound.play(Paths.sound('confirmMenu'));
+        showToast("Modpack created successfully!");
     }
 
     function createWeekFile():Void {
-        var weeksPath = Paths.modFolders("Da Modpack/weeks");
+        var weeksPath = Paths.modFolders(modpackNameInput.text + "/weeks");
         if (!FileSystem.exists(weeksPath)) FileSystem.createDirectory(weeksPath);
-
-        if (!songIsBETADCIU) return;
 
         var folder = Paths.modFolders(swagDirectory + "/data/" + swagSongDirectory + "/");
         var p2Icon = "bf";
         var p2HC:Array<Int> = [0, 0, 0];
         var daSongName = "tutorial";
 
+        // Grab character and song info
         for (file in FileSystem.readDirectory(folder)) {
             if (file.endsWith("-hard.json") && file.startsWith(swagSongDirectory)) {
                 var path = folder + file;
                 var rawJson = FileSystem.exists(path) ? File.getContent(path).trim() : Assets.getText(path).trim();
-                var json:SwagSong = cast Json.parse(rawJson).song;
+                var json:SwagSong = cast getSongJson(rawJson);
 
                 if (json.player2 != null) {
                     var charData = loadCharacterFile(json.player2);
@@ -178,17 +236,56 @@ class ModpackMakerState extends MusicBeatState {
                         p2HC = charData.healthbar_colors;
                     }
                 }
+
                 daSongName = json.song;
             }
         }
 
-        var templateWeek = 
-            '{ "storyName": "WEEK FILE", "hideFreeplay": false, "weekBackground": "bruh", "difficulties": "Hard", ' +
-            '"weekBefore": "tutorial", "startUnlocked": true, "weekCharacters": ["", "bf", ""], "songs": [[' +
-            '"' + daSongName + '", "' + p2Icon + '", ' + p2HC + ']], "hideStoryMode": false, "weekName": "' + swagSongDirectory + ' BETADCIU" }';
+        var weekFilePath = weeksPath + "/" + weekFileNameInput.text + ".json";
+        var weekData:Dynamic = null;
 
-        File.saveContent(weeksPath + "/" + swagSongDirectory + "-betadciu.json", templateWeek);
+        // Check for existing file and load if found
+        if (FileSystem.exists(weekFilePath)) {
+            var rawWeek = File.getContent(weekFilePath);
+            weekData = Json.parse(rawWeek);
+
+            if (weekData == null || !Reflect.hasField(weekData, "songs")) {
+                weekData = null; // fallback to creating a new structure
+            }
+        }
+
+        // If no valid week data was loaded, create new
+        if (weekData == null) {
+            var isBonus:Bool = weekFileNameInput.text.toLowerCase().endsWith("-bonus");
+
+            // Format weekName accordingly
+            var weekName = isBonus
+                ? CoolUtil.toTitleCase(StringTools.replace(weekFileNameInput.text, "-", " "))
+                : CoolUtil.toTitleCase(StringTools.replace(swagDirectory, "-", " ")) + " BETADCIU";
+
+            weekData = {
+                storyName: weekName,
+                hideFreeplay: false,
+                weekBackground: "bruh",
+                difficulties: "Hard",
+                weekBefore: "tutorial",
+                startUnlocked: true,
+                weekCharacters: ["", "bf", ""],
+                songs: [],
+                hideStoryMode: false,
+                weekName: weekName
+            };
+        }
+
+        // Append song to list if not already present
+        var songList:Array<Dynamic> = Reflect.field(weekData, "songs");
+        songList.push([daSongName, p2Icon, p2HC]);
+
+        // Save result
+        File.saveContent(weekFilePath, Json.stringify(weekData, null, "    "));
     }
+
+
 
     private function loadCharacterFile(characterId:String):CharacterFile {
         var path = Paths.getPath('images/characters/jsons/' + characterId + '.json', TEXT);
@@ -203,7 +300,9 @@ class ModpackMakerState extends MusicBeatState {
         return cast Json.parse(rawJson);
     }
 
-    function processFolder(folder:String, modpackFolder:String, dataType:String):Void {
+
+    // This one processes all files in the directory
+    public function processFolder(folder:String, modpackFolder:String, dataType:String):Void {
         if (!FileSystem.exists(modpackFolder)) FileSystem.createDirectory(modpackFolder);
 
         for (file in FileSystem.readDirectory(folder)) {
@@ -232,15 +331,21 @@ class ModpackMakerState extends MusicBeatState {
     private function processDataFile(file:String, initPath:String):Void {
         if (file.endsWith("-hard.json") && file.startsWith(swagSongDirectory)) {
             var rawJson = FileSystem.exists(initPath) ? File.getContent(initPath).trim() : Assets.getText(initPath).trim();
-            var json:SwagSong = cast Json.parse(rawJson).song;
+            var json:SwagSong = cast getSongJson(rawJson);
 
-            copyNoteStyleAssets(json.noteStyle);
+            copyNoteAssets([json.noteStyle, json.arrowSkin]);
             copyEventAssets(json.events);
             copyNoteTypeAssets(json.notes);
+
+            // Extra Stuff I should've added from the start
+            copyCharacterFromName(json.player1);
+            copyCharacterFromName(json.player2);
+            copyCharacterFromName(json.gfVersion);
+            copyStageFromName(json.stage);
         }
 
         if (file == 'arrowSwitches.txt') {
-            copyArrowSwitches(initPath);
+            copyNoteAssets(initPath);
         }
 
         if (file == "preload" + swagSuf + ".txt") {
@@ -325,18 +430,62 @@ class ModpackMakerState extends MusicBeatState {
 	}
 
 
-    private function copyNoteStyleAssets(noteStyle:String):Void {
-        if (noteStyle == null || noteStyle.length == 0) return;
+    private function copyNoteAssets(input:Dynamic):Void {
+        var noteStyles:Array<String> = [];
 
-        var noteFolder = Paths.modFolders(swagDirectory + "/images/notes/");
-        var noteModpackFolder = Paths.modFolders("Da Modpack/images/notes/");
-        doCopyShit(noteFolder, noteModpackFolder, [
-            noteStyle + ".png",
-            noteStyle + ".xml",
-            noteStyle + "ENDS.png",
-            "noteSplashes-" + noteStyle + ".png",
-            "noteSplashes-" + noteStyle + ".xml"
-        ]);
+        if (Std.isOfType(input, String)) {
+            var path:String = cast input;
+            var stuff = CoolUtil.coolTextFile(path);
+            if (stuff == null || stuff.length == 0) return;
+
+            for (line in stuff) {
+                var data = line.split(" ");
+                if (data.length > 1) noteStyles.push(data[1]);
+            }
+        }
+        else if (Std.isOfType(input, Array)) {
+            noteStyles = cast input;
+        }
+        else return;
+
+        var imagesBase = Paths.modFolders(swagDirectory + "/images/");
+        var modpackImagesBase = Paths.modFolders(modpackNameInput.text + "/images/");
+
+        for (noteStyle in noteStyles) {
+            if (noteStyle == null || noteStyle.length == 0) continue;
+
+            // 1. Old-style notes folder
+            var noteFolder = imagesBase + "notes/";
+            var noteModpackFolder = modpackImagesBase + "notes/";
+            doCopyShit(noteFolder, noteModpackFolder, [
+                noteStyle + ".png",
+                noteStyle + ".xml",
+                noteStyle + "ENDS.png",
+                "noteSplashes-" + noteStyle + ".png",
+                "noteSplashes-" + noteStyle + ".xml"
+            ]);
+
+            // 2. noteSkins/ (flat)
+            var noteSkinFlatFolder = imagesBase + "noteSkins/";
+            var noteSkinFlatModpack = modpackImagesBase + "noteSkins/";
+            doCopyShit(noteSkinFlatFolder, noteSkinFlatModpack, [
+                noteStyle + ".png",
+                noteStyle + ".xml",
+                noteStyle + "ENDS.png",
+                "noteSplashes-" + noteStyle + ".png",
+                "noteSplashes-" + noteStyle + ".xml"
+            ]);
+
+            // 3. noteSplashes/<noteStyle>/
+            var splashFolder = imagesBase + "noteSplashes/" + noteStyle + "/";
+            var splashModpackFolder = modpackImagesBase + "noteSplashes/" + noteStyle + "/";
+            doCopyShit(splashFolder, splashModpackFolder);
+
+            // 4. noteSkins/<noteStyle>/ (new style folder)
+            var noteSkinFolder = imagesBase + "noteSkins/" + noteStyle + "/";
+            var noteSkinModpackFolder = modpackImagesBase + "noteSkins/" + noteStyle + "/";
+            doCopyShit(noteSkinFolder, noteSkinModpackFolder);
+        }
     }
 
     private function copyEventAssets(events:Array<Dynamic>):Void {
@@ -346,27 +495,44 @@ class ModpackMakerState extends MusicBeatState {
         for (event in events) {
             for (i in 0...event[1].length) {
                 var evName = Std.string(event[1][i][0]);
+                var val1:String = Std.string(event[1][i][1]);
+                var val2:String = Std.string(event[1][i][2]);
+
+                // Add event name if not already tracked
                 if (pushedEvents.indexOf(evName) < 0) pushedEvents.push(evName);
+
+                // Handle special logic for specific event names
+                switch (evName) {
+                    case "Change Character":
+                        if (val2 != null && val2.length > 0)
+                            copyCharacterFromName(val2);
+
+                    case "Change Stage":
+                        if (val1 != null && val1.length > 0)
+                            copyStageFromName(val1);
+                }
             }
         }
 
         var eventFolder = Paths.modFolders(swagDirectory + "/custom_events/");
-        var eventModpackFolder = Paths.modFolders("Da Modpack/custom_events/");
+        var eventModpackFolder = Paths.modFolders(modpackNameInput.text + "/custom_events/");
         var evCopyArray:Array<String> = [];
 
         for (ev in pushedEvents) {
             var luaPath = Paths.modFolders("custom_events/" + ev + ".lua");
             if (FileSystem.exists(luaPath)) {
-			
                 var openLua = new FunkinLua(luaPath, "modpack");
                 openLua.call("onCreate", []);
                 openLua.call("onCreatePost", []);
             }
+
             evCopyArray.push(ev + ".txt");
             evCopyArray.push(ev + ".lua");
         }
+
         doCopyShit(eventFolder, eventModpackFolder, evCopyArray);
     }
+
 
     private function copyNoteTypeAssets(notes:Array<Dynamic>):Void {
 		if (notes == null || notes.length == 0) return;
@@ -387,7 +553,7 @@ class ModpackMakerState extends MusicBeatState {
 
         var ntCopyArray:Array<String> = [];
         var noteTypeFolder = Paths.modFolders(swagDirectory + "/custom_notetypes/");
-        var noteTypeModpackFolder = Paths.modFolders("Da Modpack/custom_notetypes/");
+        var noteTypeModpackFolder = Paths.modFolders(modpackNameInput.text + "/custom_notetypes/");
 
         for (nt in pushedNoteTypes) {
             var luaPath = Paths.modFolders("custom_notetypes/" + nt + ".lua");
@@ -402,37 +568,12 @@ class ModpackMakerState extends MusicBeatState {
         doCopyShit(noteTypeFolder, noteTypeModpackFolder, ntCopyArray);
     }
 
-    private function copyArrowSwitches(initPath:String):Void {
-        var stuff = CoolUtil.coolTextFile(initPath);
-        var noteFolder = Paths.modFolders(swagDirectory + "/images/notes/");
-        var noteModpackFolder = Paths.modFolders("Da Modpack/images/notes/");
-
-        if (!FileSystem.exists(noteModpackFolder)) FileSystem.createDirectory(noteModpackFolder);
-        if (stuff == null || stuff.length == 0) return;
-
-        for (line in stuff) {
-            var data = line.split(' ');
-            var noteskinFolder = noteFolder + data[1] + "/";
-            if (FileSystem.exists(noteskinFolder)) {
-                copyDirectory(noteskinFolder, noteModpackFolder);
-            }
-            for (file in FileSystem.readDirectory(noteFolder)) {
-                if (file == data[1] + ".png" || file == data[1] + ".xml" || file == data[1] + "ENDS.png" ||
-                    file == "noteSplashes-" + data[1] + ".png" || file == "noteSplashes-" + data[1] + ".xml") {
-                    sys.io.File.copy(noteFolder + file, noteModpackFolder + file);
-                }
-            }
-        }
-    }
-
     private function copyCharacterAssets(initPath:String):Void {
         var characters = CoolUtil.coolTextFile(initPath);
         var charFolder = Paths.modFolders(swagDirectory + "/characters/");
-        var charModpackFolder = Paths.modFolders("Da Modpack/characters/");
+        var charModpackFolder = Paths.modFolders(modpackNameInput.text + "/characters/");
 
         if (!FileSystem.exists(charModpackFolder)) FileSystem.createDirectory(charModpackFolder);
-
-        songIsBETADCIU = characters.length >= 16;
 
        for (character in characters) {
 			copyCharacterFromName(character);
@@ -442,7 +583,7 @@ class ModpackMakerState extends MusicBeatState {
     private function copyCharacterImages(json:CharacterFile):Void {
         for (folderName in ["characters", "icons"]) {
             var basePath = Paths.modFolders(swagDirectory + "/images/");
-            var modpackPath = Paths.modFolders("Da Modpack/images/");
+            var modpackPath = Paths.modFolders(modpackNameInput.text + "/images/");
             var imagePath = (folderName == "icons") ? "icons/icon-" + json.healthicon : json.image;
             var parts = imagePath.split('/');
 
@@ -458,7 +599,7 @@ class ModpackMakerState extends MusicBeatState {
 		if (name.contains("-embed")) return;
 
 		var charFolder = Paths.modFolders(swagDirectory + "/characters/");
-		var charModpackFolder = Paths.modFolders("Da Modpack/characters/");
+		var charModpackFolder = Paths.modFolders(modpackNameInput.text + "/characters/");
 		if (!FileSystem.exists(charModpackFolder)) FileSystem.createDirectory(charModpackFolder);
 
 		for (file in FileSystem.readDirectory(charFolder)) {
@@ -481,7 +622,7 @@ class ModpackMakerState extends MusicBeatState {
     private function copyStageAssets(initPath:String):Void {
         var stages = CoolUtil.coolTextFile(initPath);
         var stageFolder = Paths.modFolders(swagDirectory + "/stages/");
-        var stageModpackFolder = Paths.modFolders("Da Modpack/stages/");
+        var stageModpackFolder = Paths.modFolders(modpackNameInput.text + "/stages/");
 
         if (!FileSystem.exists(stageModpackFolder)) FileSystem.createDirectory(stageModpackFolder);
 
@@ -505,7 +646,7 @@ class ModpackMakerState extends MusicBeatState {
 		if (name.contains("-embed")) return;
 
 		var stageFolder = Paths.modFolders(swagDirectory + "/stages/");
-		var stageModpackFolder = Paths.modFolders("Da Modpack/stages/");
+		var stageModpackFolder = Paths.modFolders(modpackNameInput.text + "/stages/");
 		if (!FileSystem.exists(stageModpackFolder)) FileSystem.createDirectory(stageModpackFolder);
 
 		for (file in FileSystem.readDirectory(stageFolder)) {
@@ -529,7 +670,7 @@ class ModpackMakerState extends MusicBeatState {
     private function copyRatingSkinAssets(ratingSkin:Array<String>):Void {
         var parts = ratingSkin[0].split('/');
         var ratingFolder = Paths.modFolders(swagDirectory + "/images/");
-        var ratingModpackFolder = Paths.modFolders("Da Modpack/images/");
+        var ratingModpackFolder = Paths.modFolders(modpackNameInput.text + "/images/");
 
         for (i in 0...parts.length - 1) {
             ratingFolder += parts[i] + "/";
@@ -549,7 +690,7 @@ class ModpackMakerState extends MusicBeatState {
     private function copyCountdownAsset(assetPath:String):Void {
         var parts = assetPath.split('/');
         var baseFolder = Paths.modFolders(swagDirectory + "/images/");
-        var modpackFolder = Paths.modFolders("Da Modpack/images/");
+        var modpackFolder = Paths.modFolders(modpackNameInput.text + "/images/");
 
         for (i in 0...parts.length - 1) {
             baseFolder += parts[i] + "/";
@@ -559,24 +700,20 @@ class ModpackMakerState extends MusicBeatState {
         doCopyShit(baseFolder, modpackFolder, [parts[parts.length - 1] + ".png", parts[parts.length - 1] + ".xml"]);
     }
 
-    private function copyDirectory(src:String, dest:String):Void {
-        if (!FileSystem.exists(dest)) FileSystem.createDirectory(dest);
-        for (entry in FileSystem.readDirectory(src)) {
-            var srcPath = src + entry;
-            var destPath = dest + entry;
-            if (FileSystem.isDirectory(srcPath)) copyDirectory(srcPath + "/", destPath + "/");
-            else sys.io.File.copy(srcPath, destPath);
-        }
-    }
+   override function update(elapsed:Float) {
+        var canPress:Bool = PsychUIInputText.focusOn == null;
 
-    override function update(elapsed:Float) {
-        if (FlxG.keys.justPressed.ESCAPE) {
+       	ClientPrefs.toggleVolumeKeys(canPress);
+
+        if (canPress && FlxG.keys.justPressed.ESCAPE) {
             MusicBeatState.switchState(new options.OptionsState());
             FlxG.mouse.visible = false;
             return;
         }
+
         super.update(elapsed);
     }
+
 
     function reloadDirectoryDropDown(type:String):Void {
         var lowerType = type.toLowerCase();
@@ -623,6 +760,38 @@ class ModpackMakerState extends MusicBeatState {
 
         Sys.println(text);
     }
+
+    public function getSongJson(rawJson:String){
+        var songJson:Dynamic = Json.parse(rawJson);
+         
+        if(Reflect.hasField(songJson, 'song'))
+        {
+            var subSong:SwagSong = Reflect.field(songJson, 'song');
+            if(subSong != null && Type.typeof(subSong) == TObject)
+                songJson = subSong;
+        }
+
+        return songJson;
+    }
+
+    function showToast(message:String, duration:Float = 2):Void {
+        var toast = new FlxText(0, 0, 0, message, 20);
+        toast.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+        toast.borderSize = 2;
+        toast.screenCenter(X);
+        toast.y = FlxG.height - 60;
+        toast.scrollFactor.set();
+        toast.cameras = [camHUD]; // Put on HUD layer
+
+        add(toast);
+
+        FlxTween.tween(toast, {alpha: 0}, 0.5, {
+            startDelay: duration,
+            onComplete: function(_) {
+                toast.destroy(); // Clean up
+            }
+        });
+    }
 }
 
 // Helper function for copying files with optional filtering
@@ -636,7 +805,12 @@ function doCopyShit(srcFolder:String, destFolder:String, checkFiles:Array<String
                 sys.io.File.copy(srcFolder + file, destFolder + file);
             }
         } else {
-            sys.io.File.copy(srcFolder + file, destFolder + file);
+            var fullSrc = srcFolder + file;
+            var fullDest = destFolder + file;
+
+            if (FileSystem.exists(fullSrc)) {
+                sys.io.File.copy(fullSrc, fullDest);
+            }
         }
     }
 }
@@ -693,31 +867,71 @@ class ModpackAssetRegistry {
 		}
     }
 
-    public function processAll(swagDirectory:String):Void {
+    public function processAll(swagDirectory:String, newDirectory:String):Void {
         for (group in groups.iterator()) {
-            processLuaList(group.getList(), group.subDir, group.extensions, swagDirectory);
+            processLuaList(group.getList(), group.subDir, group.extensions, swagDirectory, newDirectory);
             group.clear();
         }
     }
 
-    public function processLuaList(luaList:Array<String>, subDir:String, extensions:Array<String>, swagDirectory:String):Void {
-        if (luaList == null) return;
+    public function processLuaList(luaList:Array<String>, subDir:String, extensions:Array<String>, swagDirectory:String, newDirectory:String):Void {
+        if (luaList == null || luaList.length == 0) return;
 
-        for (item in luaList) {
-            var parts = item.split('/');
-            var baseFolder = Paths.modFolders('$swagDirectory/$subDir/');
-            var modpackFolder = Paths.modFolders('Da Modpack/$subDir/');
+        // Wrap the actual logic
+        function copyLogic():Void {
+            for (item in luaList) {
+                var parts = item.split('/');
+                var baseFolder = Paths.modFolders('$swagDirectory/$subDir/');
+                var modpackFolder = Paths.modFolders('$newDirectory/$subDir/');
 
-            for (i in 0...parts.length - 1) {
-                baseFolder += parts[i] + '/';
-                modpackFolder += parts[i] + '/';
+                for (i in 0...parts.length - 1) {
+                    baseFolder += parts[i] + '/';
+                    modpackFolder += parts[i] + '/';
+                }
+
+                var fileBase = parts[parts.length - 1];
+                var filesToCopy = extensions.map(ext -> fileBase + ext);
+                doCopyShit(baseFolder, modpackFolder, filesToCopy);
             }
 
-            var fileBase = parts[parts.length - 1];
-            var filesToCopy = extensions.map(ext -> fileBase + ext);
-
-            doCopyShit(baseFolder, modpackFolder, filesToCopy);
+            luaList.splice(0, luaList.length); // optional cleanup
         }
-        luaList.splice(0, luaList.length); // clear after processing
+
+        #if cpp
+        // Run in a background thread (only on native targets)
+        Thread.create(copyLogic);
+        #else
+        // Fallback to synchronous version
+        copyLogic();
+        #end
     }
+}
+
+// So that I don't have to add game != null to everything in FunkinLua
+class DummyPlayState extends PlayState {
+	public function new() {
+		super();
+		PlayState.instance = this; // Register this dummy as the active PlayState
+	}
+
+	override function create() {
+        // DO NOTHING
+	}
+
+    override function update(elapsed:Float) {
+        // DO NOTHING
+	}
+
+    override function beatHit() {
+        // DO NOTHING
+	}
+
+    override function stepHit() {
+        // DO NOTHING
+	}
+
+	override function getLuaObject(tag:String):Dynamic {
+		// Optionally store dummy objects here if needed
+		return null;
+	}
 }
