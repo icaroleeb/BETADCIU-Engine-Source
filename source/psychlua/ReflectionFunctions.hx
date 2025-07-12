@@ -4,6 +4,7 @@ import Type.ValueType;
 import haxe.Constraints;
 
 import substates.GameOverSubstate;
+import options.ModpackMakerState.ModpackAssetRegistry;
 
 //
 // Functions that use a high amount of Reflections, which are somewhat CPU intensive
@@ -37,14 +38,16 @@ class ReflectionFunctions
 			var split:Array<String> = variable.split('.');
 			var result:Dynamic = null;
 			
-			if (funk.scriptType != "modpack"){
-				result = (split.length > 1)
-					? LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowMaps)
-					: LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
+			result = (split.length > 1)
+				? LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowMaps)
+				: LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
 
-				if (offsets.exists(originalVar)) {
-					result -= offsets.get(originalVar);
-				}
+			if (offsets.exists(originalVar)) {
+				result -= offsets.get(originalVar);
+			}
+
+			if (funk.scriptType == "modpack"){
+				result = 0; // 0 also works for bools
 			}
 
 			return result;
@@ -66,6 +69,21 @@ class ReflectionFunctions
 				return value;
 			}
 			LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, allowInstances ? parseInstances(value) : value, allowMaps);
+
+			if (funk.scriptType == "modpack") {
+				if (variable == "introSoundsPrefix" || variable == "introSoundsSuffix") {
+					// Fetch updated values from PlayState
+					var prefix:String = LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), "introSoundsPrefix", allowMaps);
+					var suffix:String = LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), "introSoundsSuffix", allowMaps);
+
+					var intros = ["intro3", "intro2", "intro1", "introGo"];
+					for (soundName in intros) {
+						var fullName = prefix + soundName + suffix;
+						ModpackAssetRegistry.instance.addAsset("sounds", fullName);
+					}
+				}
+			}
+			
 			return value;
 		});
 		Lua_helper.add_callback(lua, "getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false) {

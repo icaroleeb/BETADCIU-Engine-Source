@@ -263,4 +263,9 @@ class CoolUtil
 		return max + min;
 	}
 
+	public static function toTitleCase(str:String):String {
+		return str.split(" ").map(function(word) {
+			return (word.length > 0) ? word.charAt(0).toUpperCase() + word.substr(1).toLowerCase() : "";
+		}).join(" ");
+	}
 }

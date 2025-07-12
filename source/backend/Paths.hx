@@ -106,6 +106,8 @@ class Paths
 			}
 		}
 
+		openfl.Assets.cache.clear("fonts");
+
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
 		#if !html5 openfl.Assets.cache.clear("songs"); #end

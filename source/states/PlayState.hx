@@ -3270,11 +3270,13 @@ class PlayState extends MusicBeatState
 
 		if(char != null && (note == null || !note.noMissAnimation) && char.hasMissAnimations)
 		{
+			var canPlay = char.specialAnim;
 			var postfix:String = '';
 			if(note != null) postfix = note.animSuffix;
 
 			var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, direction)))] + 'miss' + postfix;
-			char.playAnim(animToPlay, true);
+			
+			if (canPlay) char.playAnim(animToPlay, true);
 
 			if(char != gf && lastCombo > 5 && gf != null && gf.hasAnimation('sad'))
 			{
@@ -3312,7 +3314,7 @@ class PlayState extends MusicBeatState
 
 				if(char != null)
 				{
-					var canPlay:Bool = true;
+					var canPlay:Bool = char.specialAnim;
 					if(note.isSustainNote)
 					{
 						var holdAnim:String = animToPlay + '-hold';
