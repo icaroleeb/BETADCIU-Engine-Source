@@ -10,21 +10,17 @@ var PUPIL_STATE_LEFT = 1;
 
 function onCreate(){
     stereoBG = new FlxSprite(0, 0).loadGraphic(Paths.image('characters/abot/stereoBG'));
-    stereoBG.scrollFactor.set(0.95, 0.95);
 
     setupAbotViz();
 
     eyeWhites = new FlxSprite(0, 0).makeGraphic(160, 60, 0xFFFFFFFF);
-    eyeWhites.scrollFactor.set(0.95, 0.95);
 
     pupil = new FlxAnimate(0, 0);
     Paths.loadAnimateAtlas(pupil, 'characters/abot/systemEyes');
-    pupil.scrollFactor.set(0.95, 0.95);
 
     abot = new FlxAnimate(0, 0);
     Paths.loadAnimateAtlas(abot, 'characters/abot/abotSystem');
     abot.anim.addBySymbol('anim', 'Abot System', 24, false);
-    abot.scrollFactor.set(0.95, 0.95);
 
     abot.antialiasing = ClientPrefs.data.antialiasing;
     eyeWhites.antialiasing = ClientPrefs.data.antialiasing;
@@ -77,6 +73,20 @@ function onCreatePost(){
     vis6.shader = gf.shader;
     vis7.shader = gf.shader;
 
+    abot.color = gf.color;
+    eyeWhites.color = gf.color;
+    pupil.color = gf.color;
+    stereoBG.color = gf.color;
+    abotViz.color = gf.color;
+
+    vis1.color = gf.color;
+    vis2.color = gf.color;
+    vis3.color = gf.color;
+    vis4.color = gf.color;
+    vis5.color = gf.color;
+    vis6.color = gf.color;
+    vis7.color = gf.color;
+
     remove(stereoBG);
     remove(abotViz);
     remove(eyeWhites);
@@ -98,7 +108,7 @@ function onEvent(n, v1, v2, v3){
         stereoBG.shader = gf.shader;
         abotViz.shader = gf.shader;
         
-        gf.scrollFactor.set(0.95, 0.95);
+        //gf.scrollFactor.set(0.95, 0.95);
 
         remove(stereoBG);
         remove(abotViz);
@@ -122,7 +132,7 @@ function onEvent(n, v1, v2, v3){
                 stereoBG.shader = gf.shader;
                 abotViz.shader = gf.shader;
 
-                gf.scrollFactor.set(0.95, 0.95);
+                //gf.scrollFactor.set(0.95, 0.95);
 
                 remove(stereoBG);
                 remove(abotViz);
@@ -159,6 +169,12 @@ function onUpdatePost(elapsed){
             }
         }
     }
+
+    stereoBG.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
+    eyeWhites.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
+    pupil.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
+    abot.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
+    abotViz.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
 
     if(analyzer == null) return;
 
@@ -225,7 +241,6 @@ function setupAbotViz():Void{
     var positionY = [0, -8, -3.5, -0.4, 0.5, 4.7, 7];
 
     abotViz = new FlxTypedSpriteGroup(gf.x + 100, gf.y + 400);
-    abotViz.scrollFactor.set(0.95, 0.95);
 
     vis1 = new FlxSprite(0, 0);
     vis1.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
