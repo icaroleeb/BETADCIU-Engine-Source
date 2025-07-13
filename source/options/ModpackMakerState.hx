@@ -492,6 +492,23 @@ class ModpackMakerState extends MusicBeatState {
 				}
 			}
 
+            // THESE ARE WEIRD. Try not to use them for now
+            // Handle texts
+			if (Reflect.hasField(preloadData, "texts")) {
+				var texts:Array<String> = cast preloadData.texts;
+				for (text in texts) {
+					ModpackAssetRegistry.instance.addAsset("", text);
+				}
+			}
+
+            // Handle scripts
+			if (Reflect.hasField(preloadData, "scripts")) {
+				var scripts:Array<String> = cast preloadData.scripts;
+				for (script in scripts) {
+					ModpackAssetRegistry.instance.addAsset("", script);
+				}
+			}
+
 		} catch (e:Dynamic) {
 			trace("Error processing preload file: " + e);
 		}
@@ -947,7 +964,7 @@ class ModpackMakerState extends MusicBeatState {
         showToast("Downloading " + zipName + " using curl...");
 
         var zipUrl = "https://github.com/Blantados/BETADCIU-Engine-Modpacks/releases/download/v1.0/" + zipName;
-        var localZipPath = Paths.mods() + "/tmp_download.zip";
+        var localZipPath = Paths.mods() + "tmp_download.zip";
 
         // Build and run the curl command
         var cmd = 'curl -L -A "Mozilla/5.0" -o "${localZipPath}" "${zipUrl}"';
@@ -1074,6 +1091,7 @@ class ModpackAssetRegistry {
         addGroup("sounds", [".ogg", ".mp3"]);
         addGroup("videos", [".mp4", ".webm"]);
         addGroup("shaders", [".frag", ".vert", ".glsl"]);
+        addGroup("", [""]); // For any assets located in other folders
 
         ModpackAssetRegistry.instance = this;
     }

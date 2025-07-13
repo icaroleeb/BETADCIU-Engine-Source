@@ -3685,11 +3685,16 @@ class PlayState extends MusicBeatState
 		if(OpenFlAssets.exists(luaToLoad))
 		#end
 		{
-			for (script in luaArray)
-				if(script.scriptName == luaToLoad){
+			for (script in luaArray) {
+				if (script.scriptName == luaToLoad) {
+					// Because the shaders weren't getting destroyed properly. Might change this to like onRemove
+					script.call("onDestroy", []);
+					
 					luaArray.remove(script);
 					return true;
 				}
+			}
+
 		}
 		return false;
 	}
@@ -4402,6 +4407,14 @@ class PlayState extends MusicBeatState
 			if (gf != null) remove(gf);
 			remove(dad);
 			remove(boyfriend);
+
+			if (modchartCharacters != null) {
+				for (char in modchartCharacters) {
+					if (char != null && char.parent != null)
+						char.parent.remove(char);
+				}
+				modchartCharacters.clear();
+			}
 		}
 	}
 

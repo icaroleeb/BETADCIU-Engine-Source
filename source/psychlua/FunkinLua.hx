@@ -474,8 +474,15 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false, ?type:String = "") {
 			var cervix = luaFile + ".lua";
 			if(luaFile.endsWith(".lua"))cervix=luaFile;
+
+			if (scriptType == "modpack"){
+				ModpackAssetRegistry.instance.addAsset("", cervix);
+				return;
+			}
+
 			var luaPath:String = findScript(luaFile);
 			if (type == "modpack") type = ""; // just preventing some weird stuff
+
 			if(luaPath != null)
 			{
 				if(!ignoreAlreadyRunning)
@@ -498,6 +505,11 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "addHScript", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false) {
 			#if HSCRIPT_ALLOWED
+			if (scriptType == "modpack"){
+				ModpackAssetRegistry.instance.addAsset("", scriptFile);
+				return;
+			}
+
 			var scriptPath:String = findScript(scriptFile, '.hx');
 			if(scriptPath != null)
 			{
@@ -824,6 +836,18 @@ class FunkinLua {
 
 		// others
 		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '') {
+			if (scriptType == "modpack"){
+				if (FileSystem.exists(Paths.modFolders('custom_events/$name.txt'))){
+					ModpackAssetRegistry.instance.addAsset("", 'custom_events/$name.txt');
+				}
+				
+				if (FileSystem.exists(Paths.modFolders('custom_events/$name.lua'))){
+					ModpackAssetRegistry.instance.addAsset("", 'custom_events/$name.lua');
+				}
+
+				return true;
+			}
+
 			game.triggerEvent(name, value1, value2, Conductor.songPosition);
 			//trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2);
 			return true;
