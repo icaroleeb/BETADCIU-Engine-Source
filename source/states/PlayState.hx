@@ -4342,7 +4342,7 @@ class PlayState extends MusicBeatState
 				for (img in images) {
 					imagesToLoad.push(img);
 				}
-				for (snd in images) {
+				for (snd in sounds) {
 					soundsToLoad.push(snd);
 				}
 			} catch (e:Dynamic) {

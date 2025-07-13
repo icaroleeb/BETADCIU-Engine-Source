@@ -1174,4 +1174,8 @@ class DummyPlayState extends PlayState {
 		// Optionally store dummy objects here if needed
 		return null;
 	}
+
+    override function addTextToDebug(text:String, color:FlxColor = FlxColor.WHITE) {
+        // DO NOTHING
+    }
 }
