@@ -4407,14 +4407,6 @@ class PlayState extends MusicBeatState
 			if (gf != null) remove(gf);
 			remove(dad);
 			remove(boyfriend);
-
-			if (modchartCharacters != null) {
-				for (char in modchartCharacters) {
-					if (char != null && char.parent != null)
-						char.parent.remove(char);
-				}
-				modchartCharacters.clear();
-			}
 		}
 	}
 
