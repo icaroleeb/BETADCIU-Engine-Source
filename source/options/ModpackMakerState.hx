@@ -117,12 +117,6 @@ class ModpackMakerState extends MusicBeatState {
         }
 
         // Left Panel: Mod Selection
-        directoryDropDown = new PsychUIDropDownMenu(leftPanel.x + 20, leftPanel.y + 70, [''], onDirectorySelected);
-        add(directoryDropDown);
-
-        songDirectoryDropDown = new PsychUIDropDownMenu(leftPanel.x + 20, leftPanel.y + 140, [''], onSongDirectorySelected);
-        add(songDirectoryDropDown);
-
         var labels = [
             {text: "Select Mod:", y: leftPanel.y + 50},
             {text: "Select Song:", y: leftPanel.y + 120}
@@ -133,6 +127,12 @@ class ModpackMakerState extends MusicBeatState {
             text.borderSize = 1.5;
             add(text);
         }
+
+        songDirectoryDropDown = new PsychUIDropDownMenu(leftPanel.x + 20, leftPanel.y + 140, [''], onSongDirectorySelected);
+        add(songDirectoryDropDown);
+
+        directoryDropDown = new PsychUIDropDownMenu(leftPanel.x + 20, leftPanel.y + 70, [''], onDirectorySelected);
+        add(directoryDropDown);
 
         // Center Panel: Modpack Creation
         var centerX = mainPanel.x + 200;
@@ -489,6 +489,23 @@ class ModpackMakerState extends MusicBeatState {
 				var stages:Array<String> = cast preloadData.stages;
 				for (stageName in stages) {
 					copyStageFromName(stageName);
+				}
+			}
+
+            // THESE ARE WEIRD. Try not to use them for now
+            // Handle texts
+			if (Reflect.hasField(preloadData, "texts")) {
+				var texts:Array<String> = cast preloadData.texts;
+				for (text in texts) {
+					ModpackAssetRegistry.instance.addAsset("", text);
+				}
+			}
+
+            // Handle scripts
+			if (Reflect.hasField(preloadData, "scripts")) {
+				var scripts:Array<String> = cast preloadData.scripts;
+				for (script in scripts) {
+					ModpackAssetRegistry.instance.addAsset("", script);
 				}
 			}
 
@@ -947,7 +964,7 @@ class ModpackMakerState extends MusicBeatState {
         showToast("Downloading " + zipName + " using curl...");
 
         var zipUrl = "https://github.com/Blantados/BETADCIU-Engine-Modpacks/releases/download/v1.0/" + zipName;
-        var localZipPath = Paths.mods() + "/tmp_download.zip";
+        var localZipPath = Paths.mods() + "tmp_download.zip";
 
         // Build and run the curl command
         var cmd = 'curl -L -A "Mozilla/5.0" -o "${localZipPath}" "${zipUrl}"';
@@ -1074,6 +1091,7 @@ class ModpackAssetRegistry {
         addGroup("sounds", [".ogg", ".mp3"]);
         addGroup("videos", [".mp4", ".webm"]);
         addGroup("shaders", [".frag", ".vert", ".glsl"]);
+        addGroup("", [""]); // For any assets located in other folders
 
         ModpackAssetRegistry.instance = this;
     }
@@ -1156,4 +1174,8 @@ class DummyPlayState extends PlayState {
 		// Optionally store dummy objects here if needed
 		return null;
 	}
+
+    override function addTextToDebug(text:String, color:FlxColor = FlxColor.WHITE) {
+        // DO NOTHING
+    }
 }

@@ -70,6 +70,7 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
+			FlxG.debugger.visible = true;
 
 		// #if (cpp && windows)
 		// backend.Native.fixScaling();
