@@ -70,7 +70,7 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
-			FlxG.debugger.visible = true;
+			// FlxG.debugger.visible = true;
 
 
 		// #if (cpp && windows)

@@ -467,6 +467,11 @@ class FunkinLua {
 			MusicBeatState.getVariables().set(varName, ReflectionFunctions.parseSingleInstance(value));
 			return value;
 		});
+		Lua_helper.add_callback(lua, "changeStageData", function(id:String) {
+            PlayState.instance.curStage = id;
+            PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
+            PlayState.instance.setStageDetails(PlayState.instance.stageData);
+        });
 		Lua_helper.add_callback(lua, "getVar", function(varName:String) {
 			return MusicBeatState.getVariables().get(varName);
 		});

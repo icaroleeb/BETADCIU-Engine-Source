@@ -3573,6 +3573,7 @@ class PlayState extends MusicBeatState
 
 	public function characterBopper(beat:Int):Void
 	{
+		if (gfSpeed == 0) gfSpeed = 1; // sigh...
 		if (gf != null && beat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && !gf.getAnimationName().startsWith('sing') && !gf.stunned)
 			gf.dance();
 
