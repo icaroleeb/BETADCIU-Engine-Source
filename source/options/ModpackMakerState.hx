@@ -23,6 +23,14 @@ import backend.StageData.StageFile;
 import sys.thread.Thread;
 #end
 
+import sys.Http;
+import haxe.zip.Entry;
+import haxe.io.BytesInput;
+import haxe.Json;
+
+import format.zip.Reader;
+import format.tools.Inflate;
+
 using StringTools;
 
 class ModpackMakerState extends MusicBeatState {
@@ -44,40 +52,133 @@ class ModpackMakerState extends MusicBeatState {
 
     public static var selectedSongName:String = ""; // I screwed myself over by using dofile
 
+    // --- Zipped modpack UI ---
+    var onlineZipDropDown:PsychUIDropDownMenu;
+    var downloadZipButton:FlxButton;
+    var selectedOnlineZip:String = "";
+
+    var weekFileNameInput:PsychUIInputText;
+    var modpackNameInput:PsychUIInputText;
+
+    // UI Elements
+    var mainPanel:FlxSprite;
+    var leftPanel:FlxSprite;
+    var rightPanel:FlxSprite;
+
     public function new() {
         super();
     }
 
     override function create() {
+        // Cameras
         camEditor = initPsychCamera();
 
         camHUD = new FlxCamera();
         camHUD.bgColor.alpha = 0;
         camMenu = new FlxCamera();
         camMenu.bgColor.alpha = 0;
-
         FlxG.cameras.add(camHUD, false);
         FlxG.cameras.add(camMenu, false);
 
+        // Background
+        var bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+        bg.color = 0xFF3E1F5C;
+        bg.screenCenter();
+        bg.antialiasing = ClientPrefs.data.antialiasing;
+        add(bg);
+
+        // Panels with consistent styling
+        mainPanel = new FlxSprite(FlxG.width * 0.5 - 400, 100);
+        mainPanel.makeGraphic(800, 500, 0xFF1E1B2E);  // Same color as side panels
+        mainPanel.alpha = 0.85;
+        add(mainPanel);
+
+        leftPanel = new FlxSprite(20, 100);
+        leftPanel.makeGraphic(350, 500, 0xFF1A0F2A);
+        leftPanel.alpha = 0.85;
+        add(leftPanel);
+
+        rightPanel = new FlxSprite(FlxG.width - 370, 100);
+        rightPanel.makeGraphic(350, 500, 0xFF1A0F2A);
+        rightPanel.alpha = 0.85;
+        add(rightPanel);
+
+        // Panel Headers - Now centered
+        var headers = [
+            {text: "MOD SELECTION", x: leftPanel.x, width: 350},
+            {text: "MODPACK CREATOR", x: mainPanel.x, width: 800},
+            {text: "ONLINE MODPACKS", x: rightPanel.x, width: 350}
+        ];
+        for (header in headers) {
+            var text = new FlxText(header.x, leftPanel.y + 10, header.width, header.text, 24);
+            text.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.PURPLE);
+            text.borderSize = 2;
+            add(text);
+        }
+
+        // Left Panel: Mod Selection
+        directoryDropDown = new PsychUIDropDownMenu(leftPanel.x + 20, leftPanel.y + 70, [''], onDirectorySelected);
+        add(directoryDropDown);
+
+        songDirectoryDropDown = new PsychUIDropDownMenu(leftPanel.x + 20, leftPanel.y + 140, [''], onSongDirectorySelected);
+        add(songDirectoryDropDown);
+
+        var labels = [
+            {text: "Select Mod:", y: leftPanel.y + 50},
+            {text: "Select Song:", y: leftPanel.y + 120}
+        ];
+        for (label in labels) {
+            var text = new FlxText(leftPanel.x + 20, label.y, 310, label.text, 16);
+            text.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.YELLOW, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+            text.borderSize = 1.5;
+            add(text);
+        }
+
+        // Center Panel: Modpack Creation
+        var centerX = mainPanel.x + 200;
+        var inputWidth = 400;
+        modpackNameInput = new PsychUIInputText(centerX, mainPanel.y + 80, inputWidth, "Modpack", 8);
+        weekFileNameInput = new PsychUIInputText(centerX, mainPanel.y + 160, inputWidth, "", 8);
+
+        var mainLabels = [
+            {text: "Modpack Name:", y: mainPanel.y + 60},
+            {text: "Week File Name:", y: mainPanel.y + 140}
+        ];
+        for (label in mainLabels) {
+            var text = new FlxText(centerX, label.y, inputWidth, label.text, 20);
+            text.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.YELLOW, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+            text.borderSize = 1.5;
+            add(text);
+        }
+        add(modpackNameInput);
+        add(weekFileNameInput);
+
+        // Create button with consistent styling
+        var createButton = new FlxButton(mainPanel.x + (mainPanel.width - 200) / 2, mainPanel.y + 240, "Create Modpack", copyAndWriteFiles);
+        createButton.scale.set(2, 2);
+        createButton.updateHitbox();
+        createButton.label.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.PURPLE);
+        createButton.color = FlxColor.PURPLE;
+        createButton.alpha = 0.9;
+        add(createButton);
+
+        // Right Panel: Online Modpacks
+        onlineZipDropDown = new PsychUIDropDownMenu(rightPanel.x + 20, rightPanel.y + 70, ['Loading...'], onOnlineZipSelected);
+        add(onlineZipDropDown);
+
+        downloadZipButton = new FlxButton(rightPanel.x + 20, rightPanel.y + 140, "Download Selected Modpack", downloadSelectedZipModpack);
+        downloadZipButton.scale.set(1.5, 1.5);
+        downloadZipButton.updateHitbox();
+        downloadZipButton.label.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.PURPLE);
+        downloadZipButton.color = FlxColor.PURPLE;
+        downloadZipButton.alpha = 0.9;
+        downloadZipButton.active = false;
+        add(downloadZipButton);
+
+        // Debug group setup
         luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
         add(luaDebugGroup);
         luaDebugGroup.cameras = [camMenu];
-
-        setupBackgroundAndTitle();
-
-        camFollow = new FlxObject(0, 0, 2, 2);
-        camFollow.screenCenter();
-        add(camFollow);
-
-        FlxG.camera.follow(camFollow);
-
-        UI_box = new PsychUIBox(FlxG.width - 360, 25, 350, 350, ['Setup']);
-        UI_box.scrollFactor.set(1, 1);
-        UI_box.cameras = [camMenu];
-        add(UI_box);
-
-        addSetupUI();
-        UI_box.selectedName = 'Setup';
 
         FlxG.mouse.visible = true;
         reloadSetupOptions();
@@ -86,7 +187,10 @@ class ModpackMakerState extends MusicBeatState {
         PlayState.instance = new DummyPlayState();
 
         super.create();
+
+        fetchOnlineZipModpacks();
     }
+
 
     private function setupBackgroundAndTitle():Void {
         var bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
@@ -115,42 +219,6 @@ class ModpackMakerState extends MusicBeatState {
         txt.borderSize = borderSize;
         if (cam != null) txt.cameras = [cam];
         return txt;
-    }
-
-    var weekFileNameInput:PsychUIInputText;
-    var modpackNameInput:PsychUIInputText; // Add this at class level if you want to access it later
-
-    function addSetupUI():Void {
-        var tabGroup = UI_box.getTab("Setup").menu;
-
-        directoryDropDown = new PsychUIDropDownMenu(15, 45, [''], onDirectorySelected);
-        songDirectoryDropDown = new PsychUIDropDownMenu(directoryDropDown.x + 170, 45, [''], onSongDirectorySelected);
-
-        // Modpack Name input field
-        modpackNameInput = new PsychUIInputText(15, 105, 200, "Modpack", 8);
-
-        // Week File Name input field
-        weekFileNameInput = new PsychUIInputText(15, 165, 200, "", 8);
-
-        var createButton = new FlxButton(directoryDropDown.x, 275, "Create Modpack", copyAndWriteFiles);
-        createButton.setGraphicSize(80, 30);
-        createButton.updateHitbox();
-
-        // Labels
-        tabGroup.add(new FlxText(directoryDropDown.x, directoryDropDown.y - 18, 0, 'Mod Directory:'));
-        tabGroup.add(new FlxText(songDirectoryDropDown.x, songDirectoryDropDown.y - 18, 0, 'Song Directory:'));
-        tabGroup.add(new FlxText(modpackNameInput.x, modpackNameInput.y - 18, 0, 'Modpack Name:'));
-        tabGroup.add(new FlxText(weekFileNameInput.x, weekFileNameInput.y - 18, 0, 'Week File Name:'));
-
-        // Add all UI elements
-        for (item in [
-            modpackNameInput,
-            weekFileNameInput,
-            directoryDropDown,
-            songDirectoryDropDown,
-            createButton
-        ])
-            tabGroup.add(item);
     }
 
     private function onDirectorySelected(selected:Int, pressed:String):Void {
@@ -742,7 +810,7 @@ class ModpackMakerState extends MusicBeatState {
     }
 
     function reloadSetupOptions():Void {
-        if (UI_box != null) reloadDirectoryDropDown("");
+        reloadDirectoryDropDown("");
     }
 
     public function addTextToDebug(text:String, ?color:FlxColor = FlxColor.RED):Void {
@@ -774,24 +842,178 @@ class ModpackMakerState extends MusicBeatState {
         return songJson;
     }
 
+    var activeToasts:Array<FlxSprite> = [];
+
     function showToast(message:String, duration:Float = 2):Void {
-        var toast = new FlxText(0, 0, 0, message, 20);
-        toast.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-        toast.borderSize = 2;
-        toast.screenCenter(X);
-        toast.y = FlxG.height - 60;
-        toast.scrollFactor.set();
-        toast.cameras = [camHUD]; // Put on HUD layer
+        trace("Toast: " + message);
 
-        add(toast);
+        var padding = 12;
 
-        FlxTween.tween(toast, {alpha: 0}, 0.5, {
+        var toastText = new FlxText(0, 0, 0, message, 20);
+        toastText.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+        toastText.borderSize = 2;
+        toastText.scrollFactor.set();
+        toastText.alpha = 1;
+        toastText.updateHitbox(); // 👈 Force layout calculation!
+
+        var bgWidth = toastText.width + padding * 2;
+        var bgHeight = toastText.height + padding * 2;
+
+        var bg = new FlxSprite().makeGraphic(Std.int(bgWidth), Std.int(bgHeight), FlxColor.BLACK);
+        bg.alpha = 0.6;
+        bg.scrollFactor.set();
+
+        // Wrap in group
+        var toastGroup = new FlxSpriteGroup();
+        toastGroup.add(bg);
+        toastGroup.add(toastText);
+        toastGroup.scrollFactor.set();
+
+        // Position the entire group first
+        toastGroup.screenCenter(X);
+        toastGroup.y = FlxG.height - 80;
+
+        // Now align text relative to group
+        toastText.x = toastGroup.x + padding;
+        toastText.y = toastGroup.y + padding;
+        bg.x = toastGroup.x;
+        bg.y = toastGroup.y;
+
+        // Stack up if needed
+        for (t in activeToasts) {
+            t.y -= bgHeight + 6;
+        }
+
+        toastGroup.cameras = [camHUD];
+        add(toastGroup);
+        activeToasts.push(toastGroup);
+
+        // Fade out
+        FlxTween.tween(toastGroup, {alpha: 0}, 0.5, {
             startDelay: duration,
             onComplete: function(_) {
-                toast.destroy(); // Clean up
+                activeToasts.remove(toastGroup);
+                toastGroup.destroy();
             }
         });
     }
+
+
+
+    // --- Online Modpack Download Logic ---
+
+    function fetchOnlineZipModpacks():Void {
+        // Replace with your raw GitHub URL to your JSON file
+        var url = "https://raw.githubusercontent.com/Blantados/BETADCIU-Engine-Modpacks/refs/heads/main/modpacks.json";
+
+        var http = new haxe.Http(url);
+        http.setHeader("User-Agent", "ModpackMakerApp");
+
+        http.onData = function(data:String) {
+            try {
+                // Expecting JSON array of strings (zip file names)
+                var zipNames:Array<String> = cast Json.parse(data);
+                onlineZipDropDown.list = zipNames.length > 0 ? zipNames : ["No zipped modpacks found"];
+                downloadZipButton.active = false;
+            } catch (e:Dynamic) {
+                trace("Error parsing JSON: " + e);
+                onlineZipDropDown.list = ["Error loading zipped modpacks"];
+                downloadZipButton.active = false;
+            }
+        }
+
+        http.onError = function(err) {
+            trace("Failed to load modpacks: " + err);
+            onlineZipDropDown.list = ["Error loading zipped modpacks"];
+            downloadZipButton.active = false;
+        }
+
+        http.request();
+    }
+
+
+    private function onOnlineZipSelected(index:Int, label:String):Void {
+        selectedOnlineZip = label;
+        downloadZipButton.active = (label != null && label != "" && label.endsWith(".zip"));
+    }
+
+    function downloadSelectedZipModpack():Void {
+        var zipName = onlineZipDropDown.selectedLabel;
+        if (zipName == null || zipName == "" || !zipName.endsWith(".zip")) {
+            showToast("No zipped modpack selected!");
+            return;
+        }
+
+        showToast("Downloading " + zipName + " using curl...");
+
+        var zipUrl = "https://github.com/Blantados/BETADCIU-Engine-Modpacks/releases/download/v1.0/" + zipName;
+        var localZipPath = Paths.mods() + "/tmp_download.zip";
+
+        // Build and run the curl command
+        var cmd = 'curl -L -A "Mozilla/5.0" -o "${localZipPath}" "${zipUrl}"';
+        trace("Executing: " + cmd);
+
+        var result = Sys.command(cmd);
+
+        if (result != 0) {
+            showToast("Curl failed! Exit code: " + result);
+            return;
+        }
+
+        try {
+            unzip(localZipPath, Paths.mods());
+            FileSystem.deleteFile(localZipPath);
+            showToast("Zipped modpack downloaded and extracted!");
+            reloadSetupOptions();
+        } catch (e:Dynamic) {
+            showToast("Error extracting zip: " + e);
+        }
+    }
+
+    // CREDIT TO ruby0x1 https://gist.github.com/ruby0x1/8dc3a206c325fbc9a97e. I just modified it to fit our use case
+    public function unzip( _path:String, _dest:String, ?ignoreRootFolder:String = "") {
+        var _in_file = sys.io.File.read( _path );
+
+        var _entries = haxe.zip.Reader.readZip( _in_file );
+
+            _in_file.close();
+
+        for(_entry in _entries) {
+            
+            var fileName = _entry.fileName;
+            if (fileName.charAt (0) != "/" && fileName.charAt (0) != "\\" && fileName.split ("..").length <= 1) {
+                var dirs = ~/[\/\\]/g.split(fileName);
+                if ((ignoreRootFolder != "" && dirs.length > 1) || ignoreRootFolder == "") {
+                    if (ignoreRootFolder != "") {
+                        dirs.shift ();
+                    }
+                
+                    var path = "";
+                    var file = dirs.pop();
+                    for( d in dirs ) {
+                        path += d;
+                        sys.FileSystem.createDirectory(_dest + "/" + path);
+                        path += "/";
+                    }
+                
+                    if( file == "" ) {
+                        if( path != "" ) trace("created " + path);
+                        continue; // was just a directory
+                    }
+                    path += file;
+                    trace("unzip " + path);
+                
+                    var data = haxe.zip.Reader.unzip(_entry);
+                    var f = File.write (_dest + "/" + path, true);
+                    f.write(data);
+                    f.close();
+                }
+            }
+        } //_entry
+
+        trace('Unzipped successfully to ${_dest}');
+
+    } //unzip
 }
 
 // Helper function for copying files with optional filtering

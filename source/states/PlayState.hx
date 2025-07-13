@@ -3270,7 +3270,7 @@ class PlayState extends MusicBeatState
 
 		if(char != null && (note == null || !note.noMissAnimation) && char.hasMissAnimations)
 		{
-			var canPlay = char.specialAnim;
+			var canPlay = true; // char.specialAnim;
 			var postfix:String = '';
 			if(note != null) postfix = note.animSuffix;
 
@@ -3314,7 +3314,7 @@ class PlayState extends MusicBeatState
 
 				if(char != null)
 				{
-					var canPlay:Bool = char.specialAnim;
+					var canPlay:Bool = true; //char.specialAnim;
 					if(note.isSustainNote)
 					{
 						var holdAnim:String = animToPlay + '-hold';

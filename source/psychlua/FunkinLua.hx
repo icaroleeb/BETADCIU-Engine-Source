@@ -939,13 +939,24 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getCameraFollowY", () -> game.camFollow.y);
 
 		Lua_helper.add_callback(lua, "cameraShake", function(camera:String, intensity:Float, duration:Float) {
+			if (game == null){
+				duration = duration / game.playbackRate;	
+			}
 			LuaUtils.cameraFromString(camera).shake(intensity, duration);
 		});
 
 		Lua_helper.add_callback(lua, "cameraFlash", function(camera:String, color:String, duration:Float,forced:Bool) {
+			if (game == null){
+				duration = duration / game.playbackRate;	
+			}
+
 			LuaUtils.cameraFromString(camera).flash(CoolUtil.colorFromString(color), duration, null, forced);
 		});
 		Lua_helper.add_callback(lua, "cameraFade", function(camera:String, color:String, duration:Float, forced:Bool, ?fadeOut:Bool = false) {
+			if (game == null){
+				duration = duration / game.playbackRate;	
+			}
+			
 			LuaUtils.cameraFromString(camera).fade(CoolUtil.colorFromString(color), duration, fadeOut, null, forced);
 		});
 		Lua_helper.add_callback(lua,"cameraSnap", function(camera:String, x:Float, y:Float) {
@@ -1961,6 +1972,10 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "soundFadeIn", function(tag:String, duration:Float, fromValue:Float = 0, toValue:Float = 1) {
+			if (game == null){
+				duration = duration / game.playbackRate;	
+			}
+
 			if(tag == null || tag.length < 1)
 			{
 				if(FlxG.sound.music != null)
@@ -1975,6 +1990,10 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "soundFadeOut", function(tag:String, duration:Float, toValue:Float = 0) {
+			if (game == null){
+				duration = duration / game.playbackRate;	
+			}
+			
 			if(tag == null || tag.length < 1)
 			{
 				if(FlxG.sound.music != null)
