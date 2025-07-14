@@ -163,9 +163,6 @@ class ModpackMakerState extends MusicBeatState {
         add(createButton);
 
         // Right Panel: Online Modpacks
-        onlineZipDropDown = new PsychUIDropDownMenu(rightPanel.x + 20, rightPanel.y + 70, ['Loading...'], onOnlineZipSelected);
-        add(onlineZipDropDown);
-
         downloadZipButton = new FlxButton(rightPanel.x + 20, rightPanel.y + 140, "Download Selected Modpack", downloadSelectedZipModpack);
         downloadZipButton.scale.set(1.5, 1.5);
         downloadZipButton.updateHitbox();
@@ -174,6 +171,9 @@ class ModpackMakerState extends MusicBeatState {
         downloadZipButton.alpha = 0.9;
         downloadZipButton.active = false;
         add(downloadZipButton);
+
+        onlineZipDropDown = new PsychUIDropDownMenu(rightPanel.x + 20, rightPanel.y + 70, ['Loading...'], onOnlineZipSelected);
+        add(onlineZipDropDown);
 
         // Debug group setup
         luaDebugGroup = new FlxTypedGroup<DebugLuaText>();

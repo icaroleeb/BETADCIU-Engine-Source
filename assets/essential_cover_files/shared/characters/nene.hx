@@ -309,14 +309,13 @@ function setupAbotViz():Void{
 }
 
 
-function onMoveCamera(focus:String)
+function onSectionHit()
 {
-	if (focus == 'boyfriend'){
+	if (mustHitSection)
 	    movePupilsRight();
-	}
-	else if (focus == 'dad'){
+	else
 	    movePupilsLeft();
-	}
+	
 }
 
 function movePupilsLeft() {
