@@ -3,9 +3,9 @@ package psychlua;
 import flixel.util.FlxSave;
 import openfl.utils.Assets;
 
-//
+
 // Things to trivialize some dumb stuff like splitting strings on older Lua
-//
+
 
 class ExtraFunctions
 {
