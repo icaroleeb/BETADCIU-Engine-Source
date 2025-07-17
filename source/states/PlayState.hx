@@ -2604,6 +2604,7 @@ class PlayState extends MusicBeatState
 
 
 	public var transitioning = false;
+	public var canDoSticker = true;
 	public function endSong()
 	{
 		//Should kill you if you tried to cheat
@@ -2713,11 +2714,14 @@ class PlayState extends MusicBeatState
 
 				canResync = false;
 				if (isBETADCIU)
-					MusicBeatState.switchState(new states.betadciu.BETADCIUState());
+					if (canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new states.betadciu.BETADCIUState(sticker)));
+					else MusicBeatState.switchState(new states.betadciu.BETADCIUState());
 				else if (isBonus)
-					MusicBeatState.switchState(new states.betadciu.BonusSongsState());
+					if (canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new states.betadciu.BonusSongsState(sticker)));
+					else MusicBeatState.switchState(new states.betadciu.BonusSongsState());
 				else
-					MusicBeatState.switchState(new FreeplayState());
+					if (canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new FreeplayState(sticker)));
+					else MusicBeatState.switchState(new FreeplayState());
 				// FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				changedDifficulty = false;
 			}

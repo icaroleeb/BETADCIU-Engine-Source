@@ -52,6 +52,17 @@ class FreeplayState extends MusicBeatState
 
 	var player:MusicPlayer;
 
+	var stickerSubState:StickerSubState;
+	public function new(?stickers:StickerSubState = null)
+	{
+		super();
+
+		if (stickers != null)
+		{
+		stickerSubState = stickers;
+		}
+	}
+
 	override function create()
 	{
 		//Paths.clearStoredMemory();
@@ -74,9 +85,17 @@ class FreeplayState extends MusicBeatState
 			MainMenuState.mainMusic = false;
 		}
 		
-		persistentUpdate = true;
 		PlayState.isStoryMode = false;
 		WeekData.reloadWeekFiles(false, 0);
+
+		if (stickerSubState != null){
+			this.persistentUpdate = true;
+			this.persistentDraw = true;
+		
+			openSubState(stickerSubState);
+			stickerSubState.degenStickers();
+		}
+		persistentUpdate = true;
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
