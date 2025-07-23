@@ -6,6 +6,7 @@ import android.content.Context;
 
 import debug.FPSCounter;
 
+import backend.ui.FullScreenScaleMode;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
 import flixel.FlxState;
@@ -156,13 +157,21 @@ class Main extends Sprite
 		Controls.instance = new Controls();
 		ClientPrefs.loadDefaultKeys();
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
-		addChild(new FlxGame(game.width, game.height, game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
-
+		var game = new FlxGame(game.width, game.height, game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen);
+		
 		// FlxG.game._customSoundTray wants just the class, it calls new from
  		// create() in there, which gets called when it's added to stage
  		// which is why it needs to be added before addChild(game) here
  		@:privateAccess
- 		FlxG.game._customSoundTray = objects.FunkinSoundTray;	
+ 		game._customSoundTray = objects.FunkinSoundTray;	
+
+		addChild(game);
+
+		#if !html5
+		game.addEventListener(Event.ADDED_TO_STAGE, function(_) {
+			FlxG.scaleMode = new FullScreenScaleMode();
+		});
+		#end
 
 		#if !mobile
 		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);

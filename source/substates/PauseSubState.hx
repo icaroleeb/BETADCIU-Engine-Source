@@ -178,13 +178,15 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		updateSkipTextStuff();
-		if (controls.UI_UP_P)
-		{
-			changeSelection(-1);
-		}
-		if (controls.UI_DOWN_P)
-		{
-			changeSelection(1);
+		if (PlayState.instance.canControlPauseMenu) {
+			if (controls.UI_UP_P)
+			{
+				changeSelection(-1);
+			}
+			if (controls.UI_DOWN_P)
+			{
+				changeSelection(1);
+			}
 		}
 
 		var daSelected:String = menuItems[curSelected];
@@ -218,7 +220,7 @@ class PauseSubState extends MusicBeatSubstate
 				}
 		}
 
-		if (controls.ACCEPT && (cantUnpause <= 0 || !controls.controllerMode))
+		if ((controls.ACCEPT && PlayState.instance.canControlPauseMenu) && (cantUnpause <= 0 || !controls.controllerMode))
 		{
 			if (menuItems == difficultyChoices)
 			{
@@ -273,7 +275,8 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.changedDifficulty = true;
 					practiceText.visible = PlayState.instance.practiceMode;
 				case "Restart Song":
-					restartSong();
+					PlayState.instance.callOnScripts('onRestart');
+					if (PlayState.instance.canRestart) restartSong();
 				case "Leave Charting Mode":
 					restartSong();
 					PlayState.chartingMode = false;
@@ -323,17 +326,17 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.instance.canResync = false;
 					Mods.loadTopMod();
 					
-					if (PlayState.isStoryMode){
-						MusicBeatState.switchState(new states.StoryMenuState());
-					}else if (PlayState.isBETADCIU){
-						MusicBeatState.switchState(new states.betadciu.BETADCIUState());
-					} else if (PlayState.isBonus) {
-						MusicBeatState.switchState(new states.betadciu.BonusSongsState());
-					} else {
-						MusicBeatState.switchState(new states.FreeplayState());
-					}				
+					if (PlayState.isBETADCIU)
+						if (PlayState.instance.canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new states.betadciu.BETADCIUState(sticker)));
+						else MusicBeatState.switchState(new states.betadciu.BETADCIUState());
+					else if (PlayState.isBonus)
+						if (PlayState.instance.canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new states.betadciu.BonusSongsState(sticker)));
+						else MusicBeatState.switchState(new states.betadciu.BonusSongsState());
+					else
+						if (PlayState.instance.canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new FreeplayState(sticker)));
+						else MusicBeatState.switchState(new FreeplayState());
 
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					// FlxG.sound.playMusic(Paths.music('freakyMenu'));
 					PlayState.changedDifficulty = false;
 					PlayState.chartingMode = false;
 					FlxG.camera.followLerp = 0;
@@ -355,6 +358,7 @@ class PauseSubState extends MusicBeatSubstate
 
 	public static function restartSong(noTrans:Bool = false)
 	{
+		PlayState.restarted = true; // For lua
 		PlayState.instance.paused = true; // For lua
 		FlxG.sound.music.volume = 0;
 		PlayState.instance.vocals.volume = 0;

@@ -316,6 +316,10 @@ class PlayState extends MusicBeatState
 	public var stageData:StageFile;
 	public var pauseCameraEffects:Bool = false;
 
+	public var canRestart:Bool = true;
+	public var canControlPauseMenu:Bool = true; // becasue set/getPropertyFromClass don't work?!
+	public static var restarted:Bool = false;
+
 	override public function create()
 	{
 		//trace('Playback Rate: ' + playbackRate);
@@ -671,6 +675,11 @@ class PlayState extends MusicBeatState
 		cachePopUpScore();
 
 		if(eventNotes.length < 1) checkEventNote();
+
+		if (restarted) {
+			callOnScripts('onRestartPost');
+			restarted = false;
+		}
 	}
 
 	function set_songSpeed(value:Float):Float
@@ -1282,8 +1291,9 @@ class PlayState extends MusicBeatState
 		}
 
 		var tempScore:String;
-		if(!instakillOnMiss) tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [songScore, songMisses, str]);
-		else tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [songScore, str]);
+		var formattedScore:String = FlxStringUtil.formatMoney(songScore, false);
+		if(!instakillOnMiss) tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [formattedScore, songMisses, str]);
+		else tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [formattedScore, str]);
 		scoreTxt.text = tempScore;
 	}
 
