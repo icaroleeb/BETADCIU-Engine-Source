@@ -418,6 +418,8 @@ class PlayState extends MusicBeatState
 			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
+			case 'stageerect': hardCodedStage = new StageErectWeek1();	//Week 1 Erect
+			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect();	//Weekend 1 Erect
 		}
 		if(isPixelStage) introSoundsSuffix = '-pixel';
 
@@ -1687,7 +1689,7 @@ class PlayState extends MusicBeatState
 	}
 
 	function eventEarlyTrigger(event:EventNote):Float {
-		var returnedValue:Null<Float> = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2, event.strumTime], true);
+		var returnedValue:Null<Float> = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2, event.value3, event.strumTime], true);
 		if(returnedValue != null && returnedValue != 0) {
 			return returnedValue;
 		}
@@ -1708,11 +1710,12 @@ class PlayState extends MusicBeatState
 			strumTime: event[0] + ClientPrefs.data.noteOffset,
 			event: event[1][i][0],
 			value1: event[1][i][1],
-			value2: event[1][i][2]
+			value2: event[1][i][2],
+			value3: event[1][i][3]
 		};
 		eventNotes.push(subEvent);
 		eventPushed(subEvent);
-		callOnScripts('onEventPushed', [subEvent.event, subEvent.value1 != null ? subEvent.value1 : '', subEvent.value2 != null ? subEvent.value2 : '', subEvent.strumTime]);
+		callOnScripts('onEventPushed', [subEvent.event, subEvent.value1 != null ? subEvent.value1 : '', subEvent.value2 != null ? subEvent.value2 : '', subEvent.value3 != null ? subEvent.value3 : '', subEvent.strumTime]);
 	}
 
 	public var skipArrowStartTween:Bool = false; //for lua
@@ -2299,7 +2302,11 @@ class PlayState extends MusicBeatState
 			if(eventNotes[0].value2 != null)
 				value2 = eventNotes[0].value2;
 
-			triggerEvent(eventNotes[0].event, value1, value2, leStrumTime);
+			var value3:String = '';
+			if(eventNotes[0].value3 != null)
+				value3 = eventNotes[0].value3;
+
+			triggerEvent(eventNotes[0].event, value1, value2, value3, leStrumTime);
 			eventNotes.shift();
 		}
 	}
@@ -2316,11 +2323,13 @@ class PlayState extends MusicBeatState
 		return !result;
 	}
 
-	public function triggerEvent(eventName:String, value1:String, value2:String, strumTime:Float) {
+	public function triggerEvent(eventName:String, value1:String, value2:String, value3:String, strumTime:Float) {
 		var flValue1:Null<Float> = Std.parseFloat(value1);
 		var flValue2:Null<Float> = Std.parseFloat(value2);
+		var flValue3:Null<Float> = Std.parseFloat(value3);
 		if(Math.isNaN(flValue1)) flValue1 = null;
 		if(Math.isNaN(flValue2)) flValue2 = null;
+		if(Math.isNaN(flValue3)) flValue3 = null;
 
 		switch(eventName) {
 			case 'Hey!':
@@ -2520,8 +2529,8 @@ class PlayState extends MusicBeatState
  				}
 		}
 
-		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, flValue1, flValue2, strumTime));
-		callOnScripts('onEvent', [eventName, value1, value2, strumTime]);
+		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, value3, flValue1, flValue2, flValue3, strumTime));
+		callOnScripts('onEvent', [eventName, value1, value2, value3, strumTime]);
 	}
 
 	public function moveCameraSection(?sec:Null<Int>):Void {
@@ -3764,6 +3773,7 @@ class PlayState extends MusicBeatState
 		try
 		{
 			newScript = new HScript(null, file, scriptType);
+			if (scriptType.toLowerCase() == 'stage') callOnHScript('onCreate'); // why this won't work on HScript?!
 			if (newScript.exists('onCreate')) newScript.call('onCreate');
 			trace('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
@@ -4491,6 +4501,8 @@ class PlayState extends MusicBeatState
 			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
+			case 'stageerect': hardCodedStage = new StageErectWeek1();	//Week 1 Erect
+			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect();	//Weekend 1 Erect
 		}
 
 		stagesFunc(function(stage:BaseStage) stage.createPost());
@@ -4501,5 +4513,11 @@ class PlayState extends MusicBeatState
 		startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
-	}	
+	}
+
+	public function setupStageVariables(){ // making this because this one is for HScript
+		if (!variables.exists("stageVariables")){
+        	variables.set("stageVariables", new Map<String, FlxSprite>());
+    	}
+	}
 }

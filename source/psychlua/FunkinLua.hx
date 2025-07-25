@@ -840,7 +840,7 @@ class FunkinLua {
 		});
 
 		// others
-		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '') {
+		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '', ?value3:String = '') {
 			if (scriptType == "modpack"){
 				if (FileSystem.exists(Paths.modFolders('custom_events/$name.txt'))){
 					ModpackAssetRegistry.instance.addAsset("", 'custom_events/$name.txt');
@@ -853,8 +853,8 @@ class FunkinLua {
 				return true;
 			}
 
-			game.triggerEvent(name, value1, value2, Conductor.songPosition);
-			//trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2);
+			game.triggerEvent(name, value1, value2, value3, Conductor.songPosition);
+			//trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2, ', ' + value3);
 			return true;
 		});
 

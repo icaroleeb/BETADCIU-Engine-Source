@@ -1,0 +1,35 @@
+{
+	"directory": "week1",
+	"defaultZoom": 0.85,
+	"stageUI": "",
+	"isVSlicePosition": true,
+
+	"boyfriend": [977.5, 865],
+	"girlfriend": [501.5, 825],
+	"opponent": [40, 860],
+	"hide_girlfriend": false,
+
+	"camera_boyfriend": [0, -50],
+	"camera_opponent": [100, 12],
+	"camera_girlfriend": [0, 0],
+	"camera_speed": 1,
+
+	"preload": {
+		"images/erect/backDark": 3,
+		"images/erect/crowd": 2,
+		"images/erect/brightLightSmall": 2,
+		"images/erect/stage_bg": 3,
+		"images/erect/server": 3,
+		"images/erect/lightgreen": 2,
+		"images/erect/lightred": 2,
+		"images/erect/orangeLight": 2,
+		"images/erect/lights": 3,
+		"images/erect/lightAbove": 2
+	},
+
+	"_editorMeta": {
+		"dad": "dad",
+		"boyfriend": "bf",
+		"gf": "gf"
+	}
+}
