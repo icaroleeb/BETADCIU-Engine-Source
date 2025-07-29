@@ -143,7 +143,7 @@
 		510
 	],
 	"player_camera_position": [
-		250,
+		50,
 		-60
 	],
 	"playerposition": [
@@ -158,8 +158,8 @@
 		246
 	],
 	"camera_position": [
-		-100,
-		-60
+		50,
+		-160
 	],
 	"noteSkin": null,
 	"sing_duration": 4,

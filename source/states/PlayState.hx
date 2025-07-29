@@ -1486,8 +1486,8 @@ class PlayState extends MusicBeatState
 
 		var arrowSwitches:Array<String> = [];
 
-		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"))){
-			arrowSwitches = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"));
+		if (FileSystem.exists(Paths.txt(songName + "/arrowSwitches"))){
+			arrowSwitches = CoolUtil.coolTextFile(Paths.txt(songName + "/arrowSwitches"));
 		}
 
 		var oldNote:Note = null;
@@ -4323,23 +4323,23 @@ class PlayState extends MusicBeatState
 	}
 
 	function grabStuffToPreload() {
-		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"))) {
-			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"));
+		if (FileSystem.exists(Paths.txt(songName + "/preload"))) {
+			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(songName + "/preload"));
 				for (i in 0...characters.length) {
 				var data:Array<String> = characters[i].split(' ');
 				charactersToLoad.push(characters[i]);
 			}
 		}
 
-		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload-stage"))) {
-			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload-stage"));
+		if (FileSystem.exists(Paths.txt(songName + "/preload-stage"))) {
+			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(songName  + "/preload-stage"));
 			for (i in 0...stages.length) {
 				var data:Array<String> = stages[i].split(' ');
 				stagesToLoad.push(stages[i]);
 			}
 		}
 
-		var jsonPath:String = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase() + "/preload";
+		var jsonPath:String = songName + "/preload";
 
 		if (FileSystem.exists(Paths.json(jsonPath))) {
 			var jsonString:String;

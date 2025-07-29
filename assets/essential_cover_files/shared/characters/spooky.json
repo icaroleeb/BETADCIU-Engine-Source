@@ -66,13 +66,9 @@
 				0
 			],
 			"loop": false,
-			"fps": 12,
+			"fps": 24,
 			"anim": "danceLeft",
-			"indices": [
-				0,
-				2,
-				6
-			],
+			"indices": [0, 1, 2, 3, 4, 5, 6, 7],
 			"name": "spooky dance idle",
 			"playerOffsets": [
 				0,
@@ -85,14 +81,9 @@
 				0
 			],
 			"loop": false,
-			"fps": 12,
+			"fps": 24,
 			"anim": "danceRight",
-			"indices": [
-				8,
-				10,
-				12,
-				14
-			],
+			"indices": [8, 9, 10, 11, 12, 13, 14, 15],
 			"name": "spooky dance idle",
 			"playerOffsets": [
 				0,
@@ -137,7 +128,7 @@
 		0
 	],
 	"camera_position": [
-		140,
+		0,
 		0
 	],
 	"noteSkin": null,

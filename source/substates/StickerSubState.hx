@@ -31,6 +31,9 @@ class StickerSubState extends MusicBeatSubstate
   
   public var grpStickers:FlxTypedGroup<StickerSprite>;
 
+  public var STICKER_SET = "stickers-set-1";
+  public var STICKER_PACK = "all";
+
   // yes... a damn OpenFL sprite!!!
   public var dipshit:Sprite;
 
@@ -152,6 +155,8 @@ class StickerSubState extends MusicBeatSubstate
     }
   }
 
+  public var stickersChars:String;
+
   function regenStickers():Void
   {
     if (grpStickers.members.length > 0)
@@ -159,9 +164,10 @@ class StickerSubState extends MusicBeatSubstate
       grpStickers.clear();
     }
 
-    var stickerInfo:StickerInfo = new StickerInfo('stickers-set-1');
+    var stickerInfo:StickerInfo = new StickerInfo(STICKER_SET);
     var stickers:Map<String, Array<String>> = new Map<String, Array<String>>();
-    for (stickerSets in stickerInfo.getPack("all"))
+
+    for (stickerSets in stickerInfo.getPack(STICKER_PACK))
     {
       stickers.set(stickerSets, stickerInfo.getStickers(stickerSets));
     }
@@ -329,6 +335,7 @@ class StickerInfo
 
   public function new(stickerSet:String):Void
   {
+
     var path = Paths.file('images/transitionSwag/' + stickerSet + '/stickers.json');
     var json = Json.parse(Assets.getText(path));
 
