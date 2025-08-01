@@ -846,6 +846,7 @@ class PlayState extends MusicBeatState
 
 	public function addCharacterToList(newCharacter:String, type:Int) {
 		var preloadChar = new Character(0, 0, newCharacter);
+		stopCharacterScripts(preloadChar.curCharacter);
 		startCharacterScripts(preloadChar.curCharacter);
 		//preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
 		add(preloadChar);
@@ -916,6 +917,15 @@ class PlayState extends MusicBeatState
 
 			if(doPush) initHScript(scriptFile);
 		}
+		#end
+	}
+
+	public function stopCharacterScripts(name:String)
+	{
+		// different from "startCharacterScripts" cuz kinda hardcoding.
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+			#if LUA_ALLOWED stopLuasNamed('characters/' + name + '.lua'); #end
+			#if HSCRIPT_ALLOWED stopHScriptsNamed('characters/' + name + '.hx'); #end
 		#end
 	}
 
@@ -3759,6 +3769,7 @@ class PlayState extends MusicBeatState
 			{
 				if (Iris.instances.exists(scriptToLoad)){
 					var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+					if(script.exists('onDestroy')) script.call('onDestroy');
 					script.destroy();
 					hscriptArray.remove(script);
 					return true;
@@ -3773,7 +3784,10 @@ class PlayState extends MusicBeatState
 		try
 		{
 			newScript = new HScript(null, file, scriptType);
-			if (scriptType.toLowerCase() == 'stage') callOnHScript('onCreate'); // why this won't work on HScript?!
+			switch (scriptType.toLowerCase()){
+				case 'stage':
+					callOnHScript('onCreate'); // why this won't work?!
+			}
 			if (newScript.exists('onCreate')) newScript.call('onCreate');
 			trace('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);

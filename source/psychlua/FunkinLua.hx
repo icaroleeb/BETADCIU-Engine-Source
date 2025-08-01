@@ -1245,6 +1245,35 @@ class FunkinLua {
 
 			leSprite.active = true;
 		});
+		Lua_helper.add_callback(lua, "makeAnimatedLuaBackdrop", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?axes:String = "XY", ?spriteType:String = 'auto') {
+			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+				ModpackAssetRegistry.instance.addAsset("images", image);
+				return;
+			}
+			
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+			var leSprite:FlxBackdrop = new FlxBackdrop("", FlxAxes.fromString(axes), Std.int(x), Std.int(y));
+			if(image != null && image.length > 0)
+			{
+				LuaUtils.loadFrames(leSprite, image, spriteType);
+			}
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leSprite);
+
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+		
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leSprite);
+			}
+
+			leSprite.active = true;
+		});
 		Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String="camGame", ?shouldLoop:Bool=false, ?muted:Bool=true) {
 			// I hate you FlxVideoSprite....
 			#if VIDEOS_ALLOWED
@@ -2623,6 +2652,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 		
+		PlayState.instance.stopCharacterScripts(PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.boyfriend.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend.destroy();
@@ -2683,6 +2713,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 
+		PlayState.instance.stopCharacterScripts(PlayState.instance.dad.curCharacter);
 		PlayState.instance.dad.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.dad);
 		PlayState.instance.dad.destroy();
@@ -2746,6 +2777,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 
+		PlayState.instance.stopCharacterScripts(PlayState.instance.gf.curCharacter);
 		PlayState.instance.gf.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.gf);
 		PlayState.instance.gf.destroy();

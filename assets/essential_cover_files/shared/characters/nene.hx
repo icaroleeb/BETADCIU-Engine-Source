@@ -9,18 +9,24 @@ var PUPIL_STATE_NORMAL = 0;
 var PUPIL_STATE_LEFT = 1;
 
 function onCreate(){
+    var characterVars = game.variables.get("characterVariables");
+
     stereoBG = new FlxSprite(0, 0).loadGraphic(Paths.image('characters/abot/stereoBG'));
+    characterVars.set("stereoBG", stereoBG);
 
     setupAbotViz();
 
     eyeWhites = new FlxSprite(0, 0).makeGraphic(160, 60, 0xFFFFFFFF);
+    characterVars.set("eyeWhites", eyeWhites);
 
     pupil = new FlxAnimate(0, 0);
     Paths.loadAnimateAtlas(pupil, 'characters/abot/systemEyes');
+    characterVars.set("pupil", pupil);
 
     abot = new FlxAnimate(0, 0);
     Paths.loadAnimateAtlas(abot, 'characters/abot/abotSystem');
     abot.anim.addBySymbol('anim', 'Abot System', 24, false);
+    characterVars.set("abot", abot);
 
     abot.antialiasing = ClientPrefs.data.antialiasing;
     eyeWhites.antialiasing = ClientPrefs.data.antialiasing;
@@ -45,20 +51,6 @@ function onCreate(){
 }
 
 function onCreatePost(){
-    if(gf.curCharacter == 'nene'){
-        stereoBG.visible = true;
-        eyeWhites.visible = true;
-        abotViz.visible = true;
-        pupil.visible = true;
-        abot.visible = true;
-    }else{
-        stereoBG.visible = false;
-        eyeWhites.visible = false;
-        abotViz.visible = false;
-        pupil.visible = false;
-        abot.visible = false;
-    }
-
     abot.shader = gf.shader;
     eyeWhites.shader = gf.shader;
     pupil.shader = gf.shader;
@@ -87,12 +79,6 @@ function onCreatePost(){
     vis6.color = gf.color;
     vis7.color = gf.color;
 
-    remove(stereoBG);
-    remove(abotViz);
-    remove(eyeWhites);
-    remove(pupil);
-    remove(abot);
-
     addBehindGF(stereoBG);
     addBehindGF(abotViz);
     addBehindGF(eyeWhites);
@@ -107,20 +93,6 @@ function onEvent(n, v1, v2, v3){
         pupil.shader = gf.shader;
         stereoBG.shader = gf.shader;
         abotViz.shader = gf.shader;
-        
-        //gf.scrollFactor.set(0.95, 0.95);
-
-        remove(stereoBG);
-        remove(abotViz);
-        remove(eyeWhites);
-        remove(pupil);
-        remove(abot);
-
-        addBehindGF(stereoBG);
-        addBehindGF(abotViz);
-        addBehindGF(eyeWhites);
-        addBehindGF(pupil);
-        addBehindGF(abot);
     }
 
     if(n == "Change Character"){
@@ -131,20 +103,6 @@ function onEvent(n, v1, v2, v3){
                 pupil.shader = gf.shader;
                 stereoBG.shader = gf.shader;
                 abotViz.shader = gf.shader;
-
-                //gf.scrollFactor.set(0.95, 0.95);
-
-                remove(stereoBG);
-                remove(abotViz);
-                remove(eyeWhites);
-                remove(pupil);
-                remove(abot);
-
-                addBehindGF(stereoBG);
-                addBehindGF(abotViz);
-                addBehindGF(eyeWhites);
-                addBehindGF(pupil);
-                addBehindGF(abot);
             }
         }
     }
@@ -206,24 +164,6 @@ function onBeatHit(){
     }
 }
 
-function onStepHit(){
-    if(gf.curCharacter == 'nene'){
-        refreshAbotSpeaker();
-
-        stereoBG.visible = true;
-        eyeWhites.visible = true;
-        abotViz.visible = true;
-        pupil.visible = true;
-        abot.visible = true;
-    }else{
-        stereoBG.visible = false;
-        eyeWhites.visible = false;
-        abotViz.visible = false;
-        pupil.visible = false;
-        abot.visible = false;
-    }
-}
-
 function initAnalyzer(){
     analyzer = new SpectralAnalyzer(FlxG.sound.music._channel.__audioSource, 7, 0.1, 40);
 
@@ -241,6 +181,7 @@ function setupAbotViz():Void{
     var positionY = [0, -8, -3.5, -0.4, 0.5, 4.7, 7];
 
     abotViz = new FlxTypedSpriteGroup(gf.x + 100, gf.y + 400);
+    characterVars.set("abotViz", abotViz);
 
     vis1 = new FlxSprite(0, 0);
     vis1.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
@@ -248,6 +189,7 @@ function setupAbotViz():Void{
     vis1.animation.play('vis', false, false, 6);
     vis1.antialiasing = false;
     abotViz.add(vis1);
+    characterVars.set("vis1", vis1);
 
     vis2 = new FlxSprite(59, -8);
     vis2.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
@@ -255,6 +197,7 @@ function setupAbotViz():Void{
     vis2.animation.play('vis', false, false, 6);
     vis2.antialiasing = false;
     abotViz.add(vis2);
+    characterVars.set("vis2", vis2);
 
     vis3 = new FlxSprite(115, -11.5);
     vis3.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
@@ -262,6 +205,7 @@ function setupAbotViz():Void{
     vis3.animation.play('vis', false, false, 6);
     vis3.antialiasing = false;
     abotViz.add(vis3);
+    characterVars.set("vis3", vis3);
 
     vis4 = new FlxSprite(181, -11.9);
     vis4.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
@@ -269,6 +213,7 @@ function setupAbotViz():Void{
     vis4.animation.play('vis', false, false, 6);
     vis4.antialiasing = false;
     abotViz.add(vis4);
+    characterVars.set("vis4", vis4);
 
     vis5 = new FlxSprite(235, -11.4);
     vis5.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
@@ -276,6 +221,7 @@ function setupAbotViz():Void{
     vis5.animation.play('vis', false, false, 6);
     vis5.antialiasing = false;
     abotViz.add(vis5);
+    characterVars.set("vis5", vis5);
 
     vis6 = new FlxSprite(287, -6.7);
     vis6.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
@@ -283,6 +229,7 @@ function setupAbotViz():Void{
     vis6.animation.play('vis', false, false, 6);
     vis6.antialiasing = false;
     abotViz.add(vis6);
+    characterVars.set("vis6", vis6);
 
     vis7 = new FlxSprite(338, 0.3);
     vis7.frames = Paths.getSparrowAtlas('characters/abot/aBotViz');
@@ -290,6 +237,7 @@ function setupAbotViz():Void{
     vis7.animation.play('vis', false, false, 6);
     vis7.antialiasing = false;
     abotViz.add(vis7);
+    characterVars.set("vis7", vis7);
 
     vis1.visible = false;
     vis2.visible = false;
@@ -319,15 +267,15 @@ function onSectionHit()
 }
 
 function movePupilsLeft() {
-		if (pupilState == PUPIL_STATE_LEFT) return;
-		pupil.anim.play('lookleft');
-		pupil.anim.curFrame = 0;
+    if (pupilState == PUPIL_STATE_LEFT) return;
+    pupil.anim.play('lookleft');
+    pupil.anim.curFrame = 0;
 }
 
 function movePupilsRight() {
-		if (pupilState == PUPIL_STATE_NORMAL) return;
-		pupil.anim.play('lookright');
-		pupil.anim.curFrame = 17;
+    if (pupilState == PUPIL_STATE_NORMAL) return;
+    pupil.anim.play('lookright');
+    pupil.anim.curFrame = 17;
 }
 
 function refreshAbotSpeaker():Void{
