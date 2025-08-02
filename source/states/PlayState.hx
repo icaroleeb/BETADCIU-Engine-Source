@@ -4531,10 +4531,4 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 	}
-
-	public function setupStageVariables(){ // making this because this one is for HScript
-		if (!variables.exists("stageVariables")){
-        	variables.set("stageVariables", new Map<String, FlxSprite>());
-    	}
-	}
 }
