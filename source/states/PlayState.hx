@@ -482,10 +482,6 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 
 		// CHARACTER SCRIPTS
-		if(gf.curCharacter != null) stopCharacterScripts(gf.curCharacter);
-		if(dad.curCharacter != null) stopCharacterScripts(dad.curCharacter);
-		if(boyfriend.curCharacter != null) stopCharacterScripts(boyfriend.curCharacter);
-
 		if(gf != null) startCharacterScripts(gf.curCharacter);
 		startCharacterScripts(dad.curCharacter);
 		startCharacterScripts(boyfriend.curCharacter);
