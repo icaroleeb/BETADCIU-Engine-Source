@@ -482,6 +482,10 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 
 		// CHARACTER SCRIPTS
+		if(gf.curCharacter != null) stopCharacterScripts(gf.curCharacter);
+		if(dad.curCharacter != null) stopCharacterScripts(dad.curCharacter);
+		if(boyfriend.curCharacter != null) stopCharacterScripts(boyfriend.curCharacter);
+
 		if(gf != null) startCharacterScripts(gf.curCharacter);
 		startCharacterScripts(dad.curCharacter);
 		startCharacterScripts(boyfriend.curCharacter);
@@ -846,8 +850,8 @@ class PlayState extends MusicBeatState
 
 	public function addCharacterToList(newCharacter:String, type:Int) {
 		var preloadChar = new Character(0, 0, newCharacter);
-		stopCharacterScripts(preloadChar.curCharacter);
 		startCharacterScripts(preloadChar.curCharacter);
+		stopCharacterScripts(preloadChar.curCharacter);
 		//preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
 		add(preloadChar);
 		remove(preloadChar);
@@ -4154,6 +4158,7 @@ class PlayState extends MusicBeatState
 					var preloadChar = new Character(0, 0, character);
 					preloadChar.visible = false;
 					startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
+					//stopCharacterScripts(preloadChar.curCharacter);
 					add(preloadChar);
 					sprites.push(preloadChar);
 					//preloadChar.destroyAtlas();
@@ -4237,6 +4242,7 @@ class PlayState extends MusicBeatState
 										var preloadChar = new Character(0, 0, toLoad.path);
 										preloadChar.visible = false;
 										startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
+										//stopCharacterScripts(preloadChar.curCharacter);
 										add(preloadChar);
 										sprites.push(preloadChar);
 										//preloadChar.destroyAtlas();
@@ -4311,6 +4317,7 @@ class PlayState extends MusicBeatState
 				var preloadChar = new Character(0, 0, character);
 				preloadChar.visible = false;
 				startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
+				//stopCharacterScripts(preloadChar.curCharacter);
 				add(preloadChar);
 				sprites.push(preloadChar);
 				//preloadChar.destroyAtlas();

@@ -29,16 +29,16 @@ function onCreate(){
     abotViz.antialiasing = ClientPrefs.data.antialiasing;
 
     abot.x = gf.x - 100;
-    abot.y = gf.y + 316;
+    abot.y = gf.y + 316; // 764 - 740
 
-    abotViz.x = gf.x + 100;
-    abotViz.y = gf.y + 400;
+    abotViz.x = abot.x + 200;
+    abotViz.y = abot.y + 84;
 
     eyeWhites.x = abot.x + 40;
     eyeWhites.y = abot.y + 250;
 
-    pupil.x = gf.x - 607;
-    pupil.y = gf.y - 176;
+    pupil.x = abot.x - 507;
+    pupil.y = abot.y - 492;
 
     stereoBG.x = abot.x + 150;
     stereoBG.y = abot.y + 30;
@@ -128,7 +128,9 @@ function onUpdatePost(elapsed){
     abot.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
     abotViz.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
 
-    if(analyzer == null) return;
+    if(analyzer == null) {
+        return;
+    }
 
     var levels = analyzer.getLevels();
 
@@ -232,6 +234,14 @@ function setupAbotViz():Void{
     vis5.antialiasing = ClientPrefs.data.antialiasing;
     vis6.antialiasing = ClientPrefs.data.antialiasing;
     vis7.antialiasing = ClientPrefs.data.antialiasing;
+
+    vis1.visible = false;
+    vis2.visible = false;
+    vis3.visible = false;
+    vis4.visible = false;
+    vis5.visible = false;
+    vis6.visible = false;
+    vis7.visible = false;
 }
 
 function onSectionHit()
@@ -241,6 +251,23 @@ function onSectionHit()
 	else
 	    movePupilsLeft();
 	
+}
+
+function onDestroy()
+{
+    remove(abotViz);
+    remove(abot);
+    remove(eyeWhites);
+    remove(pupil);
+    remove(stereoBG);
+
+    remove(vis1);
+    remove(vis2);
+    remove(vis3);
+    remove(vis4);
+    remove(vis5);
+    remove(vis6);
+    remove(vis7);
 }
 
 function movePupilsLeft() {
