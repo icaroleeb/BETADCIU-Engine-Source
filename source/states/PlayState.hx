@@ -43,6 +43,8 @@ import objects.*;
 import states.stages.*;
 import states.stages.objects.*;
 
+import states.betadciu.*;
+
 #if LUA_ALLOWED
 import psychlua.*;
 #else
@@ -405,22 +407,6 @@ class PlayState extends MusicBeatState
 		dadGroup = new FlxSpriteGroup(DAD_X, DAD_Y);
 		gfGroup = new FlxSpriteGroup(GF_X, GF_Y);
 
-		switch (curStage.toLowerCase())
-		{
-			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
-			case 'spooky': hardCodedStage = new Spooky();				//Week 2
-			case 'philly': hardCodedStage = new Philly();				//Week 3
-			case 'limo': hardCodedStage = new Limo();					//Week 4
-			case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
-			case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
-			case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
-			case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
-			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
-			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
-			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
-			case 'stageerect': hardCodedStage = new StageErectWeek1();	//Week 1 Erect
-			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect();	//Weekend 1 Erect
-		}
 		if(isPixelStage) introSoundsSuffix = '-pixel';
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -444,7 +430,7 @@ class PlayState extends MusicBeatState
 		boyfriend = new Character(0, 0, SONG.player1, true);
 		startCharacterPos(boyfriend);
 		
-		addObjects(stageData);
+		addStage(false, false);
 		
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// "SCRIPTS FOLDER" SCRIPTS
@@ -475,12 +461,8 @@ class PlayState extends MusicBeatState
 			if(gf != null)
 				gf.visible = false;
 		}
-		
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		// STAGE SCRIPTS
-		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
-		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// CHARACTER SCRIPTS
 		if(gf != null) startCharacterScripts(gf.curCharacter);
 		startCharacterScripts(dad.curCharacter);
@@ -847,7 +829,7 @@ class PlayState extends MusicBeatState
 	public function addCharacterToList(newCharacter:String, type:Int) {
 		var preloadChar = new Character(0, 0, newCharacter);
 		startCharacterScripts(preloadChar.curCharacter);
-		stopCharacterScripts(preloadChar.curCharacter);
+		//stopCharacterScripts(preloadChar.curCharacter);
 		//preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
 		add(preloadChar);
 		remove(preloadChar);
@@ -1729,6 +1711,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public var skipArrowStartTween:Bool = false; //for lua
+	public var skipArrowYPosStartTween:Bool = true;
 	private function generateStaticArrows(player:Int):Void
 	{
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X;
@@ -1747,9 +1730,13 @@ class PlayState extends MusicBeatState
 			babyArrow.downScroll = ClientPrefs.data.downScroll;
 			if (!isStoryMode && !skipArrowStartTween)
 			{
-				//babyArrow.y -= 10;
+				if (skipArrowYPosStartTween) babyArrow.y -= 10;
 				babyArrow.alpha = 0;
-				FlxTween.tween(babyArrow, {/*y: babyArrow.y + 10,*/ alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
+
+				if (skipArrowYPosStartTween)
+						FlxTween.tween(babyArrow, {y: babyArrow.y + 10, alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
+					else
+						FlxTween.tween(babyArrow, {alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
 			}
 			else babyArrow.alpha = targetAlpha;
 
@@ -2232,7 +2219,14 @@ class PlayState extends MusicBeatState
 			opponentVocals.pause();
 
 		#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
-		MusicBeatState.switchState(new CharacterEditorState((FlxG.keys.pressed.SHIFT ? boyfriend.curCharacter : (FlxG.keys.pressed.CONTROL ? gf.curCharacter : dad.curCharacter))));
+		if(gf.curCharacter.toLowerCase().contains('embed'))
+			MusicBeatState.switchState(new GoFindTheSecretState());
+		else if(dad.curCharacter.toLowerCase().contains('embed'))
+			MusicBeatState.switchState(new GoFindTheSecretState());
+		else if(boyfriend.curCharacter.toLowerCase().contains('embed'))
+			MusicBeatState.switchState(new GoFindTheSecretState());
+		else
+			MusicBeatState.switchState(new CharacterEditorState((FlxG.keys.pressed.SHIFT ? boyfriend.curCharacter : (FlxG.keys.pressed.CONTROL ? gf.curCharacter : dad.curCharacter))));
 	}
 
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!
@@ -4503,8 +4497,8 @@ class PlayState extends MusicBeatState
 		}
 	}	
 
-	public function addStage(?onlyLuas:Bool=false) {
-		setStageDetails(stageData);
+	public function addStage(?onlyLuas:Bool=false, ?stageDetails:Bool=true) {
+		if(stageDetails) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		switch (curStage.toLowerCase())
 		{
 			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1

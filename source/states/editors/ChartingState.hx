@@ -3443,6 +3443,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(scrollSpeedStepper);
 		tab_group.add(audioOffsetStepper);
 
+		tab_group.add(new FlxText(stepperShiftNoteDial.x, stepperShiftNoteDial.y - 30, 80, 'Shift Notes by # Sections:'));
+		tab_group.add(new FlxText(stepperShiftNoteDialStep.x, stepperShiftNoteDialStep.y - 30, 80, 'Shift Notes by # Steps:'));
+		tab_group.add(new FlxText(stepperShiftNoteDialMs.x, stepperShiftNoteDialMs.y - 30, 80, 'Shift Notes by # ms'));
+		tab_group.add(stepperShiftNoteDial);
+		tab_group.add(stepperShiftNoteDialStep);
+		tab_group.add(stepperShiftNoteDialMs);
+		tab_group.add(shiftNoteButton);
+
 		//dropdowns
 		tab_group.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 80, 'Stage:'));
 		tab_group.add(new FlxText(playerDropDown.x, playerDropDown.y - 15, 80, 'Player:'));
@@ -3452,15 +3460,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(girlfriendDropDown);
 		tab_group.add(opponentDropDown);
 		tab_group.add(playerDropDown);
-
-		tab_group.add(new FlxText(stepperShiftNoteDial.x, stepperShiftNoteDial.y - 30, 80, 'Shift Notes by # Sections:'));
-		tab_group.add(new FlxText(stepperShiftNoteDialStep.x, stepperShiftNoteDialStep.y - 30, 80, 'Shift Notes by # Steps:'));
-		tab_group.add(new FlxText(stepperShiftNoteDialMs.x, stepperShiftNoteDialMs.y - 30, 80, 'Shift Notes by # ms'));
-		tab_group.add(stepperShiftNoteDial);
-		tab_group.add(stepperShiftNoteDialStep);
-		tab_group.add(stepperShiftNoteDialMs);
-		tab_group.add(shiftNoteButton);
-
 	}
 
 	function addFileTab()

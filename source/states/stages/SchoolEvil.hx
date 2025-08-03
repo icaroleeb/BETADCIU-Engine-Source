@@ -50,7 +50,7 @@ class SchoolEvil extends BaseStage
 	override function createPost()
 	{
 		if (dad.curCharacter == "spirit") {
-			var trail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
+			trail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
 			PlayState.instance.variables.get("stageVariables").set('trail', trail);
 			addBehindDad(trail);
 		}
@@ -60,7 +60,7 @@ class SchoolEvil extends BaseStage
 	var bgGhouls:BGSprite;
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "schoolevil") 
+		if (PlayState.instance.curStage.toLowerCase() != "schoolevil")
 			return; 
 
 		switch(eventName)
@@ -190,8 +190,8 @@ class SchoolEvil extends BaseStage
 	}
 	override public function destroy():Void {
 		if(trail != null){
-			trail.destroy();
 			remove(trail);
+			trail.destroy();
 			var trail = null;
 		}
 

@@ -59,6 +59,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	var UI_box:PsychUIBox;
 	var UI_characterbox:PsychUIBox;
 
+	var missingTextBG:FlxSprite;
+	var missingText:FlxText;
+
 	var unsavedProgress:Bool = false;
 
 	var selectedFormat:FlxTextFormat = new FlxTextFormat(FlxColor.LIME);
@@ -167,6 +170,20 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		makeUIMenu();
 
+		missingTextBG = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		missingTextBG.alpha = 0.6;
+		missingTextBG.visible = false;
+		missingTextBG.cameras = [camHUD];
+		add(missingTextBG);
+
+		missingText = new FlxText(50, 0, FlxG.width - 100, '', 24);
+		missingText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		missingText.scrollFactor.set();
+		missingText.visible = false;
+		missingText.cameras = [camHUD];
+		missingText.color = 0xFFFF0000;
+		add(missingText);
+
 		updatePointerPos();
 		updateHealthBar();
 		character.finishAnimation();
@@ -229,30 +246,39 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 	function addCharacter(reload:Bool = false)
 	{
-		var pos:Int = -1;
-		if(character != null)
-		{
-			pos = members.indexOf(character);
-			remove(character);
-			character.destroy();
+		if(_char.toLowerCase().contains('embed')){
+			missingText.text = 'ACCESS DENIED: CHARACTER IS EMBEDDED! \nPress Enter to Continue.';
+			missingText.screenCenter(Y);
+			missingText.visible = true;
+			missingTextBG.visible = true;
 		}
-
-		var isPlayer = (reload ? character.isPlayer : !predictCharacterIsNotPlayer(_char));
-		character = new Character(0, 0, _char, isPlayer);
-		if(!reload && character.editorIsPlayer != null && isPlayer != character.editorIsPlayer)
+		else
 		{
-			character.isPlayer = !character.isPlayer;
-			character.flipX = (character.originalFlipX != character.isPlayer);
-			if(check_player != null) check_player.checked = character.isPlayer;
-		}
-		character.debugMode = true;
-		character.missingCharacter = false;
+			var pos:Int = -1;
+			if(character != null)
+			{
+				pos = members.indexOf(character);
+				remove(character);
+				character.destroy();
+			}
 
-		if(pos > -1) insert(pos, character);
-		else add(character);
-		updateCharacterPositions();
-		reloadAnimList();
-		if(healthBar != null && healthIcon != null) updateHealthBar();
+			var isPlayer = (reload ? character.isPlayer : !predictCharacterIsNotPlayer(_char));
+			character = new Character(0, 0, _char, isPlayer);
+			if(!reload && character.editorIsPlayer != null && isPlayer != character.editorIsPlayer)
+			{
+				character.isPlayer = !character.isPlayer;
+				character.flipX = (character.originalFlipX != character.isPlayer);
+				if(check_player != null) check_player.checked = character.isPlayer;
+			}
+			character.debugMode = true;
+			character.missingCharacter = false;
+
+			if(pos > -1) insert(pos, character);
+			else add(character);
+			updateCharacterPositions();
+			reloadAnimList();
+			if(healthBar != null && healthIcon != null) updateHealthBar();
+		}
 	}
 
 	function makeUIMenu()
@@ -1147,6 +1173,11 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				MusicBeatState.switchState(new PlayState());
 			}
 			return;
+		}
+
+		if (FlxG.keys.pressed.ENTER){
+			if (missingText.visible) missingText.visible = false;
+			if (missingTextBG.visible) missingTextBG.visible = false;
 		}
 	}
 
