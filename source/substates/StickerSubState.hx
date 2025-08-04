@@ -22,6 +22,8 @@ import openfl.display.Sprite;
 import openfl.display.Bitmap;
 import flixel.FlxState;
 
+import backend.WeekData;
+
 using Lambda;
 using StringTools;
 using backend.tools.MapTools;
@@ -31,11 +33,11 @@ class StickerSubState extends MusicBeatSubstate
   
   public var grpStickers:FlxTypedGroup<StickerSprite>;
 
-  public var STICKER_SET = "stickers-set-1";
-  public var STICKER_PACK = "all";
-
   // yes... a damn OpenFL sprite!!!
   public var dipshit:Sprite;
+
+  public var STICKER_SET:String = WeekData.getCurrentWeek().stickers[0]; // Sorry Shadow Mario I have to do this.
+  public var STICKER_PACK:String = WeekData.getCurrentWeek().stickers[1];
 
   /**
    * The state to switch to after the stickers are done.

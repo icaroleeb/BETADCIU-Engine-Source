@@ -9,6 +9,8 @@ import openfl.utils.Assets as OpenFlAssets;
 import haxe.Json;
 import haxe.format.JsonParser;
 
+import substates.StickerSubState;
+
 using StringTools;
 
 typedef WeekFile =
@@ -26,6 +28,7 @@ typedef WeekFile =
 	var hideStoryMode:Bool;
 	var hideFreeplay:Bool;
 	var difficulties:String;
+	var stickers:Array<String>;
 
 	//for guest betadcius
 	var ytInfo:Array<Dynamic>;
@@ -54,6 +57,8 @@ class WeekData {
 
 	public var ytInfo:Array<Dynamic>;
 
+	public var stickers:Array<String>;
+
 	public static function createWeekFile():WeekFile {
 		var weekFile:WeekFile = {
 			songs: [["Bopeebo", "dad", [146, 113, 253]], ["Fresh", "dad", [146, 113, 253]], ["Dad Battle", "dad", [146, 113, 253]]],
@@ -68,7 +73,8 @@ class WeekData {
 			hideStoryMode: false,
 			hideFreeplay: false,
 			ytInfo: ["Snow The Fox", "https://www.youtube.com/c/SnowTheFox", [185,69,69]],
-			difficulties: ''
+			difficulties: '',
+			stickers: ['stickers-set-1', 'all']
 		};
 		return weekFile;
 	}
@@ -86,6 +92,12 @@ class WeekData {
 		hideStoryMode = weekFile.hideStoryMode;
 		hideFreeplay = weekFile.hideFreeplay;
 		difficulties = weekFile.difficulties;
+
+		if (weekFile.stickers == null){
+			weekFile.stickers = ['stickers-set-1', 'all'];
+		}
+		
+		stickers = weekFile.stickers;
 
 		if (weekFile.ytInfo == null)
 			weekFile.ytInfo = ["Snow The Fox", "https://www.youtube.com/c/SnowTheFox", [185,69,69]]; //template
