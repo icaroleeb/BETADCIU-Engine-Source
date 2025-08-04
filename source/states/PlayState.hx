@@ -2219,14 +2219,7 @@ class PlayState extends MusicBeatState
 			opponentVocals.pause();
 
 		#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
-		if(gf.curCharacter.toLowerCase().contains('embed'))
-			MusicBeatState.switchState(new GoFindTheSecretState());
-		else if(dad.curCharacter.toLowerCase().contains('embed'))
-			MusicBeatState.switchState(new GoFindTheSecretState());
-		else if(boyfriend.curCharacter.toLowerCase().contains('embed'))
-			MusicBeatState.switchState(new GoFindTheSecretState());
-		else
-			MusicBeatState.switchState(new CharacterEditorState((FlxG.keys.pressed.SHIFT ? boyfriend.curCharacter : (FlxG.keys.pressed.CONTROL ? gf.curCharacter : dad.curCharacter))));
+		MusicBeatState.switchState(new CharacterEditorState((FlxG.keys.pressed.SHIFT ? boyfriend.curCharacter : (FlxG.keys.pressed.CONTROL ? gf.curCharacter : dad.curCharacter))));
 	}
 
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!

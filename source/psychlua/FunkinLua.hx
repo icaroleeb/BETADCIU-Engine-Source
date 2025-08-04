@@ -2652,7 +2652,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 		
-		PlayState.instance.stopCharacterScripts(PlayState.instance.boyfriend.curCharacter);
+		//PlayState.instance.stopCharacterScripts(PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.boyfriend.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend.destroy();
@@ -2713,7 +2713,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 
-		PlayState.instance.stopCharacterScripts(PlayState.instance.dad.curCharacter);
+		//PlayState.instance.stopCharacterScripts(PlayState.instance.dad.curCharacter);
 		PlayState.instance.dad.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.dad);
 		PlayState.instance.dad.destroy();
@@ -2777,7 +2777,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 
-		PlayState.instance.stopCharacterScripts(PlayState.instance.gf.curCharacter);
+		//PlayState.instance.stopCharacterScripts(PlayState.instance.gf.curCharacter);
 		PlayState.instance.gf.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.gf);
 		PlayState.instance.gf.destroy();
