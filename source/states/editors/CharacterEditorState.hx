@@ -247,7 +247,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	function addCharacter(reload:Bool = false)
 	{
 		if(_char.toLowerCase().contains('embed')){
-			missingText.text = 'ACCESS DENIED: CHARACTER IS EMBEDDED! \nPress Enter to Continue.';
+			missingText.text = 'ACCESS DENIED: CHARACTER IS EMBEDDED!\n \nPress Enter to Continue.';
 			missingText.screenCenter(Y);
 			missingText.visible = true;
 			missingTextBG.visible = true;
