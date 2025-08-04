@@ -4468,12 +4468,15 @@ class PlayState extends MusicBeatState
 			hardCodedStage = null;
 		}
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		// STAGE SCRIPTS
-		#if LUA_ALLOWED
-		stopLuasNamed('stages/' + curStage + '.lua', "stage");
-		for (stage in addedStages) stopLuasNamed(stage, "stage");
+			// STAGE SCRIPTS
+			#if LUA_ALLOWED
+			stopLuasNamed('stages/' + curStage + '.lua', "stage");
+			
+			for (stage in addedStages) stopLuasNamed(stage, "stage");
 		#end
-		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
+			#if HSCRIPT_ALLOWED 
+			stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
+			#end
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
@@ -4505,17 +4508,20 @@ class PlayState extends MusicBeatState
 			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
-			case 'stageerect': hardCodedStage = new StageErectWeek1();	//Week 1 Erect
-			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect();	//Weekend 1 Erect
 		}
 
 		addObjects(stageData);
 		stagesFunc(function(stage:BaseStage) stage.createPost());
+
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		// STAGE SCRIPTS
-		#if LUA_ALLOWED 
-		startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
-		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
+			// STAGE SCRIPTS
+			#if LUA_ALLOWED 
+				startLuasNamed('stages/' + curStage + '.lua', "stage"); 
+			#end
+
+			#if HSCRIPT_ALLOWED 
+				if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
+			#end
 		#end
 	}
 }
