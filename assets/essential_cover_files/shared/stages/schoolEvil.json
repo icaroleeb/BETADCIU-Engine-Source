@@ -4,8 +4,8 @@
 	"stageUI": "pixel",
 
 	"boyfriend": [780, 130],
-	"girlfriend": [580, 430],
-	"opponent": [40, 100],
+	"girlfriend": [280, 125],
+	"opponent": [110, 190],
 	"hide_girlfriend": false,
 
 	"camera_boyfriend": [-100, -100],

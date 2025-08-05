@@ -31,7 +31,7 @@
 	"vocals_file": "",
 	"no_antialiasing": false,
 	"image": "characters/gfTankmen",
-	"position": [0, 0],
+	"position": [-110, 10],
 	"player_camera_position": [0, 0],
 	"playerposition": [
 		0,

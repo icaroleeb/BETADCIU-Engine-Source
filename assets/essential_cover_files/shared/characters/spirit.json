@@ -49,16 +49,13 @@
 	"vocals_file": "",
 	"no_antialiasing": true,
 	"image": "characters/spirit",
-	"position": [-90, 100],
+	"position": [-110, 40],
 	"player_camera_position": [0, 0],
-	"playerposition": [
-		-90,
-		100
-	],
 	"healthicon": "spirit-pixel",
 	"flip_x": false,
 	"healthbar_colors": [255, 60, 110],
 	"camera_position": [0, 0],
+	"player_position": [-90, 100],
 	"sing_duration": 4,
 	"isPlayerChar": false,
 	"scale": 6,

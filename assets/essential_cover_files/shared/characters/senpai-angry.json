@@ -94,7 +94,7 @@
 	"vocals_file": "",
 	"no_antialiasing": true,
 	"image": "characters/senpai",
-	"position": [170, 270],
+	"position": [140, 270],
 	"player_camera_position": [400, -330],
 	"healthicon": "senpai-angry-pixel",
 	"flip_x": false,

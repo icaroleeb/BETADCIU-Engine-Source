@@ -49,12 +49,16 @@ class Mall extends BaseStage
 
 		santa = new BGSprite('christmas/santa', -840, 150, 1, 1, ['santa idle in fear']);
 		stageVars.set('santa', santa);
-		add(santa);
+
 		Paths.sound('Lights_Shut_off');
 		setDefaultGF('gf-christmas');
 
 		if(isStoryMode && !seenCutscene)
 			setEndCallback(eggnogEndCutscene);
+	}
+
+	override function createPost(){
+		add(santa);
 	}
 
 	override function countdownTick(count:Countdown, num:Int){
