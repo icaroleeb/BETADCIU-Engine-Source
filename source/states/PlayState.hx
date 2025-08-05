@@ -71,6 +71,8 @@ import sys.FileSystem;
 
 import flixel.addons.plugin.screengrab.FlxScreenGrab;
 
+import backend.FunkinSprite;
+
 typedef PreloadResult = {
 	var thread:Thread;
 	var asset:String;
@@ -1193,7 +1195,8 @@ class PlayState extends MusicBeatState
 
 	inline private function createCountdownSprite(image:String, antialias:Bool, ?custom:Bool=false):FlxSprite
 	{
-		var spr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(image));
+		//var spr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(image));
+		var spr = FunkinSprite.create(0, 0, image);
 		spr.cameras = [camHUD];
 		spr.scrollFactor.set();
 		spr.updateHitbox();
@@ -1715,7 +1718,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public var skipArrowStartTween:Bool = false; //for lua
-	public var skipArrowYPosStartTween:Bool = true;
+	public var skipArrowYPosStartTween:Bool = false;
 	private function generateStaticArrows(player:Int):Void
 	{
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X;
@@ -2813,7 +2816,7 @@ class PlayState extends MusicBeatState
 		}
 
 		var placement:Float = FlxG.width * 0.35;
-		var rating:FlxSprite = new FlxSprite();
+		var rating:FunkinSprite = FunkinSprite.create(0, 0, '');
 		var score:Int = 350;
 
 		//tryna do MS based judgment due to popular demand
@@ -2896,9 +2899,9 @@ class PlayState extends MusicBeatState
 			i.alpha = ratingsAlpha;
 		}
 
-		var comboSpr:FlxSprite = new FlxSprite();
+		var comboSpr:FunkinSprite = FunkinSprite.create(0, 0, uiFolder + 'combo' + uiPostfix);
 		
-		if (showCombo) comboSpr = new FlxSprite().loadGraphic(Paths.image(uiFolder + 'combo' + uiPostfix)); // don't render if we don't need it	
+		if (showCombo) comboSpr = FunkinSprite.create(0, 0, uiFolder + 'combo' + uiPostfix); // don't render if we don't need it	
 		comboSpr.screenCenter();
 		comboSpr.x = placement;
 		comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
@@ -2943,7 +2946,7 @@ class PlayState extends MusicBeatState
 		var separatedScore:String = Std.string(combo).lpad('0', 3);
 		for (i in 0...separatedScore.length)
 		{
-			var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiFolder + 'num' + Std.parseInt(separatedScore.charAt(i)) + uiPostfix));
+			var numScore:FunkinSprite = FunkinSprite.create(0, 0, uiFolder + 'num' + Std.parseInt(separatedScore.charAt(i)) + uiPostfix);
 			numScore.screenCenter();
 			numScore.x = placement + (43 * daLoop) - 90 + ClientPrefs.data.comboOffset[2];
 			numScore.y += 80 - ClientPrefs.data.comboOffset[3];
