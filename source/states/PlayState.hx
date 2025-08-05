@@ -72,6 +72,7 @@ import sys.FileSystem;
 import flixel.addons.plugin.screengrab.FlxScreenGrab;
 
 import backend.FunkinSprite;
+import backend.EaseUtil;
 
 typedef PreloadResult = {
 	var thread:Thread;
@@ -1195,6 +1196,13 @@ class PlayState extends MusicBeatState
 
 	inline private function createCountdownSprite(image:String, antialias:Bool, ?custom:Bool=false):FlxSprite
 	{
+		var fadeEase = FlxEase.cubeInOut;
+
+		if(ClientPrefs.data.perfectPixel){
+			if(PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel"))
+				fadeEase = EaseUtil.stepped(8);
+		}
+
 		//var spr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(image));
 		var spr = FunkinSprite.create(0, 0, image);
 		spr.cameras = [camHUD];
@@ -1202,15 +1210,15 @@ class PlayState extends MusicBeatState
 		spr.updateHitbox();
 		if (PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel")){
 			spr.setGraphicSize(Std.int(spr.width * daPixelZoom)); // bruh
-			spr.pixelPerfectPosition = true;
-			spr.pixelPerfectRender = true;
+			//spr.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
+			//spr.pixelPerfectRender = ClientPrefs.data.perfectPixel;
 		}
 
 		spr.screenCenter();
 		spr.antialiasing = antialias;
 		insert(members.indexOf(noteGroup), spr);
 		FlxTween.tween(spr, {y: spr.y + 25, alpha: 0}, Conductor.crochet / 1000, {
-			ease: FlxEase.cubeInOut,
+			ease: fadeEase,
 			onComplete: function(twn:FlxTween)
 			{
 				remove(spr);
@@ -2917,12 +2925,12 @@ class PlayState extends MusicBeatState
 		if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
-			rating.pixelPerfectPosition = true;
-			rating.pixelPerfectRender = true;
+			rating.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
+			rating.pixelPerfectRender = ClientPrefs.data.perfectPixel;
 
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
-			comboSpr.pixelPerfectPosition = true;
-			comboSpr.pixelPerfectRender = true;
+			comboSpr.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
+			comboSpr.pixelPerfectRender = ClientPrefs.data.perfectPixel;
 		}
 		else
 		{
@@ -2933,15 +2941,29 @@ class PlayState extends MusicBeatState
 		comboSpr.updateHitbox();
 		rating.updateHitbox();
 
+		var fadeEase = FlxEase.expoOut;
+
+		if(ClientPrefs.data.perfectPixel){
+			if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel')
+				fadeEase = EaseUtil.stepped(2);
+		}
+
 		if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel'){
 			rating.scale.set(0.785, 0.785);	
-			FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.5, {ease: FlxEase.expoOut});	
+			FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.5, {ease: fadeEase});	
 		}
 
 		var daLoop:Int = 0;
 		var xThing:Float = 0;
 		if (showCombo)
 			comboGroup.add(comboSpr);
+
+		var customFade = FlxEase.linear;
+
+		if(ClientPrefs.data.perfectPixel){
+			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
+				customFade = EaseUtil.stepped(2);
+		}
 
 		var separatedScore:String = Std.string(combo).lpad('0', 3);
 		for (i in 0...separatedScore.length)
@@ -2958,8 +2980,8 @@ class PlayState extends MusicBeatState
 
 			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
 				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
-				numScore.pixelPerfectPosition = true;
-				numScore.pixelPerfectRender = true;
+				numScore.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
+				numScore.pixelPerfectRender = ClientPrefs.data.perfectPixel;
 			}
 			else 
 				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
@@ -2982,6 +3004,7 @@ class PlayState extends MusicBeatState
 				{
 					numScore.destroy();
 				},
+				ease: customFade,
 				startDelay: Conductor.crochet * 0.002 / playbackRate
 			});
 
@@ -2990,7 +3013,8 @@ class PlayState extends MusicBeatState
 		}
 		comboSpr.x = xThing + 50;
 		FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
-			startDelay: Conductor.crochet * 0.001 / playbackRate
+			ease: customFade,
+			startDelay: Conductor.crochet * 0.001 / playbackRate,
 		});
 
 		FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
@@ -2999,6 +3023,7 @@ class PlayState extends MusicBeatState
 				comboSpr.destroy();
 				rating.destroy();
 			},
+			ease: customFade,
 			startDelay: Conductor.crochet * 0.002 / playbackRate
 		});
 	}
