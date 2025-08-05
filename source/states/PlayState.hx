@@ -1197,7 +1197,11 @@ class PlayState extends MusicBeatState
 		spr.cameras = [camHUD];
 		spr.scrollFactor.set();
 		spr.updateHitbox();
-		if (PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel")) spr.setGraphicSize(Std.int(spr.width * daPixelZoom)); // bruh
+		if (PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel")){
+			spr.setGraphicSize(Std.int(spr.width * daPixelZoom)); // bruh
+			spr.pixelPerfectPosition = true;
+			spr.pixelPerfectRender = true;
+		}
 
 		spr.screenCenter();
 		spr.antialiasing = antialias;
@@ -2944,8 +2948,14 @@ class PlayState extends MusicBeatState
 				numScore.y = 450 + (30 + offsetY);
 			}
 
-			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel') numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
-			else numScore.setGraphicSize(Std.int(numScore.width * 0.5));
+			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
+				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
+				numScore.pixelPerfectPosition = true;
+				numScore.pixelPerfectRender = true;
+			}
+			else 
+				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
+
 			numScore.updateHitbox();
 
 			numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
