@@ -33,6 +33,14 @@ class StrumNote extends OffsettableSprite
 		if(texture != value) {
 			texture = value;
 			reloadNote();
+
+			if (texture.toLowerCase().contains('pixel')){
+				pixelPerfectPosition = true;
+				pixelPerfectRender = true;
+			}else{
+				pixelPerfectPosition = false;
+				pixelPerfectRender = false;
+			}
 		}
 		return value;
 	}
