@@ -4,7 +4,7 @@
 	"stageUI": "",
 
 	"boyfriend": [810, 100],
-	"girlfriend": [200, 65],
+	"girlfriend": [280, 50],
 	"opponent": [20, 100],
 
 	"preload": {

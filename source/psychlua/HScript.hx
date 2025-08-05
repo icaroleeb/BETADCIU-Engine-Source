@@ -90,6 +90,13 @@ class HScript extends Iris
 		if (file == null)
 			file = '';
 
+		switch(scriptType.toLowerCase()){
+			case "stage":
+				if (!PlayState.instance.variables.exists("stageVariables")){
+					PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+				}
+		}
+
 		filePath = file;
 		if (filePath != null && filePath.length > 0)
 		{

@@ -84,6 +84,7 @@ import states.TitleState;
 	public var comboCam:String = "Game";// cam game by default because i like it.
 	public var ogIconBop:Bool = false;
 	public var gameResolution:String = 'Native'; // Adding a resolution option
+	public var perfectPixel:Bool = false;
 }
 
 class ClientPrefs {

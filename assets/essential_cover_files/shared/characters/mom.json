@@ -1,168 +1,99 @@
 {
 	"animations": [
 		{
+			"offsets": [0, 0],
 			"loop": false,
-			"offsets": [
-				0,
-				0
-			],
+			"fps": 24,
 			"anim": "idle",
-			"fps": 24,
-			"playerOffsets": [
-				0,
-				0
-			],
+			"indices": [],
 			"name": "Mom Idle0",
-			"indices": []
+			"playerOffsets": [0, 0]
 		},
 		{
+			"offsets": [15, 68],
 			"loop": false,
-			"offsets": [
-				15,
-				68
-			],
+			"fps": 24,
 			"anim": "singUP",
-			"fps": 24,
-			"playerOffsets": [
-				-12,
-				67
-			],
+			"indices": [],
 			"name": "Mom Up Pose0",
-			"indices": []
+			"playerOffsets": [-12, 67]
 		},
 		{
+			"offsets": [20, -170],
 			"loop": false,
-			"offsets": [
-				20,
-				-170
-			],
+			"fps": 24,
 			"anim": "singDOWN",
-			"fps": 24,
-			"playerOffsets": [
-				20,
-				-180
-			],
+			"indices": [],
 			"name": "MOM DOWN POSE0",
-			"indices": []
+			"playerOffsets": [20, -180]
 		},
 		{
+			"offsets": [180, -31],
 			"loop": false,
-			"offsets": [
-				180,
-				-31
-			],
+			"fps": 24,
 			"anim": "singLEFT",
-			"fps": 24,
-			"playerOffsets": [
-				150,
-				-66
-			],
+			"indices": [],
 			"name": "Mom Left Pose0",
-			"indices": []
+			"playerOffsets": [150, -66]
 		},
 		{
+			"offsets": [50, -68],
 			"loop": false,
-			"offsets": [
-				50,
-				-68
-			],
+			"fps": 24,
 			"anim": "singRIGHT",
-			"fps": 24,
-			"playerOffsets": [
-				51,
-				-32
-			],
+			"indices": [],
 			"name": "Mom Pose Left0",
-			"indices": []
+			"playerOffsets": [51, -32]
 		},
 		{
+			"offsets": [14, 57],
 			"loop": false,
-			"offsets": [
-				14,
-				57
-			],
+			"fps": 24,
 			"anim": "singUPmiss",
-			"fps": 24,
-			"playerOffsets": [
-				-10,
-				58
-			],
+			"indices": [],
 			"name": "Mom Up Pose MISS0",
-			"indices": []
+			"playerOffsets": [-10, 58]
 		},
 		{
+			"offsets": [20, -168],
 			"loop": false,
-			"offsets": [
-				20,
-				-168
-			],
+			"fps": 24,
 			"anim": "singDOWNmiss",
-			"fps": 24,
-			"playerOffsets": [
-				20,
-				-173
-			],
+			"indices": [],
 			"name": "MOM DOWN POSE MISS0",
-			"indices": []
+			"playerOffsets": [20, -173]
 		},
 		{
+			"offsets": [175, -32],
 			"loop": false,
-			"offsets": [
-				175,
-				-32
-			],
+			"fps": 24,
 			"anim": "singLEFTmiss",
-			"fps": 24,
-			"playerOffsets": [
-				150,
-				-70
-			],
+			"indices": [],
 			"name": "Mom Left Pose MISS0",
-			"indices": []
+			"playerOffsets": [150, -70]
 		},
 		{
+			"offsets": [60, -70],
 			"loop": false,
-			"offsets": [
-				60,
-				-70
-			],
-			"anim": "singRIGHTmiss",
 			"fps": 24,
-			"playerOffsets": [
-				50,
-				-33
-			],
+			"anim": "singRIGHTmiss",
+			"indices": [],
 			"name": "Mom Pose Left MISS0",
-			"indices": []
+			"playerOffsets": [50, -33]
 		}
 	],
+	"vocals_file": "",
 	"no_antialiasing": false,
 	"image": "characters/Mom_Assets",
-	"position": [
-		10,
-		-40
-	],
-	"player_camera_position": [
-		50,
-		50
-	],
-	"playerposition": [
-		10,
-		-40
-	],
+	"position": [10, -40],
+	"player_camera_position": [50, 50],
 	"healthicon": "mom",
 	"flip_x": false,
-	"healthbar_colors": [
-		216,
-		85,
-		142
-	],
-	"camera_position": [
-		50,
-		50
-	],
-	"noteSkin": null,
+	"healthbar_colors": [216, 85, 142],
+	"camera_position": [0, 0],
+	"player_position": [10, -40],
 	"sing_duration": 4,
 	"isPlayerChar": false,
-	"scale": 1
+	"scale": 1,
+	"_editor_isPlayer": false
 }

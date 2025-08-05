@@ -1,108 +1,63 @@
 {
 	"animations": [
 		{
+			"offsets": [0, 0],
 			"loop": false,
-			"offsets": [
-				0,
-				0
-			],
+			"fps": 24,
 			"anim": "idle",
-			"fps": 24,
-			"playerOffsets": [
-				0,
-				0
-			],
+			"indices": [],
 			"name": "monster idle",
-			"indices": []
+			"playerOffsets": [0, 0]
 		},
 		{
+			"offsets": [-22, 87],
 			"loop": false,
-			"offsets": [
-				-22,
-				87
-			],
+			"fps": 24,
 			"anim": "singUP",
-			"fps": 24,
-			"playerOffsets": [
-				-50,
-				80
-			],
+			"indices": [],
 			"name": "monster up note",
-			"indices": []
+			"playerOffsets": [-50, 80]
 		},
 		{
+			"offsets": [-43, -89],
 			"loop": false,
-			"offsets": [
-				-43,
-				-89
-			],
+			"fps": 24,
 			"anim": "singDOWN",
-			"fps": 24,
-			"playerOffsets": [
-				-2,
-				-94
-			],
+			"indices": [],
 			"name": "monster down",
-			"indices": []
+			"playerOffsets": [-2, -94]
 		},
 		{
+			"offsets": [-24, 4],
 			"loop": false,
-			"offsets": [
-				-24,
-				4
-			],
+			"fps": 24,
 			"anim": "singLEFT",
-			"fps": 24,
-			"playerOffsets": [
-				10,
-				0
-			],
+			"indices": [],
 			"name": "Monster left note",
-			"indices": []
+			"playerOffsets": [10, 0]
 		},
 		{
+			"offsets": [-40, 10],
 			"loop": false,
-			"offsets": [
-				-40,
-				10
-			],
-			"anim": "singRIGHT",
 			"fps": 24,
-			"playerOffsets": [
-				-51,
-				20
-			],
+			"anim": "singRIGHT",
+			"indices": [],
 			"name": "Monster Right note",
-			"indices": []
+			"playerOffsets": [-51, 20]
 		}
 	],
+	"vocals_file": "",
 	"no_antialiasing": false,
 	"image": "characters/Monster_Assets",
-	"position": [
-		-70,
-		90
-	],
-	"player_camera_position": [
-		140,
-		0
-	],
-	"playerposition": [
-		20,
-		90
-	],
+	"position": [-70, 90],
+	"player_camera_position": [140, 0],
 	"healthicon": "monster",
 	"flip_x": false,
-	"healthbar_colors": [
-		243,
-		255,
-		110
-	],
-	"camera_position": [
-		140,
-		0
-	],
-	"noteSkin": null,
+	"healthbar_colors": [243, 255, 110],
+	"camera_position": [0, 0],
+	"player_position": [20, 90],
 	"sing_duration": 4,
 	"isPlayerChar": false,
-	"scale": 1
+	"scale": 1,
+	"_editor_isPlayer": false
 }

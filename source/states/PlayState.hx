@@ -43,6 +43,8 @@ import objects.*;
 import states.stages.*;
 import states.stages.objects.*;
 
+import states.betadciu.*;
+
 #if LUA_ALLOWED
 import psychlua.*;
 #else
@@ -68,6 +70,9 @@ import sys.FileSystem;
 #end
 
 import flixel.addons.plugin.screengrab.FlxScreenGrab;
+
+import backend.FunkinSprite;
+import backend.EaseUtil;
 
 typedef PreloadResult = {
 	var thread:Thread;
@@ -405,20 +410,6 @@ class PlayState extends MusicBeatState
 		dadGroup = new FlxSpriteGroup(DAD_X, DAD_Y);
 		gfGroup = new FlxSpriteGroup(GF_X, GF_Y);
 
-		switch (curStage.toLowerCase())
-		{
-			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
-			case 'spooky': hardCodedStage = new Spooky();				//Week 2
-			case 'philly': hardCodedStage = new Philly();				//Week 3
-			case 'limo': hardCodedStage = new Limo();					//Week 4
-			case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
-			case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
-			case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
-			case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
-			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
-			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
-			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
-		}
 		if(isPixelStage) introSoundsSuffix = '-pixel';
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -433,7 +424,7 @@ class PlayState extends MusicBeatState
 			if (stageData.hide_girlfriend) SONG.gfVersion = 'emptygf'; // quick change to prevent the null gf bug
 			gf = new Character(0, 0, SONG.gfVersion);
 			startCharacterPos(gf);
-			gf.scrollFactor.set(0.95, 0.95);
+			//gf.scrollFactor.set(0.95, 0.95);
 		// }
 
 		dad = new Character(0, 0, SONG.player2);
@@ -442,7 +433,7 @@ class PlayState extends MusicBeatState
 		boyfriend = new Character(0, 0, SONG.player1, true);
 		startCharacterPos(boyfriend);
 		
-		addObjects(stageData);
+		addStage(false, false);
 		
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// "SCRIPTS FOLDER" SCRIPTS
@@ -473,12 +464,8 @@ class PlayState extends MusicBeatState
 			if(gf != null)
 				gf.visible = false;
 		}
-		
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		// STAGE SCRIPTS
-		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
-		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// CHARACTER SCRIPTS
 		if(gf != null) startCharacterScripts(gf.curCharacter);
 		startCharacterScripts(dad.curCharacter);
@@ -845,6 +832,7 @@ class PlayState extends MusicBeatState
 	public function addCharacterToList(newCharacter:String, type:Int) {
 		var preloadChar = new Character(0, 0, newCharacter);
 		startCharacterScripts(preloadChar.curCharacter);
+		//stopCharacterScripts(preloadChar.curCharacter);
 		//preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
 		add(preloadChar);
 		remove(preloadChar);
@@ -914,6 +902,15 @@ class PlayState extends MusicBeatState
 
 			if(doPush) initHScript(scriptFile);
 		}
+		#end
+	}
+
+	public function stopCharacterScripts(name:String)
+	{
+		// different from "startCharacterScripts" cuz kinda hardcoding.
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+			#if LUA_ALLOWED stopLuasNamed('characters/' + name + '.lua'); #end
+			#if HSCRIPT_ALLOWED stopHScriptsNamed('characters/' + name + '.hx'); #end
 		#end
 	}
 
@@ -1199,17 +1196,29 @@ class PlayState extends MusicBeatState
 
 	inline private function createCountdownSprite(image:String, antialias:Bool, ?custom:Bool=false):FlxSprite
 	{
-		var spr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(image));
+		var fadeEase = FlxEase.cubeInOut;
+
+		if(ClientPrefs.data.perfectPixel){
+			if(PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel"))
+				fadeEase = EaseUtil.stepped(8);
+		}
+
+		//var spr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(image));
+		var spr = FunkinSprite.create(0, 0, image);
 		spr.cameras = [camHUD];
 		spr.scrollFactor.set();
 		spr.updateHitbox();
-		if (PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel")) spr.setGraphicSize(Std.int(spr.width * daPixelZoom)); // bruh
+		if (PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel")){
+			spr.setGraphicSize(Std.int(spr.width * daPixelZoom)); // bruh
+			//spr.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
+			//spr.pixelPerfectRender = ClientPrefs.data.perfectPixel;
+		}
 
 		spr.screenCenter();
 		spr.antialiasing = antialias;
 		insert(members.indexOf(noteGroup), spr);
 		FlxTween.tween(spr, {y: spr.y + 25, alpha: 0}, Conductor.crochet / 1000, {
-			ease: FlxEase.cubeInOut,
+			ease: fadeEase,
 			onComplete: function(twn:FlxTween)
 			{
 				remove(spr);
@@ -1484,8 +1493,8 @@ class PlayState extends MusicBeatState
 
 		var arrowSwitches:Array<String> = [];
 
-		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"))){
-			arrowSwitches = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/arrowSwitches"));
+		if (FileSystem.exists(Paths.txt(songName + "/arrowSwitches"))){
+			arrowSwitches = CoolUtil.coolTextFile(Paths.txt(songName + "/arrowSwitches"));
 		}
 
 		var oldNote:Note = null;
@@ -1687,7 +1696,7 @@ class PlayState extends MusicBeatState
 	}
 
 	function eventEarlyTrigger(event:EventNote):Float {
-		var returnedValue:Null<Float> = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2, event.strumTime], true);
+		var returnedValue:Null<Float> = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2, event.value3, event.strumTime], true);
 		if(returnedValue != null && returnedValue != 0) {
 			return returnedValue;
 		}
@@ -1708,14 +1717,16 @@ class PlayState extends MusicBeatState
 			strumTime: event[0] + ClientPrefs.data.noteOffset,
 			event: event[1][i][0],
 			value1: event[1][i][1],
-			value2: event[1][i][2]
+			value2: event[1][i][2],
+			value3: event[1][i][3]
 		};
 		eventNotes.push(subEvent);
 		eventPushed(subEvent);
-		callOnScripts('onEventPushed', [subEvent.event, subEvent.value1 != null ? subEvent.value1 : '', subEvent.value2 != null ? subEvent.value2 : '', subEvent.strumTime]);
+		callOnScripts('onEventPushed', [subEvent.event, subEvent.value1 != null ? subEvent.value1 : '', subEvent.value2 != null ? subEvent.value2 : '', subEvent.value3 != null ? subEvent.value3 : '', subEvent.strumTime]);
 	}
 
 	public var skipArrowStartTween:Bool = false; //for lua
+	public var skipArrowYPosStartTween:Bool = false;
 	private function generateStaticArrows(player:Int):Void
 	{
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X;
@@ -1734,9 +1745,13 @@ class PlayState extends MusicBeatState
 			babyArrow.downScroll = ClientPrefs.data.downScroll;
 			if (!isStoryMode && !skipArrowStartTween)
 			{
-				//babyArrow.y -= 10;
+				if (skipArrowYPosStartTween) babyArrow.y -= 10;
 				babyArrow.alpha = 0;
-				FlxTween.tween(babyArrow, {/*y: babyArrow.y + 10,*/ alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
+
+				if (skipArrowYPosStartTween)
+						FlxTween.tween(babyArrow, {y: babyArrow.y + 10, alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
+					else
+						FlxTween.tween(babyArrow, {alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
 			}
 			else babyArrow.alpha = targetAlpha;
 
@@ -2299,7 +2314,11 @@ class PlayState extends MusicBeatState
 			if(eventNotes[0].value2 != null)
 				value2 = eventNotes[0].value2;
 
-			triggerEvent(eventNotes[0].event, value1, value2, leStrumTime);
+			var value3:String = '';
+			if(eventNotes[0].value3 != null)
+				value3 = eventNotes[0].value3;
+
+			triggerEvent(eventNotes[0].event, value1, value2, value3, leStrumTime);
 			eventNotes.shift();
 		}
 	}
@@ -2316,11 +2335,13 @@ class PlayState extends MusicBeatState
 		return !result;
 	}
 
-	public function triggerEvent(eventName:String, value1:String, value2:String, strumTime:Float) {
+	public function triggerEvent(eventName:String, value1:String, value2:String, value3:String, strumTime:Float) {
 		var flValue1:Null<Float> = Std.parseFloat(value1);
 		var flValue2:Null<Float> = Std.parseFloat(value2);
+		var flValue3:Null<Float> = Std.parseFloat(value3);
 		if(Math.isNaN(flValue1)) flValue1 = null;
 		if(Math.isNaN(flValue2)) flValue2 = null;
+		if(Math.isNaN(flValue3)) flValue3 = null;
 
 		switch(eventName) {
 			case 'Hey!':
@@ -2520,8 +2541,8 @@ class PlayState extends MusicBeatState
  				}
 		}
 
-		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, flValue1, flValue2, strumTime));
-		callOnScripts('onEvent', [eventName, value1, value2, strumTime]);
+		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, value3, flValue1, flValue2, flValue3, strumTime));
+		callOnScripts('onEvent', [eventName, value1, value2, value3, strumTime]);
 	}
 
 	public function moveCameraSection(?sec:Null<Int>):Void {
@@ -2803,7 +2824,7 @@ class PlayState extends MusicBeatState
 		}
 
 		var placement:Float = FlxG.width * 0.35;
-		var rating:FlxSprite = new FlxSprite();
+		var rating:FunkinSprite = FunkinSprite.create(0, 0, '');
 		var score:Int = 350;
 
 		//tryna do MS based judgment due to popular demand
@@ -2886,9 +2907,9 @@ class PlayState extends MusicBeatState
 			i.alpha = ratingsAlpha;
 		}
 
-		var comboSpr:FlxSprite = new FlxSprite();
+		var comboSpr:FunkinSprite = FunkinSprite.create(0, 0, uiFolder + 'combo' + uiPostfix);
 		
-		if (showCombo) comboSpr = new FlxSprite().loadGraphic(Paths.image(uiFolder + 'combo' + uiPostfix)); // don't render if we don't need it	
+		if (showCombo) comboSpr = FunkinSprite.create(0, 0, uiFolder + 'combo' + uiPostfix); // don't render if we don't need it	
 		comboSpr.screenCenter();
 		comboSpr.x = placement;
 		comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
@@ -2904,7 +2925,12 @@ class PlayState extends MusicBeatState
 		if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
+			rating.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
+			rating.pixelPerfectRender = ClientPrefs.data.perfectPixel;
+
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
+			comboSpr.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
+			comboSpr.pixelPerfectRender = ClientPrefs.data.perfectPixel;
 		}
 		else
 		{
@@ -2915,9 +2941,16 @@ class PlayState extends MusicBeatState
 		comboSpr.updateHitbox();
 		rating.updateHitbox();
 
+		var fadeEase = FlxEase.expoOut;
+
+		if(ClientPrefs.data.perfectPixel){
+			if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel')
+				fadeEase = EaseUtil.stepped(2);
+		}
+
 		if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel'){
 			rating.scale.set(0.785, 0.785);	
-			FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.5, {ease: FlxEase.expoOut});	
+			FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.5, {ease: fadeEase});	
 		}
 
 		var daLoop:Int = 0;
@@ -2925,10 +2958,17 @@ class PlayState extends MusicBeatState
 		if (showCombo)
 			comboGroup.add(comboSpr);
 
+		var customFade = FlxEase.linear;
+
+		if(ClientPrefs.data.perfectPixel){
+			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
+				customFade = EaseUtil.stepped(2);
+		}
+
 		var separatedScore:String = Std.string(combo).lpad('0', 3);
 		for (i in 0...separatedScore.length)
 		{
-			var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiFolder + 'num' + Std.parseInt(separatedScore.charAt(i)) + uiPostfix));
+			var numScore:FunkinSprite = FunkinSprite.create(0, 0, uiFolder + 'num' + Std.parseInt(separatedScore.charAt(i)) + uiPostfix);
 			numScore.screenCenter();
 			numScore.x = placement + (43 * daLoop) - 90 + ClientPrefs.data.comboOffset[2];
 			numScore.y += 80 - ClientPrefs.data.comboOffset[3];
@@ -2938,8 +2978,14 @@ class PlayState extends MusicBeatState
 				numScore.y = 450 + (30 + offsetY);
 			}
 
-			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel') numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
-			else numScore.setGraphicSize(Std.int(numScore.width * 0.5));
+			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
+				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
+				numScore.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
+				numScore.pixelPerfectRender = ClientPrefs.data.perfectPixel;
+			}
+			else 
+				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
+
 			numScore.updateHitbox();
 
 			numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
@@ -2958,6 +3004,7 @@ class PlayState extends MusicBeatState
 				{
 					numScore.destroy();
 				},
+				ease: customFade,
 				startDelay: Conductor.crochet * 0.002 / playbackRate
 			});
 
@@ -2966,7 +3013,8 @@ class PlayState extends MusicBeatState
 		}
 		comboSpr.x = xThing + 50;
 		FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
-			startDelay: Conductor.crochet * 0.001 / playbackRate
+			ease: customFade,
+			startDelay: Conductor.crochet * 0.001 / playbackRate,
 		});
 
 		FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
@@ -2975,6 +3023,7 @@ class PlayState extends MusicBeatState
 				comboSpr.destroy();
 				rating.destroy();
 			},
+			ease: customFade,
 			startDelay: Conductor.crochet * 0.002 / playbackRate
 		});
 	}
@@ -3750,6 +3799,7 @@ class PlayState extends MusicBeatState
 			{
 				if (Iris.instances.exists(scriptToLoad)){
 					var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+					if(script.exists('onDestroy')) script.call('onDestroy');
 					script.destroy();
 					hscriptArray.remove(script);
 					return true;
@@ -3764,6 +3814,10 @@ class PlayState extends MusicBeatState
 		try
 		{
 			newScript = new HScript(null, file, scriptType);
+			switch (scriptType.toLowerCase()){
+				case 'stage':
+					callOnHScript('onCreate'); // why this won't work?!
+			}
 			if (newScript.exists('onCreate')) newScript.call('onCreate');
 			trace('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
@@ -4130,6 +4184,7 @@ class PlayState extends MusicBeatState
 					var preloadChar = new Character(0, 0, character);
 					preloadChar.visible = false;
 					startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
+					//stopCharacterScripts(preloadChar.curCharacter);
 					add(preloadChar);
 					sprites.push(preloadChar);
 					//preloadChar.destroyAtlas();
@@ -4213,6 +4268,7 @@ class PlayState extends MusicBeatState
 										var preloadChar = new Character(0, 0, toLoad.path);
 										preloadChar.visible = false;
 										startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
+										//stopCharacterScripts(preloadChar.curCharacter);
 										add(preloadChar);
 										sprites.push(preloadChar);
 										//preloadChar.destroyAtlas();
@@ -4287,6 +4343,7 @@ class PlayState extends MusicBeatState
 				var preloadChar = new Character(0, 0, character);
 				preloadChar.visible = false;
 				startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
+				//stopCharacterScripts(preloadChar.curCharacter);
 				add(preloadChar);
 				sprites.push(preloadChar);
 				//preloadChar.destroyAtlas();
@@ -4313,23 +4370,23 @@ class PlayState extends MusicBeatState
 	}
 
 	function grabStuffToPreload() {
-		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"))) {
-			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload"));
+		if (FileSystem.exists(Paths.txt(songName + "/preload"))) {
+			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(songName + "/preload"));
 				for (i in 0...characters.length) {
 				var data:Array<String> = characters[i].split(' ');
 				charactersToLoad.push(characters[i]);
 			}
 		}
 
-		if (FileSystem.exists(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload-stage"))) {
-			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase()  + "/preload-stage"));
+		if (FileSystem.exists(Paths.txt(songName + "/preload-stage"))) {
+			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(songName  + "/preload-stage"));
 			for (i in 0...stages.length) {
 				var data:Array<String> = stages[i].split(' ');
 				stagesToLoad.push(stages[i]);
 			}
 		}
 
-		var jsonPath:String = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase() + "/preload";
+		var jsonPath:String = songName + "/preload";
 
 		if (FileSystem.exists(Paths.json(jsonPath))) {
 			var jsonString:String;
@@ -4454,12 +4511,15 @@ class PlayState extends MusicBeatState
 			hardCodedStage = null;
 		}
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		// STAGE SCRIPTS
-		#if LUA_ALLOWED
-		stopLuasNamed('stages/' + curStage + '.lua', "stage");
-		for (stage in addedStages) stopLuasNamed(stage, "stage");
+			// STAGE SCRIPTS
+			#if LUA_ALLOWED
+			stopLuasNamed('stages/' + curStage + '.lua', "stage");
+			
+			for (stage in addedStages) stopLuasNamed(stage, "stage");
 		#end
-		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
+			#if HSCRIPT_ALLOWED 
+			stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
+			#end
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
@@ -4476,8 +4536,8 @@ class PlayState extends MusicBeatState
 		}
 	}	
 
-	public function addStage(?onlyLuas:Bool=false) {
-		setStageDetails(stageData);
+	public function addStage(?onlyLuas:Bool=false, ?stageDetails:Bool=true) {
+		if(stageDetails) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		switch (curStage.toLowerCase())
 		{
 			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
@@ -4493,13 +4553,18 @@ class PlayState extends MusicBeatState
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
 		}
 
-		stagesFunc(function(stage:BaseStage) stage.createPost());
 		addObjects(stageData);
+		stagesFunc(function(stage:BaseStage) stage.createPost());
+
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		// STAGE SCRIPTS
-		#if LUA_ALLOWED 
-		startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
-		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
+			// STAGE SCRIPTS
+			#if LUA_ALLOWED 
+				startLuasNamed('stages/' + curStage + '.lua', "stage"); 
+			#end
+
+			#if HSCRIPT_ALLOWED 
+				if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
+			#end
 		#end
-	}	
+	}
 }

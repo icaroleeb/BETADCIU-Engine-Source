@@ -121,6 +121,9 @@ class FunkinLua {
 	
 
 		set('isStoryMode', PlayState.isStoryMode);
+		set('isBETADCIU', PlayState.isBETADCIU);
+		set('isBonus', PlayState.isBonus);
+
 		set('difficulty', PlayState.storyDifficulty);
 
 		set('difficultyName', Difficulty.getString(false));
@@ -840,7 +843,7 @@ class FunkinLua {
 		});
 
 		// others
-		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '') {
+		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '', ?value3:String = '') {
 			if (scriptType == "modpack"){
 				if (FileSystem.exists(Paths.modFolders('custom_events/$name.txt'))){
 					ModpackAssetRegistry.instance.addAsset("", 'custom_events/$name.txt');
@@ -853,8 +856,8 @@ class FunkinLua {
 				return true;
 			}
 
-			game.triggerEvent(name, value1, value2, Conductor.songPosition);
-			//trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2);
+			game.triggerEvent(name, value1, value2, value3, Conductor.songPosition);
+			//trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2, ', ' + value3);
 			return true;
 		});
 
@@ -1228,6 +1231,35 @@ class FunkinLua {
 			if(image != null && image.length > 0)
 			{
 				leSprite.loadGraphic(Paths.image(image));
+			}
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leSprite);
+
+			switch(scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+		
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leSprite);
+			}
+
+			leSprite.active = true;
+		});
+		Lua_helper.add_callback(lua, "makeAnimatedLuaBackdrop", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?axes:String = "XY", ?spriteType:String = 'auto') {
+			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+				ModpackAssetRegistry.instance.addAsset("images", image);
+				return;
+			}
+			
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+			var leSprite:FlxBackdrop = new FlxBackdrop("", FlxAxes.fromString(axes), Std.int(x), Std.int(y));
+			if(image != null && image.length > 0)
+			{
+				LuaUtils.loadFrames(leSprite, image, spriteType);
 			}
 
 			var variables = MusicBeatState.getVariables();
@@ -2623,6 +2655,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 		
+		//PlayState.instance.stopCharacterScripts(PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.boyfriend.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend.destroy();
@@ -2683,6 +2716,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 
+		//PlayState.instance.stopCharacterScripts(PlayState.instance.dad.curCharacter);
 		PlayState.instance.dad.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.dad);
 		PlayState.instance.dad.destroy();
@@ -2746,6 +2780,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 
+		//PlayState.instance.stopCharacterScripts(PlayState.instance.gf.curCharacter);
 		PlayState.instance.gf.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.gf);
 		PlayState.instance.gf.destroy();

@@ -8,6 +8,7 @@ import openfl.utils.Assets as OpenFlAssets;
 
 class SchoolEvil extends BaseStage
 {
+	var trail:FlxTrail;
 	override function create()
 	{
 		if (!PlayState.instance.variables.exists("stageVariables")){
@@ -49,7 +50,7 @@ class SchoolEvil extends BaseStage
 	override function createPost()
 	{
 		if (dad.curCharacter == "spirit") {
-			var trail:FlxTrail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
+			trail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
 			PlayState.instance.variables.get("stageVariables").set('trail', trail);
 			addBehindDad(trail);
 		}
@@ -57,9 +58,9 @@ class SchoolEvil extends BaseStage
 
 	// Ghouls event
 	var bgGhouls:BGSprite;
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
+	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "schoolevil") 
+		if (PlayState.instance.curStage.toLowerCase() != "schoolevil")
 			return; 
 
 		switch(eventName)
@@ -188,6 +189,12 @@ class SchoolEvil extends BaseStage
 		});
 	}
 	override public function destroy():Void {
+		if(trail != null){
+			remove(trail);
+			trail.destroy();
+			var trail = null;
+		}
+
 		super.destroy();
 	}
 }

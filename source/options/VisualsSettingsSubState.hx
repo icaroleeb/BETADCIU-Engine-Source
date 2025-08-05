@@ -199,6 +199,12 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 		#end
 
+		var option:Option = new Option('Perfect Pixel Effect',
+		"if checked, the pixel rating & countdown sprites will do Perfect Pixel from V Slice \nNOTE: The Characters, Icons & Stages don't count",
+		'perfectPixel',
+		BOOL);
+		addOption(option);
+
 		super();
 		add(notes);
 		add(splashes);

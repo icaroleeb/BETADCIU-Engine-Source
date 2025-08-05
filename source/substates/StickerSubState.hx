@@ -4,31 +4,27 @@ import flixel.FlxSprite;
 import haxe.Json;
 import lime.utils.Assets;
 // import flxtyped group
-import backend.MusicBeatSubstate;
-import states.StoryMenuState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxTimer;
 import flixel.FlxG;
 import flixel.math.FlxMath;
 import flixel.util.FlxSort;
-import flixel.util.FlxSignal;
-import states.MainMenuState;
 import flixel.addons.transition.FlxTransitionableState;
 import openfl.display.BitmapData;
-import states.FreeplayState;
 import openfl.geom.Matrix;
-//import backend.FunkinSound;
 import openfl.display.Sprite;
 import openfl.display.Bitmap;
 import flixel.FlxState;
 
+import backend.WeekData;
+
 using Lambda;
 using StringTools;
-using backend.tools.MapTools;
 
 class StickerSubState extends MusicBeatSubstate
 {
-  
+  public var STICKER_SET = "stickers-set-1";
+  public var STICKER_PACK = "all";
   public var grpStickers:FlxTypedGroup<StickerSprite>;
 
   // yes... a damn OpenFL sprite!!!
@@ -49,9 +45,10 @@ class StickerSubState extends MusicBeatSubstate
 
   public function new(?oldStickers:Array<StickerSprite>, ?targetState:StickerSubState->FlxState):Void
   {
+    //controls.isInSubstate = true;
     super();
 
-    this.targetState = (targetState == null) ? ((sticker) -> new MainMenuState()) : targetState;
+    this.targetState = (targetState == null) ? ((sticker) -> new states.MainMenuState()) : targetState;
 
     // todo still
     // make sure that ONLY plays mp3/ogg files
@@ -60,12 +57,12 @@ class StickerSubState extends MusicBeatSubstate
     var assetsInList = openfl.utils.Assets.list();
 
     var soundFilterFunc = function(a:String) {
-      return a.startsWith(Paths.getSharedPath('sounds/stickersounds/'));
+      return a.startsWith('assets/shared/sounds/stickersounds/');
     };
 
     soundSelections = assetsInList.filter(soundFilterFunc);
     soundSelections = soundSelections.map(function(a:String) {
-      return a.replace(Paths.getSharedPath('sounds/stickersounds/'), '').split('/')[0];
+      return a.replace('assets/shared/sounds/stickersounds/', '').split('/')[0];
     });
 
     // cracked cleanup... yuchh...
@@ -83,13 +80,13 @@ class StickerSubState extends MusicBeatSubstate
     soundSelection = FlxG.random.getObject(soundSelections);
 
     var filterFunc = function(a:String) {
-      return a.startsWith(Paths.getSharedPath('sounds/stickersounds/') + soundSelection + '/');
+      return a.startsWith('assets/shared/sounds/stickersounds/' + soundSelection + '/');
     };
     var assetsInList3 = openfl.utils.Assets.list();
     sounds = assetsInList3.filter(filterFunc);
     for (i in 0...sounds.length)
     {
-      sounds[i] = sounds[i].replace(Paths.getSharedPath('sounds/'), '');
+      sounds[i] = sounds[i].replace('assets/shared/sounds/', '');
       sounds[i] = sounds[i].substring(0, sounds[i].lastIndexOf('.'));
     }
 
@@ -118,7 +115,6 @@ class StickerSubState extends MusicBeatSubstate
   public function degenStickers():Void
   {
     grpStickers.cameras = FlxG.cameras.list;
-    FlxTransitionableState.skipNextTransIn = false;
 
     /*
       if (dipshit != null)
@@ -140,12 +136,16 @@ class StickerSubState extends MusicBeatSubstate
       new FlxTimer().start(sticker.timing, _ -> {
         sticker.visible = false;
         var daSound:String = FlxG.random.getObject(sounds);
-        //FunkinSound.playOnce(Paths.sound(daSound));
-        FlxG.sound.play(Paths.sound(daSound));
+        #if !LEGACY_PSYCH
+        new FlxSound().loadEmbedded(Paths.sound(daSound)).play();
+        #else
+        new FlxSound().loadEmbedded(Paths.sound(daSound,"shared")).play();
+        #end
 
         if (grpStickers == null || ind == grpStickers.members.length - 1)
         {
           switchingState = false;
+          FlxTransitionableState.skipNextTransIn = false;
           close();
         }
       });
@@ -159,20 +159,73 @@ class StickerSubState extends MusicBeatSubstate
       grpStickers.clear();
     }
 
-    var stickerInfo:StickerInfo = new StickerInfo('stickers-set-1');
-    var stickers:Map<String, Array<String>> = new Map<String, Array<String>>();
-    for (stickerSets in stickerInfo.getPack("all"))
-    {
-      stickers.set(stickerSets, stickerInfo.getStickers(stickerSets));
-    }
+    trace("Collecting stickers...");
+    //trace("Current mod: "+ModsHelper.getActiveMod());
+    var stickers:StickerInfo = null;
+
+    // var globalMods = Mods.getGlobalMods().map(s -> "mods/"+s);
+    // globalMods.pushUnique("mods/"+Mods.currentModDirectory);
+    // globalMods.push("assets/shared"); // base stickers
+
+      #if sys
+      #if !LEGACY_PSYCH
+      var modStickerDir = Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0],TEXT,null,true);
+      #else
+      //var modStickerDir = Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0],TEXT,null);
+      #end
+      if(!FileSystem.exists(modStickerDir)){
+        var modStickerDir = Paths.getPath('images/transitionSwag/stickers-set-1',TEXT,null,true);
+        //UserErrorSubstate.makeMessage("Missing sticker_set",'Couldn\'t find sticker set "$STICKER_SET"\n\nin $modStickerDir');
+      }
+      else if(!FileSystem.exists('$modStickerDir/stickers.json')){
+        var modStickerDir = Paths.getPath('images/transitionSwag/stickers-set-1',TEXT,null,true);
+        //UserErrorSubstate.makeMessage("Missing manifest",'Sticker set $STICKER_SET doesn\'t contain a "stickers.json" file\n\nin $modStickerDir/stickers.json');
+      }
+      else{
+
+        try{
+          var infoObj = new StickerInfo(WeekData.getCurrentWeek().stickers[0]);
+          stickers = infoObj;
+          //if(infoObj.getPack(STICKER_PACK) == null) UserErrorSubstate.makeMessage('Missing pack','Sticker set ${infoObj.name} doesn\'t contain "$STICKER_PACK" pack.\n\nAll available stickers will be loaded instead.');
+        }
+        catch(x){
+          //UserErrorSubstate.makeMessage('Couldn\'t make $STICKER_PACK','In "$modStickerDir":\n\n${x.message}');
+        }
+
+      }
+      #else
+      var infoObj = new StickerInfo(WeekData.getCurrentWeek().stickers[0]);
+          stickers = infoObj;
+      #end
+    // sticker group -> array of sticker names
 
     var xPos:Float = -100;
     var yPos:Float = -100;
     while (xPos <= FlxG.width)
     {
-      var stickerSet:String = FlxG.random.getObject(stickers.keyValues());
-      var sticker:String = FlxG.random.getObject(stickers.get(stickerSet));
-      var sticky:StickerSprite = new StickerSprite(0, 0, stickerInfo.name, sticker);
+      // A little complicateb block, so let me explain:
+      var sticky:StickerSprite = null;
+      // Determinate if we actually have a valid set.
+      if(stickers != null){
+
+        // Select subsets defined by STICKER_PACK collection in the above "StickerSet"
+        var stickerPack:Array<String> = stickers.getPack(WeekData.getCurrentWeek().stickers[1]);
+        if(stickerPack == null){
+          //stickerPack = stickers.stickers.keys();
+        }
+        // get all stickers from all subsets defined by "all" collection
+        var stickerSetCollection:Array<String> = [];
+        for(x in stickerPack){
+          stickerSetCollection = stickerSetCollection.concat(stickers.getStickers(x));
+        }
+
+        // get a random sticker 
+        var sticker:String = FlxG.random.getObject(stickerSetCollection);
+        sticky = new StickerSprite(0, 0, WeekData.getCurrentWeek().stickers[0], sticker);
+      }
+      else {
+        sticky = new StickerSprite(0, 0, null, "justBf");
+      }
       sticky.visible = false;
 
       sticky.x = xPos;
@@ -231,8 +284,11 @@ class StickerSubState extends MusicBeatSubstate
 
         sticker.visible = true;
         var daSound:String = FlxG.random.getObject(sounds);
-        //FunkinSound.playOnce(Paths.sound(daSound));
-        FlxG.sound.play(Paths.sound(daSound));
+        #if !LEGACY_PSYCH
+        new FlxSound().loadEmbedded(Paths.sound(daSound)).play();
+        #else
+        new FlxSound().loadEmbedded(Paths.sound(daSound,"shared")).play();
+        #end
 
         var frameTimer:Int = FlxG.random.int(0, 2);
 
@@ -263,8 +319,13 @@ class StickerSubState extends MusicBeatSubstate
 
               dipshit.addChild(bitmap);
               // FlxG.addChildBelowMouse(dipshit);
-            */
-            FlxG.switchState((targetState(this)));
+             */
+             if(subState != null){
+              subStateClosed.addOnce(s -> {
+                FlxG.switchState(targetState(this));
+              });
+             }
+             else FlxG.switchState(targetState(this));
           }
         });
       });
@@ -279,6 +340,14 @@ class StickerSubState extends MusicBeatSubstate
     lastOne.updateHitbox();
     lastOne.angle = 0;
     lastOne.screenCenter();
+
+    STICKER_SET = WeekData.getCurrentWeek().stickers[0];
+    STICKER_PACK = WeekData.getCurrentWeek().stickers[1];
+    #if !LEGACY_PSYCH
+      Mods.loadTopMod(); // We won't be messing with mods from here on
+    #else
+      WeekData.loadTheFirstEnabledMod();
+    #end
   }
 
   override public function update(elapsed:Float):Void
@@ -301,6 +370,7 @@ class StickerSubState extends MusicBeatSubstate
 
   override public function destroy():Void
   {
+    //controls.isInSubstate = false;
     if (switchingState) return;
     super.destroy();
   }
@@ -309,14 +379,19 @@ class StickerSubState extends MusicBeatSubstate
 class StickerSprite extends FlxSprite
 {
   public var timing:Float = 0;
+  var stickerPath:String;
+  public function loadSticker() {
+    loadGraphic(Paths.image(stickerPath));
+    updateHitbox();
+    scrollFactor.set();
+  }
 
   public function new(x:Float, y:Float, stickerSet:String, stickerName:String):Void
   {
     super(x, y);
-    loadGraphic(Paths.image('transitionSwag/' + stickerSet + '/' + stickerName));
-    updateHitbox();
-    scrollFactor.set();
+    stickerPath = stickerSet == null ? stickerName : 'transitionSwag/$stickerSet/$stickerName';
     antialiasing = ClientPrefs.data.antialiasing;
+    loadSticker();
   }
 }
 
@@ -324,13 +399,13 @@ class StickerInfo
 {
   public var name:String;
   public var artist:String;
+  public var modDir:String;
   public var stickers:Map<String, Array<String>>;
   public var stickerPacks:Map<String, Array<String>>;
 
   public function new(stickerSet:String):Void
   {
-    var path = Paths.file('images/transitionSwag/' + stickerSet + '/stickers.json');
-    var json = Json.parse(Assets.getText(path));
+    var json = Json.parse(Paths.getTextFromFile('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0] +'/stickers.json'));
 
     // doin this dipshit nonsense cuz i dunno how to deal with casting a json object with
     // a dash in its name (sticker-packs)

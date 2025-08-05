@@ -1,49 +1,49 @@
 {
 	"animations": [
 		{
+			"loop": false,
 			"offsets": [0, 0],
-			"indices": [],
-			"fps": 24,
 			"anim": "idle",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [0, 0],
 			"name": "Idle",
-			"playerOffsets": [0, 0]
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [0, 0],
-			"indices": [],
-			"fps": 24,
 			"anim": "singUP",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [-15, 2],
 			"name": "Pose Up",
-			"playerOffsets": [-15, 2]
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [0, 0],
-			"indices": [],
-			"fps": 24,
 			"anim": "singRIGHT",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [0, 1],
 			"name": "Pose Right",
-			"playerOffsets": [0, 1]
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [0, 0],
-			"indices": [],
-			"fps": 24,
 			"anim": "singLEFT",
-			"loop": false,
+			"fps": 24,
+			"playerOffsets": [-2, 2],
 			"name": "Pose Left",
-			"playerOffsets": [-2, 2]
+			"indices": []
 		},
 		{
-			"offsets": [0, 0],
-			"indices": [],
-			"fps": 24,
-			"anim": "singDOWN",
 			"loop": false,
+			"offsets": [0, 0],
+			"anim": "singDOWN",
+			"fps": 24,
+			"playerOffsets": [-8, -12],
 			"name": "Pose Down",
-			"playerOffsets": [-8, -12]
+			"indices": []
 		}
 	],
 	"vocals_file": "",
@@ -51,15 +51,12 @@
 	"image": "characters/darnell",
 	"position": [0, 210],
 	"player_camera_position": [150, 0],
-	"playerposition": [
-		-220,
-		210
-	],
 	"healthicon": "darnell",
 	"flip_x": false,
 	"healthbar_colors": [115, 94, 176],
 	"camera_position": [50, 0],
-	"sing_duration": 4,
+	"player_position": [-220, 210],
+	"sing_duration": 6.1,
 	"isPlayerChar": false,
 	"scale": 1,
 	"_editor_isPlayer": true

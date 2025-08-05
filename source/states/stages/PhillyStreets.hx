@@ -41,11 +41,11 @@ class PhillyStreets extends BaseStage
 	var phillyCars2:BGSprite;
 
 	var picoFade:FlxSprite;
+	var phillyForeground:BGSprite;
 	var spraycan:SpraycanAtlasSprite;
 	var spraycanPile:BGSprite;
 
 	var darkenable:Array<FlxSprite> = [];
-	var abot:ABotSpeaker;
 	override function create()
 	{
 		if (!PlayState.instance.variables.exists("stageVariables")){
@@ -55,8 +55,7 @@ class PhillyStreets extends BaseStage
 
 		if(!ClientPrefs.data.lowQuality)
 		{
-			var skyImage = Paths.image('phillyStreets/phillySkybox');
-			scrollingSky = new FlxTiledSprite(skyImage, skyImage.width + 400, skyImage.height, true, false);
+			scrollingSky = new FlxTiledSprite(Paths.image('phillyStreets/phillySkybox'), 2922, 718, true, false);
 			scrollingSky.antialiasing = ClientPrefs.data.antialiasing;
 			scrollingSky.setPosition(-650, -375);
 			scrollingSky.scrollFactor.set(0.1, 0.1);
@@ -140,11 +139,14 @@ class PhillyStreets extends BaseStage
 			darkenable.push(phillyTrafficLightmap);
 		}
 
-		var phillyForeground:BGSprite = new BGSprite('phillyStreets/phillyForeground', 88, 317, 1, 1);
+		var phillyForeground = new BGSprite('phillyStreets/phillyForeground', 88, 317, 1, 1);
 		stageVars.set('phillyForeground', phillyForeground);
 		add(phillyForeground);
 		darkenable.push(phillyForeground);
 		
+		spraycanPile = new BGSprite('SpraycanPile', 920, 1045, 1, 1);
+		stageVars.set("spraycanPile", spraycanPile);
+
 		if(!ClientPrefs.data.lowQuality)
 		{
 			picoFade = new FlxSprite();
@@ -154,11 +156,6 @@ class PhillyStreets extends BaseStage
 			add(picoFade);
 			darkenable.push(picoFade);
 		}
-
-		abot = new ABotSpeaker(gfGroup.x, gfGroup.y + 550);
-		stageVars.set('abot', abot);
-		updateABotEye(true);
-		add(abot);
 		
 		if(ClientPrefs.data.shaders)
 			setupRainShader();
@@ -208,9 +205,7 @@ class PhillyStreets extends BaseStage
 			if(!noteTypes.contains(note.noteType)) noteTypes.push(note.noteType);
 		}
 
-		spraycanPile = new BGSprite('SpraycanPile', 920, 1045, 1, 1);
 		if (PlayState.instance.curStage.toLowerCase() == 'phillystreets') precache();
-		PlayState.instance.variables.get("stageVariables").set("spraycanPile", spraycanPile);
 		add(spraycanPile);
 		darkenable.push(spraycanPile);
 
@@ -234,20 +229,14 @@ class PhillyStreets extends BaseStage
 	}
 
 	override public function destroy():Void {
-		if (spraycanPile != null) { 
-			remove(spraycanPile); // because its not being removed after a stage change for some reason (????)
-			spraycanPile.destroy();
-			spraycanPile = null;
+		if (PlayState.instance.camGame.filters != null) {
+			var filters = PlayState.instance.camGame.filters;
 
-			if (PlayState.instance.camGame.filters != null) {
-				var filters = PlayState.instance.camGame.filters;
-	
-				filters = filters.filter(function(f:BitmapFilter) {
-					var shaderF = Std.downcast(f, ShaderFilter);
-					return shaderF == null || shaderF.shader != rainShader;
-				});
-				PlayState.instance.camGame.filters = filters;
-			}
+			filters = filters.filter(function(f:BitmapFilter) {
+				var shaderF = Std.downcast(f, ShaderFilter);
+				return shaderF == null || shaderF.shader != rainShader;
+			});
+			PlayState.instance.camGame.filters = filters;
 		}
 		super.destroy();
 	}
@@ -433,25 +422,10 @@ class PhillyStreets extends BaseStage
 		FlxG.camera.fade(FlxColor.BLACK, 2, true, null, true);
 	}
 
-	function updateABotEye(finishInstantly:Bool = false)
-	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
-			return; 
-
-		if(PlayState.SONG.notes[Std.int(FlxMath.bound(curSection, 0, PlayState.SONG.notes.length - 1))].mustHitSection == true)
-			abot.lookRight();
-		else
-			abot.lookLeft();
-
-		if(finishInstantly) abot.eyes.anim.curFrame = abot.eyes.anim.length - 1;
-	}
-
 	override function startSong()
 	{
 		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
 			return; 
-
-		abot.snd = FlxG.sound.music;
 		gf.animation.finishCallback = onNeneAnimationFinished;
 	}
 	
@@ -559,15 +533,15 @@ class PhillyStreets extends BaseStage
 
 		rainShader = new RainShader();
 		rainShader.scale = FlxG.height / 200;
-		switch (songName)
+		switch (songName.toLowerCase())
 		{
-			case 'darnell':
+			case 'darnell' | 'darnell erect' | 'darnell (bf mix)':
 				rainShaderStartIntensity = 0;
 				rainShaderEndIntensity = 0.1;
-			case 'lit-up':
+			case 'lit up' | 'lit up erect' | 'lit up (bf mix)':
 				rainShaderStartIntensity = 0.1;
 				rainShaderEndIntensity = 0.2;
-			case '2hot':
+			case '2hot' | '2hot erect' | '2hot (bf mix)':
 				rainShaderStartIntensity = 0.2;
 				rainShaderEndIntensity = 0.4;
 		}
@@ -659,14 +633,6 @@ class PhillyStreets extends BaseStage
 		}
 	}
 
-	override function sectionHit()
-	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
-			return; 
-
-		updateABotEye();
-	}
-
 	var lightsStop:Bool = false;
 	var lastChange:Int = 0;
 	var changeInterval:Int = 8;
@@ -680,7 +646,6 @@ class PhillyStreets extends BaseStage
 		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
-		//if(curBeat % 2 == 0) abot.beatHit();
 		switch(currentNeneState) {
 			case STATE_READY:
 				if (blinkCountdown == 0)
@@ -1008,7 +973,7 @@ class PhillyStreets extends BaseStage
 				dad.specialAnim = true;
 				kickCanSnd.play(true, sndTime - 50);
 				spraycan.playCanStart();
-				camFollow.x += 250;
+				camFollow.x += 495;
 				game.cameraSpeed = 1.5;
 				game.defaultCamZoom -= 0.1;
 				

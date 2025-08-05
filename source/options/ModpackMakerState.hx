@@ -117,12 +117,6 @@ class ModpackMakerState extends MusicBeatState {
         }
 
         // Left Panel: Mod Selection
-        directoryDropDown = new PsychUIDropDownMenu(leftPanel.x + 20, leftPanel.y + 70, [''], onDirectorySelected);
-        add(directoryDropDown);
-
-        songDirectoryDropDown = new PsychUIDropDownMenu(leftPanel.x + 20, leftPanel.y + 140, [''], onSongDirectorySelected);
-        add(songDirectoryDropDown);
-
         var labels = [
             {text: "Select Mod:", y: leftPanel.y + 50},
             {text: "Select Song:", y: leftPanel.y + 120}
@@ -133,6 +127,12 @@ class ModpackMakerState extends MusicBeatState {
             text.borderSize = 1.5;
             add(text);
         }
+
+        songDirectoryDropDown = new PsychUIDropDownMenu(leftPanel.x + 20, leftPanel.y + 140, [''], onSongDirectorySelected);
+        add(songDirectoryDropDown);
+        
+        directoryDropDown = new PsychUIDropDownMenu(leftPanel.x + 20, leftPanel.y + 70, [''], onDirectorySelected);
+        add(directoryDropDown);
 
         // Center Panel: Modpack Creation
         var centerX = mainPanel.x + 200;
@@ -163,9 +163,6 @@ class ModpackMakerState extends MusicBeatState {
         add(createButton);
 
         // Right Panel: Online Modpacks
-        onlineZipDropDown = new PsychUIDropDownMenu(rightPanel.x + 20, rightPanel.y + 70, ['Loading...'], onOnlineZipSelected);
-        add(onlineZipDropDown);
-
         downloadZipButton = new FlxButton(rightPanel.x + 20, rightPanel.y + 140, "Download Selected Modpack", downloadSelectedZipModpack);
         downloadZipButton.scale.set(1.5, 1.5);
         downloadZipButton.updateHitbox();
@@ -174,6 +171,9 @@ class ModpackMakerState extends MusicBeatState {
         downloadZipButton.alpha = 0.9;
         downloadZipButton.active = false;
         add(downloadZipButton);
+
+        onlineZipDropDown = new PsychUIDropDownMenu(rightPanel.x + 20, rightPanel.y + 70, ['Loading...'], onOnlineZipSelected);
+        add(onlineZipDropDown);
 
         // Debug group setup
         luaDebugGroup = new FlxTypedGroup<DebugLuaText>();

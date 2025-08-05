@@ -67,7 +67,6 @@ class Limo extends BaseStage
 				grpLimoDancers.add(dancer);
 				stageVars.set("dancer" + i, dancer);
 			}
-			
 
 			limoLight = new BGSprite('gore/coldHeartKiller', limoMetalPole.x - 180, limoMetalPole.y - 80, 0.4, 0.4);
 			stageVars.set("limoLight", limoLight);
@@ -94,15 +93,15 @@ class Limo extends BaseStage
 		stageVars.set("fastCar", fastCar);
 		fastCar.active = true;
 
+		limo = new BGSprite('limo/limoDrive', -120, 550, 1, 1, ['Limo stage'], true); // moved to create instead of createPost because it won't remove during stage switch
+		stageVars.set("limo", limo);
 	}
 	override function createPost()
 	{
 		var stageVars = PlayState.instance.variables.get("stageVariables");
 		addBehindGF(fastCar);
-		
-		limo = new BGSprite('limo/limoDrive', -120, 550, 1, 1, ['Limo stage'], true);
-		addBehindGF(limo); //Shitty layering but whatev it works LOL
-		stageVars.set("limo", limo);
+
+		addBehindDad(limo); //Shitty layering but whatev it works LOL
 	}
 
 	override public function destroy():Void {
@@ -241,7 +240,7 @@ class Limo extends BaseStage
 		}
 	}
 
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
+	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
 		if (PlayState.instance.curStage.toLowerCase() != "limo") 
 			return; 
