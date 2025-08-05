@@ -121,6 +121,9 @@ class FunkinLua {
 	
 
 		set('isStoryMode', PlayState.isStoryMode);
+		set('isBETADCIU', PlayState.isBETADCIU);
+		set('isBonus', PlayState.isBonus);
+
 		set('difficulty', PlayState.storyDifficulty);
 
 		set('difficultyName', Difficulty.getString(false));
