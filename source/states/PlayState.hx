@@ -2914,7 +2914,12 @@ class PlayState extends MusicBeatState
 		if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
+			rating.pixelPerfectPosition = true;
+			rating.pixelPerfectRender = true;
+
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
+			comboSpr.pixelPerfectPosition = true;
+			comboSpr.pixelPerfectRender = true;
 		}
 		else
 		{
