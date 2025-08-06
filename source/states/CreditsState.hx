@@ -40,9 +40,11 @@ class CreditsState extends MusicBeatState
 		var defaultList:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
 			['BETADCIU Engine Credits'],
 			['Blantados',			'blantad',			'Main Programmer and Head of BETADCIU Engine',				'https://twitter.com/Blantados',	'64b3fe'],
-            ['Ryiuu',				'ryv',				'Contributor to BETADCIU Engine',			 				'https://twitter.com/Ryiuu01',		'0f2a49'],
+            ['Ryiuu',				'ryv',				'Programmer for BETADCIU Engine',			 				'https://twitter.com/Ryiuu01',		'0f2a49'],
 			[""],
 			['Special Thanks'],
+			['Tacos',			    'tacos',			'Additional help with the code',                            'https://www.youtube.com/@Tacos360','ffcf67'],
+			['101 Digi',			'digi',			    'Custom Stickers Artist',                                   'https://x.com/101_digi',		    '37544e'],
 			['Icaro Lee',			'icarolee',			'Ported legacy Main Menu, Some options and Fixed some Stuff','https://x.com/Icarofnf',		    '5F0000'],
 			[""],
 			["Psych Engine Team"],

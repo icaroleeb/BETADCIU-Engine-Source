@@ -2631,7 +2631,7 @@ class FunkinLua {
 
 		if (shit.animOffsets.exists(animationName)) shit.playAnim(animationName, true, false, animationFrame);
 
-		//PlayState.instance.startCharacterLua(shit.curCharacter);
+		PlayState.instance.startCharacterScripts(shit.curCharacter);
 	}
 
 	//trying to do some auto stuff so i don't have to set manual x and y values
