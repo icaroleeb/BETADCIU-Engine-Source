@@ -1381,12 +1381,23 @@ class FunkinLua {
 			else
 				luaTrace("addLuaCamera: Camera " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
-		Lua_helper.add_callback(lua, "reorderCameras", function(cameraNames:Array<String>) { // beta, doesn't work that well
+		Lua_helper.add_callback(lua, "removeLuaCamera", function(tag:String, ?destroy:Bool=false) { // add the camera
+			var leCamera:FlxCamera = game.getLuaObject(tag);
+			
+			if (leCamera != null)
+				FlxG.cameras.remove(leCamera, destroy)
+			else
+				luaTrace("removeLuaCamera: Camera " + tag + " doesn't exist!", false, false, FlxColor.RED);
+		});
+		Lua_helper.add_callback(lua, "reorderCameras", function(cameraNames:Array<String>) { 
+			@:privateAccess
+			var defaultCameras:Array<FlxCamera> = FlxG.cameras.defaults;
+			var copiedCameras:Array<FlxCamera> = defaultCameras.slice(0, defaultCameras.length); // Need to create a copy since we remove from FlxG.cameras
+
 			for (camName in cameraNames) {
 				var leCamera:FlxCamera = LuaUtils.cameraFromString(camName);
 
 				if (leCamera != null){
-					// trace("REMOVING " + camName);
 					FlxG.cameras.remove(leCamera, false);
 				}	
 			}
@@ -1394,10 +1405,10 @@ class FunkinLua {
 			for (camName in cameraNames) {
 			
 				var leCamera:FlxCamera = LuaUtils.cameraFromString(camName);
-				var isDefault = (camName.toLowerCase() == "camgame" || camName.toLowerCase() == "game");
-
+			
 				if (leCamera != null){
-					// trace("ADDING " + camName);
+					@:privateAccess
+					var isDefault = copiedCameras.indexOf(leCamera) != -1;
 					FlxG.cameras.add(leCamera, isDefault);
 				}
 			}
@@ -1424,8 +1435,24 @@ class FunkinLua {
 			return false;
 		});
 		Lua_helper.add_callback(lua, "makeGraphic", function(obj:String, width:Int = 256, height:Int = 256, color:String = 'FFFFFF') {
-			var spr:FlxSprite = LuaUtils.getObjectDirectly(obj);
-			if(spr != null) spr.makeGraphic(width, height, CoolUtil.colorFromString(color));
+			if(game.getLuaObject(obj)!=null) {
+				var spr:FlxSprite = game.getLuaObject(obj);
+				spr.makeGraphic(width, height, CoolUtil.colorFromString(color));
+				return;
+			}
+
+			var split:Array<String> = obj.split('.');
+			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
+			if(split.length > 1) {
+				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
+			}
+
+			if(spr != null) {
+				spr.makeGraphic(width, height, CoolUtil.colorFromString(color));
+				return;
+			}
+
+			luaTrace('makeGraphic: Couldnt find object: ' + obj, false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua, "addAnimationByPrefix", function(obj:String, name:String, prefix:String, framerate:Float = 24, loop:Bool = true) {
 			var obj:FlxSprite = cast LuaUtils.getObjectDirectly(obj);

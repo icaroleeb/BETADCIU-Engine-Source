@@ -95,11 +95,16 @@ class TweenFunctions
 			LuaUtils.cancelTween(tag);
 		});
 
-		Lua_helper.add_callback(lua, "cancelTweensOf", function(obj:String) {
-			var spr:Dynamic = LuaUtils.getObjectDirectly(obj);
+		Lua_helper.add_callback(lua, "cancelTweensOf", function(variable:String, ?allowMaps:Bool = false) {
+			var split:Array<String> = variable.split('.');
+			var result:Dynamic = null;
+			
+			result = (split.length > 1)
+				? LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowMaps)
+				: LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
 
-			if(spr != null) {
-				FlxTween.cancelTweensOf(spr);
+			if(result != null) {
+				FlxTween.cancelTweensOf(result);
 			}
 		});
 

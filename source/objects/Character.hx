@@ -452,6 +452,11 @@ class Character extends OffsettableSprite
 		specialAnim = false;
 		var useFallbackMiss:Bool = false;
 
+		// Reimplemented the fall back for the alt sprites
+		if (AnimName.endsWith('alt') && !hasAnimation(AnimName)){
+			AnimName = AnimName.split('-')[0];
+		}
+			
 		if (AnimName.endsWith('miss') && !hasAnimation(AnimName))
 		{
 			AnimName = AnimName.substr(0, AnimName.length - 4);

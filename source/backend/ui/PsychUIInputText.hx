@@ -63,7 +63,7 @@ class PsychUIInputText extends FlxSpriteGroup
 	public function new(x:Float = 0, y:Float = 0, wid:Int = 100, ?text:String = '', size:Int = 8)
 	{
 		super(x, y);
-		this.bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		this.bg = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
 		this.behindText = new FlxSprite(1, 1).makeGraphic(1, 1, FlxColor.WHITE);
 		this.selection = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
 		this.textObj = new FlxText(1, 1, Math.max(1, wid - 2), '', size);
@@ -73,6 +73,8 @@ class PsychUIInputText extends FlxSpriteGroup
 		add(this.selection);
 		add(this.textObj);
 		add(this.caret);
+
+		this.bg.color = FlxColor.BLACK;
 
 		this.textObj.color = FlxColor.BLACK;
 		this.textObj.textField.selectable = false;

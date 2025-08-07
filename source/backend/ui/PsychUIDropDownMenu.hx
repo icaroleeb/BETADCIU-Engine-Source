@@ -37,7 +37,8 @@ class PsychUIDropDownMenu extends PsychUIInputText
 		{
 			if(old != cur)
 			{
-				_curFilter = this.list.filter(function(str:String) return str.startsWith(cur));
+				// So I don't have to type the number when looking for events
+				_curFilter = this.list.filter(function(str:String) return str.toLowerCase().indexOf(cur.toLowerCase()) != -1);
 				showDropDown(true, 0, _curFilter);
 			}
 		}
