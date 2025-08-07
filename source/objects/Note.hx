@@ -44,7 +44,7 @@ typedef NoteAnimArray = {
 
 typedef NoteConfig = {
 	@:optional var strumAnimations:Array<NoteAnimArray>;
-	@:optional var strumOffset:Array<Float>;
+	@:optional var noteAnimations:Array<NoteAnimArray>;
 	@:optional var rgbEnabled:Bool;
 }
 
@@ -53,7 +53,7 @@ typedef NoteConfig = {
  * 
  * If you want to make a custom note type, you should search for: "function set_noteType"
 **/
-class Note extends FlxSprite
+class Note extends OffsettableSprite
 {
 	//This is needed for the hardcoded note types to appear on the Chart Editor,
 	//It's also used for backwards compatibility with 0.1 - 0.3.2 charts.
@@ -67,6 +67,9 @@ class Note extends FlxSprite
 	];
 
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	// Implemented here so I can add offsets to the notes. Particularly the tail
+	public static var configs:Map<String, NoteConfig> = new Map();
 
 	public var strumTime:Float = 0;
 	public var noteData:Int = 0;
@@ -463,6 +466,12 @@ class Note extends FlxSprite
 			if (Paths.fileExists('images/$jsonPath.json', TEXT)) {
 				final json = getNoteConfig('images/$jsonPath');
 				rgbShader.enabled = json.rgbEnabled != null ? json.rgbEnabled : false;
+
+				if (json.noteAnimations != null) {
+					for (anim in json.noteAnimations) {
+						addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+					}
+				}
 			}
 
 			if (curSkin != skin){
@@ -525,6 +534,7 @@ class Note extends FlxSprite
 			if (isPixelNote && !wasPixelNote) offsetX -= 5;
 		}
 		updateHitbox();
+		
 
 		if(animName != null)
 			animation.play(animName, true);
@@ -750,10 +760,6 @@ class Note extends FlxSprite
 					anim: "static"
 				}
 			],
-			strumOffset: [
-				0,
-				0
-			],
 			rgbEnabled: true
 		};
 	}
@@ -761,7 +767,11 @@ class Note extends FlxSprite
 	public static function getNoteConfig(jsonPath:String){
 		try
 		{
-			return cast tjson.TJSON.parse(Paths.getTextFromFile('$jsonPath.json'));
+			if (!configs.exists(jsonPath)){
+				configs.set(jsonPath, cast tjson.TJSON.parse(Paths.getTextFromFile('$jsonPath.json')));
+			}
+			
+			return configs.get(jsonPath);
 		}
 		return dummy();
 	}

@@ -980,6 +980,8 @@ class ModpackMakerState extends MusicBeatState {
         try {
             unzip(localZipPath, Paths.mods());
             FileSystem.deleteFile(localZipPath);
+
+            FlxG.sound.play(Paths.sound('confirmMenu'));
             showToast("Zipped modpack downloaded and extracted!");
             reloadSetupOptions();
         } catch (e:Dynamic) {
