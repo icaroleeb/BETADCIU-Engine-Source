@@ -2596,10 +2596,12 @@ class FunkinLua {
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;	
 		var position:Int = -1;
+		var oldChar:String = "";
 							
 		if (PlayState.instance.modchartCharacters.get(tag) != null)
 		{
 			var daChar:Character = PlayState.instance.modchartCharacters.get(tag);
+			oldChar = daChar.curCharacter;
 
 			if (daChar.isAnimateAtlas){
 				if (daChar.getAnimationName().startsWith('sing')) {
@@ -2658,6 +2660,7 @@ class FunkinLua {
 
 		if (shit.animOffsets.exists(animationName)) shit.playAnim(animationName, true, false, animationFrame);
 
+		if (oldChar != "") shit.pastCharacter = oldChar;
 		PlayState.instance.startCharacterScripts(shit.curCharacter);
 	}
 
@@ -2665,6 +2668,7 @@ class FunkinLua {
 	public static function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;				
+		var oldChar:String = PlayState.instance.boyfriend.curCharacter;
 		
 		try {
 			if (PlayState.instance.boyfriend.isAnimateAtlas){
@@ -2719,6 +2723,7 @@ class FunkinLua {
 		if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
 			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
 
+		PlayState.instance.boyfriend.pastCharacter = oldChar;
 		PlayState.instance.setOnScripts('boyfriendName', PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
 	}
@@ -2726,6 +2731,7 @@ class FunkinLua {
 	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
+		var oldChar:String = PlayState.instance.dad.curCharacter;
 
 		try {
 			if (PlayState.instance.dad.isAnimateAtlas){
@@ -2783,6 +2789,7 @@ class FunkinLua {
 		if (PlayState.instance.dad.animOffsets.exists(animationName))
 			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
 
+		PlayState.instance.dad.pastCharacter = oldChar;
 		PlayState.instance.setOnScripts('dadName', PlayState.instance.dad.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
 	}
@@ -2790,6 +2797,7 @@ class FunkinLua {
 	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // not tested but i'm almost 100% sure it works		
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;		
+		var oldChar:String = PlayState.instance.gf.curCharacter;
 
 		try {
 			if (PlayState.instance.gf.isAnimateAtlas){
@@ -2822,6 +2830,7 @@ class FunkinLua {
 		if (PlayState.instance.gf.animOffsets.exists(animationName))
 			PlayState.instance.gf.playAnim(animationName, true, false, animationFrame);
 
+		PlayState.instance.gf.pastCharacter = oldChar;
 		PlayState.instance.setOnScripts('gfName', PlayState.instance.gf.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.gf.curCharacter);
 	}
