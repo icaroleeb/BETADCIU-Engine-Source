@@ -57,6 +57,7 @@ class Character extends OffsettableSprite
 	public var isPlayer:Bool = false;
 	public var flipMode:Bool = false;
 	public var curCharacter:String = DEFAULT_CHARACTER;
+	public var pastCharacter:String = DEFAULT_CHARACTER;
 
 	public var daZoom:Float = 1;
 
@@ -125,6 +126,7 @@ class Character extends OffsettableSprite
 		animOffsets = [];
 		animPlayerOffsets = [];
 		curCharacter = character;
+		pastCharacter = character;
 		isPsychPlayer = false;
 
 		curColor = 0xFFFFFFFF;
