@@ -153,7 +153,7 @@ class PlayState extends MusicBeatState
 	public var boyfriendGroup:FlxSpriteGroup;
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
-	public var curStage:String = '';
+	public static var curStage:String = '';
 
 	public static var stageUI(default, set):String = "normal";
 	public static var uiPrefix:String = "";
@@ -433,7 +433,7 @@ class PlayState extends MusicBeatState
 		boyfriend = new Character(0, 0, SONG.player1, true);
 		startCharacterPos(boyfriend);
 		
-		addStage(false, false);
+		addStage(false, true);
 		
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// "SCRIPTS FOLDER" SCRIPTS
@@ -4150,13 +4150,13 @@ class PlayState extends MusicBeatState
 					removeStage();
 					curStage = stage;
 					stageData = StageData.getStageFile(curStage); 
-					addStage(true);
+					addStage(false, true);
 					trace('Stage Loaded: ' + stage + '!');
 				}
 				removeStage();
 				curStage = ogStage;
 				stageData = StageData.getStageFile(curStage); 
-				addStage(true);
+				addStage(false, true);
 				stagesPreloaded = true;
 				trace('Stage Preloading Finished.');
 			}
@@ -4505,20 +4505,22 @@ class PlayState extends MusicBeatState
 	public var addedStages:Array<String> = [];
 	public function removeStage(){
 		removeObjects(stageData);
+
+		if (ClientPrefs.data.comboCam == "Game") // this should help for base stages
+			remove(comboGroup);
+
+		stagesFunc(function(stage:BaseStage) stage.destroy());
+
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
 			hardCodedStage = null;
 		}
+
+		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			// STAGE SCRIPTS
-			#if LUA_ALLOWED
-			stopLuasNamed('stages/' + curStage + '.lua', "stage");
-			
-			for (stage in addedStages) stopLuasNamed(stage, "stage");
-		#end
-			#if HSCRIPT_ALLOWED 
-			stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
-			#end
+		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage");
+		for (stage in addedStages) stopLuasNamed(stage, "stage"); #end
+		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
@@ -4526,6 +4528,7 @@ class PlayState extends MusicBeatState
 		if (stageVars != null) {
 			for (key in stageVars.keys()) {
 				var sprite:FlxSprite = stageVars.get(key);
+
 				if (sprite != null) {
 					remove(sprite);
 					variables.remove(key);
@@ -4533,10 +4536,10 @@ class PlayState extends MusicBeatState
 			}
 			stageVars.clear();
 		}
-	}	
+	}
 
-	public function addStage(?onlyLuas:Bool=false, ?stageDetails:Bool=true) {
-		if(stageDetails) setStageDetails(stageData); // for some reason they don't add the chars position on them.
+	public function addStage(?onlyLuas:Bool=false, ?isCreate:Bool=false) {
+		if(!isCreate) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		switch (curStage.toLowerCase())
 		{
 			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
@@ -4553,17 +4556,17 @@ class PlayState extends MusicBeatState
 		}
 
 		addObjects(stageData);
-		stagesFunc(function(stage:BaseStage) stage.createPost());
+		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
 
+		if(!isCreate){
+			stagesFunc(function(stage:BaseStage) stage.createPost());
+			callOnScripts('onCreatePost'); // I don't think suppose put this here.
+		}
+
+		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			// STAGE SCRIPTS
-			#if LUA_ALLOWED 
-				startLuasNamed('stages/' + curStage + '.lua', "stage"); 
-			#end
-
-			#if HSCRIPT_ALLOWED 
-				if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
-			#end
+		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
+		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 	}
 }

@@ -103,6 +103,10 @@ class FunkinLua {
 		set('luaDebugMode', false);
 		set('luaDeprecatedWarnings', true);
 		set('version', MainMenuState.psychEngineVersion.trim());
+
+		set('betadciuVersion', MainMenuState.betadciuEngineVersion.trim());
+		set('psychVersion', MainMenuState.psychEngineVersion.trim());
+		
 		set('modFolder', this.modFolder);
 
 		// Song/Week shit
@@ -471,8 +475,8 @@ class FunkinLua {
 			return value;
 		});
 		Lua_helper.add_callback(lua, "changeStageData", function(id:String) {
-            PlayState.instance.curStage = id;
-            PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
+            PlayState.curStage = id;
+            PlayState.instance.stageData = StageData.getStageFile(PlayState.curStage); 
             PlayState.instance.setStageDetails(PlayState.instance.stageData);
         });
 		Lua_helper.add_callback(lua, "getVar", function(varName:String) {
@@ -1612,10 +1616,10 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "changeStage", function(id:String) {
 			PlayState.instance.removeStage(); // Remove current stage
-			PlayState.instance.curStage = id; // Set new stage name
-			PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
+			PlayState.curStage = id; // Set new stage name
+			PlayState.instance.stageData = StageData.getStageFile(PlayState.curStage); 
 			PlayState.instance.addStage();
-			PlayState.instance.setOnScripts('curStage', PlayState.instance.curStage);
+			PlayState.instance.setOnScripts('curStage', PlayState.curStage);
 		});
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
 			if (scriptType.toLowerCase() == "modpack"){
