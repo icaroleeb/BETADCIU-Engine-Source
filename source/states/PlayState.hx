@@ -1227,6 +1227,7 @@ class PlayState extends MusicBeatState
 		return spr;
 	}
 
+	/*
 	public function addBehindGF(obj:FlxBasic)
 	{
 		insert(members.indexOf(gf), obj);
@@ -1239,6 +1240,7 @@ class PlayState extends MusicBeatState
 	{
 		insert(members.indexOf(dad), obj);
 	}
+	*/
 
 	public function clearNotesBefore(time:Float)
 	{
@@ -3813,10 +3815,6 @@ class PlayState extends MusicBeatState
 		try
 		{
 			newScript = new HScript(null, file, scriptType);
-			switch (scriptType.toLowerCase()){
-				case 'stage':
-					callOnHScript('onCreate'); // why this won't work?!
-			}
 			if (newScript.exists('onCreate')) newScript.call('onCreate');
 			trace('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
