@@ -225,7 +225,7 @@ class StickerSubState extends MusicBeatSubstate
         sticky = new StickerSprite(0, 0, WeekData.getCurrentWeek().stickers[0], sticker);
       }
       else {
-        sticky = new StickerSprite(0, 0, null, "justBf");
+        sticky = new StickerSprite(0, 0, null, "transitionSwag/stickers-set-1/bfSticker3");
       }
       sticky.visible = false;
 
