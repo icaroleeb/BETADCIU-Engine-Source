@@ -4181,7 +4181,7 @@ class PlayState extends MusicBeatState
 					var preloadChar = new Character(0, 0, character);
 					preloadChar.visible = false;
 					startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
-					//stopCharacterScripts(preloadChar.curCharacter);
+					stopCharacterScripts(preloadChar.curCharacter);
 					add(preloadChar);
 					sprites.push(preloadChar);
 					//preloadChar.destroyAtlas();
@@ -4265,7 +4265,7 @@ class PlayState extends MusicBeatState
 										var preloadChar = new Character(0, 0, toLoad.path);
 										preloadChar.visible = false;
 										startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
-										//stopCharacterScripts(preloadChar.curCharacter);
+										stopCharacterScripts(preloadChar.curCharacter);
 										add(preloadChar);
 										sprites.push(preloadChar);
 										//preloadChar.destroyAtlas();
