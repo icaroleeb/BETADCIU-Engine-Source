@@ -4556,15 +4556,15 @@ class PlayState extends MusicBeatState
 		addObjects(stageData);
 		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
 
-		if(!isCreate){
-			stagesFunc(function(stage:BaseStage) stage.createPost());
-			callOnScripts('onCreatePost'); // I don't think suppose put this here.
-		}
-
 		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
+
+		if(!isCreate){
+			stagesFunc(function(stage:BaseStage) stage.createPost());
+			callOnScripts('onCreatePost');
+		}
 	}
 }

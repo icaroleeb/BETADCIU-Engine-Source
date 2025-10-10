@@ -367,6 +367,10 @@ class HScript extends Iris
 			FlxG.state.add(tag);
 		});
 
+		set('insert', function(position:Int, tag:FlxBasic){ 
+			FlxG.state.insert(position, tag);
+		});
+
 		set('addBehindGF', function(tag:FlxBasic){
 			if(daScriptType.toLowerCase() == "stage") {
 				if (!PlayState.instance.variables.exists("stageVariables")){
