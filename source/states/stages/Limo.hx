@@ -98,7 +98,7 @@ class Limo extends BaseStage
 	}
 	override function createPost()
 	{
-		if (PlayState.curStage.toLowerCase() != "schoolevil") 
+		if (PlayState.curStage.toLowerCase() != "limo") 
 			return;
 
 		if (!PlayState.instance.variables.exists("stageVariables")){

@@ -20,7 +20,20 @@ class FlxAnimateFunctions
 
 			var mySprite:ModchartAnimateSprite = new ModchartAnimateSprite(x, y);
 			if(loadFolder != null) Paths.loadAnimateAtlas(mySprite, loadFolder);
-			MusicBeatState.getVariables().set(tag, mySprite);
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leSprite);
+
+			switch(funk.scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+		
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, mySprite);
+			}
+			
 			mySprite.active = true;
 		});
 
