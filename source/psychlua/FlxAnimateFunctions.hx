@@ -22,7 +22,7 @@ class FlxAnimateFunctions
 			if(loadFolder != null) Paths.loadAnimateAtlas(mySprite, loadFolder);
 
 			var variables = MusicBeatState.getVariables();
-			variables.set(tag, leSprite);
+			variables.set(tag, mySprite);
 
 			switch(funk.scriptType.toLowerCase()){
 				case "stage":
