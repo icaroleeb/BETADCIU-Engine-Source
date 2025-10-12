@@ -90,15 +90,33 @@ class DeprecatedFunctions
 			}
 		});
 		Lua_helper.add_callback(lua, "changeAddedIcon", function(tag:String, character:String){
-			var shit:HealthIcon = PlayState.instance.variables.get(tag);
-			shit.changeIcon(character);
+			var killMe:Array<String> = tag.split('.');
+			var object:HealthIcon = LuaUtils.getObjectDirectly(killMe[0]);
+			if(killMe.length > 1) {
+				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+
+			if(object != null) {
+				object.changeIcon(character);
+				return;
+			}
+			luaTrace("changeIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua, "makeLuaIcon", function(tag:String, character:String, player:Bool = false) {
 			FunkinLua.makeIcon(tag, character, player);
 		});
 		Lua_helper.add_callback(lua, "changeLuaIcon", function(tag:String, character:String){
-			var shit:HealthIcon = PlayState.instance.variables.get(tag);
-			shit.changeIcon(character);
+			var killMe:Array<String> = tag.split('.');
+			var object:HealthIcon = LuaUtils.getObjectDirectly(killMe[0]);
+			if(killMe.length > 1) {
+				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+
+			if(object != null) {
+				object.changeIcon(character);
+				return;
+			}
+			luaTrace("changeIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua, "luaSpriteAddAnimationByIndices", function(tag:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
 			FunkinLua.luaTrace("luaSpriteAddAnimationByIndices is deprecated! Use addAnimationByIndices instead", false, true);

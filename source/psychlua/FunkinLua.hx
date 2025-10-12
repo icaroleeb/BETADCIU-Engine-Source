@@ -1630,8 +1630,17 @@ class FunkinLua {
 			makeIcon(tag, character, player);
 		});
 		Lua_helper.add_callback(lua, "changeIcon", function(tag:String, character:String){
-			var shit:HealthIcon = game.variables.get(tag);
-			shit.changeIcon(character);
+			var killMe:Array<String> = tag.split('.');
+			var object:HealthIcon = LuaUtils.getObjectDirectly(killMe[0]);
+			if(killMe.length > 1) {
+				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+
+			if(object != null) {
+				object.changeIcon(character);
+				return;
+			}
+			luaTrace("changeIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua,"characterZoom", function(id:String, zoomAmount:Float, ?isSenpai:Bool = false) {
 			if(PlayState.instance.modchartCharacters.exists(id)) {
