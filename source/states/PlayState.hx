@@ -4562,7 +4562,7 @@ class PlayState extends MusicBeatState
 
 		if(!isCreate){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
-			callOnScripts('onCreatePost');
+			//callOnScripts('onCreatePost');
 		}
 	}
 }
