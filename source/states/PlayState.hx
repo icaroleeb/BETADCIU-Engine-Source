@@ -4505,8 +4505,6 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.data.comboCam == "Game") // this should help for base stages
 			remove(comboGroup);
 
-		stagesFunc(function(stage:BaseStage) stage.destroy());
-
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
 			hardCodedStage = null;
