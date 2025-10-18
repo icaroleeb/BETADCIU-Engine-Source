@@ -100,7 +100,7 @@ class DeprecatedFunctions
 				object.changeIcon(character);
 				return;
 			}
-			luaTrace("changeIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			FunkinLua.luaTrace("changeAddedIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua, "makeLuaIcon", function(tag:String, character:String, player:Bool = false) {
 			FunkinLua.makeIcon(tag, character, player);
@@ -116,7 +116,7 @@ class DeprecatedFunctions
 				object.changeIcon(character);
 				return;
 			}
-			luaTrace("changeIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			FunkinLua.luaTrace("changeLuaIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua, "luaSpriteAddAnimationByIndices", function(tag:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
 			FunkinLua.luaTrace("luaSpriteAddAnimationByIndices is deprecated! Use addAnimationByIndices instead", false, true);
