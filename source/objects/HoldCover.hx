@@ -11,6 +11,29 @@ import flixel.system.FlxAssets.FlxShader;
 
 using StringTools;
 
+typedef RGB2 = {
+	r:Null<Int>,
+	g:Null<Int>,
+	b:Null<Int>
+}
+
+typedef NoteHoldCoverAnim = {
+	name:String,
+	noteData:Int,
+	prefix:String,
+	indices:Array<Int>,
+	offsets:Array<Float>,
+	fps:Array<Int>
+}
+
+typedef NoteHoldCoverConfig = {
+	animations:Map<String, NoteHoldCoverAnim>,
+	scale:Float,
+	allowRGB:Bool,
+	allowPixel:Bool,
+	rgb:Array<Null<RGB2>>
+}
+
 //Most of the Original code from Mr.Bruh (mr.bruh69)
 //Ported to haxe and edited by glowsoony // thanks man!
 
@@ -25,6 +48,8 @@ class CoverSprite extends FlxSprite
 
 	public var hColor:String = "";
 	public var noteIndex:Int = 0;
+
+	public static var isCustomHoldCoverSkin:Bool = true;
 
 	private function set_texture(value:String):String {
 		if(texture != value) {
@@ -44,6 +69,8 @@ class CoverSprite extends FlxSprite
 	{
 		this.hColor = hColor;
 		this.noteIndex = i;
+
+		isCustomHoldCoverSkin = false;
 
 		trace("SKIN IS " + skin);
 		if (Paths.fileExists('images/holdCovers/$skin/holdCover$hColor.png', IMAGE)){
@@ -75,6 +102,9 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 	public var enabled:Bool = true;
 	public var isPlayer:Bool = false;
 	public var rgbShader:PixelHoldShaderRef;
+	public var config(default, set):NoteHoldCoverConfig;
+	public static var configs:Map<String, NoteHoldCoverConfig> = new Map();
+	var noteDataMap:Map<Int, String> = new Map();
 
 	public function new(enabled:Bool, isPlayer:Bool)
 	{
@@ -107,73 +137,20 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 	public function spawnOnNoteHit(note:Note, isReady:Bool):Void
 	{
 		if (note == null) return;
+
+		config = null;
 		var noteData:Int = note.noteData;
 		var isSus:Bool = note.isSustainNote;
 		var isHoldEnd:Bool = false;
 		if (note.animation.curAnim != null) isHoldEnd = note.animation.curAnim.name.endsWith('end');
 
-		// rgb shader hold cover stuff
+		// Splashes with no json
+		var tempConfig:NoteHoldCoverConfig = createConfig();
 
-		/*
-		var tempShader:RGBPalette = null;
-		if (config.allowRGB)
-		{
-			Note.initializeGlobalRGBShader(noteData % Note.colArray.length);
-			if (inEditor || (note == null || note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableNoteRGB))
-			{
-				tempShader = new RGBPalette();
-				// If Note RGB is enabled:
-				if ((note == null || !note.noteSplashData.useGlobalShader) || inEditor)
-				{
-					var colors = config.rgb;
-					if (colors != null)
-					{
-						for (i in 0...colors.length)
-						{
-							if (i > 2) break;
-
-							var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData % Note.colArray.length];
-							if (note != null && note.isPixelNote) arr = ClientPrefs.data.arrowRGBPixel[noteData % Note.colArray.length];
-
-							var rgb = colors[i];
-							if (rgb == null)
-							{
-								if (i == 0) tempShader.r = arr[0];
-								else if (i == 1) tempShader.g = arr[1];
-								else if (i == 2) tempShader.b = arr[2];
-								continue;
-							}
-
-							var r:Null<Int> = rgb.r; 
-							var g:Null<Int> = rgb.g;
-							var b:Null<Int> = rgb.b;
-
-							if (r == null || Math.isNaN(r) || r < 0) r = arr[0];
-							if (g == null || Math.isNaN(g) || g < 0) g = arr[1];
-							if (b == null || Math.isNaN(b) || b < 0) b = arr[2];
-
-							var color:FlxColor = FlxColor.fromRGB(r, g, b);
-							if (i == 0) tempShader.r = color;
-							else if (i == 1) tempShader.g = color;
-							else if (i == 2) tempShader.b = color;
-						}
-					}
-					else tempShader.copyValues(Note.globalRgbShaders[noteData % Note.colArray.length]);
-
-					if (note != null)
-					{
-						if (note.noteSplashData.r != -1) tempShader.r = note.noteSplashData.r;
-						if (note.noteSplashData.g != -1) tempShader.g = note.noteSplashData.g;
-						if (note.noteSplashData.b != -1) tempShader.b = note.noteSplashData.b;
-					}
-				}
-				else tempShader.copyValues(Note.globalRgbShaders[noteData % Note.colArray.length]);
-			}
+		if (note != null) {
+			noteData = note.noteData;
+			config.allowPixel = note.isPixelNote;
 		}
-		rgbShader.copyValues(tempShader);
-		if (!config.allowPixel) rgbShader.pixelAmount = 1;
-		else if (note != null && note.isPixelNote) rgbShader.pixelAmount = 6;
-		*/
 
 		if (enabled && isReady)
 		{
@@ -188,8 +165,13 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 				}
 
 				coverSprite.smoothSprite();
-				
-			
+
+				// rgb shader hold cover stuff
+
+				var tempShader:RGBPalette = null;
+
+				if (!config.allowPixel) rgbShader.pixelAmount = 1;
+				else if (note != null && note.isPixelNote) rgbShader.pixelAmount = 6;
 
 				if (isHoldEnd)
 				{
@@ -296,6 +278,42 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		}
 		}
 		return 0;
+	}
+
+	function set_config(value:NoteHoldCoverConfig):NoteHoldCoverConfig 
+	{
+		if (value == null) value = createConfig();
+
+		@:privateAccess
+		noteDataMap.clear();
+
+		for (i in value.animations)
+		{
+			var key:String = i.name;
+			if (i.prefix.length > 0 && key != null && key.length > 0)
+			{
+				if (i.indices != null && i.indices.length > 0)
+					animation.addByIndices(key, i.prefix, i.indices, "", i.fps[1], false);
+				else
+					animation.addByPrefix(key, i.prefix, i.fps[1], false);
+
+				noteDataMap.set(i.noteData, key);
+			}
+		}
+
+		scale.set(value.scale, value.scale);
+		return config = value;
+	}
+
+	public static function createConfig():NoteHoldCoverConfig
+	{
+		return {
+			animations: new Map(),
+			scale: 1,
+			allowRGB: true,
+			allowPixel: true,
+			rgb: null
+		}
 	}
 }
 
