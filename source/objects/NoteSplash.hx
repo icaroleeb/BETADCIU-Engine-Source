@@ -69,7 +69,7 @@ class NoteSplash extends FlxSprite
 			if (PlayState.SONG != null && PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) splash = PlayState.SONG.splashSkin;
 		}
 
-		if (splash == 'noteSkins/NOTE_assets') splash  = 'noteSplashes/noteSplashes'; // lets avoid some problems with the default stuff.
+		if (splash == 'noteSkins/NOTE_assets') splash = 'noteSplashes/noteSplashes'; // lets avoid some problems with the default stuff.
 		texture = splash;
 		var splashPaths:Array<String> = [
 			'notes/noteSplashes-$texture',

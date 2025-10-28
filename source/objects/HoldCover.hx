@@ -70,17 +70,30 @@ class CoverSprite extends FlxSprite
 		this.hColor = hColor;
 		this.noteIndex = i;
 
-		isCustomHoldCoverSkin = false;
-
 		trace("SKIN IS " + skin);
-		if (Paths.fileExists('images/holdCovers/$skin/holdCover$hColor.png', IMAGE)){
-			this.frames = Paths.getSparrowAtlas(skin.length > 0 ? 
-				'holdCovers/$skin/holdCover$hColor' : 
-				'holdCovers/holdCover$hColor');
+		if (hColor.length > 0) {
+			if (Paths.fileExists('images/holdCovers/$skin/holdCover$hColor.png', IMAGE)){
+				this.frames = Paths.getSparrowAtlas(skin.length > 0 ? 
+					'holdCovers/$skin/holdCover$hColor' : 
+					'holdCovers/holdCover$hColor');
+			}
+			else{
+				this.frames = Paths.getSparrowAtlas('holdCovers/holdCover$hColor');
+			}
+
+			isCustomHoldCoverSkin = true;
+		}else{
+			if (Paths.fileExists('images/holdCovers/$skin/holdCover.png', IMAGE)){
+				this.frames = Paths.getSparrowAtlas(skin.length > 0 ? 
+					'holdCovers/$skin/holdCover' : 
+					'holdCovers/holdCover');
+			}
+			else{
+				this.frames = Paths.getSparrowAtlas('holdCovers/holdCover');
+			}
+
+			isCustomHoldCoverSkin = false;
 		}
-		else{
-			this.frames = Paths.getSparrowAtlas('holdCovers/holdCover$hColor');
-		}	
 	}
 
 	public function initAnimations(i:Int, hColor:String)
@@ -147,57 +160,107 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		// Splashes with no json
 		var tempConfig:NoteHoldCoverConfig = createConfig();
 
-		if (note != null) {
-			noteData = note.noteData;
-			config.allowPixel = note.isPixelNote;
-		}
-
 		if (enabled && isReady)
 		{
 			var data:Int = noteData;
 
 			if (isSus)
 			{
-				var coverSprite = this.members[data];
+				var coverSpriteMember = this.members[data];
 
-				if (note.texture != null && note.texture.length > 0 && coverSprite.texture != note.texture) {
-					coverSprite.texture = note.texture;
+				if (note.texture != null && note.texture.length > 0 && coverSpriteMember.texture != note.texture) {
+					coverSpriteMember.texture = note.texture;
 				}
 
-				coverSprite.smoothSprite();
+				coverSpriteMember.smoothSprite();
 
-				// rgb shader hold cover stuff
-
+				// RGB shader hold cover stuff
 				var tempShader:RGBPalette = null;
+				if (config.allowRGB)
+				{
+					Note.initializeGlobalRGBShader(noteData % Note.colArray.length);
+					if ((note == null || note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableNoteRGB))
+					{
+						tempShader = new RGBPalette();
+						// If Note RGB is enabled:
+						if ((note == null || !note.noteSplashData.useGlobalShader))
+						{
+							var hColor = config.rgb;
+							if (hColor != null)
+							{
+								for (i in 0...hColor.length)
+								{
+									var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData % Note.colArray.length];
+									if (note != null && note.isPixelNote) arr = ClientPrefs.data.arrowRGBPixel[noteData % Note.colArray.length];
 
+									var rgb = hColor[i];
+									if (rgb == null)
+									{
+										if (i == 0) tempShader.r = arr[0];
+										else if (i == 1) tempShader.g = arr[1];
+										else if (i == 2) tempShader.b = arr[2];
+										continue;
+									}
+
+									var r:Null<Int> = rgb.r;
+									var g:Null<Int> = rgb.g;
+									var b:Null<Int> = rgb.b;
+
+									if (r == null || Math.isNaN(r) || r < 0) r = arr[0];
+									if (g == null || Math.isNaN(g) || g < 0) g = arr[1];
+									if (b == null || Math.isNaN(b) || b < 0) b = arr[2];
+
+									var color:FlxColor = FlxColor.fromRGB(r, g, b);
+									if (i == 0) tempShader.r = color;
+									else if (i == 1) tempShader.g = color;
+									else if (i == 2) tempShader.b = color;
+								}
+							}
+							else tempShader.copyValues(Note.globalRgbShaders[noteData % Note.colArray.length]);
+
+							if (note != null)
+							{
+								if (note.noteSplashData.r != -1) tempShader.r = note.noteSplashData.r;
+								if (note.noteSplashData.g != -1) tempShader.g = note.noteSplashData.g;
+								if (note.noteSplashData.b != -1) tempShader.b = note.noteSplashData.b;
+							}
+						}
+						else tempShader.copyValues(Note.globalRgbShaders[noteData % Note.colArray.length]);
+					}
+				}
+				rgbShader.copyValues(tempShader);
 				if (!config.allowPixel) rgbShader.pixelAmount = 1;
 				else if (note != null && note.isPixelNote) rgbShader.pixelAmount = 6;
+
+				if (CoverSprite.isCustomHoldCoverSkin) tempConfig.allowRGB = false;
+
+				// end RGB shader hold cover stuff
 
 				if (isHoldEnd)
 				{
 					if (isPlayer)
 					{
-						coverSprite.isPlaying = false;
-						coverSprite.boom = true;
-						coverSprite.animation.play(Std.string(data) + 'p');
+						coverSpriteMember.isPlaying = false;
+						coverSpriteMember.boom = true;
+						coverSpriteMember.animation.play(Std.string(data) + 'p');
 					}
 					else
 					{
-						coverSprite.isPlaying = false;
-						coverSprite.boom = false;
+						coverSpriteMember.isPlaying = false;
+						coverSpriteMember.boom = false;
 						hideHoldCoverLater(data, 0.075);
 					}
 				}
 				else
 				{
-					if (coverSprite.isPlaying == false)
+					if (coverSpriteMember.isPlaying == false)
 					{
-						if (coverSprite.boom == false){
-							coverSprite.visible = true;
+						if (coverSpriteMember.boom == false){
+							coverSpriteMember.visible = true;
 						}
 							
-						coverSprite.animation.play(Std.string(data));
-						coverSprite.isPlaying = false;
+						coverSpriteMember.animation.play(Std.string(data));
+						coverSpriteMember.isPlaying = false;
 					}
 				}
 			}

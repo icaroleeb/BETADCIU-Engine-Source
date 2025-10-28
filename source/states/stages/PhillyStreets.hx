@@ -242,7 +242,12 @@ class PhillyStreets extends BaseStage
 				var shaderF = Std.downcast(f, ShaderFilter);
 				return shaderF == null || shaderF.shader != rainShader;
 			});
+
+			#if (flixel >= "6.0.0")
 			PlayState.instance.camGame.filters = filters;
+			#else
+			PlayState.instance.camGame.setFilters(filters);
+			#end
 		}
 		super.destroy();
 	}
@@ -563,7 +568,12 @@ class PhillyStreets extends BaseStage
 		}
 
 		filters.push(new ShaderFilter(rainShader));
+
+		#if (flixel >= "6.0.0")
 		PlayState.instance.camGame.filters = filters;
+		#else
+		PlayState.instance.camGame.setFilters(filters);
+		#end
 	}
 	
 	var currentNeneState:NeneState = STATE_DEFAULT;
