@@ -71,7 +71,7 @@ class CoverSprite extends FlxSprite
 		this.noteIndex = i;
 
 		trace("SKIN IS " + skin);
-		if (hColor.length > 0) {
+		if (hColor.length < 0) {
 			if (Paths.fileExists('images/holdCovers/$skin/holdCover$hColor.png', IMAGE)){
 				this.frames = Paths.getSparrowAtlas(skin.length > 0 ? 
 					'holdCovers/$skin/holdCover$hColor' : 
@@ -141,10 +141,9 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		hold.visible = false;
 		hold.activatedSprite = enabled;
 		hold.spriteId = '$hColor-$i';
-		this.add(hold);
-
 		rgbShader = new PixelHoldShaderRef();
 		hold.shader = rgbShader.shader;
+		this.add(hold);
 	}
 
 	public function spawnOnNoteHit(note:Note, isReady:Bool):Void
@@ -157,7 +156,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		var isHoldEnd:Bool = false;
 		if (note.animation.curAnim != null) isHoldEnd = note.animation.curAnim.name.endsWith('end');
 
-		// Splashes with no json
+		// HoldCovers with no json
 		var tempConfig:NoteHoldCoverConfig = createConfig();
 
 		if (enabled && isReady)
@@ -173,7 +172,6 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 				}
 
 				coverSpriteMember.smoothSprite();
-
 				// RGB shader hold cover stuff
 				var tempShader:RGBPalette = null;
 				if (config.allowRGB)
@@ -185,15 +183,15 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 						// If Note RGB is enabled:
 						if ((note == null || !note.noteSplashData.useGlobalShader))
 						{
-							var hColor = config.rgb;
-							if (hColor != null)
+							var colors = config.rgb;
+							if (colors != null)
 							{
-								for (i in 0...hColor.length)
+								for (i in 0...3)
 								{
 									var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData % Note.colArray.length];
 									if (note != null && note.isPixelNote) arr = ClientPrefs.data.arrowRGBPixel[noteData % Note.colArray.length];
 
-									var rgb = hColor[i];
+									var rgb = colors[i];
 									if (rgb == null)
 									{
 										if (i == 0) tempShader.r = arr[0];
