@@ -154,6 +154,7 @@ class PlayState extends MusicBeatState
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
 	public static var curStage:String = '';
+	public var curStageLua:String = ''; // I added this cuz the "curStage" is with static broken
 
 	public static var stageUI(default, set):String = "normal";
 	public static var uiPrefix:String = "";
@@ -403,6 +404,7 @@ class PlayState extends MusicBeatState
 			SONG.stage = StageData.vanillaSongStage(Paths.formatToSongPath(Song.loadedSongName));
 
 		curStage = SONG.stage;
+		curStageLua = SONG.stage;
 		stageData = StageData.getStageFile(curStage);
 		setStageDetails(stageData);
 
@@ -2532,8 +2534,9 @@ class PlayState extends MusicBeatState
 			case "Change Stage":
 				if (value1 != null && value1 != ""){
  					removeStage(); // Remove current stage
-			
+					
 					curStage = value1; // Set new stage name
+					curStageLua = value1;
  					stageData = StageData.getStageFile(curStage); 
  					addStage();
 					setOnScripts('curStage', curStage);

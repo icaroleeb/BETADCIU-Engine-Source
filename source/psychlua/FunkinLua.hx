@@ -476,6 +476,7 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "changeStageData", function(id:String) {
             PlayState.curStage = id;
+			game.curStageLua = id;
             PlayState.instance.stageData = StageData.getStageFile(PlayState.curStage); 
             PlayState.instance.setStageDetails(PlayState.instance.stageData);
         });
@@ -1173,7 +1174,8 @@ class FunkinLua {
 				switch(character.toLowerCase()) {
 					case 'dad': game.dad.dance();
 					case 'gf' | 'girlfriend': if(game.gf != null) game.gf.dance();
-					default: game.boyfriend.dance();
+					case 'bf' | 'boyfriend': game.boyfriend.dance();
+					default: if(game.modchartCharacters.exists(character)) game.modchartCharacters.get(character).dance();
 				}
 			}
 		});
@@ -1602,24 +1604,25 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "flipCharacterAnim", function(character:String) {
 			switch(character.toLowerCase()) {
 				case 'dad':
-					PlayState.instance.dad.flipAnims();
+					game.dad.flipAnims();
 				case 'gf' | 'girlfriend':
-					PlayState.instance.gf.flipAnims();
+					game.gf.flipAnims();
 				default:
-					if(PlayState.instance.modchartCharacters.exists(character)) {
-						var spr:Character = PlayState.instance.modchartCharacters.get(character);
+					if(game.modchartCharacters.exists(character)) {
+						var spr:Character = game.modchartCharacters.get(character);
 						spr.flipAnims();
 						return;
 					}
-					PlayState.instance.boyfriend.flipAnims();
+					game.boyfriend.flipAnims();
 			}
 		});
 		Lua_helper.add_callback(lua, "changeStage", function(id:String) {
-			PlayState.instance.removeStage(); // Remove current stage
+			game.removeStage(); // Remove current stage
 			PlayState.curStage = id; // Set new stage name
-			PlayState.instance.stageData = StageData.getStageFile(PlayState.curStage); 
-			PlayState.instance.addStage();
-			PlayState.instance.setOnScripts('curStage', PlayState.curStage);
+			game.curStageLua = id;
+			game.stageData = StageData.getStageFile(PlayState.curStage); 
+			game.addStage();
+			game.setOnScripts('curStage', PlayState.curStage);
 		});
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
 			if (scriptType.toLowerCase() == "modpack"){
@@ -1643,8 +1646,8 @@ class FunkinLua {
 			luaTrace("changeIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua,"characterZoom", function(id:String, zoomAmount:Float, ?isSenpai:Bool = false) {
-			if(PlayState.instance.modchartCharacters.exists(id)) {
-				var spr:Character = PlayState.instance.modchartCharacters.get(id);
+			if(game.modchartCharacters.exists(id)) {
+				var spr:Character = game.modchartCharacters.get(id);
 				spr.setZoom(zoomAmount, isSenpai);
 			}
 			else
