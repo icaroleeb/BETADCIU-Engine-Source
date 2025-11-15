@@ -1599,7 +1599,10 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
-			makeLuaCharacter(tag, character, isPlayer, flipped);
+			if(scriptType.toLowerCase() == "stage") 
+				luaTrace("The makeLuaCharacter can't be added in script stages!", false, false, FlxColor.RED);
+			else
+				makeLuaCharacter(tag, character, isPlayer, flipped);
 		});
 		Lua_helper.add_callback(lua, "flipCharacterAnim", function(character:String) {
 			switch(character.toLowerCase()) {
@@ -1728,13 +1731,26 @@ class FunkinLua {
 			if(destroy)
 			{
 				MusicBeatState.getVariables().remove(tag);
+				
+				if (!MusicBeatState.getVariables().exists("stageVariables")){
+					MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxSprite>());
+				}
+				var stageVars = MusicBeatState.getVariables().get("stageVariables");
+
+				// these will be helpful to remove sprites from other make lua calls
+				if(stageVars.exists(tag)) stageVars.remove(tag);
+				if(game.modchartCharacters.exists(tag)) game.modchartCharacters.remove(tag);
+
 				obj.destroy();
 			}
 		});
 
 		Lua_helper.add_callback(lua, "luaSpriteExists", function(tag:String) {
 			var obj:FlxSprite = MusicBeatState.getVariables().get(tag);
-			return (obj != null && (Std.isOfType(obj, ModchartSprite) || Std.isOfType(obj, ModchartAnimateSprite)));
+			return (obj != null && (Std.isOfType(obj, ModchartSprite) || Std.isOfType(obj, ModchartAnimateSprite) || Std.isOfType(obj, FlxBackdrop)));
+		});
+		Lua_helper.add_callback(lua, "luaCharacterExists", function(tag:String) {
+			return (game.modchartCharacters.exists(tag));
 		});
 		Lua_helper.add_callback(lua, "luaTextExists", function(tag:String) {
 			var obj:FlxText = MusicBeatState.getVariables().get(tag);

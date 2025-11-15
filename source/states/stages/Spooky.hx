@@ -39,6 +39,7 @@ class Spooky extends BaseStage
 		halloweenWhite.makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.WHITE);
 		halloweenWhite.alpha = 0;
 		halloweenWhite.blend = ADD;
+		PlayState.instance.variables.get("stageVariables").set("halloweenWhite", halloweenWhite);
 		add(halloweenWhite);
 	}
 
@@ -46,8 +47,6 @@ class Spooky extends BaseStage
 	var lightningOffset:Int = 8;
 	override function beatHit()
 	{
-		if (PlayState.curStage.toLowerCase() != "spooky") 
-			return; 
 		if (FlxG.random.bool(10) && curBeat > lightningStrikeBeat + lightningOffset)
 		{
 			lightningStrikeShit();
@@ -56,9 +55,6 @@ class Spooky extends BaseStage
 
 	function lightningStrikeShit():Void
 	{
-		if (PlayState.curStage.toLowerCase() != "spooky") 
-			return; 
-
 		FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
 		if(!ClientPrefs.data.lowQuality) halloweenBG.animation.play('halloweem bg lightning strike');
 
@@ -93,9 +89,6 @@ class Spooky extends BaseStage
 
 	function monsterCutscene()
 	{
-		if (PlayState.curStage.toLowerCase() != "spooky") 
-			return; 
-		
 		inCutscene = true;
 		camHUD.visible = false;
 
@@ -110,6 +103,7 @@ class Spooky extends BaseStage
 		var whiteScreen:FlxSprite = new FlxSprite().makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.WHITE);
 		whiteScreen.scrollFactor.set();
 		whiteScreen.blend = ADD;
+		PlayState.instance.variables.get("stageVariables").set("whiteScreen", whiteScreen);
 		add(whiteScreen);
 		FlxTween.tween(whiteScreen, {alpha: 0}, 1, {
 			startDelay: 0.1,
@@ -123,8 +117,5 @@ class Spooky extends BaseStage
 				startCountdown();
 			}
 		});
-	}
-	override public function destroy():Void {
-		super.destroy();
 	}
 }

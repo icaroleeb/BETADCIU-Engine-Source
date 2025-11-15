@@ -7,6 +7,7 @@ import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.util.FlxTimer;
 import states.PlayState;
 import shaders.RGBPalette;
+import shaders.RGBPalette.RGBShaderReference;
 import flixel.system.FlxAssets.FlxShader;
 
 using StringTools;
@@ -123,6 +124,8 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 	{
 		this.enabled = enabled;
 		this.isPlayer = isPlayer;
+
+		rgbShader = new PixelHoldShaderRef();
 		
 		super(0, 0, 4);
 		for (i in 0...maxSize)
@@ -141,8 +144,6 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		hold.visible = false;
 		hold.activatedSprite = enabled;
 		hold.spriteId = '$hColor-$i';
-		rgbShader = new PixelHoldShaderRef();
-		hold.shader = rgbShader.shader;
 		this.add(hold);
 	}
 
@@ -230,7 +231,11 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 				if (!config.allowPixel) rgbShader.pixelAmount = 1;
 				else if (note != null && note.isPixelNote) rgbShader.pixelAmount = 6;
 
-				if (CoverSprite.isCustomHoldCoverSkin) tempConfig.allowRGB = false;
+				if(tempConfig.allowRGB) coverSpriteMember.shader = rgbShader.shader;
+
+				if (CoverSprite.isCustomHoldCoverSkin){
+					tempConfig.allowRGB = false;
+				}
 
 				// end RGB shader hold cover stuff
 

@@ -8,7 +8,6 @@ import openfl.utils.Assets as OpenFlAssets;
 
 class SchoolEvil extends BaseStage
 {
-	var trail:FlxTrail;
 	override function create()
 	{
 		if (!PlayState.instance.variables.exists("stageVariables")){
@@ -33,7 +32,7 @@ class SchoolEvil extends BaseStage
 
 		bg.scale.set(PlayState.daPixelZoom, PlayState.daPixelZoom);
 		bg.antialiasing = false;
-		stageVars.set('bg', bg);
+		stageVars.set("bg", bg);
 		add(bg);
 		setDefaultGF('gf-pixel');
 
@@ -49,26 +48,15 @@ class SchoolEvil extends BaseStage
 	}
 	override function createPost()
 	{
-		if (!PlayState.instance.variables.exists("stageVariables")){
-			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
-		}
-		
-		var stageVars = PlayState.instance.variables.get("stageVariables");
-
-		if (dad.curCharacter == "spirit") {
-			trail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
-			PlayState.instance.variables.get("stageVariables").set('trail', trail);
-			addBehindDad(trail);
-		}
+		var trail:FlxTrail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
+		PlayState.instance.variables.get("stageVariables").set("trail", trail);
+		addBehindDad(trail);
 	}
 
 	// Ghouls event
 	var bgGhouls:BGSprite;
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.curStage.toLowerCase() != "schoolevil")
-			return; 
-
 		switch(eventName)
 		{
 			case "Trigger BG Ghouls":
@@ -81,9 +69,6 @@ class SchoolEvil extends BaseStage
 	}
 	override function eventPushed(event:objects.Note.EventNote)
 	{
-		if (PlayState.curStage.toLowerCase() != "schoolevil") 
-			return; 
-
 		// used for preloading assets used on events
 		switch(event.event)
 		{
@@ -108,8 +93,6 @@ class SchoolEvil extends BaseStage
 	var doof:DialogueBox = null;
 	function initDoof()
 	{
-		if (PlayState.curStage.toLowerCase() != "schoolevil") 
-			return; 
 		var file:String = Paths.txt('$songName/${songName}Dialogue_${ClientPrefs.data.language}'); //Checks for vanilla/Senpai dialogue
 		#if MODS_ALLOWED
 		if (!FileSystem.exists(file))
@@ -140,11 +123,10 @@ class SchoolEvil extends BaseStage
 	
 	function schoolIntro():Void
 	{
-		if (PlayState.curStage.toLowerCase() != "schoolevil") 
-			return; 
 		inCutscene = true;
 		var red:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
 		red.scrollFactor.set();
+		PlayState.instance.variables.get("stageVariables").set("red", red);
 		add(red);
 
 		var senpaiEvil:FlxSprite = new FlxSprite();
@@ -156,6 +138,7 @@ class SchoolEvil extends BaseStage
 		senpaiEvil.screenCenter();
 		senpaiEvil.x += 300;
 		camHUD.visible = false;
+		PlayState.instance.variables.get("stageVariables").set("senpaiEvil", senpaiEvil);
 
 		new FlxTimer().start(2.1, function(tmr:FlxTimer)
 		{
@@ -193,14 +176,5 @@ class SchoolEvil extends BaseStage
 				});
 			}
 		});
-	}
-	override public function destroy():Void {
-		if(trail != null){
-			remove(trail);
-			trail.destroy();
-			var trail = null;
-		}
-
-		super.destroy();
 	}
 }

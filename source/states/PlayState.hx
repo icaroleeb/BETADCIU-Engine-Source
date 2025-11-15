@@ -4529,6 +4529,7 @@ class PlayState extends MusicBeatState
 				if (sprite != null) {
 					remove(sprite);
 					variables.remove(key);
+					sprite.destroy();
 				}
 			}
 			stageVars.clear();
@@ -4563,7 +4564,7 @@ class PlayState extends MusicBeatState
 
 		if(!isCreate){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
-			//callOnScripts('onCreatePost');
+			//script.call("onCreatePost", []);
 		}
 	}
 }
