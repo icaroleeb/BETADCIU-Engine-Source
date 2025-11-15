@@ -231,7 +231,10 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 				if (!config.allowPixel) rgbShader.pixelAmount = 1;
 				else if (note != null && note.isPixelNote) rgbShader.pixelAmount = 6;
 
-				if(tempConfig.allowRGB) coverSpriteMember.shader = rgbShader.shader;
+				if(tempConfig.allowRGB) 
+					coverSpriteMember.shader = rgbShader.shader;
+				else
+					coverSpriteMember.shader = null;
 
 				if (CoverSprite.isCustomHoldCoverSkin){
 					tempConfig.allowRGB = false;
