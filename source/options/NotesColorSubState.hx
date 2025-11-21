@@ -634,6 +634,12 @@ class NotesColorSubState extends MusicBeatSubstate
 			Note.initializeGlobalRGBShader(i);
 			var newNote:StrumNote = new StrumNote(150 + (480 / dataArray.length * i), 200, i, 0);
 			newNote.useRGBShader = true;
+			
+			if(onPixel) 
+				newNote.texture = "pixel";
+			else
+				newNote.texture = "normal";
+
 			newNote.setGraphicSize(102);
 			newNote.updateHitbox();
 			newNote.ID = i;
@@ -642,6 +648,12 @@ class NotesColorSubState extends MusicBeatSubstate
 
 		bigNote = new Note(0, 0, false, true);
 		bigNote.setPosition(250, 325);
+
+		if(onPixel) 
+			bigNote.texture = "pixel";
+		else
+			bigNote.texture = "normal";
+
 		bigNote.setGraphicSize(250);
 		bigNote.updateHitbox();
 		bigNote.rgbShader.parent = Note.globalRgbShaders[curSelectedNote];
