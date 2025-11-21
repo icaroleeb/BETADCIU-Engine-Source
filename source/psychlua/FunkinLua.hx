@@ -934,7 +934,7 @@ class FunkinLua {
 				case 'boyfriend' | 'bf' | 'player':
 					return game.boyfriend.x;
 				default:
-					return char.y;
+					return char.x;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterX", function(type:String, value:Float) {
@@ -948,7 +948,7 @@ class FunkinLua {
 				case 'boyfriend' | 'bf' | 'player':
 					game.boyfriend.x = value;
 				default:
-					char.y = value;
+					char.x = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "getCharacterY", function(type:String) {
