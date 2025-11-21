@@ -4,10 +4,13 @@ import flixel.addons.effects.FlxTrail;
 import states.stages.objects.*;
 import substates.GameOverSubstate;
 import cutscenes.DialogueBox;
+import backend.FunkinSprite;
 import openfl.utils.Assets as OpenFlAssets;
 
 class SchoolEvil extends BaseStage
 {
+	var pixelPerfectEffectArray:Array<FlxSprite> = []; // long array name lol
+
 	override function create()
 	{
 		if (!PlayState.instance.variables.exists("stageVariables")){
@@ -24,17 +27,32 @@ class SchoolEvil extends BaseStage
 		var posX = 400;
 		var posY = 200;
 
-		var bg:BGSprite;
-		if(!ClientPrefs.data.lowQuality)
-			bg = new BGSprite('weeb/animatedEvilSchool', posX, posY, 0.8, 0.9, ['background 2'], true);
-		else
-			bg = new BGSprite('weeb/animatedEvilSchool_low', posX, posY, 0.8, 0.9);
+		var bg:FunkinSprite;
+		if(!ClientPrefs.data.lowQuality){
+			bg = FunkinSprite.create(posX, posY, null);
+			bg.frames = Paths.getSparrowAtlas("weeb/animatedEvilSchool");
+			bg.scrollFactor.set(0.8, 0.9);
+			bg.animation.addByPrefix('bg2', 'background 2', 24, true);
+			bg.animation.play('bg2');
+		}else{
+			bg = FunkinSprite.create(posX, posY, "weeb/animatedEvilSchool_low");
+			bg.scrollFactor.set(0.8, 0.9);
+		}
 
 		bg.scale.set(PlayState.daPixelZoom, PlayState.daPixelZoom);
 		bg.antialiasing = false;
 		stageVars.set("bg", bg);
 		add(bg);
 		setDefaultGF('gf-pixel');
+		pixelPerfectEffectArray.push(bg);
+
+		if (ClientPrefs.data.perfectPixel == "inGame") {
+			for (sprite in pixelPerfectEffectArray)
+			{
+				sprite.pixelPerfectPosition = true;
+				sprite.pixelPerfectRender = true;
+			}
+		}
 
 		if (PlayState.instance.startingSong){
 			FlxG.sound.playMusic(Paths.music('LunchboxScary'), 0);
@@ -54,7 +72,7 @@ class SchoolEvil extends BaseStage
 	}
 
 	// Ghouls event
-	var bgGhouls:BGSprite;
+	var bgGhouls:FunkinSprite;
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
 		switch(eventName)
@@ -62,7 +80,8 @@ class SchoolEvil extends BaseStage
 			case "Trigger BG Ghouls":
 				if(!ClientPrefs.data.lowQuality)
 				{
-					bgGhouls.dance(true);
+					//bgGhouls.dance(true);
+					bgGhouls.animation.play('bgFreak');
 					bgGhouls.visible = true;
 				}
 		}
@@ -75,7 +94,14 @@ class SchoolEvil extends BaseStage
 			case "Trigger BG Ghouls":
 				if(!ClientPrefs.data.lowQuality)
 				{
-					bgGhouls = new BGSprite('weeb/bgGhouls', -100, 190, 0.9, 0.9, ['BG freaks glitch instance'], false);
+					//bgGhouls = new BGSprite('weeb/bgGhouls', posX, posY, 0.9, 0.9, ['BG freaks glitch instance'], false);
+
+					bgGhouls = FunkinSprite.create(-100, 190, null);
+					bgGhouls.frames = Paths.getSparrowAtlas("weeb/animatedEvilSchool");
+					bgGhouls.scrollFactor.set(0.9, 0.9);
+					bgGhouls.animation.addByPrefix('bgFreak', 'BG freaks glitch instance', 24, true);
+					bgGhouls.animation.play('bgFreak');
+
 					bgGhouls.setGraphicSize(Std.int(bgGhouls.width * PlayState.daPixelZoom));
 					bgGhouls.updateHitbox();
 					bgGhouls.visible = false;
@@ -86,6 +112,11 @@ class SchoolEvil extends BaseStage
 							bgGhouls.visible = false;
 					}
 					addBehindGF(bgGhouls);
+
+					if (ClientPrefs.data.perfectPixel == "inGame") {
+						bgGhouls.pixelPerfectPosition = true;
+						bgGhouls.pixelPerfectRender = true;
+					}
 				}
 		}
 	}
@@ -124,12 +155,13 @@ class SchoolEvil extends BaseStage
 	function schoolIntro():Void
 	{
 		inCutscene = true;
-		var red:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
+		var red:FunkinSprite = FunkinSprite.create(-100, -100, null);
+		red.makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
 		red.scrollFactor.set();
 		PlayState.instance.variables.get("stageVariables").set("red", red);
 		add(red);
 
-		var senpaiEvil:FlxSprite = new FlxSprite();
+		var senpaiEvil:FunkinSprite = FunkinSprite.create(0, 0, null);
 		senpaiEvil.frames = Paths.getSparrowAtlas('weeb/senpaiCrazy');
 		senpaiEvil.animation.addByPrefix('idle', 'Senpai Pre Explosion', 24, false);
 		senpaiEvil.setGraphicSize(Std.int(senpaiEvil.width * 6));

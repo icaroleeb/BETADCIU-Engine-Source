@@ -1197,7 +1197,7 @@ class PlayState extends MusicBeatState
 	{
 		var fadeEase = FlxEase.cubeInOut;
 
-		if(ClientPrefs.data.perfectPixel){
+		if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
 			if(PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel"))
 				fadeEase = EaseUtil.stepped(8);
 		}
@@ -1209,8 +1209,6 @@ class PlayState extends MusicBeatState
 		spr.updateHitbox();
 		if (PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel")){
 			spr.setGraphicSize(Std.int(spr.width * daPixelZoom)); // bruh
-			//spr.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
-			//spr.pixelPerfectRender = ClientPrefs.data.perfectPixel;
 		}
 
 		spr.screenCenter();
@@ -2927,12 +2925,16 @@ class PlayState extends MusicBeatState
 		if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
-			rating.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
-			rating.pixelPerfectRender = ClientPrefs.data.perfectPixel;
+			if (ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
+				rating.pixelPerfectPosition = true;
+				rating.pixelPerfectRender = true;
+			}
 
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
-			comboSpr.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
-			comboSpr.pixelPerfectRender = ClientPrefs.data.perfectPixel;
+			if (ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){ 
+				comboSpr.pixelPerfectPosition = true;
+				comboSpr.pixelPerfectRender = true;
+			}
 		}
 		else
 		{
@@ -2945,7 +2947,7 @@ class PlayState extends MusicBeatState
 
 		var fadeEase = FlxEase.expoOut;
 
-		if(ClientPrefs.data.perfectPixel){
+		if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
 			if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel')
 				fadeEase = EaseUtil.stepped(2);
 		}
@@ -2962,7 +2964,7 @@ class PlayState extends MusicBeatState
 
 		var customFade = FlxEase.linear;
 
-		if(ClientPrefs.data.perfectPixel){
+		if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
 			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
 				customFade = EaseUtil.stepped(2);
 		}
@@ -2982,8 +2984,11 @@ class PlayState extends MusicBeatState
 
 			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
 				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
-				numScore.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
-				numScore.pixelPerfectRender = ClientPrefs.data.perfectPixel;
+
+				if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){ 
+					numScore.pixelPerfectPosition = true;
+					numScore.pixelPerfectRender = true;
+				}
 			}
 			else 
 				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
@@ -4554,6 +4559,18 @@ class PlayState extends MusicBeatState
 		}
 
 		addObjects(stageData);
+
+		if(ClientPrefs.data.perfectPixel == "inGame"){
+			boyfriend.pixelPerfectPosition = stageData.isPixelStage;
+			boyfriend.pixelPerfectRender = stageData.isPixelStage;
+
+			dad.pixelPerfectPosition = stageData.isPixelStage;
+			dad.pixelPerfectRender = stageData.isPixelStage;
+
+			gf.pixelPerfectPosition = stageData.isPixelStage;
+			gf.pixelPerfectRender = stageData.isPixelStage;
+		}
+
 		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
 
 		// STAGE SCRIPTS

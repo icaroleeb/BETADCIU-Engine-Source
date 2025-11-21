@@ -200,9 +200,10 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		#end
 
 		var option:Option = new Option('Perfect Pixel Effect',
-		"if checked, the pixel rating & countdown sprites will do Perfect Pixel from V Slice \nNOTE: The Characters, Icons & Stages don't count",
+		"The Perfect pixel effects\n Based on Codename Engine & VSlice",
 		'perfectPixel',
-		BOOL);
+		STRING,
+		['inGame', 'RatingAndCountdownOnly', 'Disable']);
 		addOption(option);
 
 		super();
