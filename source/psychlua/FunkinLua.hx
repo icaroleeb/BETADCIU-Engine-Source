@@ -924,43 +924,59 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "getCharacterX", function(type:String) {
+			var char:Character = modchartCharacters.get(type);
+
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					return game.dadGroup.x;
+					return game.dad.x;
 				case 'gf' | 'girlfriend':
-					return game.gfGroup.x;
+					return game.gf.x;
+				case 'boyfriend' | 'bf' | 'player':
+					return game.boyfriend.x;
 				default:
-					return game.boyfriendGroup.x;
+					return char.y;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterX", function(type:String, value:Float) {
+			var char:Character = modchartCharacters.get(type);
+
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					game.dadGroup.x = value;
+					game.dad.x = value;
 				case 'gf' | 'girlfriend':
-					game.gfGroup.x = value;
+					game.gf.x = value;
+				case 'boyfriend' | 'bf' | 'player':
+					game.boyfriend.x = value;
 				default:
-					game.boyfriendGroup.x = value;
+					char.y = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "getCharacterY", function(type:String) {
+			var char:Character = modchartCharacters.get(type);
+
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					return game.dadGroup.y;
+					return game.dad.y;
 				case 'gf' | 'girlfriend':
-					return game.gfGroup.y;
+					return game.gf.y;
+				case 'boyfriend' | 'bf' | 'player':
+					return game.boyfriend.y;
 				default:
-					return game.boyfriendGroup.y;
+					return char.y;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterY", function(type:String, value:Float) {
+			var char:Character = game.modchartCharacters.get(type);
+
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					game.dadGroup.y = value;
+					game.dad.y = value;
 				case 'gf' | 'girlfriend':
-					game.gfGroup.y = value;
+					game.gf.y = value;
+				case 'boyfriend' | 'bf' | 'player':
+					game.boyfriend.y = value;
 				default:
-					game.boyfriendGroup.y = value;
+					char.y = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
@@ -970,8 +986,10 @@ class FunkinLua {
 					game.moveCameraToGirlfriend();
 				case 'dad', 'opponent':
 					game.moveCamera(true);
-				default:
+				case "boyfriend", 'bf', 'player':
 					game.moveCamera(false);
+				default:
+					game.moveCameraLuaCharacter(target);
 			}
 		});
 

@@ -2604,6 +2604,28 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public function moveCameraLuaCharacter(charFocus:String)
+	{
+		var char:Character = modchartCharacters.get(charFocus);
+
+		if(char == null) return;
+
+		var playerCameraOffset = char.isPlayer ? 100 : 150;
+
+		camFollow.setPosition(char.getMidpoint().x - playerCameraOffset, char.getMidpoint().y - 100);
+
+		if (char.isPlayer){
+			camFollow.x -= char.cameraPosition[0] - boyfriendCameraOffset[0];
+			camFollow.y += char.cameraPosition[1] + boyfriendCameraOffset[1];
+		}else{
+			camFollow.x -= char.cameraPosition[0] - opponentCameraOffset[0];
+			camFollow.y += char.cameraPosition[1] + opponentCameraOffset[1];
+		}
+
+
+		if(!char.isPlayer) tweenCamIn();
+	}
+
 	public function tweenCamIn() {
 		if (songName == 'tutorial' && cameraTwn == null && FlxG.camera.zoom != 1.3) {
 			cameraTwn = FlxTween.tween(FlxG.camera, {zoom: 1.3}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut, onComplete:
