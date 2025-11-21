@@ -934,7 +934,10 @@ class FunkinLua {
 				case 'boyfriend' | 'bf' | 'player':
 					return game.boyfriend.x;
 				default:
-					return char.x;
+					if (game.modchartCharacters.exists(type)) 
+						return char.x;
+					else
+						luaTrace("getCharacterX: " + type + " doesn't exist!", false, false, FlxColor.RED);
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterX", function(type:String, value:Float) {
@@ -948,7 +951,10 @@ class FunkinLua {
 				case 'boyfriend' | 'bf' | 'player':
 					game.boyfriend.x = value;
 				default:
-					char.x = value;
+					if (game.modchartCharacters.exists(type)) 
+						char.x = value;
+					else
+						luaTrace("setCharacterX: " + type + " doesn't exist!", false, false, FlxColor.RED);
 			}
 		});
 		Lua_helper.add_callback(lua, "getCharacterY", function(type:String) {
@@ -962,7 +968,10 @@ class FunkinLua {
 				case 'boyfriend' | 'bf' | 'player':
 					return game.boyfriend.y;
 				default:
-					return char.y;
+					if (game.modchartCharacters.exists(type)) 
+						return char.y;
+					else
+						luaTrace("getCharacterY: " + type + " doesn't exist!", false, false, FlxColor.RED);
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterY", function(type:String, value:Float) {
@@ -976,7 +985,10 @@ class FunkinLua {
 				case 'boyfriend' | 'bf' | 'player':
 					game.boyfriend.y = value;
 				default:
-					char.y = value;
+					if (game.modchartCharacters.exists(type)) 
+						char.y = value;
+					else
+						luaTrace("setCharacterY: " + type + " doesn't exist!", false, false, FlxColor.RED);
 			}
 		});
 		Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
@@ -989,7 +1001,10 @@ class FunkinLua {
 				case "boyfriend", 'bf', 'player':
 					game.moveCamera(false);
 				default:
-					game.moveCameraLuaCharacter(target);
+					if (game.modchartCharacters.exists(target))
+						game.moveCameraToLuaCharacter(target);
+					else
+						luaTrace("cameraSetTarget: " + target + " doesn't exist!", false, false, FlxColor.RED);
 			}
 		});
 
@@ -1758,6 +1773,7 @@ class FunkinLua {
 				// these will be helpful to remove sprites from other make lua calls
 				if(stageVars.exists(tag)) stageVars.remove(tag);
 				if(game.modchartCharacters.exists(tag)) game.modchartCharacters.remove(tag);
+				//
 
 				obj.destroy();
 			}

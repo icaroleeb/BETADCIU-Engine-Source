@@ -2604,7 +2604,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function moveCameraLuaCharacter(charFocus:String)
+	public function moveCameraToLuaCharacter(charFocus:String)
 	{
 		var char:Character = modchartCharacters.get(charFocus);
 
@@ -2621,7 +2621,6 @@ class PlayState extends MusicBeatState
 			camFollow.x -= char.cameraPosition[0] - opponentCameraOffset[0];
 			camFollow.y += char.cameraPosition[1] + opponentCameraOffset[1];
 		}
-
 
 		if(!char.isPlayer) tweenCamIn();
 	}
@@ -4404,7 +4403,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (FileSystem.exists(Paths.txt(songName + "/preload-stage"))) {
-			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(songName  + "/preload-stage"));
+			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(songName + "/preload-stage"));
 			for (i in 0...stages.length) {
 				var data:Array<String> = stages[i].split(' ');
 				stagesToLoad.push(stages[i]);
