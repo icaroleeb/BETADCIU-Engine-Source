@@ -2604,15 +2604,20 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public var charLuaMoveScript:Bool = true; // if you wanna disable it put it on false on "setProperty".
+
 	public function moveCameraToLuaCharacter(charFocus:String)
 	{
 		var char = modchartCharacters.get(charFocus);
 
+		if(!modchartCharacters.exists(charFocus)) return;
+
 		if(char.isPlayer)
-			camFollow.setPosition(boyfriend.getMidpoint().x - 100 - char.cameraPosition[0] + boyfriendCameraOffset[0], boyfriend.getMidpoint().y - 100 + char.cameraPosition[1] + boyfriendCameraOffset[1]);
+			camFollow.setPosition(char.getMidpoint().x - 100 - char.cameraPosition[0] + boyfriendCameraOffset[0], char.getMidpoint().y - 100 + char.cameraPosition[1] + boyfriendCameraOffset[1]);
 		else
 			camFollow.setPosition(char.getMidpoint().x + 150 + char.cameraPosition[0] + opponentCameraOffset[0], char.getMidpoint().y - 100 + char.cameraPosition[1] + opponentCameraOffset[1]);
 
+		if(charLuaMoveScript) callOnScripts('onMoveCamera', [char]);
 		if(!char.isPlayer) tweenCamIn();
 	}
 
