@@ -477,8 +477,8 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "changeStageData", function(id:String) {
             PlayState.curStage = id;
 			game.curStageLua = id;
-            PlayState.instance.stageData = StageData.getStageFile(PlayState.curStage); 
-            PlayState.instance.setStageDetails(PlayState.instance.stageData);
+            game.stageData = StageData.getStageFile(PlayState.curStage); 
+            game.setStageDetails(game.stageData);
         });
 		Lua_helper.add_callback(lua, "getVar", function(varName:String) {
 			return MusicBeatState.getVariables().get(varName);
@@ -924,7 +924,7 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "getCharacterX", function(type:String) {
-			var char:Character = modchartCharacters.get(type);
+			var char:Character = game.modchartCharacters.get(type);
 
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
@@ -934,14 +934,11 @@ class FunkinLua {
 				case 'boyfriend' | 'bf' | 'player':
 					return game.boyfriend.x;
 				default:
-					if (game.modchartCharacters.exists(type)) 
-						return char.x;
-					else
-						luaTrace("getCharacterX: " + type + " doesn't exist!", false, false, FlxColor.RED);
+					return char.x;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterX", function(type:String, value:Float) {
-			var char:Character = modchartCharacters.get(type);
+			var char:Character = game.modchartCharacters.get(type);
 
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
@@ -951,14 +948,11 @@ class FunkinLua {
 				case 'boyfriend' | 'bf' | 'player':
 					game.boyfriend.x = value;
 				default:
-					if (game.modchartCharacters.exists(type)) 
-						char.x = value;
-					else
-						luaTrace("setCharacterX: " + type + " doesn't exist!", false, false, FlxColor.RED);
+					char.x = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "getCharacterY", function(type:String) {
-			var char:Character = modchartCharacters.get(type);
+			var char:Character = game.modchartCharacters.get(type);
 
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
@@ -968,10 +962,7 @@ class FunkinLua {
 				case 'boyfriend' | 'bf' | 'player':
 					return game.boyfriend.y;
 				default:
-					if (game.modchartCharacters.exists(type)) 
-						return char.y;
-					else
-						luaTrace("getCharacterY: " + type + " doesn't exist!", false, false, FlxColor.RED);
+					return char.y;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterY", function(type:String, value:Float) {
@@ -985,10 +976,7 @@ class FunkinLua {
 				case 'boyfriend' | 'bf' | 'player':
 					game.boyfriend.y = value;
 				default:
-					if (game.modchartCharacters.exists(type)) 
-						char.y = value;
-					else
-						luaTrace("setCharacterY: " + type + " doesn't exist!", false, false, FlxColor.RED);
+					char.y = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
@@ -1001,10 +989,7 @@ class FunkinLua {
 				case "boyfriend", 'bf', 'player':
 					game.moveCamera(false);
 				default:
-					if (game.modchartCharacters.exists(target))
-						game.moveCameraToLuaCharacter(target);
-					else
-						luaTrace("cameraSetTarget: " + target + " doesn't exist!", false, false, FlxColor.RED);
+					game.moveCameraToLuaCharacter(target);
 			}
 		});
 

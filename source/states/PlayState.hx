@@ -154,7 +154,7 @@ class PlayState extends MusicBeatState
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
 	public static var curStage:String = '';
-	public var curStageLua:String = ''; // I added this cuz the "curStage" is with static broken
+	public var curStageLua:String = ''; // I added this cuz the "curStage" with static don't work on "setProperty" or "getProperty"
 
 	public static var stageUI(default, set):String = "normal";
 	public static var uiPrefix:String = "";
@@ -2606,21 +2606,12 @@ class PlayState extends MusicBeatState
 
 	public function moveCameraToLuaCharacter(charFocus:String)
 	{
-		var char:Character = modchartCharacters.get(charFocus);
+		var char = modchartCharacters.get(charFocus);
 
-		if(char == null) return;
-
-		var playerCameraOffset = char.isPlayer ? 100 : 150;
-
-		camFollow.setPosition(char.getMidpoint().x - playerCameraOffset, char.getMidpoint().y - 100);
-
-		if (char.isPlayer){
-			camFollow.x -= char.cameraPosition[0] - boyfriendCameraOffset[0];
-			camFollow.y += char.cameraPosition[1] + boyfriendCameraOffset[1];
-		}else{
-			camFollow.x -= char.cameraPosition[0] - opponentCameraOffset[0];
-			camFollow.y += char.cameraPosition[1] + opponentCameraOffset[1];
-		}
+		if(char.isPlayer)
+			camFollow.setPosition(boyfriend.getMidpoint().x - 100 - char.cameraPosition[0] + boyfriendCameraOffset[0], boyfriend.getMidpoint().y - 100 + char.cameraPosition[1] + boyfriendCameraOffset[1]);
+		else
+			camFollow.setPosition(char.getMidpoint().x + 150 + char.cameraPosition[0] + opponentCameraOffset[0], char.getMidpoint().y - 100 + char.cameraPosition[1] + opponentCameraOffset[1]);
 
 		if(!char.isPlayer) tweenCamIn();
 	}
