@@ -7,6 +7,7 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 
 import openfl.display.BitmapData;
+import backend.system.OptimizedBitmapData;
 import openfl.display3D.textures.RectangleTexture;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
@@ -305,7 +306,7 @@ class Paths
 	static public function image(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxGraphic
 	{
 		key = Language.getFileTranslation('images/$key') + '.png';
-		var bitmap:BitmapData = null;
+		var bitmap:OptimizedBitmapData = null;
 		if (currentTrackedAssets.exists(key))
 		{
 			localTrackedAssets.push(key);

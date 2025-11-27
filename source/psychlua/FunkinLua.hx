@@ -659,7 +659,12 @@ class FunkinLua {
 		});
 		//shitass stuff for epic coders like me B)  *image of obama giving himself a medal*
 		Lua_helper.add_callback(lua, "getObjectOrder", function(obj:String, ?group:String = null) {
-			var leObj:FlxBasic = LuaUtils.getObjectDirectly(obj);
+			var killMe:Array<String> = obj.split('.');
+			var leObj:FlxBasic = LuaUtils.getObjectDirectly(killMe[0]);
+			if(killMe.length > 1) {
+				leObj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+	
 			if(leObj != null)
 			{
 				if(group != null)

@@ -1040,21 +1040,30 @@ function doCopyShit(srcFolder:String, destFolder:String, checkFiles:Array<String
     if (!FileSystem.exists(srcFolder)) return;
     if (!FileSystem.exists(destFolder)) FileSystem.createDirectory(destFolder);
 
-    for (file in FileSystem.readDirectory(srcFolder)) {
-        if (checkFiles != null && checkFiles.length > 0) {
-            if (checkFiles.indexOf(file) >= 0) {
-                sys.io.File.copy(srcFolder + file, destFolder + file);
-            }
-        } else {
-            var fullSrc = srcFolder + file;
-            var fullDest = destFolder + file;
+    if (!srcFolder.endsWith("/")) srcFolder += "/";
+    if (!destFolder.endsWith("/")) destFolder += "/";
 
-            if (FileSystem.exists(fullSrc)) {
-                sys.io.File.copy(fullSrc, fullDest);
-            }
+    for (file in FileSystem.readDirectory(srcFolder)) {
+        var fullSrc = srcFolder + file;
+        var fullDest = destFolder + file;
+
+        if (FileSystem.isDirectory(fullSrc)) {
+            if (!FileSystem.exists(fullDest)) FileSystem.createDirectory(fullDest);
+            doCopyShit(fullSrc, fullDest, checkFiles);
+            continue;
+        }
+
+        if (checkFiles != null && checkFiles.length > 0 && checkFiles.indexOf(file) == -1)
+            continue;
+
+        try {
+            sys.io.File.copy(fullSrc, fullDest);
+        } catch (e:Dynamic) {
+            trace('Failed copying $fullSrc → $fullDest : $e');
         }
     }
 }
+
 
 class ModpackAssetGroup {
     public var subDir:String;

@@ -1902,8 +1902,10 @@ class PlayState extends MusicBeatState
 			}
 		}
 		else FlxG.camera.followLerp = 0;
-		callOnScripts('onUpdate', [elapsed]);
+		
 
+		callOnScripts('onUpdate', [elapsed]);
+		
 		super.update(elapsed);
 
 		if (!startingSong) {
@@ -2095,6 +2097,7 @@ class PlayState extends MusicBeatState
 			playerHoldCovers.updateHold(elapsed, enabledHolds);
 			opponentHoldCovers.updateHold(elapsed, enabledHolds);	
 		}
+
 		setOnScripts('botPlay', cpuControlled);
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
@@ -3603,6 +3606,8 @@ class PlayState extends MusicBeatState
 		FlxG.animationTimeScale = 1;
 
 		Note.globalRgbShaders = [];
+		Note.configs.clear();
+
 		backend.NoteTypesConfig.clearNoteTypesData();
 
 		NoteSplash.configs.clear();

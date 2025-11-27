@@ -257,10 +257,17 @@ class Limo extends BaseStage
 
 	function resetFastCar():Void
 	{
-		fastCar.x = -12600;
-		fastCar.y = FlxG.random.int(140, 250);
-		fastCar.velocity.x = 0;
-		fastCarCanDrive = true;
+		if (fastCar != null)
+		{
+			fastCar.x = -12600;
+			fastCar.y = FlxG.random.int(140, 250);
+
+			if (fastCar.velocity != null) {
+				fastCar.velocity.x = 0;
+			}
+
+			fastCarCanDrive = true;
+		}
 	}
 
 	var carTimer:FlxTimer;

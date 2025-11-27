@@ -162,7 +162,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 
 		if (enabled && isReady)
 		{
-			var data:Int = noteData;
+			var data:Int = Std.int(noteData) % 4;
 
 			if (isSus)
 			{
@@ -269,13 +269,13 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 						coverSpriteMember.isPlaying = false;
 					}
 				}
-			}
+			}	
 		}
 	}
 
-	public function despawnOnMiss(isReady:Bool, direciton:Int, ?note:Note = null):Void
+	public function despawnOnMiss(isReady:Bool, direction:Int, ?note:Note = null):Void
 	{
-		var noteData:Int = (note != null ? note.noteData : direciton);
+		var noteData:Int = (note != null ? Std.int(note.noteData) % 4 : direction);
 		if (enabled && isReady)
 		{
 			var data:Int = noteData;
@@ -374,7 +374,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		return config = value;
 	}
 
-	public static function createConfig():NoteHoldCoverConfig
+	private function createConfig():NoteHoldCoverConfig
 	{
 		return {
 			animations: new Map(),

@@ -92,6 +92,7 @@ class StrumNote extends OffsettableSprite
 	{
 		separateSheets = false;
 		isLegacyNoteSkin = false;
+		useRGBShader = true;
 		animOffsets.clear();
 		
 		var lastAnim:String = null;
@@ -123,6 +124,7 @@ class StrumNote extends OffsettableSprite
 
 			if (Paths.fileExists('images/$jsonPath.json', TEXT)) {
 				final json = Note.getNoteConfig('images/$jsonPath');
+
 				if (json.strumAnimations != null) {
 					for (anim in json.strumAnimations) {
 						addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
@@ -164,7 +166,7 @@ class StrumNote extends OffsettableSprite
 			rgbShader.enabled = true;
 			texture = Note.defaultNoteSkin;
 		} 
-
+			
 		if(lastAnim != null)
 		{
 			playAnim(lastAnim, true);
@@ -172,8 +174,10 @@ class StrumNote extends OffsettableSprite
 	}
 
 	function defaultRGB(?pixelShit:Bool=false) {
-		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData];
-		if(pixelShit) arr = ClientPrefs.data.arrowRGBPixel[noteData];
+		var index:Int = Std.int(Math.abs(noteData) % 4);
+
+		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[index];
+		if(pixelShit) arr = ClientPrefs.data.arrowRGBPixel[index];
 		
 		if(noteData <= arr.length)
 		{
@@ -213,14 +217,14 @@ class StrumNote extends OffsettableSprite
 		}
 
 		if (separateSheets && !isPixelNote){
-			offset.x += 32;
-			offset.y += 20;
+			offset.x += 32 * (0.7 / scale.x);
+			offset.y += 32 * (0.7 / scale.y);
 		}
 
 		var daOffsets = getAnimOffset(anim);
 		
-		offset.x += daOffsets[0];
-		offset.y += daOffsets[1];
+		offset.x += daOffsets[0] * ((isPixelNote ? PlayState.daPixelZoom : 0.7) / scale.x);
+		offset.y += daOffsets[1] * ((isPixelNote ? PlayState.daPixelZoom : 0.7) / scale.y);
 		
 		if(useRGBShader && !isLegacyNoteSkin) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
 		else if (isLegacyNoteSkin) rgbShader.enabled = false;
@@ -229,7 +233,8 @@ class StrumNote extends OffsettableSprite
 	public function loadNoteAnims(isPixelNote:Bool = false){
 		if (isPixelNote){
 			antialiasing = false;
-			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+			// setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+			scale.set(6, 6);
 
 			animation.add('green', [6]);
 			animation.add('red', [7]);
@@ -248,10 +253,11 @@ class StrumNote extends OffsettableSprite
 		}else{
 			if (separateSheets){
 				var dirArr:Array<String> = ["Left", "Down", "Up", "Right"];
+				var index:Int = Std.int(Math.abs(noteData) % 4);
 
-				animation.addByPrefix("static", "static" + dirArr[noteData]);
-				animation.addByPrefix("pressed", "press" + dirArr[noteData], 24, false);
-				animation.addByPrefix("confirm", "confirm" + dirArr[noteData], 24, false);
+				animation.addByPrefix("static", "static" + dirArr[index]);
+				animation.addByPrefix("pressed", "press" + dirArr[index], 24, false);
+				animation.addByPrefix("confirm", "confirm" + dirArr[index], 24, false);
 			} else{
 				var colors:Array<String> = ['green', 'blue', 'purple', 'red'];
 				var arrows:Array<String> = ['arrowUP', 'arrowDOWN', 'arrowLEFT', 'arrowRIGHT'];
@@ -269,8 +275,8 @@ class StrumNote extends OffsettableSprite
 			}	
 
 			antialiasing = ClientPrefs.data.antialiasing;
-			setGraphicSize(Std.int(width * 0.7));
-
+			// setGraphicSize(Std.int(width * 0.7));
+			scale.set(0.7, 0.7);
 		}
 	}
 }
