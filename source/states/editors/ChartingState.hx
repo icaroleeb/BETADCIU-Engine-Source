@@ -226,7 +226,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var maxListItems:Int = -1;
 	#end
 
-	var justChanged:Bool;
 	var lilStage:FlxSprite;
 	var lilBf:FlxSprite;
 	var lilOpp:FlxSprite;
@@ -1529,6 +1528,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 							strumNote.resetAnim = Math.max(Conductor.stepCrochet * 1.25, note.sustainLength) / 1000 / playbackRate;
 						}
 					}
+
+					var data:Int = note.noteData;
+					if(note.mustPress){
+						lilBf.animation.play("" + Std.string(data), true);
+						lilBf.color = 0xffffffff;
+					}
+					else if(!note.mustPress){
+						lilOpp.animation.play("" + Std.string(data), true);
+						lilOpp.color = 0xffffffff;
+					}
 				}
 			}
 			forceDataUpdate = false;
@@ -1539,26 +1548,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 			lastBeatHit = curBeat;
 		}
-
-		if(!justChanged){
-			curRenderedNotes.forEach(function(note:Note) {
-				if(note.strumTime <= Conductor.songPosition) {
-					var data:Int = note.noteData;
-					if(note.strumTime >= Conductor.songPosition -100 && FlxG.sound.music.playing && note.noteData > -1) {
-						if(note.mustPress){
-							lilBf.animation.play("" + Std.string(data), true);
-							lilBf.color = 0xffffffff;
-						}
-						else if(!note.mustPress){
-							lilOpp.animation.play("" + Std.string(data), true);
-							lilOpp.color = 0xffffffff;
-						}
-					}
-				}
-
-			});
-		}
-		justChanged = false;
 
 		if(selectedNotes.length > 0)
 		{
@@ -2195,7 +2184,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var forceDataUpdate:Bool = true;
 	function loadSection(?sec:Null<Int> = null)
 	{
-		justChanged = true;
 		if(sec != null) curSec = sec;
 		curSec = Std.int(FlxMath.bound(curSec, 0, PlayState.SONG.notes.length-1));
 		Conductor.bpm = cachedSectionBPMs[curSec];
@@ -4851,7 +4839,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 								changedSelected = true;
 							}
 							notes.remove(n);
-							note.destroy();
+							n.destroy();
 						}
 					}
 					if(changedSelected) onSelectNote();
@@ -4866,6 +4854,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 			var ratio:Float = (nextSectionTime - curSectionTime) / (oldNextSectionTime - oldCurSectionTime);
 			var adaptedStrumTime:Float = ((note.strumTime - oldCurSectionTime) * ratio) + curSectionTime;
+			if(Math.isNaN(adaptedStrumTime) || !Math.isFinite(adaptedStrumTime)) adaptedStrumTime = note.strumTime; // safety
 			note.setStrumTime(adaptedStrumTime);
 			if(shouldBound)
 				note.setStrumTime(FlxMath.bound(note.strumTime, curSectionTime, nextSectionTime));
@@ -4874,16 +4863,53 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			note.updateSustainToStepCrochet(cachedSectionCrochets[noteSec] / 4);
 		}
 		
+		// --- UPDATED: adapt events the same way notes are adapted ---
 		for (event in events)
 		{
-			var secNum:Int = 0;
-			for (time in cachedSectionTimes)
+			if (event == null || event.strumTime <= 0) continue;
+
+			// Find the section in the OLD times that this event belonged to
+			var sec:Int = 0;
+			while (sec + 2 < oldTimes.length && oldTimes[sec + 1] <= event.strumTime)
+				sec++;
+
+			// Clamp sec to valid range
+			if (sec + 1 >= cachedSectionTimes.length)
 			{
-				if(time > event.strumTime) break;
-				secNum++;
+				sec = Std.int(Math.max(0, cachedSectionTimes.length - 2));
 			}
-			positionNoteYOnTime(event, secNum);
+
+			var oldCur:Float = oldTimes[sec];
+			var oldNext:Float = oldTimes[sec + 1];
+			var newCur:Float = cachedSectionTimes[sec];
+			var newNext:Float = cachedSectionTimes[sec + 1];
+
+			var origTime:Float = event.strumTime;
+			var adapted:Float = origTime;
+
+			// Protect against zero-length old section
+			if (oldNext - oldCur != 0)
+			{
+				var ratioE:Float = (newNext - newCur) / (oldNext - oldCur);
+				adapted = ((origTime - oldCur) * ratioE) + newCur;
+				if (Math.isNaN(adapted) || !Math.isFinite(adapted)) adapted = origTime;
+			}
+
+			// Apply adapted time
+			event.setStrumTime(adapted);
+
+			// Bound if it originally fell inside the old section
+			var shouldBoundE:Bool = (origTime >= oldCur && origTime < oldNext);
+			if (shouldBoundE)
+			{
+				var bounded:Float = FlxMath.bound(adapted, newCur, newNext);
+				event.setStrumTime(bounded);
+			}
+
+			// Finally position the event
+			positionNoteYOnTime(event, sec);
 		}
+
 		
 		var time:Float = FlxMath.remapToRange(gridLerp, 0, 1, cachedSectionTimes[curSec], cachedSectionTimes[curSec + 1]);
 		if(Math.isNaN(time))
@@ -4902,6 +4928,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		forceDataUpdate = true;
 		loadSection();
 	}
+
 
 	public function UIEvent(id:String, sender:Dynamic)
 	{

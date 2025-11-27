@@ -80,7 +80,12 @@ class LuaUtils
 			MusicBeatState.getVariables().set(variable, value);
 			return value;
 		}
-		Reflect.setProperty(instance, variable, value);
+		
+		try {
+			Reflect.setProperty(instance, variable, value);
+		} catch(e:Dynamic) {
+			trace("Failed to set property: " + variable + " -> " + e);
+		}
 		return value;
 	}
 	public static function getVarInArray(instance:Dynamic, variable:String, allowMaps:Bool = false):Any

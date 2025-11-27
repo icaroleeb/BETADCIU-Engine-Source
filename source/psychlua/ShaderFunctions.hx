@@ -80,6 +80,40 @@ class ShaderFunctions
 			#end
 			return false;
 		});
+
+		funk.addLocalCallback('makeLuaShader', function(tag:String, shader:String) {
+			if(!ClientPrefs.data.shaders) return false;
+
+			if (funk.scriptType == "modpack"){
+				ModpackAssetRegistry.instance.addAsset("shaders", shader);
+				return true;
+			}
+
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+			
+			#if (!flash && sys)
+			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader))
+			{
+				FunkinLua.luaTrace('makeLuaShader: Shader $shader is missing!', false, false, FlxColor.RED);
+				return false;
+			}
+
+			var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
+
+			if (arr !=  null){
+				var leShader:ErrorHandledRuntimeShader = new ErrorHandledRuntimeShader(shader, arr[0], arr[1]); 
+				MusicBeatState.getVariables().set(tag, leShader);
+				MusicBeatState.getVariables().set("src_shader_name_" + tag, shader);
+
+				return true;
+			}
+			#else
+			FunkinLua.luaTrace("makeLuaShader: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
+			#end
+			return false;
+		});
+
 		
 		funk.addLocalCallback("setSpriteShader", function(obj:String, shader:String, ?keepOtherShaders:Bool = true) {
 			if(!ClientPrefs.data.shaders) return false;
@@ -90,7 +124,7 @@ class ShaderFunctions
 			}
 
 			#if (!flash && sys)
-			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader))
+			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader) && LuaUtils.getObjectDirectly(shader) == null)
 			{
 				FunkinLua.luaTrace('setSpriteShader: Shader $shader is missing!', false, false, FlxColor.RED);
 				return false;
@@ -103,20 +137,29 @@ class ShaderFunctions
 			}
 	
 			if(leObj != null) {
-				var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
-				var daShader:ErrorHandledRuntimeShader = new ErrorHandledRuntimeShader(shader, arr[0], arr[1]); 
-
-				if (Std.isOfType(leObj, FlxCamera)){
-					var daFilters = (leObj.filters != null && keepOtherShaders) ? leObj.filters : [];
-					daFilters.push(new ShaderFilter(daShader));
-					leObj.filters = daFilters;
+				var daShader:ErrorHandledRuntimeShader = null;
+				
+				if (MusicBeatState.getVariables().get(shader) != null){
+					daShader = MusicBeatState.getVariables().get(shader);
 				}
 				else{
-					var daObj:FlxSprite = leObj;
-					daObj.shader = daShader;
+					var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
+					daShader = new ErrorHandledRuntimeShader(shader, arr[0], arr[1]); 
 				}
-			
-				return true;
+				
+				if (daShader != null){
+					if (Std.isOfType(leObj, FlxCamera)){
+						var daFilters = (leObj.filters != null && keepOtherShaders) ? leObj.filters : [];
+						daFilters.push(new ShaderFilter(daShader));
+						leObj.filters = daFilters;
+					}
+					else{
+						var daObj:FlxSprite = leObj;
+						daObj.shader = daShader;
+					}
+				
+					return true;
+				}
 			}
 			#else
 			FunkinLua.luaTrace("setSpriteShader: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
@@ -145,8 +188,13 @@ class ShaderFunctions
 		funk.addLocalCallback("setCameraShader", function(obj:String, shader:String, ?keepOtherShaders:Bool = true) {
 			if(!ClientPrefs.data.shaders) return false;
 
+			if (funk.scriptType == "modpack"){
+				ModpackAssetRegistry.instance.addAsset("shaders", shader);
+				return true;
+			}
+			
 			#if (!flash && sys)
-			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader))
+			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader) && LuaUtils.getObjectDirectly(shader) == null)
 			{
 				FunkinLua.luaTrace('setCameraShader: Shader $shader is missing!', false, false, FlxColor.RED);
 				return false;
@@ -159,12 +207,22 @@ class ShaderFunctions
 			}
 	
 			if(leObj != null) {
-				var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
-				var daShader:ErrorHandledRuntimeShader = new ErrorHandledRuntimeShader(shader, arr[0], arr[1]); 
-				var daFilters = (keepOtherShaders && leObj.filters != null) ? leObj.filters : [];
-				daFilters.push(new ShaderFilter(daShader));
-				leObj.filters = daFilters;
+				var daShader:ErrorHandledRuntimeShader = null;
 
+				if (MusicBeatState.getVariables().get(shader) != null){
+					daShader = MusicBeatState.getVariables().get(shader);
+				}
+				else{
+					var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
+					daShader = new ErrorHandledRuntimeShader(shader, arr[0], arr[1]); 
+				}
+
+				if (daShader != null){
+					var daFilters = (keepOtherShaders && leObj.filters != null) ? leObj.filters : [];
+					daFilters.push(new ShaderFilter(daShader));
+					leObj.filters = daFilters;
+				}
+				
 				return true;
 			}
 			#else
@@ -492,7 +550,7 @@ class ShaderFunctions
 			var daFilters = (target.filters != null && target.filters.length > 0) ? target.filters : [];
 			
 			if (shaderName != null && shaderName.length > 0) {
-				var arr:Array<String> = PlayState.instance.runtimeShaders.get(shaderName);
+				var arr:Array<String> = PlayState.instance.runtimeShaders.get(MusicBeatState.getVariables().get(shaderName) != null ? MusicBeatState.getVariables().get("src_shader_name_" + shaderName) : shaderName);
 				
 				if (arr == null || arr.length == 0) {
 					FunkinLua.luaTrace('Error: Shader $shaderName not found in runtimeShaders', false, false, FlxColor.RED);

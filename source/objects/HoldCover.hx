@@ -162,7 +162,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 
 		if (enabled && isReady)
 		{
-			var data:Int = noteData;
+			var data:Int = Std.int(noteData) % 4;
 
 			if (isSus)
 			{
@@ -242,9 +242,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 
 				// end RGB shader hold cover stuff
 
-				if (isHoldEnd)
-				{
-					if (isPlayer)
+					if (isHoldEnd)
 					{
 						coverSpriteMember.isPlaying = false;
 						coverSpriteMember.boom = true;
@@ -273,9 +271,9 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		}
 	}
 
-	public function despawnOnMiss(isReady:Bool, direciton:Int, ?note:Note = null):Void
+	public function despawnOnMiss(isReady:Bool, direction:Int, ?note:Note = null):Void
 	{
-		var noteData:Int = (note != null ? note.noteData : direciton);
+		var noteData:Int = (note != null ? Std.int(note.noteData) % 4 : direction);
 		if (enabled && isReady)
 		{
 			var data:Int = noteData;

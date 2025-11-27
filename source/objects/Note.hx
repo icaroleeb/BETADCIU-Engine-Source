@@ -299,7 +299,7 @@ class Note extends OffsettableSprite
 			if(!isSustainNote && noteData < colArray.length) { //Doing this 'if' check to fix the warnings on Senpai songs
 				var animToPlay:String = '';
 				animToPlay = colArray[noteData % colArray.length];
-				animation.play(animToPlay + 'Scroll');
+				playAnim(animToPlay + 'Scroll');
 			}
 		}
 
@@ -318,7 +318,7 @@ class Note extends OffsettableSprite
 			offsetX += width / 2;
 			copyAngle = false;
 
-			animation.play(colArray[noteData % colArray.length] + 'holdend');
+			playAnim(colArray[noteData % colArray.length] + 'holdend');
 
 			updateHitbox();
 
@@ -329,9 +329,9 @@ class Note extends OffsettableSprite
 
 			if (prevNote.isSustainNote)
 			{
-				prevNote.animation.play(colArray[prevNote.noteData % colArray.length] + 'hold');
+				prevNote.playAnim(colArray[prevNote.noteData % colArray.length] + 'hold');
 
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.045;
 				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
 
 				if(isPixelNote) {
@@ -512,7 +512,8 @@ class Note extends OffsettableSprite
 					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 				}
 			}
-			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+			// setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+			scale.set(6, 6);
 			loadPixelNoteAnims();
 			antialiasing = false;
 
@@ -539,9 +540,10 @@ class Note extends OffsettableSprite
 		updateHitbox();
 		
 
-		if(animName != null)
-			animation.play(animName, true);
-
+		if(animName != null){
+			playAnim(animName, true);
+		}
+		
 		return texture;
 	}
 
@@ -598,7 +600,8 @@ class Note extends OffsettableSprite
 			else animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
 		}
 		
-		setGraphicSize(Std.int(width * 0.7));
+		// setGraphicSize(Std.int(width * 0.7));
+		scale.set(0.7, 0.7);
 		updateHitbox();
 	}
 
@@ -724,6 +727,18 @@ class Note extends OffsettableSprite
 			}
 			clipRect = swagRect;
 		}
+	}
+
+	public function playAnim(anim:String, ?force:Bool = false) {
+		animation.play(anim, force);
+
+		var daOffsets = getAnimOffset(anim);
+		
+		offset.x += daOffsets[0] * ((isPixelNote ? PlayState.daPixelZoom : 0.7) / scale.x);
+		offset.y += daOffsets[1] * ((isPixelNote ? PlayState.daPixelZoom : 0.7) / scale.y);
+		
+		// if(useRGBShader && !isLegacyNoteSkin) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
+		// else if (isLegacyNoteSkin) rgbShader.enabled = false;
 	}
 
 	@:noCompletion
