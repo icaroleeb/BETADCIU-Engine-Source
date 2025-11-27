@@ -16,6 +16,16 @@ class SpriteGroupFunctions
 
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, group);
+
+			switch(funk.scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+		
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, group);
+			}
 		});
 
 		Lua_helper.add_callback(lua, 'groupInsertSprite', function(tag:String, obj:String, index:Int, pos:Int, removeFromGroup:Bool = false) {

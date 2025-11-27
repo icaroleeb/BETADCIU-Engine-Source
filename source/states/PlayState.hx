@@ -153,7 +153,8 @@ class PlayState extends MusicBeatState
 	public var boyfriendGroup:FlxSpriteGroup;
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
-	public var curStage:String = '';
+	public static var curStage:String = '';
+	public var curStageLua:String = ''; // I added this cuz the "curStage" with static don't work on "setProperty" or "getProperty"
 
 	public static var stageUI(default, set):String = "normal";
 	public static var uiPrefix:String = "";
@@ -403,6 +404,7 @@ class PlayState extends MusicBeatState
 			SONG.stage = StageData.vanillaSongStage(Paths.formatToSongPath(Song.loadedSongName));
 
 		curStage = SONG.stage;
+		curStageLua = SONG.stage;
 		stageData = StageData.getStageFile(curStage);
 		setStageDetails(stageData);
 
@@ -433,7 +435,7 @@ class PlayState extends MusicBeatState
 		boyfriend = new Character(0, 0, SONG.player1, true);
 		startCharacterPos(boyfriend);
 		
-		addStage(false, false);
+		addStage(false, true);
 		
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// "SCRIPTS FOLDER" SCRIPTS
@@ -549,14 +551,12 @@ class PlayState extends MusicBeatState
 		iconP1.y = healthBar.y - 75;
 		iconP1.visible = !ClientPrefs.data.hideHud;
 		iconP1.alpha = ClientPrefs.data.healthBarAlpha;
-		variables.set('iconP1', iconP1); // because without adding it the changeIcon lua function don't work?
 		add(iconP1);
 
 		iconP2 = new HealthIcon(dad.healthIcon, false);
 		iconP2.y = healthBar.y - 75;
 		iconP2.visible = !ClientPrefs.data.hideHud;
 		iconP2.alpha = ClientPrefs.data.healthBarAlpha;
-		variables.set('iconP2', iconP2);
 		add(iconP2);
 
 		scoreTxt = new FlxText(0, healthBar.y + 40, FlxG.width, "", 20);
@@ -1197,7 +1197,7 @@ class PlayState extends MusicBeatState
 	{
 		var fadeEase = FlxEase.cubeInOut;
 
-		if(ClientPrefs.data.perfectPixel){
+		if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
 			if(PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel"))
 				fadeEase = EaseUtil.stepped(8);
 		}
@@ -1209,8 +1209,6 @@ class PlayState extends MusicBeatState
 		spr.updateHitbox();
 		if (PlayState.isPixelStage && !custom || custom && StringTools.contains(image, "-pixel")){
 			spr.setGraphicSize(Std.int(spr.width * daPixelZoom)); // bruh
-			//spr.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
-			//spr.pixelPerfectRender = ClientPrefs.data.perfectPixel;
 		}
 
 		spr.screenCenter();
@@ -1227,6 +1225,7 @@ class PlayState extends MusicBeatState
 		return spr;
 	}
 
+	/*
 	public function addBehindGF(obj:FlxBasic)
 	{
 		insert(members.indexOf(gf), obj);
@@ -1239,6 +1238,7 @@ class PlayState extends MusicBeatState
 	{
 		insert(members.indexOf(dad), obj);
 	}
+	*/
 
 	public function clearNotesBefore(time:Float)
 	{
@@ -2532,8 +2532,9 @@ class PlayState extends MusicBeatState
 			case "Change Stage":
 				if (value1 != null && value1 != ""){
  					removeStage(); // Remove current stage
-			
+					
 					curStage = value1; // Set new stage name
+					curStageLua = value1;
  					stageData = StageData.getStageFile(curStage); 
  					addStage();
 					setOnScripts('curStage', curStage);
@@ -2601,6 +2602,23 @@ class PlayState extends MusicBeatState
 				});
 			}
 		}
+	}
+
+	public var charLuaMoveScript:Bool = true; // if you wanna disable it put it on false on "setProperty".
+
+	public function moveCameraToLuaCharacter(charFocus:String)
+	{
+		var char = modchartCharacters.get(charFocus);
+
+		if(!modchartCharacters.exists(charFocus)) return;
+
+		if(char.isPlayer)
+			camFollow.setPosition(char.getMidpoint().x - 100 - char.cameraPosition[0] + boyfriendCameraOffset[0], char.getMidpoint().y - 100 + char.cameraPosition[1] + boyfriendCameraOffset[1]);
+		else
+			camFollow.setPosition(char.getMidpoint().x + 150 + char.cameraPosition[0] + opponentCameraOffset[0], char.getMidpoint().y - 100 + char.cameraPosition[1] + opponentCameraOffset[1]);
+
+		if(charLuaMoveScript) callOnScripts('onMoveCamera', [char]);
+		if(!char.isPlayer) tweenCamIn();
 	}
 
 	public function tweenCamIn() {
@@ -2924,12 +2942,16 @@ class PlayState extends MusicBeatState
 		if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
-			rating.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
-			rating.pixelPerfectRender = ClientPrefs.data.perfectPixel;
+			if (ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
+				rating.pixelPerfectPosition = true;
+				rating.pixelPerfectRender = true;
+			}
 
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
-			comboSpr.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
-			comboSpr.pixelPerfectRender = ClientPrefs.data.perfectPixel;
+			if (ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){ 
+				comboSpr.pixelPerfectPosition = true;
+				comboSpr.pixelPerfectRender = true;
+			}
 		}
 		else
 		{
@@ -2942,7 +2964,7 @@ class PlayState extends MusicBeatState
 
 		var fadeEase = FlxEase.expoOut;
 
-		if(ClientPrefs.data.perfectPixel){
+		if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
 			if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel')
 				fadeEase = EaseUtil.stepped(2);
 		}
@@ -2959,7 +2981,7 @@ class PlayState extends MusicBeatState
 
 		var customFade = FlxEase.linear;
 
-		if(ClientPrefs.data.perfectPixel){
+		if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
 			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
 				customFade = EaseUtil.stepped(2);
 		}
@@ -2979,8 +3001,11 @@ class PlayState extends MusicBeatState
 
 			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
 				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
-				numScore.pixelPerfectPosition = ClientPrefs.data.perfectPixel;
-				numScore.pixelPerfectRender = ClientPrefs.data.perfectPixel;
+
+				if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){ 
+					numScore.pixelPerfectPosition = true;
+					numScore.pixelPerfectRender = true;
+				}
 			}
 			else 
 				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
@@ -3813,10 +3838,6 @@ class PlayState extends MusicBeatState
 		try
 		{
 			newScript = new HScript(null, file, scriptType);
-			switch (scriptType.toLowerCase()){
-				case 'stage':
-					callOnHScript('onCreate'); // why this won't work?!
-			}
 			if (newScript.exists('onCreate')) newScript.call('onCreate');
 			trace('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
@@ -4150,13 +4171,13 @@ class PlayState extends MusicBeatState
 					removeStage();
 					curStage = stage;
 					stageData = StageData.getStageFile(curStage); 
-					addStage(true);
+					addStage(false, true);
 					trace('Stage Loaded: ' + stage + '!');
 				}
 				removeStage();
 				curStage = ogStage;
 				stageData = StageData.getStageFile(curStage); 
-				addStage(true);
+				addStage(false, true);
 				stagesPreloaded = true;
 				trace('Stage Preloading Finished.');
 			}
@@ -4183,7 +4204,7 @@ class PlayState extends MusicBeatState
 					var preloadChar = new Character(0, 0, character);
 					preloadChar.visible = false;
 					startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
-					//stopCharacterScripts(preloadChar.curCharacter);
+					stopCharacterScripts(preloadChar.curCharacter);
 					add(preloadChar);
 					sprites.push(preloadChar);
 					//preloadChar.destroyAtlas();
@@ -4267,7 +4288,7 @@ class PlayState extends MusicBeatState
 										var preloadChar = new Character(0, 0, toLoad.path);
 										preloadChar.visible = false;
 										startCharacterScripts(preloadChar.curCharacter); // if the hx breaks this...
-										//stopCharacterScripts(preloadChar.curCharacter);
+										stopCharacterScripts(preloadChar.curCharacter);
 										add(preloadChar);
 										sprites.push(preloadChar);
 										//preloadChar.destroyAtlas();
@@ -4378,7 +4399,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (FileSystem.exists(Paths.txt(songName + "/preload-stage"))) {
-			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(songName  + "/preload-stage"));
+			var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt(songName + "/preload-stage"));
 			for (i in 0...stages.length) {
 				var data:Array<String> = stages[i].split(' ');
 				stagesToLoad.push(stages[i]);
@@ -4505,20 +4526,20 @@ class PlayState extends MusicBeatState
 	public var addedStages:Array<String> = [];
 	public function removeStage(){
 		removeObjects(stageData);
+
+		if (ClientPrefs.data.comboCam == "Game") // this should help for base stages
+			remove(comboGroup);
+
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
 			hardCodedStage = null;
 		}
+
+		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			// STAGE SCRIPTS
-			#if LUA_ALLOWED
-			stopLuasNamed('stages/' + curStage + '.lua', "stage");
-			
-			for (stage in addedStages) stopLuasNamed(stage, "stage");
-		#end
-			#if HSCRIPT_ALLOWED 
-			stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
-			#end
+		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage");
+		for (stage in addedStages) stopLuasNamed(stage, "stage"); #end
+		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
@@ -4526,17 +4547,19 @@ class PlayState extends MusicBeatState
 		if (stageVars != null) {
 			for (key in stageVars.keys()) {
 				var sprite:FlxSprite = stageVars.get(key);
+
 				if (sprite != null) {
 					remove(sprite);
 					variables.remove(key);
+					sprite.destroy();
 				}
 			}
 			stageVars.clear();
 		}
-	}	
+	}
 
-	public function addStage(?onlyLuas:Bool=false, ?stageDetails:Bool=true) {
-		if(stageDetails) setStageDetails(stageData); // for some reason they don't add the chars position on them.
+	public function addStage(?onlyLuas:Bool=false, ?isCreate:Bool=false) {
+		if(!isCreate) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		switch (curStage.toLowerCase())
 		{
 			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
@@ -4553,17 +4576,29 @@ class PlayState extends MusicBeatState
 		}
 
 		addObjects(stageData);
-		stagesFunc(function(stage:BaseStage) stage.createPost());
 
+		if(ClientPrefs.data.perfectPixel == "inGame"){
+			boyfriend.pixelPerfectPosition = stageData.isPixelStage;
+			boyfriend.pixelPerfectRender = stageData.isPixelStage;
+
+			dad.pixelPerfectPosition = stageData.isPixelStage;
+			dad.pixelPerfectRender = stageData.isPixelStage;
+
+			gf.pixelPerfectPosition = stageData.isPixelStage;
+			gf.pixelPerfectRender = stageData.isPixelStage;
+		}
+
+		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
+
+		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			// STAGE SCRIPTS
-			#if LUA_ALLOWED 
-				startLuasNamed('stages/' + curStage + '.lua', "stage"); 
-			#end
-
-			#if HSCRIPT_ALLOWED 
-				if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
-			#end
+		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
+		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
+
+		if(!isCreate){
+			stagesFunc(function(stage:BaseStage) stage.createPost());
+			//script.call("onCreatePost", []);
+		}
 	}
 }

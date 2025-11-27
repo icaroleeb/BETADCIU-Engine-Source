@@ -73,11 +73,11 @@ function onCreatePost(){
     vis6.color = gf.color;
     vis7.color = gf.color;
 
-    addBehindGF(stereoBG);
-    addBehindGF(abotViz);
-    addBehindGF(eyeWhites);
-    addBehindGF(pupil);
-    addBehindGF(abot);
+    insert(members.indexOf(game.gf) - 1, stereoBG);
+    insert(members.indexOf(game.gf) - 1, abotViz);
+    insert(members.indexOf(game.gf) - 1, eyeWhites);
+    insert(members.indexOf(game.gf) - 1, pupil);
+    insert(members.indexOf(game.gf) - 1, abot);
 }
 
 function onEvent(n, v1, v2, v3){
@@ -87,6 +87,28 @@ function onEvent(n, v1, v2, v3){
         pupil.shader = gf.shader;
         stereoBG.shader = gf.shader;
         abotViz.shader = gf.shader;
+
+        if (game.gf.curCharacter == 'nene'){
+            onDestroy();
+
+            insert(members.indexOf(game.gf) - 1, stereoBG);
+
+            insert(members.indexOf(game.gf) - 1, vis1);
+            insert(members.indexOf(game.gf) - 1, vis2);
+            insert(members.indexOf(game.gf) - 1, vis3);
+            insert(members.indexOf(game.gf) - 1, vis4);
+            insert(members.indexOf(game.gf) - 1, vis5);
+            insert(members.indexOf(game.gf) - 1, vis6);
+            insert(members.indexOf(game.gf) - 1, vis7);
+
+            insert(members.indexOf(game.gf) - 1, abotViz);
+
+            initAnalyzer();
+
+            insert(members.indexOf(game.gf) - 1, eyeWhites);
+            insert(members.indexOf(game.gf) - 1, pupil);
+            insert(members.indexOf(game.gf) - 1, abot);
+        }
     }
 
     if(n == "Change Character"){
@@ -97,6 +119,24 @@ function onEvent(n, v1, v2, v3){
                 pupil.shader = gf.shader;
                 stereoBG.shader = gf.shader;
                 abotViz.shader = gf.shader;
+
+                insert(members.indexOf(game.gf) - 1, stereoBG);
+
+                insert(members.indexOf(game.gf) - 1, vis1);
+                insert(members.indexOf(game.gf) - 1, vis2);
+                insert(members.indexOf(game.gf) - 1, vis3);
+                insert(members.indexOf(game.gf) - 1, vis4);
+                insert(members.indexOf(game.gf) - 1, vis5);
+                insert(members.indexOf(game.gf) - 1, vis6);
+                insert(members.indexOf(game.gf) - 1, vis7);
+
+                insert(members.indexOf(game.gf) - 1, abotViz);
+
+                initAnalyzer();
+
+                insert(members.indexOf(game.gf) - 1, eyeWhites);
+                insert(members.indexOf(game.gf) - 1, pupil);
+                insert(members.indexOf(game.gf) - 1, abot);
             }
         }
     }
@@ -121,6 +161,8 @@ function onUpdatePost(elapsed){
             }
         }
     }
+
+    refreshAbotSpeaker();
 
     stereoBG.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
     eyeWhites.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
@@ -256,6 +298,7 @@ function onSectionHit()
 function onDestroy()
 {
     remove(abotViz);
+    analyzer = null;
     remove(abot);
     remove(eyeWhites);
     remove(pupil);
@@ -284,16 +327,16 @@ function movePupilsRight() {
 
 function refreshAbotSpeaker():Void{
     abot.x = gf.x - 100;
-    abot.y = gf.y + 316;
+    abot.y = gf.y + 316; // 764 - 740
 
-    abotViz.x = gf.x + 100;
-    abotViz.y = gf.y + 400;
+    abotViz.x = abot.x + 200;
+    abotViz.y = abot.y + 84;
 
     eyeWhites.x = abot.x + 40;
     eyeWhites.y = abot.y + 250;
 
-    pupil.x = gf.x - 607;
-    pupil.y = gf.y - 176;
+    pupil.x = abot.x - 507;
+    pupil.y = abot.y - 492;
 
     stereoBG.x = abot.x + 150;
     stereoBG.y = abot.y + 30;

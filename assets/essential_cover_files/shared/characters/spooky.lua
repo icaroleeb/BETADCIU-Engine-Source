@@ -10,3 +10,7 @@ function onUpdatePost(elapsed)
         close(true)
     end
 end
+
+function onDestroy()
+    setProperty('iconP1.flipX', false)
+end

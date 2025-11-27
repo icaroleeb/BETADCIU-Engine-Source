@@ -13,7 +13,6 @@ enum HenchmenKillState
 
 class Limo extends BaseStage
 {
-	var limo:BGSprite;
 	var grpLimoDancers:FlxTypedGroup<BackgroundDancer>;
 	var fastCar:BGSprite;
 	var fastCarCanDrive:Bool = true;
@@ -64,8 +63,8 @@ class Limo extends BaseStage
 			{
 				var dancer:BackgroundDancer = new BackgroundDancer((370 * i) + dancersDiff + bgLimo.x, bgLimo.y - 400);
 				dancer.scrollFactor.set(0.4, 0.4);
-				grpLimoDancers.add(dancer);
 				stageVars.set("dancer" + i, dancer);
+				grpLimoDancers.add(dancer);
 			}
 
 			limoLight = new BGSprite('gore/coldHeartKiller', limoMetalPole.x - 180, limoMetalPole.y - 80, 0.4, 0.4);
@@ -89,18 +88,17 @@ class Limo extends BaseStage
 		}
 
 		fastCar = new BGSprite('limo/fastCarLol', -300, 160);
-		resetFastCar();
 		stageVars.set("fastCar", fastCar);
 		fastCar.active = true;
-
-		limo = new BGSprite('limo/limoDrive', -120, 550, 1, 1, ['Limo stage'], true); // moved to create instead of createPost because it won't remove during stage switch
-		stageVars.set("limo", limo);
 	}
+
 	override function createPost()
 	{
-		var stageVars = PlayState.instance.variables.get("stageVariables");
+		resetFastCar();
 		addBehindGF(fastCar);
-
+		
+		var limo:BGSprite = new BGSprite('limo/limoDrive', -120, 550, 1, 1, ['Limo stage'], true);
+		PlayState.instance.variables.get("stageVariables").set("limo", limo);
 		addBehindDad(limo); //Shitty layering but whatev it works LOL
 	}
 
@@ -116,9 +114,6 @@ class Limo extends BaseStage
 	var limoSpeed:Float = 0;
 	override function update(elapsed:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "limo") 
-			return; 
-		
 		if(!ClientPrefs.data.lowQuality) {
 			grpLimoParticles.forEach(function(spr:BGSprite) {
 				if(spr.animation.curAnim.finished) {
@@ -203,9 +198,6 @@ class Limo extends BaseStage
 
 	override function beatHit()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "limo") 
-			return; 
-
 		if(!ClientPrefs.data.lowQuality) {
 			grpLimoDancers.forEach(function(dancer:BackgroundDancer)
 			{
@@ -220,9 +212,6 @@ class Limo extends BaseStage
 	// Substates for pausing/resuming tweens and timers
 	override function closeSubState()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "limo") 
-			return; 
-
 		if(paused)
 		{
 			if(carTimer != null) carTimer.active = true;
@@ -231,9 +220,6 @@ class Limo extends BaseStage
 
 	override function openSubState(SubState:flixel.FlxSubState)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "limo") 
-			return; 
-
 		if(paused)
 		{
 			if(carTimer != null) carTimer.active = false;
@@ -242,9 +228,6 @@ class Limo extends BaseStage
 
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "limo") 
-			return; 
-
 		switch(eventName)
 		{
 			case "Kill Henchmen":

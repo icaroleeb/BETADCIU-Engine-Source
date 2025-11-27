@@ -1,6 +1,8 @@
 package states.stages.objects;
 
-class BackgroundGirls extends FlxSprite
+import backend.FunkinSprite;
+
+class BackgroundGirls extends FunkinSprite
 {
 	var isPissed:Bool = true;
 	public function new(x:Float, y:Float)

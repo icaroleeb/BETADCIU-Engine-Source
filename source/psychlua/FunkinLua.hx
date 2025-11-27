@@ -103,6 +103,10 @@ class FunkinLua {
 		set('luaDebugMode', false);
 		set('luaDeprecatedWarnings', true);
 		set('version', MainMenuState.psychEngineVersion.trim());
+
+		set('betadciuVersion', MainMenuState.betadciuEngineVersion.trim());
+		set('psychVersion', MainMenuState.psychEngineVersion.trim());
+		
 		set('modFolder', this.modFolder);
 
 		// Song/Week shit
@@ -471,9 +475,10 @@ class FunkinLua {
 			return value;
 		});
 		Lua_helper.add_callback(lua, "changeStageData", function(id:String) {
-            PlayState.instance.curStage = id;
-            PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
-            PlayState.instance.setStageDetails(PlayState.instance.stageData);
+            PlayState.curStage = id;
+			game.curStageLua = id;
+            game.stageData = StageData.getStageFile(PlayState.curStage); 
+            game.setStageDetails(game.stageData);
         });
 		Lua_helper.add_callback(lua, "getVar", function(varName:String) {
 			return MusicBeatState.getVariables().get(varName);
@@ -919,43 +924,59 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "getCharacterX", function(type:String) {
+			var char:Character = game.modchartCharacters.get(type);
+
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					return game.dadGroup.x;
+					return game.dad.x;
 				case 'gf' | 'girlfriend':
-					return game.gfGroup.x;
+					return game.gf.x;
+				case 'boyfriend' | 'bf' | 'player':
+					return game.boyfriend.x;
 				default:
-					return game.boyfriendGroup.x;
+					return char.x;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterX", function(type:String, value:Float) {
+			var char:Character = game.modchartCharacters.get(type);
+
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					game.dadGroup.x = value;
+					game.dad.x = value;
 				case 'gf' | 'girlfriend':
-					game.gfGroup.x = value;
+					game.gf.x = value;
+				case 'boyfriend' | 'bf' | 'player':
+					game.boyfriend.x = value;
 				default:
-					game.boyfriendGroup.x = value;
+					char.x = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "getCharacterY", function(type:String) {
+			var char:Character = game.modchartCharacters.get(type);
+
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					return game.dadGroup.y;
+					return game.dad.y;
 				case 'gf' | 'girlfriend':
-					return game.gfGroup.y;
+					return game.gf.y;
+				case 'boyfriend' | 'bf' | 'player':
+					return game.boyfriend.y;
 				default:
-					return game.boyfriendGroup.y;
+					return char.y;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterY", function(type:String, value:Float) {
+			var char:Character = game.modchartCharacters.get(type);
+
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					game.dadGroup.y = value;
+					game.dad.y = value;
 				case 'gf' | 'girlfriend':
-					game.gfGroup.y = value;
+					game.gf.y = value;
+				case 'boyfriend' | 'bf' | 'player':
+					game.boyfriend.y = value;
 				default:
-					game.boyfriendGroup.y = value;
+					char.y = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
@@ -965,8 +986,10 @@ class FunkinLua {
 					game.moveCameraToGirlfriend();
 				case 'dad', 'opponent':
 					game.moveCamera(true);
-				default:
+				case "boyfriend", 'bf', 'player':
 					game.moveCamera(false);
+				default:
+					game.moveCameraToLuaCharacter(target);
 			}
 		});
 
@@ -1169,7 +1192,8 @@ class FunkinLua {
 				switch(character.toLowerCase()) {
 					case 'dad': game.dad.dance();
 					case 'gf' | 'girlfriend': if(game.gf != null) game.gf.dance();
-					default: game.boyfriend.dance();
+					case 'bf' | 'boyfriend': game.boyfriend.dance();
+					default: if(game.modchartCharacters.exists(character)) game.modchartCharacters.get(character).dance();
 				}
 			}
 		});
@@ -1593,29 +1617,33 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
-			makeLuaCharacter(tag, character, isPlayer, flipped);
+			if(scriptType.toLowerCase() == "stage") 
+				luaTrace("The makeLuaCharacter can't be added in script stages!", false, false, FlxColor.RED);
+			else
+				makeLuaCharacter(tag, character, isPlayer, flipped);
 		});
 		Lua_helper.add_callback(lua, "flipCharacterAnim", function(character:String) {
 			switch(character.toLowerCase()) {
 				case 'dad':
-					PlayState.instance.dad.flipAnims();
+					game.dad.flipAnims();
 				case 'gf' | 'girlfriend':
-					PlayState.instance.gf.flipAnims();
+					game.gf.flipAnims();
 				default:
-					if(PlayState.instance.modchartCharacters.exists(character)) {
-						var spr:Character = PlayState.instance.modchartCharacters.get(character);
+					if(game.modchartCharacters.exists(character)) {
+						var spr:Character = game.modchartCharacters.get(character);
 						spr.flipAnims();
 						return;
 					}
-					PlayState.instance.boyfriend.flipAnims();
+					game.boyfriend.flipAnims();
 			}
 		});
 		Lua_helper.add_callback(lua, "changeStage", function(id:String) {
-			PlayState.instance.removeStage(); // Remove current stage
-			PlayState.instance.curStage = id; // Set new stage name
-			PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
-			PlayState.instance.addStage();
-			PlayState.instance.setOnScripts('curStage', PlayState.instance.curStage);
+			game.removeStage(); // Remove current stage
+			PlayState.curStage = id; // Set new stage name
+			game.curStageLua = id;
+			game.stageData = StageData.getStageFile(PlayState.curStage); 
+			game.addStage();
+			game.setOnScripts('curStage', PlayState.curStage);
 		});
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
 			if (scriptType.toLowerCase() == "modpack"){
@@ -1626,12 +1654,21 @@ class FunkinLua {
 			makeIcon(tag, character, player);
 		});
 		Lua_helper.add_callback(lua, "changeIcon", function(tag:String, character:String){
-			var shit:HealthIcon = game.variables.get(tag);
-			shit.changeIcon(character);
+			var killMe:Array<String> = tag.split('.');
+			var object:HealthIcon = LuaUtils.getObjectDirectly(killMe[0]);
+			if(killMe.length > 1) {
+				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+
+			if(object != null) {
+				object.changeIcon(character);
+				return;
+			}
+			luaTrace("changeIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua,"characterZoom", function(id:String, zoomAmount:Float, ?isSenpai:Bool = false) {
-			if(PlayState.instance.modchartCharacters.exists(id)) {
-				var spr:Character = PlayState.instance.modchartCharacters.get(id);
+			if(game.modchartCharacters.exists(id)) {
+				var spr:Character = game.modchartCharacters.get(id);
 				spr.setZoom(zoomAmount, isSenpai);
 			}
 			else
@@ -1712,13 +1749,27 @@ class FunkinLua {
 			if(destroy)
 			{
 				MusicBeatState.getVariables().remove(tag);
+				
+				if (!MusicBeatState.getVariables().exists("stageVariables")){
+					MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxSprite>());
+				}
+				var stageVars = MusicBeatState.getVariables().get("stageVariables");
+
+				// these will be helpful to remove sprites from other make lua calls
+				if(stageVars.exists(tag)) stageVars.remove(tag);
+				if(game.modchartCharacters.exists(tag)) game.modchartCharacters.remove(tag);
+				//
+
 				obj.destroy();
 			}
 		});
 
 		Lua_helper.add_callback(lua, "luaSpriteExists", function(tag:String) {
 			var obj:FlxSprite = MusicBeatState.getVariables().get(tag);
-			return (obj != null && (Std.isOfType(obj, ModchartSprite) || Std.isOfType(obj, ModchartAnimateSprite)));
+			return (obj != null && (Std.isOfType(obj, ModchartSprite) || Std.isOfType(obj, ModchartAnimateSprite) || Std.isOfType(obj, FlxBackdrop)));
+		});
+		Lua_helper.add_callback(lua, "luaCharacterExists", function(tag:String) {
+			return (game.modchartCharacters.exists(tag));
 		});
 		Lua_helper.add_callback(lua, "luaTextExists", function(tag:String) {
 			var obj:FlxText = MusicBeatState.getVariables().get(tag);
@@ -2710,7 +2761,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 		
-		//PlayState.instance.stopCharacterScripts(PlayState.instance.boyfriend.curCharacter);
+		PlayState.instance.stopCharacterScripts(PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.boyfriend.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend.destroy();
@@ -2773,7 +2824,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 
-		//PlayState.instance.stopCharacterScripts(PlayState.instance.dad.curCharacter);
+		PlayState.instance.stopCharacterScripts(PlayState.instance.dad.curCharacter);
 		PlayState.instance.dad.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.dad);
 		PlayState.instance.dad.destroy();
@@ -2839,7 +2890,7 @@ class FunkinLua {
 			// do absolutely nothing
 		}
 
-		//PlayState.instance.stopCharacterScripts(PlayState.instance.gf.curCharacter);
+		PlayState.instance.stopCharacterScripts(PlayState.instance.gf.curCharacter);
 		PlayState.instance.gf.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.gf);
 		PlayState.instance.gf.destroy();

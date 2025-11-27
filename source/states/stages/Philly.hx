@@ -27,73 +27,72 @@ class Philly extends BaseStage
 
 		if(!ClientPrefs.data.lowQuality) {
 			var bg:BGSprite = new BGSprite('philly/sky', -100, 0, 0.1, 0.1);
-			stageVars.set('bg', bg);
+			stageVars.set("bg", bg);
 			add(bg);
 		}
 
 		var city:BGSprite = new BGSprite('philly/city', -10, 0, 0.3, 0.3);
 		city.setGraphicSize(Std.int(city.width * 0.85));
 		city.updateHitbox();
-		stageVars.set('city', city);
+		stageVars.set("city", city);
 		add(city);
 
 		phillyLightsColors = [0xFF31A2FD, 0xFF31FD8C, 0xFFFB33F5, 0xFFFD4531, 0xFFFBA633];
 		phillyWindow = new BGSprite('philly/window', city.x, city.y, 0.3, 0.3);
 		phillyWindow.setGraphicSize(Std.int(phillyWindow.width * 0.85));
 		phillyWindow.updateHitbox();
-		stageVars.set('phillyWindow', phillyWindow);
+		stageVars.set("phillyWindow", phillyWindow);
 		add(phillyWindow);
 		phillyWindow.alpha = 0;
 
 		if(!ClientPrefs.data.lowQuality) {
 			var streetBehind:BGSprite = new BGSprite('philly/behindTrain', -40, 50);
-			stageVars.set('streetBehind', streetBehind);
+			stageVars.set("streetBehind", streetBehind);
 			add(streetBehind);
 		}
 
 		phillyTrain = new PhillyTrain(2000, 360);
-		stageVars.set('phillyTrain', phillyTrain);
+		stageVars.set("phillyTrain", phillyTrain);
 		add(phillyTrain);
 
 		phillyStreet = new BGSprite('philly/street', -40, 50);
-		stageVars.set('phillyStreet', phillyStreet);
+		stageVars.set("phillyStreet", phillyStreet);
 		add(phillyStreet);
 	}
 	override function eventPushed(event:objects.Note.EventNote)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "philly") 
-			return; 
-
 		switch(event.event)
 		{
 			case "Philly Glow":
 				blammedLightsBlack = new FlxSprite(FlxG.width * -0.5, FlxG.height * -0.5).makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
 				blammedLightsBlack.visible = false;
+				PlayState.instance.variables.get("stageVariables").set("blammedLightsBlack", blammedLightsBlack);
 				insert(members.indexOf(phillyStreet), blammedLightsBlack);
 
 				phillyWindowEvent = new BGSprite('philly/window', phillyWindow.x, phillyWindow.y, 0.3, 0.3);
 				phillyWindowEvent.setGraphicSize(Std.int(phillyWindowEvent.width * 0.85));
 				phillyWindowEvent.updateHitbox();
 				phillyWindowEvent.visible = false;
+				PlayState.instance.variables.get("stageVariables").set("phillyWindowEvent", phillyWindowEvent);
 				insert(members.indexOf(blammedLightsBlack) + 1, phillyWindowEvent);
 
 				phillyGlowGradient = new PhillyGlowGradient(-400, 225);
 				phillyGlowGradient.visible = false;
+				PlayState.instance.variables.get("stageVariables").set("phillyGlowGradient", phillyGlowGradient);
 				insert(members.indexOf(blammedLightsBlack) + 1, phillyGlowGradient);
+
 				if(!ClientPrefs.data.flashing) phillyGlowGradient.intendedAlpha = 0.7;
 
 				Paths.image('philly/particle'); //precache philly glow particle image
 				phillyGlowParticles = new FlxTypedGroup<PhillyGlowParticle>();
 				phillyGlowParticles.visible = false;
+				PlayState.instance.variables.get("stageVariables").set("phillyGlowParticles", phillyGlowParticles);
 				insert(members.indexOf(phillyGlowGradient) + 1, phillyGlowParticles);
 		}
 	}
 
 	override function update(elapsed:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "philly") 
-			return; 
-
 		phillyWindow.alpha -= (Conductor.crochet / 1000) * elapsed * 1.5;
 		if(phillyGlowParticles != null)
 		{
@@ -107,9 +106,6 @@ class Philly extends BaseStage
 
 	override function beatHit()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "philly") 
-			return; 
-
 		phillyTrain.beatHit(curBeat);
 		if (curBeat % 4 == 0)
 		{
@@ -121,9 +117,6 @@ class Philly extends BaseStage
 
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "philly") 
-			return; 
-
 		switch(eventName)
 		{
 			case "Philly Glow":
@@ -222,10 +215,6 @@ class Philly extends BaseStage
 						phillyGlowGradient.bop();
 				}
 		}
-	}
-
-	override public function destroy():Void {
-		super.destroy();
 	}
 
 	function doFlash()

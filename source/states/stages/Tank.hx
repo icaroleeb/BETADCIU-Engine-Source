@@ -55,6 +55,7 @@ class Tank extends BaseStage
 			var smokeLeft:BGSprite = new BGSprite('smokeLeft', -200, -100, 0.4, 0.4, ['SmokeBlurLeft'], true);
 			stageVars.set("smokeLeft", smokeLeft);
 			add(smokeLeft);
+
 			var smokeRight:BGSprite = new BGSprite('smokeRight', 1100, -100, 0.4, 0.4, ['SmokeRight'], true);
 			stageVars.set("smokeRight", smokeRight);
 			add(smokeRight);
@@ -79,13 +80,14 @@ class Tank extends BaseStage
 		add(ground);
 
 		foregroundSprites = new FlxTypedGroup<BGSprite>();
-		stageVars.set("foregroundSprites", foregroundSprites);
 		foregroundSprites.add(new BGSprite('tank0', -500, 650, 1.7, 1.5, ['fg']));
 		if(!ClientPrefs.data.lowQuality) foregroundSprites.add(new BGSprite('tank1', -300, 750, 2, 0.2, ['fg']));
 		foregroundSprites.add(new BGSprite('tank2', 450, 940, 1.5, 1.5, ['foreground']));
 		if(!ClientPrefs.data.lowQuality) foregroundSprites.add(new BGSprite('tank4', 1300, 900, 1.5, 1.5, ['fg']));
 		foregroundSprites.add(new BGSprite('tank5', 1620, 700, 1.5, 1.5, ['fg']));
 		if(!ClientPrefs.data.lowQuality) foregroundSprites.add(new BGSprite('tank3', 1300, 1200, 3.5, 2.5, ['fg']));
+
+		//stageVars.set("foregroundSprites", foregroundSprites);
 
 		// Default GFs
 		if(songName == 'stress') setDefaultGF('pico-speaker');
@@ -116,10 +118,10 @@ class Tank extends BaseStage
 				if(gf.curCharacter == 'pico-speaker')
 				{
 					var firstTank:TankmenBG = new TankmenBG(20, 500, true);
-					PlayState.instance.variables.get("stageVariables").set("firstTank", firstTank);
 					firstTank.resetShit(20, 1500, true);
 					firstTank.strumTime = 10;
 					firstTank.visible = false;
+					PlayState.instance.variables.get("stageVariables").set("firstTank", firstTank);
 					tankmanRun.add(firstTank);
 
 					for (i in 0...TankmenBG.animationNotes.length)
@@ -138,21 +140,10 @@ class Tank extends BaseStage
 		}
 	}
 
-	override function countdownTick(count:Countdown, num:Int) {
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
-			return; 
-
-		if(num % 2 == 0) everyoneDance();
-	}
-	override function beatHit(){
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
-			return; 
-		everyoneDance();
-	} 
+	override function countdownTick(count:Countdown, num:Int) if(num % 2 == 0) everyoneDance();
+	override function beatHit() everyoneDance();
 	function everyoneDance()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
-			return; 
 		if(!ClientPrefs.data.lowQuality) tankWatchtower.dance();
 		foregroundSprites.forEach(function(spr:BGSprite)
 		{
@@ -168,8 +159,6 @@ class Tank extends BaseStage
 	var audioPlaying:FlxSound;
 	function prepareCutscene()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
-			return; 
 		cutsceneHandler = new CutsceneHandler();
 
 		dadGroup.alpha = 0.00001;
@@ -180,6 +169,7 @@ class Tank extends BaseStage
 		tankman.showPivot = false;
 		Paths.loadAnimateAtlas(tankman, 'cutscenes/tankman');
 		tankman.antialiasing = ClientPrefs.data.antialiasing;
+		PlayState.instance.variables.get("stageVariables").set("tankman", tankman);
 		addBehindDad(tankman);
 		cutsceneHandler.push(tankman);
 
@@ -225,8 +215,6 @@ class Tank extends BaseStage
 
 	function ughIntro()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
-			return; 
 		prepareCutscene();
 		cutsceneHandler.endTime = 12;
 		cutsceneHandler.music = 'DISTORTO';
@@ -280,8 +268,6 @@ class Tank extends BaseStage
 	}
 	function gunsIntro()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
-			return; 
 		prepareCutscene();
 		cutsceneHandler.endTime = 11.5;
 		cutsceneHandler.music = 'DISTORTO';
@@ -315,8 +301,6 @@ class Tank extends BaseStage
 	var dualWieldAnimPlayed = 0;
 	function stressIntro()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
-			return; 
 		prepareCutscene();
 		
 		cutsceneHandler.endTime = 35.5;
@@ -339,6 +323,7 @@ class Tank extends BaseStage
 		pico.anim.addBySymbol('picoAppears', 'Pico Saves them sequence', 24, false);
 		pico.anim.addBySymbol('picoEnd', 'Pico Dual Wield on Speaker idle', 24, false);
 		pico.anim.play('dance', true);
+		PlayState.instance.variables.get("stageVariables").set("pico", pico);
 		addBehindGF(pico);
 		cutsceneHandler.push(pico);
 
@@ -375,6 +360,7 @@ class Tank extends BaseStage
 		boyfriendCutscene.animation.addByPrefix('idle', 'BF idle dance', 24, false);
 		boyfriendCutscene.animation.play('idle', true);
 		boyfriendCutscene.animation.curAnim.finish();
+		PlayState.instance.variables.get("stageVariables").set("boyfriendCutscene", boyfriendCutscene);
 		addBehindBF(boyfriendCutscene);
 		cutsceneHandler.push(boyfriendCutscene);
 
@@ -439,8 +425,6 @@ class Tank extends BaseStage
 
 	function zoomBack()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
-			return; 
 		var calledTimes:Int = 0;
 		camFollow.setPosition(630, 425);
 		FlxG.camera.snapToTarget();
@@ -456,6 +440,7 @@ class Tank extends BaseStage
 			});
 		}
 	}
+
 	override public function destroy():Void {
 		if (foregroundSprites != null) { // fuck u <3.
 			remove(foregroundSprites);

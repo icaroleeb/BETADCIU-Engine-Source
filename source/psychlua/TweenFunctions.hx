@@ -18,6 +18,12 @@ class TweenFunctions
 		Lua_helper.add_callback(lua, "doTweenY", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			oldTweenFunction(tag, vars, {y: value}, duration, ease, 'doTweenY');
 		});
+		Lua_helper.add_callback(lua, "doTweenWidth", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			oldTweenFunction(tag, vars, {width: value}, duration, ease, 'doTweenWidth');
+		});
+		Lua_helper.add_callback(lua, "doTweenHeight", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			oldTweenFunction(tag, vars, {height: value}, duration, ease, 'doTweenHeight');
+		});
 		Lua_helper.add_callback(lua, "doTweenAngle", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			oldTweenFunction(tag, vars, {angle: value}, duration, ease, 'doTweenAngle');
 		});
@@ -201,6 +207,12 @@ class TweenFunctions
 		Lua_helper.add_callback(lua, "noteTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(tag, note, {y: value}, duration, ease);
 		});
+		Lua_helper.add_callback(lua, "noteTweenScaleX", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
+			return noteScaleTweenFunction(tag, note, {x: value}, duration, ease);
+		});
+		Lua_helper.add_callback(lua, "noteTweenScaleY", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
+			return noteScaleTweenFunction(tag, note, {y: value}, duration, ease);
+		});
 		Lua_helper.add_callback(lua, "noteTweenAngle", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(tag, note, {angle: value}, duration, ease);
 		});
@@ -306,6 +318,38 @@ class TweenFunctions
 		return null;
 	}
 	
+	public static function noteScaleTweenFunction(tag:String, note:Int, data:Dynamic, duration:Float, ease:String)
+	{
+		var game = PlayState.instance;
+
+		if (game == null){
+			return null;	
+		}else{
+			duration = duration / game.playbackRate;
+		}
+
+		var strumNote:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
+		if(strumNote == null) return null;
+
+		if(tag != null)
+		{
+			var originalTag:String = tag;
+			tag = LuaUtils.formatVariable('tween_$tag');
+			LuaUtils.cancelTween(tag);
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, FlxTween.tween(strumNote.scale, data, duration, {ease: LuaUtils.getTweenEaseByString(ease),
+				onComplete: function(twn:FlxTween)
+				{
+					variables.remove(tag);
+					if(PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [originalTag]);
+				}
+			}));
+			return tag;
+		}
+		else FlxTween.tween(strumNote.scale, data, duration, {ease: LuaUtils.getTweenEaseByString(ease)});
+		return null;
+	}
 
 	//i can't change the one in FunkinLua to static
 	public static function tweenCall(func:String, args:Array<Dynamic>):Dynamic {
