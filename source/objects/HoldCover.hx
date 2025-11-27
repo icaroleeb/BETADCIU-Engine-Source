@@ -242,7 +242,9 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 
 				// end RGB shader hold cover stuff
 
-					if (isHoldEnd)
+				if (isHoldEnd)
+				{
+					if (isPlayer)
 					{
 						coverSpriteMember.isPlaying = false;
 						coverSpriteMember.boom = true;
@@ -267,7 +269,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 						coverSpriteMember.isPlaying = false;
 					}
 				}
-			}
+			}	
 		}
 	}
 
@@ -372,7 +374,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		return config = value;
 	}
 
-	public static function createConfig():NoteHoldCoverConfig
+	private function createConfig():NoteHoldCoverConfig
 	{
 		return {
 			animations: new Map(),
