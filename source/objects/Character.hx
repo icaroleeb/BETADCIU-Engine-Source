@@ -31,7 +31,8 @@ typedef CharacterFile = {
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
 	var vocals_file:String;
-	var isPlayerChar:Bool;
+	@:optional var is_player_char:Bool; // New preferred field
+	@:optional var isPlayerChar:Bool;  // Legacy fallback
 	
 	@:optional var _editor_isPlayer:Null<Bool>;
 }
@@ -202,8 +203,8 @@ class Character extends OffsettableSprite
 	{
 		isAnimateAtlas = false;
 
-		if (json.isPlayerChar){
-			isPsychPlayer = json.isPlayerChar;
+		if (json.isPlayerChar || json.is_player_char){
+			isPsychPlayer = json.isPlayerChar || json.is_player_char;
 		}
 
 		#if flxanimate
