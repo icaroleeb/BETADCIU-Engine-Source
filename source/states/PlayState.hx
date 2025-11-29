@@ -3780,8 +3780,8 @@ class PlayState extends MusicBeatState
 		{
 			for (script in luaArray) {
 				if (script.scriptName == luaToLoad) {
-					// Because the shaders weren't getting destroyed properly. Might change this to like onRemove
-					script.call("onDestroy", []);
+					// Because the shaders weren't getting destroyed properly. Changed it to onStop
+					script.call("onStop", []);
 					
 					luaArray.remove(script);
 					return true;
@@ -3828,7 +3828,7 @@ class PlayState extends MusicBeatState
 			{
 				if (Iris.instances.exists(scriptToLoad)){
 					var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
-					if(script.exists('onDestroy')) script.call('onDestroy');
+					if(script.exists('onStop')) script.call('onStop');
 					script.destroy();
 					hscriptArray.remove(script);
 					return true;

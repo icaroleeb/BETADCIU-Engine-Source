@@ -70,8 +70,7 @@ class CoverSprite extends FlxSprite
 	{
 		this.hColor = hColor;
 		this.noteIndex = i;
-
-		trace("SKIN IS " + skin);
+		
 		if (hColor.length < 0) {
 			if (Paths.fileExists('images/holdCovers/$skin/holdCover$hColor.png', IMAGE)){
 				this.frames = Paths.getSparrowAtlas(skin.length > 0 ? 

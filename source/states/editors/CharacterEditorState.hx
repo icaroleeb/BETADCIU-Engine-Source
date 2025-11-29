@@ -261,7 +261,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		UI_box.scrollFactor.set();
 		UI_box.cameras = [camHUD];
 
-		UI_characterbox = new PsychUIBox(UI_box.x - 100, UI_box.y + UI_box.height + 10, 350, 310, ['Animations', 'Character']);
+		UI_characterbox = new PsychUIBox(UI_box.x - 100, UI_box.y + UI_box.height + 10, 350, 350, ['Animations', 'Character']);
 		UI_characterbox.scrollFactor.set();
 		UI_characterbox.cameras = [camHUD];
 		add(UI_characterbox);
@@ -386,7 +386,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	{
 		var tab_group = UI_box.getTab('Settings').menu;
 
-		check_player = new PsychUICheckBox(10, 60, "Playable Character", 100);
+		check_player = new PsychUICheckBox(10, 60, "View on Player Side", 100);
 		check_player.checked = character.isPlayer;
 		check_player.onClick = function()
 		{
@@ -428,7 +428,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				player_camera_position: [0, 0],
 				position: [0, 0],
 				player_position: [0, 0],
-				isPlayerChar: false,
+				is_player_char: false,
 				vocals_file: null
 			};
 
@@ -641,6 +641,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 	var flipXCheckBox:PsychUICheckBox;
 	var noAntialiasingCheckBox:PsychUICheckBox;
+	var playerSpriteSheetCheckBox:PsychUICheckBox;
 
 	var healthColorStepperR:PsychUINumericStepper;
 	var healthColorStepperG:PsychUINumericStepper;
@@ -695,6 +696,12 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			character.noAntialiasing = noAntialiasingCheckBox.checked;
 		};
 
+		playerSpriteSheetCheckBox = new PsychUICheckBox(flipXCheckBox.x, noAntialiasingCheckBox.y + 40, "Player Spritesheet", 80);
+		playerSpriteSheetCheckBox.checked = character.isPsychPlayer;
+		playerSpriteSheetCheckBox.onClick = function() {
+			character.isPsychPlayer = playerSpriteSheetCheckBox.checked;
+		};
+
 		// positionXStepper = new PsychUINumericStepper(flipXCheckBox.x + 110, flipXCheckBox.y, 10, character.positionArray[0], -9000, 9000, 0);
 		positionXStepper = new PsychUINumericStepper(flipXCheckBox.x + 110, vocalsInputText.y, 10, character.positionArray[0], -9000, 9000, 0);
 		positionYStepper = new PsychUINumericStepper(positionXStepper.x + 70, positionXStepper.y, 10, character.positionArray[1], -9000, 9000, 0);
@@ -709,7 +716,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		playerPositionCameraYStepper = new PsychUINumericStepper(playerPositionYStepper.x, playerPositionYStepper.y + 40, 10, character.playerCameraPosition[1], -9000, 9000, 0);
 
 
-		var saveCharacterButton:PsychUIButton = new PsychUIButton(reloadImage.x, noAntialiasingCheckBox.y + 70, "Save Character", function() {
+		var saveCharacterButton:PsychUIButton = new PsychUIButton(reloadImage.x, noAntialiasingCheckBox.y + 80, "Save Character", function() {
 			saveCharacter();
 		});
 
@@ -736,6 +743,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		tab_group.add(scaleStepper);
 		tab_group.add(flipXCheckBox);
 		tab_group.add(noAntialiasingCheckBox);
+		tab_group.add(playerSpriteSheetCheckBox);
 		tab_group.add(positionXStepper);
 		tab_group.add(positionYStepper);
 		tab_group.add(positionCameraXStepper);
@@ -914,6 +922,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		scaleStepper.value = character.jsonScale;
 		flipXCheckBox.checked = character.originalFlipX;
 		noAntialiasingCheckBox.checked = character.noAntialiasing;
+		playerSpriteSheetCheckBox.checked = character.isPsychPlayer;
 		positionXStepper.value = character.positionArray[0];
 		positionYStepper.value = character.positionArray[1];
 		playerPositionXStepper.value = character.playerPositionArray[0];
@@ -922,6 +931,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		positionCameraYStepper.value = character.cameraPosition[1];
 		playerPositionCameraXStepper.value = character.playerCameraPosition[0];
 		playerPositionCameraYStepper.value = character.playerCameraPosition[1];
+		
 		reloadAnimationDropDown();
 		updateHealthBar();
 	}
@@ -1413,7 +1423,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			"no_antialiasing": character.noAntialiasing,
 			"healthbar_colors": character.healthColorArray,
 			"vocals_file": character.vocalsFile,
-			"isPlayerChar": character.isPsychPlayer,
+			"is_player_char": character.isPsychPlayer,
 			"_editor_isPlayer": character.isPlayer
 		};
 
