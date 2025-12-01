@@ -4529,6 +4529,8 @@ class PlayState extends MusicBeatState
 
 	public var hardCodedStage:BaseStage;
 	public var addedStages:Array<String> = [];
+	public var addedStagesHScript:Array<String> = [];
+
 	public function removeStage(){
 		removeObjects(stageData);
 
@@ -4544,7 +4546,8 @@ class PlayState extends MusicBeatState
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage");
 		for (stage in addedStages) stopLuasNamed(stage, "stage"); #end
-		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
+		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
+		for (stage in addedStagesHScript) stopHScriptsNamed(stage, "stage"); #end
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");

@@ -70,7 +70,7 @@ class Tank extends BaseStage
 		add(tankGround);
 
 		tankmanRun = new FlxTypedGroup<TankmenBG>();
-		stageVars.set("tankmanRun", tankmanRun);
+		//stageVars.set("tankmanRun", tankmanRun);
 		add(tankmanRun);
 
 		var ground:BGSprite = new BGSprite('tankGround', -420, -150);
@@ -112,30 +112,26 @@ class Tank extends BaseStage
 
 		if(!ClientPrefs.data.lowQuality)
 		{
-			for (daGf in gfGroup)
+			if(gf.curCharacter == 'pico-speaker')
 			{
-				var gf:Character = cast daGf;
-				if(gf.curCharacter == 'pico-speaker')
-				{
-					var firstTank:TankmenBG = new TankmenBG(20, 500, true);
-					firstTank.resetShit(20, 1500, true);
-					firstTank.strumTime = 10;
-					firstTank.visible = false;
-					PlayState.instance.variables.get("stageVariables").set("firstTank", firstTank);
-					tankmanRun.add(firstTank);
+				var firstTank:TankmenBG = new TankmenBG(20, 500, true);
+				firstTank.resetShit(20, 1500, true);
+				firstTank.strumTime = 10;
+				firstTank.visible = false;
+				//PlayState.instance.variables.get("stageVariables").set("firstTank", firstTank);
+				tankmanRun.add(firstTank);
 
-					for (i in 0...TankmenBG.animationNotes.length)
-					{
-						if(FlxG.random.bool(16)) {
-							var tankBih = tankmanRun.recycle(TankmenBG);
-							tankBih.strumTime = TankmenBG.animationNotes[i][0];
-							tankBih.resetShit(500, 200 + FlxG.random.int(50, 100), TankmenBG.animationNotes[i][1] < 2);
-							PlayState.instance.variables.get("stageVariables").set("tankBih", tankBih);
-							tankmanRun.add(tankBih);
-						}
+				for (i in 0...TankmenBG.animationNotes.length)
+				{
+					if(FlxG.random.bool(16)) {
+						var tankBih = tankmanRun.recycle(TankmenBG);
+						tankBih.strumTime = TankmenBG.animationNotes[i][0];
+						tankBih.resetShit(500, 200 + FlxG.random.int(50, 100), TankmenBG.animationNotes[i][1] < 2);
+						//PlayState.instance.variables.get("stageVariables").set("tankBih", tankBih);
+						tankmanRun.add(tankBih);
 					}
-					break;
 				}
+				//break;
 			}
 		}
 	}
@@ -161,7 +157,7 @@ class Tank extends BaseStage
 	{
 		cutsceneHandler = new CutsceneHandler();
 
-		dadGroup.alpha = 0.00001;
+		dad.alpha = 0.00001;
 		camHUD.visible = false;
 		//inCutscene = true; //this would stop the camera movement, oops
 
@@ -180,7 +176,7 @@ class Tank extends BaseStage
 			FlxTween.tween(FlxG.camera, {zoom: defaultCamZoom}, timeForStuff, {ease: FlxEase.quadInOut});
 			startCountdown();
 
-			dadGroup.alpha = 1;
+			dad.alpha = 1;
 			camHUD.visible = true;
 			boyfriend.animation.finishCallback = null;
 			gf.animation.finishCallback = null;
@@ -189,9 +185,9 @@ class Tank extends BaseStage
 
 		cutsceneHandler.skipCallback = function()
 		{
-			dadGroup.alpha = 1;
-			gfGroup.alpha = 1;
-			boyfriendGroup.alpha = 1;
+			dad.alpha = 1;
+			gf.alpha = 1;
+			boyfriend.alpha = 1;
 			camHUD.visible = true;
 
 			if(audioPlaying != null)
@@ -304,8 +300,8 @@ class Tank extends BaseStage
 		prepareCutscene();
 		
 		cutsceneHandler.endTime = 35.5;
-		gfGroup.alpha = 0.00001;
-		boyfriendGroup.alpha = 0.00001;
+		gf.alpha = 0.00001;
+		boyfriend.alpha = 0.00001;
 		camFollow.setPosition(dad.x + 400, dad.y + 170);
 		FlxTween.tween(FlxG.camera, {zoom: 0.9 * 1.2}, 1, {ease: FlxEase.quadInOut});
 		foregroundSprites.forEach(function(spr:BGSprite)
@@ -332,7 +328,7 @@ class Tank extends BaseStage
 			switch (pico.anim.curInstance.symbol.name) {
 				case "dieBitch", "GF Time to Die sequence":
 					pico.anim.play('picoAppears', true);
-					boyfriendGroup.alpha = 1;
+					boyfriend.alpha = 1;
 					boyfriendCutscene.visible = false;
 					boyfriend.playAnim('bfCatch', true);
 					boyfriend.animation.finishCallback = function(name:String)
@@ -346,7 +342,7 @@ class Tank extends BaseStage
 				case "picoAppears", "Pico Saves them sequence":
 					pico.anim.play('picoEnd', true);
 				case "picoEnd", "Pico Dual Wield on Speaker idle":
-					gfGroup.alpha = 1;
+					gf.alpha = 1;
 					pico.visible = false;
 					if (pico.anim.onComplete.has(picoStressCycle)) // for safety
 						pico.anim.onComplete.remove(picoStressCycle);
@@ -446,6 +442,12 @@ class Tank extends BaseStage
 			remove(foregroundSprites);
 			foregroundSprites.destroy();
 			foregroundSprites = null;
+		}
+
+		if (tankmanRun != null) { // fuck u <3.
+			remove(tankmanRun);
+			tankmanRun.destroy();
+			tankmanRun = null;
 		}
 		super.destroy();
 	}

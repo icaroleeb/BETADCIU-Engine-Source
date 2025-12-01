@@ -1,139 +1,139 @@
 {
 	"animations": [
 		{
+			"loop": false,
 			"offsets": [-5, 0],
-			"loop": false,
-			"fps": 24,
 			"anim": "idle",
-			"indices": [],
+			"fps": 24,
+			"playerOffsets": [-5, 0],
 			"name": "Tankman Idle Dance",
-			"playerOffsets": [-5, 0]
+			"indices": []
 		},
 		{
-			"offsets": [-20, -9],
 			"loop": false,
-			"fps": 24,
+			"offsets": [-20, -9],
 			"anim": "singUP-alt",
-			"indices": [],
+			"fps": 24,
+			"playerOffsets": [-20, -9],
 			"name": "TANKMAN UGH",
-			"playerOffsets": [-20, -9]
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [-5, 15],
-			"loop": false,
-			"fps": 24,
 			"anim": "singDOWN-alt",
-			"indices": [],
+			"fps": 24,
+			"playerOffsets": [95, 15],
 			"name": "PRETTY GOOD",
-			"playerOffsets": [95, 15]
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [-5, 8],
-			"loop": false,
-			"fps": 24,
 			"anim": "singLEFT-alt",
-			"indices": [],
+			"fps": 24,
+			"playerOffsets": [-20, -9],
 			"name": "Lil Dude",
-			"playerOffsets": [-20, -9]
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [-20, -9],
-			"loop": false,
-			"fps": 24,
 			"anim": "singRIGHT-alt",
-			"indices": [],
+			"fps": 24,
+			"playerOffsets": [-20, -9],
 			"name": "TANKMAN UGH",
-			"playerOffsets": [4, 10]
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [-7, 15],
-			"loop": false,
-			"fps": 24,
 			"anim": "huh",
-			"indices": [],
+			"fps": 24,
+			"playerOffsets": [27, 15],
 			"name": "HUH",
-			"playerOffsets": [97, 15]
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [-4, 16],
-			"loop": false,
-			"fps": 24,
 			"anim": "good",
-			"indices": [],
+			"fps": 24,
+			"playerOffsets": [96, 16],
 			"name": "GOOD",
-			"playerOffsets": [96, 16]
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [44, 46],
+			"loop": false,
+			"fps": 24,
 			"anim": "singUP",
-			"fps": 24,
-			"playerOffsets": [0, 0],
+			"indices": [],
 			"name": "Tankman UP note 1",
-			"indices": []
+			"playerOffsets": [18, 52]
 		},
 		{
-			"loop": false,
 			"offsets": [68, -104],
+			"loop": false,
+			"fps": 24,
 			"anim": "singDOWN",
-			"fps": 24,
-			"playerOffsets": [0, 0],
+			"indices": [],
 			"name": "Tankman DOWN note 1",
-			"indices": []
+			"playerOffsets": [68, -104]
 		},
 		{
-			"loop": false,
 			"offsets": [82, -12],
+			"loop": false,
+			"fps": 24,
 			"anim": "singLEFT",
-			"fps": 24,
-			"playerOffsets": [0, 0],
+			"indices": [],
 			"name": "Tankman Right Note 1",
-			"indices": []
+			"playerOffsets": [86, -29]
 		},
 		{
-			"loop": false,
 			"offsets": [44, 46],
+			"loop": false,
+			"fps": 24,
 			"anim": "singUP-miss",
-			"fps": 24,
-			"playerOffsets": [0, 0],
+			"indices": [],
 			"name": "Tankman UP note MISS",
-			"indices": []
+			"playerOffsets": [18, 52]
 		},
 		{
-			"loop": false,
 			"offsets": [68, -104],
+			"loop": false,
+			"fps": 24,
 			"anim": "singDOWN-miss",
-			"fps": 24,
-			"playerOffsets": [0, 0],
+			"indices": [],
 			"name": "Tankman DOWN note MISS",
-			"indices": []
+			"playerOffsets": [68, -104]
 		},
 		{
-			"loop": false,
 			"offsets": [82, -12],
+			"loop": false,
+			"fps": 24,
 			"anim": "singLEFT-miss",
-			"fps": 24,
-			"playerOffsets": [0, 0],
+			"indices": [],
 			"name": "Tankman Right Note MISS",
-			"indices": []
+			"playerOffsets": [86, -29]
 		},
 		{
-			"loop": false,
 			"offsets": [-25, -30],
+			"loop": false,
+			"fps": 24,
 			"anim": "singRIGHT-miss",
-			"fps": 24,
-			"playerOffsets": [0, 0],
+			"indices": [],
 			"name": "Tankman Note Left MISS",
-			"indices": []
+			"playerOffsets": [-28, -12]
 		},
 		{
-			"loop": false,
 			"offsets": [-25, -30],
-			"anim": "singRIGHT",
+			"loop": false,
 			"fps": 24,
-			"playerOffsets": [0, 0],
+			"anim": "singRIGHT",
+			"indices": [],
 			"name": "Tankman Note Left 1",
-			"indices": []
+			"playerOffsets": [-28, -12]
 		}
 	],
 	"vocals_file": "",
@@ -141,13 +141,13 @@
 	"image": "characters/tankmanCaptain",
 	"position": [0, 200],
 	"player_camera_position": [100, 0],
+	"is_player_char": false,
 	"healthicon": "tankman",
 	"flip_x": true,
 	"healthbar_colors": [44, 45, 65],
-	"camera_position": [0, 0],
+	"camera_position": [100, 0],
 	"player_position": [0, 200],
 	"sing_duration": 4,
-	"isPlayerChar": false,
 	"scale": 1,
 	"_editor_isPlayer": false
 }

@@ -516,7 +516,7 @@ class FunkinLua {
 			}
 			luaTrace("addLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
 		});
-		Lua_helper.add_callback(lua, "addHScript", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false) {
+		Lua_helper.add_callback(lua, "addHScript", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false, ?type:String = "") {
 			#if HSCRIPT_ALLOWED
 			if (scriptType == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("", scriptFile);
@@ -534,7 +534,12 @@ class FunkinLua {
 							return;
 						}
 
-				PlayState.instance.initHScript(scriptPath);
+				PlayState.instance.initHScript(scriptPath, type);
+
+				if (type == "stage") {
+					game.addedStagesHScript.push(scriptFile);
+					// trace('pushing $scriptFile');
+				}
 				return;
 			}
 			luaTrace("addHScript: Script doesn't exist!", false, false, FlxColor.RED);
@@ -586,7 +591,38 @@ class FunkinLua {
 			luaTrace("removeHScript: HScript is not supported on this platform!", false, false, FlxColor.RED);
 			#end
 		});
+		Lua_helper.add_callback(lua, "addStagetoCamera", function(?stageName:String = "", ?cameraName:String = "") {
+			// beta not finalized yet
+			switch (stageName.toLowerCase())
+			{
+				case 'stage' | 'spooky' | 'philly' | 'limo' | 'mall' | 'mallevil' | 'school' | 'schoolevil' | 'tank' | 'phillystreets' | 'phillyblazin':
+					luaTrace("Base Game Stages can't be added to camera", false, false, FlxColor.RED);
+					return; 
+			}
 
+			/*
+			switch (stageName.toLowerCase())
+			{
+				case 'stage' | 'spooky' | 'philly' | 'limo' | 'mall' | 'mallevil' | 'school' | 'schoolevil' | 'tank' | 'phillystreets' | 'phillyblazin':
+
+			}
+			*/
+			
+			game.startLuasNamed('stages/' + stageName + '.lua', "stageCamera");
+			game.startHScriptsNamed('stages/' + stageName + '.hx', "stageCamera");
+
+			var stageCameraVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageCameraVariables");
+
+			if (stageCameraVars != null) {
+				for (key in stageCameraVars.keys()) {
+					var sprite:FlxSprite = stageCameraVars.get(key);
+
+					if (sprite != null) {
+						sprite.cameras = [LuaUtils.cameraFromString(cameraName)];
+					}
+				}
+			}
+		});
 		Lua_helper.add_callback(lua, "loadSong", function(?name:String = null, ?difficultyNum:Int = -1) {
 			if(name == null || name.length < 1)
 				name = Song.loadedSongName;
@@ -1228,6 +1264,13 @@ class FunkinLua {
 		
 					var stageVars = variables.get("stageVariables");
 					stageVars.set(tag, leSprite);
+				case "stagecamera":
+					if (!variables.exists("stageCameraVariables")){
+						variables.set("stageCameraVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageCameraVariables");
+					stageVars.set(tag, leSprite);
 			}
 
 			leSprite.active = true;
@@ -1258,6 +1301,13 @@ class FunkinLua {
 		
 					var stageVars = variables.get("stageVariables");
 					stageVars.set(tag, leSprite);
+				case "stagecamera":
+					if (!variables.exists("stageCameraVariables")){
+						variables.set("stageCameraVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageCameraVariables");
+					stageVars.set(tag, leSprite);
 			}
 		});
 		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?axes:String = "XY") {
@@ -1284,6 +1334,13 @@ class FunkinLua {
 					}
 		
 					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leSprite);
+				case "stagecamera":
+					if (!variables.exists("stageCameraVariables")){
+						variables.set("stageCameraVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageCameraVariables");
 					stageVars.set(tag, leSprite);
 			}
 
@@ -1313,6 +1370,13 @@ class FunkinLua {
 					}
 		
 					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leSprite);
+				case "stagecamera":
+					if (!variables.exists("stageCameraVariables")){
+						variables.set("stageCameraVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageCameraVariables");
 					stageVars.set(tag, leSprite);
 			}
 
@@ -1362,6 +1426,13 @@ class FunkinLua {
 						}
 			
 						var stageVars = variables.get("stageVariables");
+						stageVars.set(tag, leVSprite);
+					case "stagecamera":
+						if (!variables.exists("stageCameraVariables")){
+							variables.set("stageCameraVariables", new Map<String, PsychVideoSprite>());
+						}
+
+						var stageVars = variables.get("stageCameraVariables");
 						stageVars.set(tag, leVSprite);
 				}
 			} else {
@@ -1622,7 +1693,7 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
-			if(scriptType.toLowerCase() == "stage") 
+			if(scriptType.toLowerCase() == "stage" || scriptType.toLowerCase() == "stagecamera") 
 				luaTrace("The makeLuaCharacter can't be added in script stages!", false, false, FlxColor.RED);
 			else
 				makeLuaCharacter(tag, character, isPlayer, flipped);
