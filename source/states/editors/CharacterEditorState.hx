@@ -1407,6 +1407,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	function saveCharacter() {
 		if(_file != null) return;
 
+		var wasAutoPause = FlxG.autoPause;
+    	FlxG.autoPause = true;
+
 		var json:Dynamic = {
 			"animations": character.animationsArray,
 			"image": character.imageFile,
@@ -1437,5 +1440,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data, '$_char.json');
 		}
+
+		FlxG.autoPause = wasAutoPause;
 	}
 }

@@ -33,6 +33,9 @@ import objects.HealthIcon;
 import objects.Note;
 import objects.StrumNote;
 
+import sys.FileSystem;
+import sys.FileStat;
+
 using DateTools;
 
 typedef UndoStruct = {
@@ -229,6 +232,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var lilStage:FlxSprite;
 	var lilBf:FlxSprite;
 	var lilOpp:FlxSprite;
+
+	// So it doesn't search the directories everytime:
+	static var cachedLists:Map<String, CachedList> = new Map<String, CachedList>();
+
 	override function create()
 	{
 		if(Difficulty.list.length < 1) Difficulty.resetList();
@@ -5030,6 +5037,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function loadFileList(mainFolder:String, ?optionalList:String = null, ?fileTypes:Array<String> = null, ?maxItems:Int = -1)
 	{
+		var cachedList = cachedLists.get(mainFolder);
+		var currentModifiedTime = getDirectoryLastModified(mainFolder);
+
+		// So that it only searches the directory when something new is added
+		if (cachedList != null && (currentModifiedTime.getTime() <= cachedList.lastModified.getTime())){
+			return cachedList.items;
+		}
+
 		if (fileTypes == null) fileTypes = ['.json'];
 		
 		var fileList:Array<String> = [];
@@ -5072,6 +5087,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				}
 			}
 		}
+
+		if (cachedList == null) {
+			cachedLists.set(mainFolder, new CachedList(fileList, currentModifiedTime));
+		} else {
+			cachedList.items = fileList;
+			cachedList.lastModified = currentModifiedTime;
+		}
+
 		return fileList;
 	}
 
@@ -5575,4 +5598,24 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		if (lilBf != null) lilBf.animation.play("idle");
 		if (lilOpp != null) lilOpp.animation.play("idle");
 	}
+
+	function getDirectoryLastModified(dirPath:String):Date {
+		try {
+			var stats:FileStat = FileSystem.stat(dirPath);
+			return stats.mtime;
+		} catch (e:Dynamic) {
+			trace('Error getting stats for directory "' + dirPath + '": ' + e);
+			return null;
+		}
+	}
+}
+
+class CachedList {
+    public var items:Array<String>;
+    public var lastModified:Date;
+
+    public function new(?items:Array<String>, ?lastModified:Date) {
+        this.items = items != null ? items : [];
+        this.lastModified = lastModified;
+    }
 }

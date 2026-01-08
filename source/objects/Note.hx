@@ -534,6 +534,7 @@ class Note extends OffsettableSprite
 
 		if(isSustainNote) {
 			scale.y = lastScaleY;
+			
 			if (wasPixelNote && !isPixelNote) offsetX += 30;
 			if (isPixelNote && !wasPixelNote) offsetX -= 5;
 		}

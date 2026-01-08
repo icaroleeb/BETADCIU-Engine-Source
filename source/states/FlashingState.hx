@@ -58,7 +58,7 @@ class FlashingState extends MusicBeatState
 			isYes = !isYes;
 			updateItems();
 		}
-		if (controls.ACCEPT || back) {
+		if (controls.ACCEPT && !FlxG.keys.pressed.ALT || back) {
 			leftState = true;
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;

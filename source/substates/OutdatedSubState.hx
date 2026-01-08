@@ -46,7 +46,7 @@ class OutdatedSubState extends MusicBeatSubstate
 	override function update(elapsed:Float)
 	{
 		if(!leftState) {
-			if (controls.ACCEPT) {
+			if (controls.ACCEPT && !FlxG.keys.pressed.ALT ) {
 				leftState = true;
 				CoolUtil.browserLoad("https://gamejolt.com/games/betadciu/645551");
 			}

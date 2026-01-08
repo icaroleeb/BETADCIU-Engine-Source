@@ -39,7 +39,7 @@ class ErrorState extends MusicBeatState
 		errorSine += 180 * elapsed;
 		errorText.alpha = 1 - Math.sin((Math.PI * errorSine) / 180);
 
-		if(controls.ACCEPT && acceptCallback != null)
+		if(controls.ACCEPT && !FlxG.keys.pressed.ALT && acceptCallback != null)
 			acceptCallback();
 		else if(controls.BACK && backCallback != null)
 			backCallback();
