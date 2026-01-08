@@ -1310,7 +1310,7 @@ class FunkinLua {
 					stageVars.set(tag, leSprite);
 			}
 		});
-		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?axes:String = "XY") {
+		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, ?image:String = null, ?spacingX:Float = 0, ?spacingY:Float = 0, ?axes:String = "XY") {
 			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
 				ModpackAssetRegistry.instance.addAsset("images", image);
 				return;
@@ -1318,7 +1318,7 @@ class FunkinLua {
 			
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
-			var leSprite:FlxBackdrop = new FlxBackdrop("", FlxAxes.fromString(axes), Std.int(x), Std.int(y));
+			var leSprite:FlxBackdrop = new FlxBackdrop("", FlxAxes.fromString(axes), Std.int(spacingX), Std.int(spacingY));
 			if(image != null && image.length > 0)
 			{
 				leSprite.loadGraphic(Paths.image(image));
@@ -1422,7 +1422,7 @@ class FunkinLua {
 				switch(scriptType.toLowerCase()){
 					case "stage":
 						if (!variables.exists("stageVariables")){
-							variables.set("stageVariables", new Map<String, PsychVideoSprite>());
+							variables.set("stageVariables", new Map<String, FlxSprite>());
 						}
 			
 						var stageVars = variables.get("stageVariables");
@@ -1445,6 +1445,10 @@ class FunkinLua {
 			#end
 		});
 		Lua_helper.add_callback(lua, "makeLuaCamera", function(tag:String, ?x:Float = 0.0, ?y:Float = 0.0, ?resX:Int = 1280, ?resY:Int = 720, ?zoom:Float = 1.0) { // creates the camera
+			if (scriptType.toLowerCase() == "modpack"){
+				return;
+			}
+
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 
@@ -1471,7 +1475,7 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "setCameraFollow", function(tag:String, ?followPoint:String=null, ?speed:Float=0) { // sets the follow point to the camera
 			var variables = MusicBeatState.getVariables();
 
-			var leCamera:FlxCamera = game.getLuaObject(tag);
+			var leCamera:FlxCamera = LuaUtils.getObjectDirectly(tag);
 			var daFollow:FlxObject = game.getLuaObject(followPoint);
 			var daSpeed:Float = speed;
 
@@ -1501,7 +1505,41 @@ class FunkinLua {
 			else
 				luaTrace("removeLuaCamera: Camera " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
+
+		Lua_helper.add_callback(lua, "getCameraOrder", function(camName:String) {
+			var cam = LuaUtils.cameraFromString(camName);
+			if (cam != null) {
+				@:privateAccess
+				return FlxG.cameras.list.indexOf(cam);
+			}
+			return -1;
+		});
+
+		Lua_helper.add_callback(lua, "setCameraOrder", function(camName:String, position:Int) {
+			@:privateAccess
+			var defaultCameras:Array<FlxCamera> = FlxG.cameras.defaults;
+			var copiedCameras:Array<FlxCamera> = defaultCameras.slice(0, defaultCameras.length); // Need to create a copy since we remove from FlxG.cameras
+
+			var cam = LuaUtils.cameraFromString(camName);
+
+			if (cam != null) {
+				FlxG.cameras.remove(cam, false);
+
+				if (position < 0) position = 0;
+       		 	if (position > FlxG.cameras.list.length) position = FlxG.cameras.list.length;
+
+				var isDefault = copiedCameras.indexOf(cam) != -1;
+				FlxG.cameras.insert(cam, position, isDefault);
+			}
+
+			return;
+		});
+
 		Lua_helper.add_callback(lua, "reorderCameras", function(cameraNames:Array<String>) { 
+			if (scriptType.toLowerCase() == "modpack"){
+				return;
+			}
+		
 			@:privateAccess
 			var defaultCameras:Array<FlxCamera> = FlxG.cameras.defaults;
 			var copiedCameras:Array<FlxCamera> = defaultCameras.slice(0, defaultCameras.length); // Need to create a copy since we remove from FlxG.cameras
@@ -2438,7 +2476,10 @@ class FunkinLua {
 		}
 		trace('lua file loaded succesfully:' + scriptName);
 
+		
 		call('onCreate', []);
+
+		scriptType = ""; // Idk if this breaks anything but it fixes that one bug where anything added after switching stages gets incorrectly placed in stageVariables
 	}
 
 	//main

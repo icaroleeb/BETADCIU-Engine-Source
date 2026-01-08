@@ -93,7 +93,7 @@ class ResetScoreSubState extends MusicBeatSubstate
 		if(controls.BACK) {
 			FlxG.sound.play(Paths.sound('cancelMenu'), 1);
 			close();
-		} else if(controls.ACCEPT) {
+		} else if(controls.ACCEPT && !FlxG.keys.pressed.ALT ) {
 			if(onYes) {
 				if(week == -1) {
 					Highscore.resetSong(song, difficulty);

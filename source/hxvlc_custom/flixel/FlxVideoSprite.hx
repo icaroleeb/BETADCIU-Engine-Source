@@ -241,8 +241,20 @@ class FlxVideoSprite extends FlxSprite
 		bitmap.togglePaused();
 	}
 
-	public override function destroy():Void
+	override public function destroy():Void
 	{
+		if (bitmap != null)
+		{
+			bitmap.onOpening.removeAll();
+			bitmap.onFormatSetup.removeAll();
+
+			if (bitmap.parent != null)
+				FlxG.game.removeChild(bitmap);
+
+			bitmap.stop();
+			bitmap.dispose();
+		}
+
 		#if (FLX_SOUND_SYSTEM && flixel >= version("5.9.0"))
 		if (FlxG.sound.onVolumeChange.has(onVolumeChange))
 			FlxG.sound.onVolumeChange.remove(onVolumeChange);
@@ -252,11 +264,8 @@ class FlxVideoSprite extends FlxSprite
 		#end
 
 		super.destroy();
-
-		FlxG.removeChild(bitmap);
-
-		bitmap.dispose();
 	}
+
 
 	public override function kill():Void
 	{

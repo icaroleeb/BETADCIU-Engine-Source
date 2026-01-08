@@ -103,7 +103,7 @@ class MasterEditorMenu extends MusicBeatState
 			MusicBeatState.switchState(new MainMenuState());
 		}
 
-		if (controls.ACCEPT)
+		if (controls.ACCEPT && !FlxG.keys.pressed.ALT )
 		{
 			switch(options[curSelected]) {
 				case 'Chart Editor'://felt it would be cool maybe

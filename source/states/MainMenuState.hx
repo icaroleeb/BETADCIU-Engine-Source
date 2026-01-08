@@ -313,7 +313,7 @@ class MainMenuState extends MusicBeatState
 				MusicBeatState.switchState(new TitleState());
 			}
 
-			if (controls.ACCEPT || (FlxG.mouse.justPressed && allowMouse))
+			if (controls.ACCEPT && !FlxG.keys.pressed.ALT || (FlxG.mouse.justPressed && allowMouse))
 			{
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 				selectedSomethin = true;

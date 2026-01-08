@@ -483,7 +483,7 @@ class ModsMenuState extends MusicBeatState
 						button.ignoreCheck = button.onFocus = false;
 						changeSelectedMod();
 					}
-					else if(controls.ACCEPT)
+					else if(controls.ACCEPT && !FlxG.keys.pressed.ALT )
 					{
 						var button = getButton();
 						if(button.onClick != null) button.onClick();

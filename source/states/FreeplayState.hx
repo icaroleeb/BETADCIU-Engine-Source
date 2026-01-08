@@ -446,7 +446,7 @@ class FreeplayState extends MusicBeatState
 				player.pauseOrResume(!player.playing);
 			}
 		}
-		else if (controls.ACCEPT && !player.playingMusic)
+		else if (controls.ACCEPT && !FlxG.keys.pressed.ALT && !player.playingMusic)
 		{
 			persistentUpdate = false;
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);

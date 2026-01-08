@@ -450,7 +450,7 @@ class BonusSongsState extends MusicBeatState
 				playerBonus.pauseOrResume(!playerBonus.playing);
 			}
 		}
-		else if (controls.ACCEPT && !playerBonus.playingMusic)
+		else if (controls.ACCEPT && !FlxG.keys.pressed.ALT && !playerBonus.playingMusic)
 		{
 			persistentUpdate = false;
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);

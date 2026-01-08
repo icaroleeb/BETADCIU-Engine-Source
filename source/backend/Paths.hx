@@ -7,7 +7,6 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 
 import openfl.display.BitmapData;
-import backend.system.OptimizedBitmapData;
 import openfl.display3D.textures.RectangleTexture;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
@@ -61,6 +60,10 @@ class Paths
 	// haya I love you for the base cache dump I took to the max
 	public static function clearUnusedMemory()
 	{
+		for (key in currentTrackedFrames.keys()){
+			currentTrackedFrames.remove(key); // and remove the key from local cache map
+		}
+
 		// clear non local assets in the tracked assets list
 		for (key in currentTrackedAssets.keys())
 		{
@@ -303,10 +306,12 @@ class Paths
 		return sound(key + FlxG.random.int(min, max), modsAllowed);
 
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
+	public static var currentTrackedFrames:Map<String, FlxAtlasFrames> = [];
+	
 	static public function image(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxGraphic
 	{
 		key = Language.getFileTranslation('images/$key') + '.png';
-		var bitmap:OptimizedBitmapData = null;
+		var bitmap:BitmapData = null;
 		if (currentTrackedAssets.exists(key))
 		{
 			localTrackedAssets.push(key);
@@ -443,7 +448,6 @@ class Paths
 	
 	static public function getMultiAtlas(keys:Array<String>, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
-		
 		var parentFrames:FlxAtlasFrames = Paths.getAtlas(keys[0].trim());
 		if(keys.length > 1)
 		{
@@ -457,6 +461,7 @@ class Paths
 					parentFrames.addAtlas(extraFrames, true);
 			}
 		}
+		
 		return parentFrames;
 	}
 
