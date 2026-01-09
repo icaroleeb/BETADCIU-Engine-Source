@@ -597,16 +597,8 @@ class FunkinLua {
 			{
 				case 'stage' | 'spooky' | 'philly' | 'limo' | 'mall' | 'mallevil' | 'school' | 'schoolevil' | 'tank' | 'phillystreets' | 'phillyblazin':
 					luaTrace("Base Game Stages can't be added to camera", false, false, FlxColor.RED);
-					return; 
+					//return; 
 			}
-
-			/*
-			switch (stageName.toLowerCase())
-			{
-				case 'stage' | 'spooky' | 'philly' | 'limo' | 'mall' | 'mallevil' | 'school' | 'schoolevil' | 'tank' | 'phillystreets' | 'phillyblazin':
-
-			}
-			*/
 			
 			game.startLuasNamed('stages/' + stageName + '.lua', "stageCamera");
 			game.startHScriptsNamed('stages/' + stageName + '.hx', "stageCamera");
@@ -621,6 +613,7 @@ class FunkinLua {
 						sprite.cameras = [LuaUtils.cameraFromString(cameraName)];
 					}
 				}
+				stageCameraVars.clear();
 			}
 		});
 		Lua_helper.add_callback(lua, "loadSong", function(?name:String = null, ?difficultyNum:Int = -1) {
@@ -2771,6 +2764,7 @@ class FunkinLua {
 		LuaUtils.resetCharacterTag(tag);
 		var leSprite:Character = new Character(0, 0, character, isPlayer);
 		//leSprite.flipMode = flipped;
+		if(PlayState.instance.modchartCharacters.exists(tag)) PlayState.instance.callOnScripts('onCharacterChange', [tag]);
 		PlayState.instance.modchartCharacters.set(tag, leSprite); //yes
 		var shit:Character = PlayState.instance.modchartCharacters.get(tag);
 		LuaUtils.getTargetInstance().add(shit);
@@ -2869,11 +2863,13 @@ class FunkinLua {
 			PlayState.instance.healthBar.createFilledBar(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
 			PlayState.instance.healthBar.updateBar();
 		}	*/
-		PlayState.instance.reloadHealthBarColors();
+
+		if (PlayState.instance.defaultBar) PlayState.instance.reloadHealthBarColors();
 
 		if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
 			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
 
+		PlayState.instance.callOnScripts('onCharacterChange', ['boyfriend']);
 		PlayState.instance.boyfriend.pastCharacter = oldChar;
 		PlayState.instance.setOnScripts('boyfriendName', PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
@@ -2935,11 +2931,12 @@ class FunkinLua {
 			PlayState.instance.healthBar.updateBar();
 		}*/
 
-		PlayState.instance.reloadHealthBarColors();
+		if (PlayState.instance.defaultBar) PlayState.instance.reloadHealthBarColors();
 
 		if (PlayState.instance.dad.animOffsets.exists(animationName))
 			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
 
+		PlayState.instance.callOnScripts('onCharacterChange', ['dad']);
 		PlayState.instance.dad.pastCharacter = oldChar;
 		PlayState.instance.setOnScripts('dadName', PlayState.instance.dad.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
@@ -2981,6 +2978,7 @@ class FunkinLua {
 		if (PlayState.instance.gf.animOffsets.exists(animationName))
 			PlayState.instance.gf.playAnim(animationName, true, false, animationFrame);
 
+		PlayState.instance.callOnScripts('onCharacterChange', ['gf']);
 		PlayState.instance.gf.pastCharacter = oldChar;
 		PlayState.instance.setOnScripts('gfName', PlayState.instance.gf.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.gf.curCharacter);

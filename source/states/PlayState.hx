@@ -279,6 +279,7 @@ class PlayState extends MusicBeatState
 	private var singAnimations:Array<String> = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
 
 	public var inCutscene:Bool = false;
+	public var defaultBar:Bool = true;
 	public var skipCountdown:Bool = false;
 	var songLength:Float = 0;
 
@@ -425,6 +426,7 @@ class PlayState extends MusicBeatState
 			if(SONG.gfVersion == null || SONG.gfVersion.length < 1) SONG.gfVersion = 'gf'; //Fix for the Chart Editor
 			if (stageData.hide_girlfriend) SONG.gfVersion = 'emptygf'; // quick change to prevent the null gf bug
 			gf = new Character(0, 0, SONG.gfVersion);
+			gfOldChar = SONG.gfVersion;
 			startCharacterPos(gf);
 			//gf.scrollFactor.set(0.95, 0.95);
 		// }
@@ -3791,6 +3793,31 @@ class PlayState extends MusicBeatState
 		}
 		return false;
 	}
+
+	public function callLuaFile(luaFile:String, ?callLua:String = "")
+	{
+		#if MODS_ALLOWED
+		var luaToLoad:String = Paths.modFolders(luaFile);
+		if(!FileSystem.exists(luaToLoad))
+			luaToLoad = Paths.getSharedPath(luaFile);
+
+		if(FileSystem.exists(luaToLoad))
+		#elseif sys
+		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		if(OpenFlAssets.exists(luaToLoad))
+		#end
+		{
+			for (script in luaArray) {
+				if (script.scriptName == luaToLoad) {
+					// Because the shaders weren't getting destroyed properly. Changed it to onStop
+					script.call(callLua, []);
+					return true;
+				}
+			}
+
+		}
+		return false;
+	}
 	#end
 
 	#if HSCRIPT_ALLOWED
@@ -3815,27 +3842,48 @@ class PlayState extends MusicBeatState
 	}
 
 	public function stopHScriptsNamed(scriptFile:String, ?scriptType:String = "")
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad))
 		{
-			#if MODS_ALLOWED
-			var scriptToLoad:String = Paths.modFolders(scriptFile);
-			if(!FileSystem.exists(scriptToLoad))
-				scriptToLoad = Paths.getSharedPath(scriptFile);
-			#else
-			var scriptToLoad:String = Paths.getSharedPath(scriptFile);
-			#end
-	
-			if(FileSystem.exists(scriptToLoad))
-			{
-				if (Iris.instances.exists(scriptToLoad)){
-					var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
-					if(script.exists('onStop')) script.call('onStop');
-					script.destroy();
-					hscriptArray.remove(script);
-					return true;
-				};
-			}
-			return false;
+			if (Iris.instances.exists(scriptToLoad)){
+				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+				if(script.exists('onStop')) script.call('onStop');
+				script.destroy();
+				hscriptArray.remove(script);
+				return true;
+			};
 		}
+		return false;
+	}
+
+	public function callHScriptFile(scriptFile:String, ?callHScript:String = "")
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad))
+		{
+			if (Iris.instances.exists(scriptToLoad)){
+				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+				if(script.exists(callHScript)) script.call(callHScript);
+				return true;
+			};
+		}
+		return false;
+	}
 
 	public function initHScript(file:String, ?scriptType:String = "")
 	{
@@ -3994,7 +4042,16 @@ class PlayState extends MusicBeatState
 	public var ratingPercent:Float;
 	public var accuracy:Float; // old scripts
 	public var ratingFC:String;
-	public function RecalculateRating(badHit:Bool = false, scoreBop:Bool = true) {
+	public function RecalculateRating(badHit:Bool = false, scoreBop:Bool = true, ?resetScore:Bool = false):Void {
+		if (resetScore) {
+			totalNotesHit = 0;
+			totalPlayed = 0;
+			songScore = 0;
+			songMisses = 0;
+			songHits = 0;
+			combo = 0;
+		}
+
 		setOnScripts('score', songScore);
 		setOnScripts('misses', songMisses);
 		setOnScripts('hits', songHits);
@@ -4173,13 +4230,13 @@ class PlayState extends MusicBeatState
 		if (curStage != null) ogStage = curStage;
 			if (!stagesPreloaded) {
 				for (stage in stagesToLoad) {
-					removeStage();
+					removeStage(true);
 					curStage = stage;
 					stageData = StageData.getStageFile(curStage); 
 					addStage(false, true);
 					trace('Stage Loaded: ' + stage + '!');
 				}
-				removeStage();
+				removeStage(true);
 				curStage = ogStage;
 				stageData = StageData.getStageFile(curStage); 
 				addStage(false, true);
@@ -4488,7 +4545,7 @@ class PlayState extends MusicBeatState
 		return stageData;
 	}
 
-	public function removeObjects(stageData:StageFile){
+	public function removeObjects(stageData:StageFile, isCreate:Bool=false){
 		// if you comment out the else part, the stage loads fine but character layers and positions are messed up.
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
@@ -4505,9 +4562,14 @@ class PlayState extends MusicBeatState
 			remove(dad);
 			remove(boyfriend);
 		}
+
+		if (ClientPrefs.data.comboCam == "Game" && !isCreate) // this should help for base stages
+			remove(comboGroup);
 	}
 
-	public function addObjects(stageData:StageFile){
+	public var gfOldChar:String = '';
+
+	public function addObjects(stageData:StageFile, ?isCreate:Bool=false){
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
 			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
@@ -4525,17 +4587,25 @@ class PlayState extends MusicBeatState
 			add(dad);
 			add(boyfriend);
 		}
+
+		if(ClientPrefs.data.perfectPixel == "inGame"){
+			gf.pixelPerfectPosition = stageData.isPixelStage;
+			gf.pixelPerfectRender = stageData.isPixelStage;
+			dad.pixelPerfectPosition = stageData.isPixelStage;
+			dad.pixelPerfectRender = stageData.isPixelStage;
+			boyfriend.pixelPerfectPosition = stageData.isPixelStage;
+			boyfriend.pixelPerfectRender = stageData.isPixelStage;
+		}
+
+		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
 	}
 
 	public var hardCodedStage:BaseStage;
 	public var addedStages:Array<String> = [];
 	public var addedStagesHScript:Array<String> = [];
 
-	public function removeStage(){
-		removeObjects(stageData);
-
-		if (ClientPrefs.data.comboCam == "Game") // this should help for base stages
-			remove(comboGroup);
+	public function removeStage(?isCreate:Bool=false) {
+		removeObjects(stageData, isCreate);
 
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
@@ -4583,20 +4653,7 @@ class PlayState extends MusicBeatState
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
 		}
 
-		addObjects(stageData);
-
-		if(ClientPrefs.data.perfectPixel == "inGame"){
-			boyfriend.pixelPerfectPosition = stageData.isPixelStage;
-			boyfriend.pixelPerfectRender = stageData.isPixelStage;
-
-			dad.pixelPerfectPosition = stageData.isPixelStage;
-			dad.pixelPerfectRender = stageData.isPixelStage;
-
-			gf.pixelPerfectPosition = stageData.isPixelStage;
-			gf.pixelPerfectRender = stageData.isPixelStage;
-		}
-
-		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
+		addObjects(stageData, isCreate);
 
 		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -4606,7 +4663,8 @@ class PlayState extends MusicBeatState
 
 		if(!isCreate){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
-			//script.call("onCreatePost", []);
+			callLuaFile('stages/' + curStage + '.lua', "onCreatePost");
+			callHScriptFile('stages/' + curStage + '.hx', "onCreatePost");
 		}
 	}
 }

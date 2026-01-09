@@ -573,12 +573,19 @@ class FreeplayState extends MusicBeatState
 		for (num => item in grpSongs.members)
 		{
 			var icon:HealthIcon = iconArray[num];
-			item.alpha = 0.6;
-			icon.alpha = 0.6;
+			FlxTween.cancelTweensOf(icon);
+			FlxTween.cancelTweensOf(item);
+
+			FlxTween.tween(item, {alpha: 0.6}, 0.3, {ease: FlxEase.quadOut});
+			FlxTween.tween(icon, {alpha: 0.6}, 0.3, {ease: FlxEase.quadOut});
+
 			if (item.targetY == curSelected)
 			{
-				item.alpha = 1;
-				icon.alpha = 1;
+				FlxTween.cancelTweensOf(icon);
+				FlxTween.cancelTweensOf(item);
+				
+				FlxTween.tween(item, {alpha: 1}, 0.3, {ease: FlxEase.quadOut});
+				FlxTween.tween(icon, {alpha: 1}, 0.3, {ease: FlxEase.quadOut});
 			}
 		}
 		
