@@ -152,7 +152,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		if(!isEnding)
 		{
-			if (controls.ACCEPT)
+			if (controls.ACCEPT && !FlxG.keys.pressed.ALT )
 			{
 				endBullshit();
 			}

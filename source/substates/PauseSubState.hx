@@ -220,7 +220,7 @@ class PauseSubState extends MusicBeatSubstate
 				}
 		}
 
-		if ((controls.ACCEPT && PlayState.instance.canControlPauseMenu) && (cantUnpause <= 0 || !controls.controllerMode))
+		if ((controls.ACCEPT && !FlxG.keys.pressed.ALT && PlayState.instance.canControlPauseMenu) && (cantUnpause <= 0 || !controls.controllerMode))
 		{
 			if (menuItems == difficultyChoices)
 			{

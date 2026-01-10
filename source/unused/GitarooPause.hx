@@ -53,7 +53,7 @@ class GitarooPause extends MusicBeatState
 		if (controls.UI_LEFT_P || controls.UI_RIGHT_P)
 			changeThing();
 
-		if (controls.ACCEPT)
+		if (controls.ACCEPT && !FlxG.keys.pressed.ALT )
 		{
 			if (replaySelect)
 			{

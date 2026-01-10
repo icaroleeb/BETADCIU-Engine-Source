@@ -1085,21 +1085,6 @@ class PlayState extends MusicBeatState
 			return false;
 		}
 
-		if (!generatedStaticArrows) {
-			generateStaticArrows(0);
-			generateStaticArrows(1);
-			for (i in 0...playerStrums.length) {
-				setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
-				setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
-			}
-			for (i in 0...opponentStrums.length) {
-				setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
-				setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
-				//if(ClientPrefs.data.middleScroll) opponentStrums.members[i].visible = false;
-			}
-			generatedStaticArrows = true;
-		}
-
 		seenCutscene = true;
 		inCutscene = false;
 		var ret:Dynamic = callOnScripts('onStartCountdown', null, true);
@@ -1108,6 +1093,21 @@ class PlayState extends MusicBeatState
 				if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
 
 				canPause = true;
+
+				if (!generatedStaticArrows) {
+					generateStaticArrows(0);
+					generateStaticArrows(1);
+					for (i in 0...playerStrums.length) {
+						setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
+						setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
+					}
+					for (i in 0...opponentStrums.length) {
+						setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
+						setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
+						//if(ClientPrefs.data.middleScroll) opponentStrums.members[i].visible = false;
+					}
+					generatedStaticArrows = true;
+				}
 
 				startedCountdown = true;
 				Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
@@ -3782,8 +3782,8 @@ class PlayState extends MusicBeatState
 		{
 			for (script in luaArray) {
 				if (script.scriptName == luaToLoad) {
-					// Because the shaders weren't getting destroyed properly. Changed it to onStop
-					script.call("onStop", []);
+					// Because the shaders weren't getting destroyed properly. Changed it to onDestroy
+					script.call("onDestroy", []);
 					
 					luaArray.remove(script);
 					return true;
@@ -3842,27 +3842,27 @@ class PlayState extends MusicBeatState
 	}
 
 	public function stopHScriptsNamed(scriptFile:String, ?scriptType:String = "")
-	{
-		#if MODS_ALLOWED
-		var scriptToLoad:String = Paths.modFolders(scriptFile);
-		if(!FileSystem.exists(scriptToLoad))
-			scriptToLoad = Paths.getSharedPath(scriptFile);
-		#else
-		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
-		#end
-
-		if(FileSystem.exists(scriptToLoad))
 		{
-			if (Iris.instances.exists(scriptToLoad)){
-				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
-				if(script.exists('onStop')) script.call('onStop');
-				script.destroy();
-				hscriptArray.remove(script);
-				return true;
-			};
+			#if MODS_ALLOWED
+			var scriptToLoad:String = Paths.modFolders(scriptFile);
+			if(!FileSystem.exists(scriptToLoad))
+				scriptToLoad = Paths.getSharedPath(scriptFile);
+			#else
+			var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+			#end
+	
+			if(FileSystem.exists(scriptToLoad))
+			{
+				if (Iris.instances.exists(scriptToLoad)){
+					var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+					if(script.exists('onDestroy')) script.call('onDestroy');
+					script.destroy();
+					hscriptArray.remove(script);
+					return true;
+				};
+			}
+			return false;
 		}
-		return false;
-	}
 
 	public function callHScriptFile(scriptFile:String, ?callHScript:String = "")
 	{
@@ -4614,7 +4614,8 @@ class PlayState extends MusicBeatState
 
 		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage");
+		#if LUA_ALLOWED 
+		stopLuasNamed('stages/' + curStage + '.lua', "stage");
 		for (stage in addedStages) stopLuasNamed(stage, "stage"); #end
 		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
 		for (stage in addedStagesHScript) stopHScriptsNamed(stage, "stage"); #end
@@ -4651,6 +4652,8 @@ class PlayState extends MusicBeatState
 			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
 			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
+			case 'stageerect': hardCodedStage = new StageErect();	//Stage Erect
+			case 'limoerect': hardCodedStage = new LimoErect();		//Week 4
 		}
 
 		addObjects(stageData, isCreate);

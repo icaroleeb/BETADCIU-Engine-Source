@@ -580,10 +580,10 @@ class ShaderFunctions
 		return shader;
 	}
 
-	static function removeCameraShader(leObj:Dynamic, ?shader:String = ""){
+	static function removeCameraShader(leObj:Dynamic, ?shaderName:String = ""){
 		var newCamEffects = [];
 
-		if (shader != "" && shader.length > 0)
+		if (shaderName != "" && shaderName.length > 0)
 		{
 			var daFilters = [];
 			var swagFilters = [];
@@ -593,7 +593,7 @@ class ShaderFunctions
 				swagFilters = leObj.filters;
 			}
 
-			var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
+			var arr:Array<String> = PlayState.instance.runtimeShaders.get(MusicBeatState.getVariables().get(shaderName) != null ? MusicBeatState.getVariables().get("src_shader_name_" + shaderName) : shaderName);
 			
 			for (i in 0...daFilters.length){	
 				var filter:ShaderFilter = daFilters[i];

@@ -449,7 +449,7 @@ class BETADCIUState extends MusicBeatState
 				playerBETADCIU.pauseOrResume(!playerBETADCIU.playing);
 			}
 		}
-		else if (controls.ACCEPT && !playerBETADCIU.playingMusic)
+		else if (controls.ACCEPT && !FlxG.keys.pressed.ALT && !playerBETADCIU.playingMusic)
 		{
 			persistentUpdate = false;
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);

@@ -1,3 +1,5 @@
+// From Codename Engine
+
 package backend.system;
 
 import lime.graphics.Image;
