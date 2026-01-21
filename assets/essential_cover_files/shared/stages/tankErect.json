@@ -1,0 +1,21 @@
+{
+	"directory": "week7",
+	"defaultZoom": 0.7,
+	"stageUI": "",
+
+	"boyfriend": [1120, 115],
+	"girlfriend": [320, 135],
+	"opponent": [10, 85],
+	"hide_girlfriend": false,
+
+	"camera_boyfriend": [10, -5],
+	"camera_opponent": [55, 40],
+	"camera_girlfriend": [0, 0],
+	"camera_speed": 1,
+
+	"_editorMeta": {
+		"dad": "tankman",
+		"boyfriend": "bf",
+		"gf": "gf"
+	}
+}

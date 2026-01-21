@@ -190,6 +190,23 @@ class HScript extends Iris
 			MusicBeatState.getVariables().set(name, value);
 			return value;
 		});
+		set('setStageVar', function(name:String, value:Dynamic) {
+			if (!PlayState.instance.variables.exists("stageVariables")){
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+			}
+
+			PlayState.instance.variables.get("stageVariables").set(name, value);
+			return value;
+		});
+		set('getStageVar', function(name:String) {
+			if (!PlayState.instance.variables.exists("stageVariables")){
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+			}
+
+			var result:Dynamic = null;
+			if(PlayState.instance.variables.get("stageVariables").exists(name)) result = PlayState.instance.variables.get("stageVariables").get(name);
+			return result;
+		});
 		set('getVar', function(name:String) {
 			var result:Dynamic = null;
 			if(MusicBeatState.getVariables().exists(name)) result = MusicBeatState.getVariables().get(name);
@@ -353,6 +370,7 @@ class HScript extends Iris
 		set('ModchartState', FunkinLua); // lazy ass fix for some scripts ported from betadciu engine
 		set('controls', Controls.instance);
 
+		/*
 		// you don't need to add stageVars anymore.
 		set('add', function(tag:FlxBasic){
 			switch(scriptType.toLowerCase()){
@@ -461,6 +479,7 @@ class HScript extends Iris
 
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
 		});
+		*/
 
 		set('buildTarget', LuaUtils.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);

@@ -153,8 +153,7 @@ class PlayState extends MusicBeatState
 	public var boyfriendGroup:FlxSpriteGroup;
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
-	public static var curStage:String = '';
-	public var curStageLua:String = ''; // I added this cuz the "curStage" with static don't work on "setProperty" or "getProperty"
+	public var curStage:String = '';
 
 	public static var stageUI(default, set):String = "normal";
 	public static var uiPrefix:String = "";
@@ -405,7 +404,6 @@ class PlayState extends MusicBeatState
 			SONG.stage = StageData.vanillaSongStage(Paths.formatToSongPath(Song.loadedSongName));
 
 		curStage = SONG.stage;
-		curStageLua = SONG.stage;
 		stageData = StageData.getStageFile(curStage);
 		setStageDetails(stageData);
 
@@ -1227,7 +1225,6 @@ class PlayState extends MusicBeatState
 		return spr;
 	}
 
-	/*
 	public function addBehindGF(obj:FlxBasic)
 	{
 		insert(members.indexOf(gf), obj);
@@ -1240,7 +1237,6 @@ class PlayState extends MusicBeatState
 	{
 		insert(members.indexOf(dad), obj);
 	}
-	*/
 
 	public function clearNotesBefore(time:Float)
 	{
@@ -2539,7 +2535,6 @@ class PlayState extends MusicBeatState
  					removeStage(); // Remove current stage
 					
 					curStage = value1; // Set new stage name
-					curStageLua = value1;
  					stageData = StageData.getStageFile(curStage); 
  					addStage();
 					setOnScripts('curStage', curStage);
@@ -4617,7 +4612,8 @@ class PlayState extends MusicBeatState
 		#if LUA_ALLOWED 
 		stopLuasNamed('stages/' + curStage + '.lua', "stage");
 		for (stage in addedStages) stopLuasNamed(stage, "stage"); #end
-		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
+		#if HSCRIPT_ALLOWED 
+		stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
 		for (stage in addedStagesHScript) stopHScriptsNamed(stage, "stage"); #end
 		#end
 
@@ -4641,19 +4637,26 @@ class PlayState extends MusicBeatState
 		if(!isCreate) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		switch (curStage.toLowerCase())
 		{
-			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
-			case 'spooky': hardCodedStage = new Spooky();				//Week 2
-			case 'philly': hardCodedStage = new Philly();				//Week 3
-			case 'limo': hardCodedStage = new Limo();					//Week 4
-			case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
-			case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
-			case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
-			case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
-			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
-			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
-			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
-			case 'stageerect': hardCodedStage = new StageErect();	//Stage Erect
-			case 'limoerect': hardCodedStage = new LimoErect();		//Week 4
+			case 'stage': hardCodedStage = new StageWeek1(); 					  //Week 1
+			case 'spooky': hardCodedStage = new Spooky();						  //Week 2
+			case 'philly': hardCodedStage = new Philly();						  //Week 3
+			case 'limo': hardCodedStage = new Limo();							  //Week 4
+			case 'mall': hardCodedStage = new Mall();							  //Week 5 - Cocoa, Eggnog
+			case 'mallevil': hardCodedStage = new MallEvil();					  //Week 5 - Winter Horrorland
+			case 'school': hardCodedStage = new School();						  //Week 6 - Senpai, Roses
+			case 'schoolevil': hardCodedStage = new SchoolEvil();				  //Week 6 - Thorns
+			case 'tank': hardCodedStage = new Tank();							  //Week 7 - Ugh, Guns, Stress
+			case 'phillystreets': hardCodedStage = new PhillyStreets(); 		  //Weekend 1 - Darnell, Lit Up, 2Hot
+			case 'phillyblazin': hardCodedStage = new PhillyBlazin();			  //Weekend 1 - Blazin
+			case 'stageerect': hardCodedStage = new StageErect();	    		  //Week 1 Erect
+			//case 'spookyerect': hardCodedStage = new SpookyErect();     		  //Week 2 Erect
+			case 'phillyerect': hardCodedStage = new PhillyErect();     	      //Week 3 Erect
+			case 'limoerect': hardCodedStage = new LimoErect();		    		  //Week 4 Erect
+			//case 'mallerect': hardCodedStage = new MallErect();		    	  //Week 5 Erect
+			//case 'schoolerect': hardCodedStage = new SchoolErect();			  //Week 6 Erect
+			//case 'schoolevilerect': hardCodedStage = new SchoolEvilErect();	  //Week 6 Erect
+			case 'tankerect': hardCodedStage = new TankErect();				  	  //Week 7 Erect
+			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect(); //Weekend 1 Erect
 		}
 
 		addObjects(stageData, isCreate);

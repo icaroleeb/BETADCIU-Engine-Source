@@ -5,11 +5,22 @@ import states.stages.objects.*;
 import substates.GameOverSubstate;
 import cutscenes.DialogueBox;
 import backend.FunkinSprite;
+import shaders.WiggleEffect;
 import openfl.utils.Assets as OpenFlAssets;
 
 class SchoolEvil extends BaseStage
 {
 	var pixelPerfectEffectArray:Array<FlxSprite> = []; // long array name lol
+
+	var backTrees:FunkinSprite;
+	var school:FunkinSprite;
+	var street:FunkinSprite;
+	var trees:FunkinSprite;
+
+	var wiggleBack:WiggleEffect;
+	var wiggleSchool:WiggleEffect;
+	var wiggleGround:WiggleEffect;
+	var wiggleTrees:WiggleEffect;
 
 	override function create()
 	{
@@ -23,28 +34,36 @@ class SchoolEvil extends BaseStage
 		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'gameOver-pixel';
 		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
 		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'bf-pixel-dead';
+
+		backTrees = FunkinSprite.create(-842, -80, 'weeb/evil/weebBackTrees');
+		backTrees.scrollFactor.set(0.5, 0.5);
+		stageVars.set("backTrees", backTrees);
+		add(backTrees);
+		backTrees.antialiasing = false;
+		pixelPerfectEffectArray.push(backTrees);
+
+		school = FunkinSprite.create(-816, -38, 'weeb/evil/weebSchool');
+		school.scrollFactor.set(0.75, 0.75);
+		stageVars.set("school", school);
+		add(school);
+		school.antialiasing = false;
+		pixelPerfectEffectArray.push(school);
+
+		street = FunkinSprite.create(-662, 6, 'weeb/evil/weebStreet');
+		street.scrollFactor.set(0.75, 0.75);
+		stageVars.set("street", street);
+		add(street);
+		street.antialiasing = false;
+		pixelPerfectEffectArray.push(street);
+
+		trees = FunkinSprite.create(-662, 6, 'weeb/evil/weebTrees');
+		trees.scrollFactor.set(0.75, 0.75);
+		stageVars.set("trees", trees);
+		add(trees);
+		trees.antialiasing = false;
+		pixelPerfectEffectArray.push(trees);
 		
-		var posX = 400;
-		var posY = 200;
-
-		var bg:FunkinSprite;
-		if(!ClientPrefs.data.lowQuality){
-			bg = FunkinSprite.create(posX, posY, null);
-			bg.frames = Paths.getSparrowAtlas("weeb/animatedEvilSchool");
-			bg.scrollFactor.set(0.8, 0.9);
-			bg.animation.addByPrefix('bg2', 'background 2', 24, true);
-			bg.animation.play('bg2');
-		}else{
-			bg = FunkinSprite.create(posX, posY, "weeb/animatedEvilSchool_low");
-			bg.scrollFactor.set(0.8, 0.9);
-		}
-
-		bg.scale.set(PlayState.daPixelZoom, PlayState.daPixelZoom);
-		bg.antialiasing = false;
-		stageVars.set("bg", bg);
-		add(bg);
 		setDefaultGF('gf-pixel');
-		pixelPerfectEffectArray.push(bg);
 
 		if (ClientPrefs.data.perfectPixel == "inGame") {
 			for (sprite in pixelPerfectEffectArray)
@@ -52,6 +71,12 @@ class SchoolEvil extends BaseStage
 				sprite.pixelPerfectPosition = true;
 				sprite.pixelPerfectRender = true;
 			}
+		}
+
+		for (sprite in pixelPerfectEffectArray)
+		{ 
+			sprite.scale.set(6, 6);
+			sprite.updateHitbox();
 		}
 
 		if (PlayState.instance.startingSong){
@@ -64,11 +89,33 @@ class SchoolEvil extends BaseStage
 			}
 		}
 	}
+
 	override function createPost()
 	{
 		var trail:FlxTrail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
 		PlayState.instance.variables.get("stageVariables").set("trail", trail);
 		addBehindDad(trail);
+
+		if(!ClientPrefs.data.shaders)
+			return;
+
+		wiggleBack = new WiggleEffect(2 * 0.8, 4 * 0.4, 0.011, WiggleEffectType.DREAMY);
+		wiggleSchool = new WiggleEffect(2, 4, 0.017, WiggleEffectType.DREAMY);
+		wiggleGround = new WiggleEffect(2, 4, 0.007, WiggleEffectType.DREAMY);
+		wiggleTrees = new WiggleEffect(2, 4, 0.007, WiggleEffectType.DREAMY);
+
+		backTrees.shader = wiggleBack.shader;
+		school.shader = wiggleSchool.shader;
+		street.shader = wiggleGround.shader;
+		trees.shader = wiggleTrees.shader;
+	}
+
+	override function update(elapsed:Float)
+	{
+		if (wiggleBack != null) wiggleBack.update(elapsed);
+		if (wiggleSchool != null) wiggleSchool.update(elapsed);
+		if (wiggleGround != null) wiggleGround.update(elapsed);
+		if (wiggleTrees != null) wiggleTrees.update(elapsed);
 	}
 
 	// Ghouls event

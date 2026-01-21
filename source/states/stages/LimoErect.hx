@@ -10,6 +10,7 @@ import shaders.AdjustColorShader;
 
 class LimoErect extends BaseStage
 {
+	var shootingStar:BGSprite;
 	var grpLimoDancers:FlxTypedGroup<BackgroundDancer>;
 	var fastCar:BGSprite;
 	var fastCarCanDrive:Bool = true;
@@ -23,6 +24,9 @@ class LimoErect extends BaseStage
 	var bgLimo:BGSprite;
 	var grpLimoParticles:FlxTypedGroup<BGSprite>;
 	var dancersDiff:Float = 320;
+
+	var shootingStarBeat:Int = 0;
+  	var shootingStarOffset:Int = 2;
 
 	var colorShader:AdjustColorShader;
 	var mist1:FlxBackdrop;
@@ -41,6 +45,11 @@ class LimoErect extends BaseStage
 		var skyBG:BGSprite = new BGSprite('limo/erect/limoSunset', -120, -100, 0.1, 0.1);
 		stageVars.set("skyBG", skyBG);
 		add(skyBG);
+
+		shootingStar = new BGSprite('limo/erect/shooting star', 200, 0, 0.12, 0.12, ['shooting star'], false);
+		shootingStar.blend = ADD;
+		stageVars.set("shootingStar", shootingStar);
+		add(shootingStar);
 
 		mist5 = new FlxBackdrop(Paths.image('limo/erect/mistMid'), FlxAxes.X);
 		mist5.setPosition(-650, -400);
@@ -176,9 +185,9 @@ class LimoErect extends BaseStage
 		addBehindGF(mist4);
 
 		if (ClientPrefs.data.shaders){
-			get_boyfriend().shader = colorShader.shader;
-			get_dad().shader = colorShader.shader;
-			get_gf().shader = colorShader.shader;
+			boyfriend.shader = colorShader.shader;
+			dad.shader = colorShader.shader;
+			gf.shader = colorShader.shader;
 		}
 	}
 
@@ -297,6 +306,9 @@ class LimoErect extends BaseStage
 
 		if (FlxG.random.bool(10) && fastCarCanDrive)
 			fastCarDrive();
+
+		if (FlxG.random.bool(10) && curBeat > (shootingStarBeat + shootingStarOffset))
+			doShootingStar(curBeat);
 	}
 	
 	// Substates for pausing/resuming tweens and timers
@@ -366,6 +378,17 @@ class LimoErect extends BaseStage
 
 			fastCarCanDrive = true;
 		}
+	}
+
+	function doShootingStar(beat:Int):Void
+	{
+		shootingStar.x = FlxG.random.int(50, 900);
+		shootingStar.y = FlxG.random.int(-10, 20);
+		shootingStar.flipX = FlxG.random.bool(50);
+		shootingStar.animation.play('shooting star');
+
+		shootingStarBeat = beat;
+		shootingStarOffset = FlxG.random.int(4, 8);
 	}
 
 	var carTimer:FlxTimer;

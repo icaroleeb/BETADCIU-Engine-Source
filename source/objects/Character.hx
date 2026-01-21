@@ -33,6 +33,7 @@ typedef CharacterFile = {
 	var vocals_file:String;
 	@:optional var is_player_char:Bool; // New preferred field
 	@:optional var isPlayerChar:Bool;  // Legacy fallback
+	@:optional var isCharSpeaker:Bool;
 	
 	@:optional var _editor_isPlayer:Null<Bool>;
 }
@@ -58,6 +59,7 @@ class Character extends OffsettableSprite
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public var isPlayer:Bool = false;
+	public var isSpeakerChar:Bool = false;
 	public var flipMode:Bool = false;
 	public var curCharacter:String = DEFAULT_CHARACTER;
 	public var pastCharacter:String = DEFAULT_CHARACTER;
@@ -262,6 +264,7 @@ class Character extends OffsettableSprite
 		vocalsFile = json.vocals_file != null ? json.vocals_file : '';
 		originalFlipX = (json.flip_x == true);
 		editorIsPlayer = json._editor_isPlayer;
+		isSpeakerChar = json.isCharSpeaker;
 
 		var colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
 		var colorPreCut = colorPreString.toHexString();

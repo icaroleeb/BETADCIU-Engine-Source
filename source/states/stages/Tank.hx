@@ -5,12 +5,15 @@ import cutscenes.CutsceneHandler;
 import substates.GameOverSubstate;
 import objects.Character;
 
+import flixel.addons.display.FlxTiledSprite;
+
 class Tank extends BaseStage
 {
 	var tankWatchtower:BGSprite;
 	var tankGround:BackgroundTank;
 	var tankmanRun:FlxTypedGroup<TankmenBG>;
 	var foregroundSprites:FlxTypedGroup<BGSprite>;
+	var tankBricks:BGSprite;
 
 	override function create()
 	{
@@ -19,33 +22,44 @@ class Tank extends BaseStage
 		}
 		var stageVars = PlayState.instance.variables.get("stageVariables");
 
-		var sky:BGSprite = new BGSprite('tankSky', -400, -400, 0, 0);
+		var solid:FlxSprite = new FlxSprite(-500, -1000).makeGraphic(2400, 2000, 0xFFE3A26D);
+		solid.scrollFactor.set();
+		add(solid);
+
+		var sky:BGSprite = new BGSprite('tankSky', -1000, -400, 0, 0);
+		sky.scale.set(3000, 1);
+		sky.updateHitbox();
 		stageVars.set("sky", sky);
 		add(sky);
 
 		if(!ClientPrefs.data.lowQuality)
 		{
-			var clouds:BGSprite = new BGSprite('tankClouds', FlxG.random.int(-700, -100), FlxG.random.int(-20, 20), 0.1, 0.1);
-			clouds.active = true;
-			clouds.velocity.x = FlxG.random.float(5, 15);
+			var clouds:FlxTiledSprite = new FlxTiledSprite(Paths.image('tankClouds'), 3200, 235, true, false);
+			clouds.setPosition(-1100, 20);
+			clouds.scrollFactor.set(0.25, 0.25);
+			clouds.velocity.x = 8;
 			stageVars.set("clouds", clouds);
 			add(clouds);
 
-			var mountains:BGSprite = new BGSprite('tankMountains', -300, -20, 0.2, 0.2);
-			mountains.setGraphicSize(Std.int(1.2 * mountains.width));
+			var mountains:BGSprite = new BGSprite('mountains2', -500, -35, 0.2, 0.2);
+			mountains.scale.set(1.2, 1.2);
 			mountains.updateHitbox();
 			stageVars.set("mountains", mountains);
 			add(mountains);
 
-			var buildings:BGSprite = new BGSprite('tankBuildings', -200, 0, 0.3, 0.3);
-			buildings.setGraphicSize(Std.int(1.1 * buildings.width));
+			var buildings:BGSprite = new BGSprite('tankBuildings', -260, -35, 0.3, 0.3);
+			buildings.scale.set(1.1, 1.1);
 			buildings.updateHitbox();
 			stageVars.set("buildings", buildings);
 			add(buildings);
 		}
 
-		var ruins:BGSprite = new BGSprite('tankRuins',-200,0,.35,.35);
-		ruins.setGraphicSize(Std.int(1.1 * ruins.width));
+		var clouds2:BGSprite = new BGSprite('clouds2', 0, 0, .4, .4);
+		clouds2.alpha = 0;
+		add(clouds2);
+
+		var ruins:BGSprite = new BGSprite('cityruins2', -200, 150, .35, .35);
+		ruins.scale.set(1.1, 1.1);
 		ruins.updateHitbox();
 		stageVars.set("ruins", ruins);
 		add(ruins);
@@ -60,7 +74,8 @@ class Tank extends BaseStage
 			stageVars.set("smokeRight", smokeRight);
 			add(smokeRight);
 
-			tankWatchtower = new BGSprite('tankWatchtower', 100, 50, 0.5, 0.5, ['watchtower gradient color']);
+			tankWatchtower = new BGSprite('tankWatchtower', -35, 110, 0.5, 0.5, ['watchtower gradient color']);
+			tankWatchtower.scale.set(0.85, 0.85);
 			stageVars.set("tankWatchtower", tankWatchtower);
 			add(tankWatchtower);
 		}
@@ -78,6 +93,11 @@ class Tank extends BaseStage
 		ground.updateHitbox();
 		stageVars.set("ground", ground);
 		add(ground);
+
+		tankBricks = new BGSprite('bricksGround', 438, 715);
+		tankBricks.scale.set(1.15, 1.15);
+		tankBricks.updateHitbox();
+		stageVars.set("tankBricks", tankBricks);
 
 		foregroundSprites = new FlxTypedGroup<BGSprite>();
 		foregroundSprites.add(new BGSprite('tank0', -500, 650, 1.7, 1.5, ['fg']));
@@ -108,6 +128,7 @@ class Tank extends BaseStage
 	}
 	override function createPost()
 	{
+		addBehindDad(tankBricks);
 		add(foregroundSprites);
 
 		if(!ClientPrefs.data.lowQuality)

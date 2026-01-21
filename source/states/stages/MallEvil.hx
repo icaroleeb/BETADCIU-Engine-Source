@@ -10,6 +10,10 @@ class MallEvil extends BaseStage
 			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
 		}
 		var stageVars = PlayState.instance.variables.get("stageVariables");
+
+		var solid:FlxSprite = new FlxSprite(-500, -1000).makeGraphic(2400, 2000, 0xFF23062D);
+		solid.scrollFactor.set(0.2, 0.2);
+		add(solid);
 		
 		var bg:BGSprite = new BGSprite('christmas/evilBG', -400, -500, 0.2, 0.2);
 		bg.setGraphicSize(Std.int(bg.width * 0.8));
@@ -21,7 +25,7 @@ class MallEvil extends BaseStage
 		stageVars.set("evilTree", evilTree);
 		add(evilTree);
 
-		var evilSnow:BGSprite = new BGSprite('christmas/evilSnow', -200, 700);
+		var evilSnow:BGSprite = new BGSprite('christmas/evilSnow', -500, 700);
 		stageVars.set("evilSnow", evilSnow);
 		add(evilSnow);
 

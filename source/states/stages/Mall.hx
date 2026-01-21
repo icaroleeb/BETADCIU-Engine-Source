@@ -15,35 +15,39 @@ class Mall extends BaseStage
 		}
 		var stageVars = PlayState.instance.variables.get("stageVariables");
 
-		var bg:BGSprite = new BGSprite('christmas/bgWalls', -1000, -500, 0.2, 0.2);
+		var bg:BGSprite = new BGSprite('christmas/bgWalls', -630, -492, 0.2, 0.2);
 		bg.setGraphicSize(Std.int(bg.width * 0.8));
 		bg.updateHitbox();
 		stageVars.set("bg", bg);
 		add(bg);
 
 		if(!ClientPrefs.data.lowQuality) {
-			upperBoppers = new BGSprite('christmas/upperBop', -240, -90, 0.33, 0.33, ['Upper Crowd Bob']);
+			upperBoppers = new BGSprite('christmas/upperBop', -396, -98, 0.28, 0.28, ['Upper Crowd Bob']);
 			upperBoppers.setGraphicSize(Std.int(upperBoppers.width * 0.85));
 			upperBoppers.updateHitbox();
 			stageVars.set("upperBoppers", upperBoppers);
 			add(upperBoppers);
 
-			var bgEscalator:BGSprite = new BGSprite('christmas/bgEscalator', -1100, -600, 0.3, 0.3);
+			var bgEscalator:BGSprite = new BGSprite('christmas/bgEscalator', -1100, -540, 0.3, 0.3);
 			bgEscalator.setGraphicSize(Std.int(bgEscalator.width * 0.9));
 			bgEscalator.updateHitbox();
 			stageVars.set("bgEscalator", bgEscalator);
 			add(bgEscalator);
 		}
 
-		var tree:BGSprite = new BGSprite('christmas/christmasTree', 370, -250, 0.40, 0.40);
+		var tree:BGSprite = new BGSprite('christmas/christmasTree', 370, -250, 0.4, 0.4);
 		stageVars.set("tree", tree);
 		add(tree);
 
-		bottomBoppers = new MallCrowd(-300, 140);
+		bottomBoppers = new MallCrowd(-300, 120);
+		bottomBoppers.scrollFactor.set(0.9, 0.9);
 		stageVars.set("bottomBoppers", bottomBoppers);
 		add(bottomBoppers);
 
-		var fgSnow:BGSprite = new BGSprite('christmas/fgSnow', -600, 700);
+		var snowUnder:FlxSprite = new FlxSprite(-1200, 800).makeGraphic(5400, 3000, 0xFFF3F4F5);
+		add(snowUnder);
+
+		var fgSnow:BGSprite = new BGSprite('christmas/fgSnow', -1150, 680);
 		stageVars.set("fgSnow", fgSnow);
 		add(fgSnow);
 
