@@ -25,7 +25,8 @@ class PsychVideoSprite extends VideoSprite
 
     public function new(destroyOnUse = true) {
         super();
-        heldVideos.push(this);
+        if (!heldVideos.contains(this))
+            heldVideos.push(this);
 
         this.destroyOnUse = destroyOnUse;
         if (destroyOnUse) bitmap.onEndReached.add(() -> destroy());
@@ -41,6 +42,9 @@ class PsychVideoSprite extends VideoSprite
 
     public override function load(location:String, ?options:Array<String>):Bool
     {
+        removeSignals();
+        bitmap.stop();
+        bitmap.dispose();
         var b:Bool = super.load(location,options);
         if (!b) return b;
 
@@ -65,8 +69,7 @@ class PsychVideoSprite extends VideoSprite
         super.pause();
         if (FlxG.autoPause) 
         {
-            if (FlxG.signals.focusGained.has(bitmap.resume)) FlxG.signals.focusGained.remove(bitmap.resume);
-            if (FlxG.signals.focusLost.has(bitmap.pause)) FlxG.signals.focusLost.remove(bitmap.pause);
+            removeSignals();
         }
     }
 
@@ -94,12 +97,21 @@ class PsychVideoSprite extends VideoSprite
     }
 
     public override function destroy() {
-
         if (destroyOnUse && onEndCallback != null) onEndCallback(); 
-        
+        bitmap.onEndReached.removeAll();
+        bitmap.onOpening.removeAll();
+        bitmap.onFormatSetup.removeAll();
+        removeSignals();
         heldVideos.remove(this);
         super.destroy();
     }
+
+    override function kill() {
+        removeSignals();
+        heldVideos.remove(this);
+        super.kill();
+    }
+
 
     public function restart(?options:Array<String>) 
     {
@@ -123,6 +135,13 @@ class PsychVideoSprite extends VideoSprite
                 i.globalPaused = false;
                 i.resume();
             }
+        }
+    }
+
+    function removeSignals() {
+        if (FlxG.autoPause && bitmap != null) {
+            if (FlxG.signals.focusGained.has(bitmap.resume)) FlxG.signals.focusGained.remove(bitmap.resume);
+            if (FlxG.signals.focusGained.has(bitmap.pause))FlxG.signals.focusLost.remove(bitmap.pause);
         }
     }
 }

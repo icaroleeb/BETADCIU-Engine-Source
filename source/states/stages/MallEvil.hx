@@ -13,6 +13,7 @@ class MallEvil extends BaseStage
 
 		var solid:FlxSprite = new FlxSprite(-500, -1000).makeGraphic(2400, 2000, 0xFF23062D);
 		solid.scrollFactor.set(0.2, 0.2);
+		stageVars.set("solid", solid);
 		add(solid);
 		
 		var bg:BGSprite = new BGSprite('christmas/evilBG', -400, -500, 0.2, 0.2);

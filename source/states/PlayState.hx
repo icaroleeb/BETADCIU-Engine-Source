@@ -4037,16 +4037,7 @@ class PlayState extends MusicBeatState
 	public var ratingPercent:Float;
 	public var accuracy:Float; // old scripts
 	public var ratingFC:String;
-	public function RecalculateRating(badHit:Bool = false, scoreBop:Bool = true, ?resetScore:Bool = false):Void {
-		if (resetScore) {
-			totalNotesHit = 0;
-			totalPlayed = 0;
-			songScore = 0;
-			songMisses = 0;
-			songHits = 0;
-			combo = 0;
-		}
-
+	public function RecalculateRating(badHit:Bool = false, scoreBop:Bool = true):Void {
 		setOnScripts('score', songScore);
 		setOnScripts('misses', songMisses);
 		setOnScripts('hits', songHits);

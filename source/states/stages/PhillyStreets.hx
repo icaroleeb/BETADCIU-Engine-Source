@@ -56,6 +56,7 @@ class PhillyStreets extends BaseStage
 		{
 			var solid:FlxSprite = new FlxSprite(-500, -1000).makeGraphic(4000, 3000, 0xFF8E9191);
 			solid.scrollFactor.set();
+			stageVars.set('solid', solid);
 			add(solid);
 
 			scrollingSky = new FlxTiledSprite(Paths.image('phillyStreets/phillySkybox'), 2922, 718, true, false);
@@ -72,13 +73,13 @@ class PhillyStreets extends BaseStage
 			add(phillySkyline);
 			darkenable.push(phillySkyline);
 
-			var phillyForegroundCity:BGSprite = new BGSprite('phillyStreets/phillyForegroundCity', 1865, 220, 0.3, 0.3);
+			var phillyForegroundCity:BGSprite = new BGSprite('phillyStreets/phillyForegroundCity', 600, 69, 0.3, 0.3);
 			stageVars.set('phillyForegroundCity', phillyForegroundCity);
 			add(phillyForegroundCity);
 			darkenable.push(phillyForegroundCity);
 		}
 
-		var phillyConstruction:BGSprite = new BGSprite('phillyStreets/phillyConstruction', 600, 69, 0.7, 1);
+		var phillyConstruction:BGSprite = new BGSprite('phillyStreets/phillyConstruction', 1800, 364, 0.7, 1);
 		stageVars.set('phillyConstruction', phillyConstruction);
 		add(phillyConstruction);
 		darkenable.push(phillyConstruction);

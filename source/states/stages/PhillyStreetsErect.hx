@@ -67,6 +67,7 @@ class PhillyStreetsErect extends BaseStage
 		{
 			var solid:FlxSprite = new FlxSprite(-500, -1000).makeGraphic(4000, 3000, 0xFF8E9191);
 			solid.scrollFactor.set();
+			stageVars.set('solid', solid);
 			add(solid);
 
 			scrollingSky = new FlxTiledSprite(Paths.image('phillyStreets/erect/phillySkybox'), 2922, 718, true, false);

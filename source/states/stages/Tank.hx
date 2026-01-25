@@ -24,6 +24,7 @@ class Tank extends BaseStage
 
 		var solid:FlxSprite = new FlxSprite(-500, -1000).makeGraphic(2400, 2000, 0xFFE3A26D);
 		solid.scrollFactor.set();
+		stageVars.set("solid", solid);
 		add(solid);
 
 		var sky:BGSprite = new BGSprite('tankSky', -1000, -400, 0, 0);

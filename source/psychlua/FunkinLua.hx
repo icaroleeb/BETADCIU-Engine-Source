@@ -1903,14 +1903,48 @@ class FunkinLua {
 				right_color = CoolUtil.colorFromString(right);
 			game.timeBar.setColors(left_color, right_color);
 		});
-		Lua_helper.add_callback(lua, "setGradientTimeBarColor", function(left:String, right:String) {
+		Lua_helper.add_callback(lua, "setBarColors", function(bar:String, left:String, right:String) {
 			var left_color:Null<FlxColor> = null;
 			var right_color:Null<FlxColor> = null;
 			if (left != null && left != '')
 				left_color = CoolUtil.colorFromString(left);
 			if (right != null && right != '')
 				right_color = CoolUtil.colorFromString(right);
-			game.timeBar.createGradientBar([0xFF000000, 0xFF000000], [right_color, left_color]);
+
+			var daObjBar = LuaUtils.getObjectDirectly(bar);
+
+			daObjBar.setColors(left_color, right_color);
+		});
+		Lua_helper.add_callback(lua, "setGradientBarColor", function(bar:String = 'timeBar', 
+			left:String, right:String, 
+			chunkSize:Int = 1, rotation:Int = 180, 
+			showBorder:Bool = false, border:String = '000000', 
+			borderSize:Int = 1, 
+			filEmptyLeft:String = '000000', filEmptyRight:String = '000000') {
+
+			var left_color:Null<FlxColor> = null;
+			var right_color:Null<FlxColor> = null;
+
+			var empty_right_color:Null<FlxColor> = null;
+			var empty_left_color:Null<FlxColor> = null;
+
+			var border_color:Null<FlxColor> = null;
+			if (left != null && left != '')
+				left_color = CoolUtil.colorFromString(left);
+			if (right != null && right != '')
+				right_color = CoolUtil.colorFromString(right);
+
+			if (filEmptyLeft != null && filEmptyLeft != '')
+				empty_left_color = CoolUtil.colorFromString(filEmptyLeft);
+			if (filEmptyRight != null && filEmptyRight != '')
+				empty_right_color = CoolUtil.colorFromString(filEmptyRight);
+
+			if (border != null && border != '')
+				border_color = CoolUtil.colorFromString(border);
+
+			var objBar = LuaUtils.getObjectDirectly(bar);
+
+			objBar.createGradientBar([empty_right_color, empty_left_color], [right_color, left_color], chunkSize, rotation, showBorder, border_color, borderSize);
 		});
 		Lua_helper.add_callback(lua, "setObjectCamera", function(obj:String, camera:Dynamic = 'game') {
 			if (game != null){

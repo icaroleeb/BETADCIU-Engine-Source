@@ -33,6 +33,7 @@ class StageErect extends BaseStage
 
 		var solid:FlxSprite = new FlxSprite(-500, -1000).makeGraphic(2400, 2000, 0xFF222026);
 		solid.scrollFactor.set();
+		if (inGameplay) stageVars.set("solid", solid);
 		add(solid);
 
 		var crowd:BGSprite = new BGSprite('erect/crowd', 682, 290, 0.8, 0.8, ['idle0'], true);
