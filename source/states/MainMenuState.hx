@@ -44,6 +44,7 @@ class MainMenuState extends MusicBeatState
 	var rightOption:String = 'options';
 
 	var magenta:FlxSprite;
+	var bg:FlxSprite;
 	var camFollow:FlxObject;
 
 	static var showOutdatedWarning:Bool = true;
@@ -70,7 +71,7 @@ class MainMenuState extends MusicBeatState
 		persistentUpdate = persistentDraw = true;
 
 		var yScroll:Float = 0.10;
-		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
+		bg = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.scrollFactor.set(0, yScroll);
 		bg.setGraphicSize(Std.int(bg.width * 1.175));
@@ -78,7 +79,7 @@ class MainMenuState extends MusicBeatState
 		bg.screenCenter();
 		add(bg);
 
-		camFollow = new FlxObject(0, 0, 1, 1);
+		camFollow = new FlxObject(-20, 0, 1, 1);
 		add(camFollow);
 
 		magenta = new FlxSprite(-80).loadGraphic(Paths.image('menuDesat'));
@@ -112,7 +113,7 @@ class MainMenuState extends MusicBeatState
 			rightItem.x -= rightItem.width;
 		}
 
-		var psychVer:FlxText = new FlxText(12, FlxG.height - 64, 0, "Psych Engine v" + psychEngineVersion, 12);
+		var psychVer:FlxText = new FlxText(12, FlxG.height - 64, 0, "Psych Engine v" + psychEngineVersion + " Custom Build", 12);
 		psychVer.scrollFactor.set();
 		psychVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(psychVer);
@@ -120,7 +121,7 @@ class MainMenuState extends MusicBeatState
 		fnfVer.scrollFactor.set();
 		fnfVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(fnfVer);
-		var betadciuVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "BETADCIU Engine Reworked v" + betadciuEngineVersion + "", 12); // Reworked sounds better than "Reboot"
+		var betadciuVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "BETADCIU Engine Reworked v" + betadciuEngineVersion + " " + Main.getBuildTarget() + " Build", 12); // Reworked sounds better than "Reboot"
 		betadciuVer.scrollFactor.set();
 		betadciuVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(betadciuVer);
@@ -138,7 +139,7 @@ class MainMenuState extends MusicBeatState
 		#end
 
 		#if CHECK_FOR_UPDATES
-		if (showOutdatedWarning && ClientPrefs.data.checkForUpdates && substates.OutdatedSubState.updateVersion != psychEngineVersion) {
+		if (showOutdatedWarning && ClientPrefs.data.checkForUpdates && substates.OutdatedSubState.updateVersion != betadciuEngineVersion) {
 			persistentUpdate = false;
 			showOutdatedWarning = false;
 			openSubState(new substates.OutdatedSubState());
@@ -389,7 +390,8 @@ class MainMenuState extends MusicBeatState
 					if(memb == item)
 						continue;
 
-					FlxTween.tween(memb, {alpha: 0}, 0.4, {ease: FlxEase.quadOut});
+					// FlxTween.tween(memb, {alpha: 0}, 0.4, {ease: FlxEase.quadOut});
+					FlxTween.tween(memb, {x: memb.x - 1200}, 0.8, {ease: FlxEase.backIn});
 				}
 
 				for (memb in menuItems2)
@@ -397,8 +399,11 @@ class MainMenuState extends MusicBeatState
 					if(memb == item)
 						continue;
 
-					FlxTween.tween(memb, {alpha: 0}, 0.4, {ease: FlxEase.quadOut});
+					// FlxTween.tween(memb, {alpha: 0}, 0.4, {ease: FlxEase.quadOut});
+					FlxTween.tween(memb, {x: memb.x + 1200}, 0.8, {ease: FlxEase.backIn});
 				}
+				FlxTween.tween(bg.scale, {x: 1.6, y: 1.6}, 1, {ease: FlxEase.quadOut});
+				FlxTween.tween(magenta.scale, {x: 1.6, y: 1.6}, 1, {ease: FlxEase.quadOut});
 			}
 			#if desktop
 			if (controls.justPressed('debug_1'))
@@ -412,6 +417,8 @@ class MainMenuState extends MusicBeatState
 
 		super.update(elapsed);
 	}
+
+	var savedY:Float = 0;
 
 	function changeItem(change:Int = 0)
 	{
@@ -449,6 +456,24 @@ class MainMenuState extends MusicBeatState
 		}
 		selectedItem.animation.play('selected');
 		selectedItem.centerOffsets();
-		if (selectedItem != leftItem && selectedItem != rightItem) camFollow.y = selectedItem.getGraphicMidpoint().y;
+		if (selectedItem != leftItem && selectedItem != rightItem) {
+			camFollow.y = selectedItem.getGraphicMidpoint().y;
+			savedY = camFollow.y;
+		}
+
+		if (selectedItem == leftItem || selectedItem == rightItem) {
+			if (curColumn == RIGHT) camFollow.y = savedY + 140 else camFollow.y = savedY;
+			camFollow.x = 140;
+			FlxTween.cancelTweensOf(bg);
+			FlxTween.cancelTweensOf(magenta);
+			FlxTween.tween(bg, {x: -165.5}, 0.4, {ease: FlxEase.sineOut});
+			FlxTween.tween(magenta, {x: -165.5}, 0.4, {ease: FlxEase.sineOut});
+		} else {
+			camFollow.x = -20;
+			FlxTween.cancelTweensOf(bg);
+			FlxTween.cancelTweensOf(magenta);
+			FlxTween.tween(bg, {x: -115.5}, 0.4, {ease: FlxEase.sineOut});
+			FlxTween.tween(magenta, {x: -115.5}, 0.4, {ease: FlxEase.sineOut});
+		}
 	}
 }

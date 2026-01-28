@@ -100,6 +100,8 @@ class FunkinLua {
 		set('Function_StopAll', LuaUtils.Function_StopAll);
 		set('Function_Stop', LuaUtils.Function_Stop);
 		set('Function_Continue', LuaUtils.Function_Continue);
+		// if (!PlayState.chartingMode) set('luaDebugMode', false);
+		// else set('luaDebugMode', true);
 		set('luaDebugMode', false);
 		set('luaDeprecatedWarnings', true);
 		set('version', MainMenuState.psychEngineVersion.trim());
@@ -475,9 +477,8 @@ class FunkinLua {
 			return value;
 		});
 		Lua_helper.add_callback(lua, "changeStageData", function(id:String) {
-            PlayState.curStage = id;
-			game.curStageLua = id;
-            game.stageData = StageData.getStageFile(PlayState.curStage); 
+            game.curStage = id;
+            game.stageData = StageData.getStageFile(game.curStage); 
             game.setStageDetails(game.stageData);
         });
 		Lua_helper.add_callback(lua, "getVar", function(varName:String) {
@@ -1681,12 +1682,13 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "changeStage", function(id:String) {
+			game.callOnScripts('onStageChange', [id]);
 			game.removeStage(); // Remove current stage
-			PlayState.curStage = id; // Set new stage name
-			game.curStageLua = id;
-			game.stageData = StageData.getStageFile(PlayState.curStage); 
+			game.curStage = id; // Set new stage name
+			game.stageData = StageData.getStageFile(game.curStage); 
 			game.addStage();
-			game.setOnScripts('curStage', PlayState.curStage);
+			game.setOnScripts('curStage', game.curStage);
+			game.callOnScripts('onStageChangePost', [id]);
 		});
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
 			if (scriptType.toLowerCase() == "modpack"){
@@ -1832,6 +1834,7 @@ class FunkinLua {
 				right_color = CoolUtil.colorFromString(right);
 			game.healthBar.setColors(left_color, right_color);
 		});
+
 		Lua_helper.add_callback(lua, "setTimeBarColors", function(left:String, right:String) {
 			var left_color:Null<FlxColor> = null;
 			var right_color:Null<FlxColor> = null;
@@ -1840,6 +1843,32 @@ class FunkinLua {
 			if (right != null && right != '')
 				right_color = CoolUtil.colorFromString(right);
 			game.timeBar.setColors(left_color, right_color);
+		});
+
+		Lua_helper.add_callback(lua, "setGradientBarColor", function(bar:String = 'timeBar', left:String, right:String, chunkSize:Int = 1, rotation:Int = 180, showBorder:Bool = false, border:String = '000000', borderSize:Int = 1, filEmptyLeft:String = '000000', filEmptyRight:String = '000000') {
+			var left_color:Null<FlxColor> = null;
+			var right_color:Null<FlxColor> = null;
+
+			var empty_right_color:Null<FlxColor> = null;
+			var empty_left_color:Null<FlxColor> = null;
+
+			var border_color:Null<FlxColor> = null;
+			if (left != null && left != '')
+				left_color = CoolUtil.colorFromString(left);
+			if (right != null && right != '')
+				right_color = CoolUtil.colorFromString(right);
+
+			if (filEmptyLeft != null && filEmptyLeft != '')
+				empty_left_color = CoolUtil.colorFromString(filEmptyLeft);
+			if (filEmptyRight != null && filEmptyRight != '')
+				empty_right_color = CoolUtil.colorFromString(filEmptyRight);
+
+			if (border != null && border != '')
+				border_color = CoolUtil.colorFromString(border);
+
+			var objBar = LuaUtils.getObjectDirectly(bar);
+
+			objBar.createGradientBar([empty_right_color, empty_left_color], [right_color, left_color], chunkSize, rotation, showBorder, border_color, borderSize);
 		});
 
 		Lua_helper.add_callback(lua, "setObjectCamera", function(obj:String, camera:Dynamic = 'game') {
@@ -1962,6 +1991,10 @@ class FunkinLua {
 			}
 			luaTrace("getObjectCamera: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
 			return game.camGame;
+		});
+
+		Lua_helper.add_callback(lua, "buildTarget", function() {
+			return Main.getBuildTarget();
 		});
 
 		//change individual values

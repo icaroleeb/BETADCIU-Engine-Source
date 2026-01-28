@@ -153,8 +153,7 @@ class PlayState extends MusicBeatState
 	public var boyfriendGroup:FlxSpriteGroup;
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
-	public static var curStage:String = '';
-	public var curStageLua:String = ''; // I added this cuz the "curStage" with static don't work on "setProperty" or "getProperty"
+	public var curStage:String = '';
 
 	public static var stageUI(default, set):String = "normal";
 	public static var uiPrefix:String = "";
@@ -404,7 +403,6 @@ class PlayState extends MusicBeatState
 			SONG.stage = StageData.vanillaSongStage(Paths.formatToSongPath(Song.loadedSongName));
 
 		curStage = SONG.stage;
-		curStageLua = SONG.stage;
 		stageData = StageData.getStageFile(curStage);
 		setStageDetails(stageData);
 
@@ -510,7 +508,7 @@ class PlayState extends MusicBeatState
 			timeTxt.size = 24;
 			timeTxt.y += 3;
 		}else if(ClientPrefs.data.timeBarType == 'Song Name And Time'){
-			timeTxt.text = SONG.song + "(0:00)";
+			timeTxt.text = SONG.song + " (0:00)";
 			timeTxt.size = 24;
 			timeTxt.y += 3;
 		}
@@ -1225,7 +1223,7 @@ class PlayState extends MusicBeatState
 		return spr;
 	}
 
-	/*
+	// why was this commented?
 	public function addBehindGF(obj:FlxBasic)
 	{
 		insert(members.indexOf(gf), obj);
@@ -1238,7 +1236,6 @@ class PlayState extends MusicBeatState
 	{
 		insert(members.indexOf(dad), obj);
 	}
-	*/
 
 	public function clearNotesBefore(time:Float)
 	{
@@ -1978,7 +1975,7 @@ class PlayState extends MusicBeatState
 			if(secondsTotal < 0) secondsTotal = 0;
 
 			if(ClientPrefs.data.timeBarType != 'Song Name' || ClientPrefs.data.timeBarType != 'Song Name And Time' ) timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
-			if (ClientPrefs.data.timeBarType == "Song Name And Time") timeTxt.text = SONG.song + "(" + FlxStringUtil.formatTime(secondsTotal, false) + ")";
+			if (ClientPrefs.data.timeBarType == "Song Name And Time") timeTxt.text = SONG.song + " (" + FlxStringUtil.formatTime(secondsTotal, false) + ")";
 		}
 
 		if (camZooming)
@@ -2537,7 +2534,6 @@ class PlayState extends MusicBeatState
  					removeStage(); // Remove current stage
 					
 					curStage = value1; // Set new stage name
-					curStageLua = value1;
  					stageData = StageData.getStageFile(curStage); 
  					addStage();
 					setOnScripts('curStage', curStage);
@@ -4606,7 +4602,54 @@ class PlayState extends MusicBeatState
 
 		if(!isCreate){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
-			//script.call("onCreatePost", []);
+			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
+			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');
 		}
+	}
+
+	public function callLuaFile(luaFile:String, ?callLua:String = "")
+	{
+		#if MODS_ALLOWED
+		var luaToLoad:String = Paths.modFolders(luaFile);
+		if(!FileSystem.exists(luaToLoad))
+			luaToLoad = Paths.getSharedPath(luaFile);
+
+		if(FileSystem.exists(luaToLoad))
+		#elseif sys
+		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		if(OpenFlAssets.exists(luaToLoad))
+		#end
+		{
+			for (script in luaArray) {
+				if (script.scriptName == luaToLoad) {
+					// Custom function call
+					script.call(callLua, []);
+					return true;
+				}
+			}
+
+		}
+		return false;
+	}
+
+	public function callHScriptFile(scriptFile:String, ?callHScript:String = "")
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad))
+		{
+			if (Iris.instances.exists(scriptToLoad)){
+				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+				if(script.exists(callHScript)) script.call(callHScript);
+				return true;
+			};
+		}
+		return false;
 	}
 }

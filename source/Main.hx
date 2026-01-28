@@ -4,7 +4,8 @@ package;
 import android.content.Context;
 #end
 
-import debug.FPSCounter;
+// import debug.FPSCounter;
+import backend.tools.DebugDisplay as FPSCounter;
 
 import backend.ui.FullScreenScaleMode;
 import flixel.graphics.FlxGraphic;
@@ -174,7 +175,7 @@ class Main extends Sprite
 		#end
 
 		#if !mobile
-		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
+		fpsVar = new FPSCounter(10, 10, 0xFFFFFF);
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -281,4 +282,24 @@ class Main extends Sprite
 		Sys.exit(1);
 	}
 	#end
+
+	public static function getBuildTarget():String {
+		#if html5
+			return "HTML5";
+		#elseif android
+			return "Android";
+		#elseif windows
+			return "Windows";
+		#elseif mac
+			return "macOS";
+		#elseif linux
+			return "Linux";
+		#elseif neko
+			return "Neko";
+		#elseif flash
+			return "Flash";
+		#else
+			return "Unknown";
+		#end
+	}
 }
