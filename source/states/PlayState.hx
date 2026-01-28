@@ -510,7 +510,7 @@ class PlayState extends MusicBeatState
 			timeTxt.size = 24;
 			timeTxt.y += 3;
 		}else if(ClientPrefs.data.timeBarType == 'Song Name And Time'){
-			timeTxt.text = SONG.song + "(0:00)";
+			timeTxt.text = SONG.song + " (0:00)";
 			timeTxt.size = 24;
 			timeTxt.y += 3;
 		}
@@ -1225,6 +1225,7 @@ class PlayState extends MusicBeatState
 		return spr;
 	}
 
+	// why was this commented?
 	public function addBehindGF(obj:FlxBasic)
 	{
 		insert(members.indexOf(gf), obj);
@@ -1975,7 +1976,7 @@ class PlayState extends MusicBeatState
 			if(secondsTotal < 0) secondsTotal = 0;
 
 			if(ClientPrefs.data.timeBarType != 'Song Name' || ClientPrefs.data.timeBarType != 'Song Name And Time' ) timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
-			if (ClientPrefs.data.timeBarType == "Song Name And Time") timeTxt.text = SONG.song + "(" + FlxStringUtil.formatTime(secondsTotal, false) + ")";
+			if (ClientPrefs.data.timeBarType == "Song Name And Time") timeTxt.text = SONG.song + " (" + FlxStringUtil.formatTime(secondsTotal, false) + ")";
 		}
 
 		if (camZooming)
