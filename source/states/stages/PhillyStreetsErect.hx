@@ -192,33 +192,6 @@ class PhillyStreetsErect extends BaseStage
 		stageVars.set('phillyForeground', phillyForeground);
 		add(phillyForeground);
 
-		mist0 = new FlxBackdrop(Paths.image('phillyStreets/erect/mistMid'), FlxAxes.X, 0, 0);
-		mist0.setPosition(-650, -100);
-		mist0.scrollFactor.set(1.2, 1.2);
-		mist0.blend = ADD;
-		mist0.color = 0xFF5c5c5c;
-		mist0.alpha = 0.6;
-		mist0.velocity.x = 172;
-		stageVars.set('mist0', mist0);
-
-		mist1 = new FlxBackdrop(Paths.image('phillyStreets/erect/mistMid'), FlxAxes.X, 0, 0);
-		mist1.setPosition(-650, -100);
-		mist1.scrollFactor.set(1.1, 1.1);
-		mist1.blend = ADD;
-		mist1.color = 0xFF5c5c5c;
-		mist1.alpha = 0.6;
-		mist1.velocity.x = 150;
-		stageVars.set('mist1', mist1);
-	
-		mist2 = new FlxBackdrop(Paths.image('phillyStreets/erect/mistBack'), FlxAxes.X, 0, 0);
-		mist2.setPosition(-650, -100);
-		mist2.scrollFactor.set(1.2, 1.2);
-		mist2.blend = ADD;
-		mist2.color = 0xFF5c5c5c;
-		mist2.alpha = 0.8;
-		mist2.velocity.x = -80;
-		stageVars.set('mist2', mist2);
-		
 		if(ClientPrefs.data.shaders)
 			setupRainShader();
 
@@ -251,8 +224,34 @@ class PhillyStreetsErect extends BaseStage
 			}
 		}
 
+		mist0 = new FlxBackdrop(Paths.image('phillyStreets/erect/mistMid'), FlxAxes.X, 0, 0);
+		mist0.setPosition(-650, -100);
+		mist0.scrollFactor.set(1.2, 1.2);
+		mist0.blend = ADD;
+		mist0.color = 0xFF5c5c5c;
+		mist0.alpha = 0.6;
+		mist0.velocity.x = 172;
+		PlayState.instance.variables.get("stageVariables").set('mist0', mist0);
 		add(mist0);
+
+		mist1 = new FlxBackdrop(Paths.image('phillyStreets/erect/mistMid'), FlxAxes.X, 0, 0);
+		mist1.setPosition(-650, -100);
+		mist1.scrollFactor.set(1.1, 1.1);
+		mist1.blend = ADD;
+		mist1.color = 0xFF5c5c5c;
+		mist1.alpha = 0.6;
+		mist1.velocity.x = 150;
+		PlayState.instance.variables.get("stageVariables").set('mist1', mist1);
 		add(mist1);
+
+		mist2 = new FlxBackdrop(Paths.image('phillyStreets/erect/mistBack'), FlxAxes.X, 0, 0);
+		mist2.setPosition(-650, -100);
+		mist2.scrollFactor.set(1.2, 1.2);
+		mist2.blend = ADD;
+		mist2.color = 0xFF5c5c5c;
+		mist2.alpha = 0.8;
+		mist2.velocity.x = -80;
+		PlayState.instance.variables.get("stageVariables").set('mist2', mist2);
 		add(mist2);
 
 		if(ClientPrefs.data.shaders)
@@ -269,6 +268,9 @@ class PhillyStreetsErect extends BaseStage
 			});
 			PlayState.instance.camGame.filters = filters;
 		}
+
+		FlxTween.cancelTweensOf(phillyCars);
+		FlxTween.cancelTweensOf(phillyCars2);
 
 		if (boyfriend.shader != null) {
 			boyfriend.shader = null;

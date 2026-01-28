@@ -238,6 +238,9 @@ class PhillyStreets extends BaseStage
 			});
 			PlayState.instance.camGame.filters = filters;
 		}
+
+		FlxTween.cancelTweensOf(phillyCars);
+		FlxTween.cancelTweensOf(phillyCars2);
 		super.destroy();
 	}
 

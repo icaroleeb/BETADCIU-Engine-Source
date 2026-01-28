@@ -68,6 +68,7 @@ class BaseStage extends FlxBasic
 	public function create() {}
 	public function createPost() {}
 	//public function update(elapsed:Float) {}
+	function updatePost(elapsed:Float) {}
 	public function countdownTick(count:Countdown, num:Int) {}
 	public function startSong() {}
 
@@ -89,6 +90,10 @@ class BaseStage extends FlxBasic
 	public function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float) {}
 	public function eventPushed(event:EventNote) {}
 	public function eventPushedUnique(event:EventNote) {}
+
+	// Switch Character
+	public function characterChange(charToChange:String, newChar:String) {}
+	public function characterChangePost(charToChange:String, newChar:String) {}
 
 	// Note Hit/Miss
 	public function goodNoteHit(note:Note) {}

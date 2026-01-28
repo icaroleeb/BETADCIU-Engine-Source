@@ -178,6 +178,7 @@ class StageErect extends BaseStage
 						defaultCamZoom -= 0.12;
 						FlxTween.tween(dadbattleFog, {alpha: 0}, 0.7, {onComplete: function(twn:FlxTween) dadbattleFog.visible = false});
 				}
+			/*
 			case "Change Character":
 				var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(value1);
 
@@ -192,6 +193,23 @@ class StageErect extends BaseStage
 					else 
 						character.shader = colorShaderDad.shader;
 				}
+			*/
+		}
+	}
+
+	function characterChangePost(charExist:String, charNew:String) {
+		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(charExist);
+
+		if (character.isSpeakerChar && character != null){
+			character.shader = colorShaderGf.shader;
+			return;
+		}
+
+		if (character != null && character == null){
+			if (character.isPlayer)
+				character.shader = colorShaderBf.shader;
+			else 
+				character.shader = colorShaderDad.shader;
 		}
 	}
 

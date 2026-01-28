@@ -1683,7 +1683,6 @@ class PlayState extends MusicBeatState
 				var newCharacter:String = event.value2;
 				// addCharacterToList(newCharacter, charType);
 				charactersToLoad.push(newCharacter);
-
 			case 'Play Sound':
 				Paths.sound(event.value1); //Precache sound
 			case "Change Stage":
@@ -2097,6 +2096,7 @@ class PlayState extends MusicBeatState
 		}
 
 		setOnScripts('botPlay', cpuControlled);
+		stagesFunc(function(stage:BaseStage) stage.updatePost(elapsed));
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
 
@@ -2462,7 +2462,10 @@ class PlayState extends MusicBeatState
 
 
 			case 'Change Character':
-				var charType:Int = 0;
+				stagesFunc(function(stage:BaseStage) stage.characterChange(value1, value2)); // putting this beacuse of the function lua
+				callOnScripts('onCharacterChange', [value1, value2]);
+
+				//var charType:Int = 0;
 				switch(value1.toLowerCase().trim()) {
 					case 'gf' | 'girlfriend' | "2":
 						FunkinLua.changeGFAuto(value2);
@@ -2480,6 +2483,8 @@ class PlayState extends MusicBeatState
 				}
 				reloadHealthBarColors();
 
+				stagesFunc(function(stage:BaseStage) stage.characterChangePost(value1, value2)); // putting this beacuse of the characters shaders including the function lua
+				callOnScripts('onCharacterChangePost', [value1, value2]);
 			case 'Change Scroll Speed':
 				if (songSpeedType != "constant")
 				{
@@ -3804,7 +3809,7 @@ class PlayState extends MusicBeatState
 		{
 			for (script in luaArray) {
 				if (script.scriptName == luaToLoad) {
-					// Because the shaders weren't getting destroyed properly. Changed it to onStop
+					// Custom function call
 					script.call(callLua, []);
 					return true;
 				}
