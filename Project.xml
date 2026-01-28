@@ -42,6 +42,7 @@
 
 	<!-- ____________________________ Android Port ___________________________ -->
 
+	<!--
 	<java if="android" path="source/external/android/java" />
 
 	<config type="android" gradle-version="8.10.2" gradle-plugin="8.8.0" ndkVersion="27.3"
@@ -71,6 +72,7 @@
 			<icon path="art/mobile/iconAdaptive.png" if="android" />
 			<icon path="art/mobile/iconMobile.png" unless="android" />
 		</section>
+	-->
 
 	<!-- ____________________________ Window Settings ___________________________ -->
 
