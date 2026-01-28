@@ -197,7 +197,7 @@ class StageErect extends BaseStage
 		}
 	}
 
-	function characterChangePost(charExist:String, charNew:String) {
+	override function characterChangePost(charExist:String, charNew:String) {
 		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(charExist);
 
 		if (character.isSpeakerChar && character != null){
