@@ -4650,7 +4650,7 @@ class PlayState extends MusicBeatState
 			case 'phillyerect': hardCodedStage = new PhillyErect();     	      //Week 3 Erect
 			case 'limoerect': hardCodedStage = new LimoErect();		    		  //Week 4 Erect
 			//case 'mallerect': hardCodedStage = new MallErect();		    	  //Week 5 Erect
-			//case 'schoolerect': hardCodedStage = new SchoolErect();			  //Week 6 Erect
+			case 'schoolerect': hardCodedStage = new SchoolErect();			      //Week 6 Erect
 			//case 'schoolevilerect': hardCodedStage = new SchoolEvilErect();	  //Week 6 Erect
 			case 'tankerect': hardCodedStage = new TankErect();				  	  //Week 7 Erect
 			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect(); //Weekend 1 Erect
