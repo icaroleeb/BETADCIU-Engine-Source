@@ -3,11 +3,8 @@ package states.stages;
 import states.stages.objects.*;
 import substates.GameOverSubstate;
 import cutscenes.DialogueBox;
-
 import backend.FunkinSprite;
-
 import shaders.DropShadowShader;
-
 import openfl.utils.Assets as OpenFlAssets;
 
 class SchoolErect extends BaseStage
@@ -101,12 +98,6 @@ class SchoolErect extends BaseStage
 			sprite.updateHitbox();
 		}
 
-		if(ClientPrefs.data.shaders){
-			applyCharacterShader("boyfriend");
-			applyCharacterShader("dad");
-			applyCharacterShader("gf");
-		}
-
 		switch (songName)
 		{
 			case 'senpai':
@@ -123,9 +114,18 @@ class SchoolErect extends BaseStage
 		}
 	}
 
+	override function createPost()
+	{
+		if (ClientPrefs.data.shaders) 
+		{
+			applyCharacterShader("dad");
+			applyCharacterShader("gf");
+			applyCharacterShader("boyfriend");
+		}
+	}
+
 	function applyCharacterShader(char:String):Void
 	{
-		// Apply the shader automatically to each character as it gets added.
 		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
 		
 		var rim = new DropShadowShader();
@@ -140,7 +140,6 @@ class SchoolErect extends BaseStage
 			rim.angle = 90;
 
 			rim.maskThreshold = 1;
-        	rim.useAltMask = true;
 		}
 		else if (character.isSpeakerChar)
 		{
@@ -151,16 +150,14 @@ class SchoolErect extends BaseStage
 			rim.threshold = 0.3;
 			
 			rim.maskThreshold = 1;
-        	rim.useAltMask = true;
 		}
 		else
 		{
 			rim.angle = 90;
 			rim.maskThreshold = 1;
-        	rim.useAltMask = true;
 		}
 
-		var altMaskPath:Dynamic = Paths.image('weeb/erect/masks/' + character.curCharacter + '_mask'); // wont work without dynamic :(
+		var altMaskPath:Dynamic = Paths.image('weeb/erect/masks/' + character.curCharacter + '_mask', "week6"); // wont work without dynamic :(
 
 		#if MODS_ALLOWED
 		if (FileSystem.exists(altMaskPath))
@@ -169,6 +166,7 @@ class SchoolErect extends BaseStage
 		#end
 		{
 			rim.altMaskImage = altMaskPath.bitmap;
+			rim.useAltMask = true;
 		}
 
 		character.shader = rim;
@@ -181,8 +179,8 @@ class SchoolErect extends BaseStage
 
 	// For events
 
-	override function characterChangePost(charExist:String, charNew:String) {
-		applyCharacterShader(charExist);
+	override function characterChangePost(charExist:String, charName:String) {
+		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
 	}
 
 	var doof:DialogueBox = null;

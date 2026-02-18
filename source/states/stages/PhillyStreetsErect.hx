@@ -254,8 +254,11 @@ class PhillyStreetsErect extends BaseStage
 		PlayState.instance.variables.get("stageVariables").set('mist2', mist2);
 		add(mist2);
 
-		if(ClientPrefs.data.shaders)
-			setupCharactersShader();
+		if(ClientPrefs.data.shaders){
+			applyCharacterShader("boyfriend");
+			applyCharacterShader("dad");
+			applyCharacterShader("gf");
+		}
 	}
 
 	override public function destroy():Void {
@@ -337,8 +340,9 @@ class PhillyStreetsErect extends BaseStage
 		PlayState.instance.camGame.filters = filters;
 	}
 
-	function setupCharactersShader()
+	function applyCharacterShader(char:String):Void
 	{
+		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
 		var colorShader = new AdjustColorShader();
 
 		colorShader.hue = -5;
@@ -346,9 +350,7 @@ class PhillyStreetsErect extends BaseStage
 		colorShader.contrast = -25;
 		colorShader.brightness = -20;
 
-		boyfriend.shader = colorShader.shader;
-		dad.shader = colorShader.shader;
-		gf.shader = colorShader.shader;
+		character.shader = colorShader.shader;
 	}
 	
 	var currentNeneState:NeneState2 = STATE_DEFAULT;
@@ -643,5 +645,9 @@ class PhillyStreetsErect extends BaseStage
 					}
 			}
 		}
+	}
+
+	override function characterChangePost(charExist:String, charName:String) {
+		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
 	}
 }

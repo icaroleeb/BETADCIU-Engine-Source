@@ -6,21 +6,23 @@ import substates.GameOverSubstate;
 import cutscenes.DialogueBox;
 import backend.FunkinSprite;
 import shaders.WiggleEffect;
+import shaders.DropShadowShader;
 import openfl.utils.Assets as OpenFlAssets;
+//import openfl.display.BitmapData;
 
-class SchoolEvil extends BaseStage
+class SchoolEvilErect extends BaseStage
 {
 	var pixelPerfectEffectArray:Array<FlxSprite> = []; // long array name lol
 
-	var backTrees:FunkinSprite;
+	var backspikes:FunkinSprite;
 	var school:FunkinSprite;
-	var street:FunkinSprite;
-	var trees:FunkinSprite;
+	var backspike:FunkinSprite;
+	var evilstreet:FunkinSprite;
 
 	var wiggleBack:WiggleEffect;
 	var wiggleSchool:WiggleEffect;
+	var wiggleSpike:WiggleEffect;
 	var wiggleGround:WiggleEffect;
-	var wiggleTrees:WiggleEffect;
 
 	override function create()
 	{
@@ -40,33 +42,32 @@ class SchoolEvil extends BaseStage
 		stageVars.set("solid", solid);
 		add(solid);
 
-		backTrees = FunkinSprite.create(-842, -80, 'weeb/evil/weebBackTrees');
-		backTrees.scrollFactor.set(0.5, 0.5);
-		stageVars.set("backTrees", backTrees);
-		add(backTrees);
-		backTrees.antialiasing = false;
-		pixelPerfectEffectArray.push(backTrees);
+		backspikes = FunkinSprite.create(-842, -180, 'weeb/erect/evil/weebBackSpikes');
+		backspikes.scrollFactor.set(0.5, 0.5);
+		stageVars.set("backspikes", backspikes);
+		add(backspikes);
+		backspikes.antialiasing = false;
+		pixelPerfectEffectArray.push(backspikes);
 
-		school = FunkinSprite.create(-816, -38, 'weeb/evil/weebSchool');
+		school = FunkinSprite.create(-816, -38, 'weeb/erect/evil/weebSchool');
 		school.scrollFactor.set(0.75, 0.75);
 		stageVars.set("school", school);
 		add(school);
 		school.antialiasing = false;
 		pixelPerfectEffectArray.push(school);
 
-		street = FunkinSprite.create(-662, 6, 'weeb/evil/weebStreet');
-		street.scrollFactor.set(0.75, 0.75);
-		stageVars.set("street", street);
-		add(street);
-		street.antialiasing = false;
-		pixelPerfectEffectArray.push(street);
+		backspike = FunkinSprite.create(1416, 464, 'weeb/erect/evil/backSpike');
+		backspike.scrollFactor.set(0.85, 0.85);
+		stageVars.set("backspike", backspike);
+		add(backspike);
+		backspike.antialiasing = false;
+		pixelPerfectEffectArray.push(backspike);
 
-		trees = FunkinSprite.create(-662, 6, 'weeb/evil/weebTrees');
-		trees.scrollFactor.set(0.75, 0.75);
-		stageVars.set("trees", trees);
-		add(trees);
-		trees.antialiasing = false;
-		pixelPerfectEffectArray.push(trees);
+		evilstreet = FunkinSprite.create(-662, 6, 'weeb/erect/evil/weebStreet');
+		stageVars.set("evilstreet", evilstreet);
+		add(evilstreet);
+		evilstreet.antialiasing = false;
+		pixelPerfectEffectArray.push(evilstreet);
 		
 		setDefaultGF('gf-pixel');
 
@@ -106,13 +107,18 @@ class SchoolEvil extends BaseStage
 
 		wiggleBack = new WiggleEffect(2 * 0.8, 4 * 0.4, 0.011, WiggleEffectType.DREAMY);
 		wiggleSchool = new WiggleEffect(2, 4, 0.017, WiggleEffectType.DREAMY);
+		wiggleSpike = new WiggleEffect(2, 4, 0.01, WiggleEffectType.DREAMY);
 		wiggleGround = new WiggleEffect(2, 4, 0.007, WiggleEffectType.DREAMY);
-		wiggleTrees = new WiggleEffect(2, 4, 0.007, WiggleEffectType.DREAMY);
 
-		backTrees.shader = wiggleBack.shader;
 		school.shader = wiggleSchool.shader;
-		street.shader = wiggleGround.shader;
-		trees.shader = wiggleTrees.shader;
+		evilstreet.shader = wiggleGround.shader;
+		backspikes.shader = wiggleBack.shader;
+		backspike.shader = wiggleSpike.shader;
+
+		// characters shaders that don't have in game
+		applyCharacterShader("boyfriend");
+		applyCharacterShader("dad");
+		applyCharacterShader("gf");
 	}
 
 	override function update(elapsed:Float)
@@ -120,7 +126,7 @@ class SchoolEvil extends BaseStage
 		if (wiggleBack != null) wiggleBack.update(elapsed);
 		if (wiggleSchool != null) wiggleSchool.update(elapsed);
 		if (wiggleGround != null) wiggleGround.update(elapsed);
-		if (wiggleTrees != null) wiggleTrees.update(elapsed);
+		if (wiggleSpike != null) wiggleSpike.update(elapsed);
 	}
 
 	// Ghouls event
@@ -260,5 +266,54 @@ class SchoolEvil extends BaseStage
 				});
 			}
 		});
+	}
+
+	function applyCharacterShader(char:String):Void
+	{
+		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
+		
+		var rim = new DropShadowShader();
+		rim.setAdjustColor(-66, -28, 31, -20);
+    	rim.color = 0xFF940226;
+		rim.antialiasAmt = 0;
+		rim.attachedSprite = character;
+		rim.distance = 5;
+
+		if (character.isPlayer)
+		{
+			//rim.color = 0xFF4a0523;
+			rim.angle = 180;
+		    rim.distance = 3;
+		}
+		else if (character.isSpeakerChar)
+		{
+			rim.angle = 180;
+			rim.distance = 3;
+		}
+		else
+		{
+			rim.angle = 90;
+		}
+
+		/*
+		var altMaskPath:Dynamic = Paths.image('weeb/erect/masks/' + character.curCharacter + '_mask', "week6"); // wont work without dynamic :(
+
+		#if MODS_ALLOWED
+		if (FileSystem.exists(altMaskPath))
+		#else
+		if (OpenFlAssets.exists(altMaskPath))
+		#end
+		{
+			rim.altMaskImage = altMaskPath.bitmap;
+			rim.useAltMask = true;
+		}
+		*/
+
+		character.shader = rim;
+
+		character.animation.callback = function(anim, frame, index)
+		{
+			rim.updateFrameInfo(character.frame);
+		};
 	}
 }

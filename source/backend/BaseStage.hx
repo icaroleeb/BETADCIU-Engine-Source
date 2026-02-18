@@ -39,6 +39,10 @@ class BaseStage extends FlxBasic
 	public var boyfriendGroup(get, never):FlxSpriteGroup;
 	public var dadGroup(get, never):FlxSpriteGroup;
 	public var gfGroup(get, never):FlxSpriteGroup;
+	public var modchartCharacters(get, never):Map<String, Character>;
+
+	public var gfSpeed(get, never):Int;
+	public var speedBaseMod(get, never):Int;
 
 	public var unspawnNotes(get, never):Array<Note>;
 	
@@ -162,6 +166,9 @@ class BaseStage extends FlxBasic
 	inline private function get_game() return cast FlxG.state;
 	inline private function get_onPlayState() return (Std.isOfType(FlxG.state, states.PlayState));
 
+	inline private function get_gfSpeed():Int return game.gfSpeed;
+	inline private function get_speedBaseMod():Int return game.speedBaseMod;
+
 	inline private function get_boyfriend():Character return game.boyfriend;
 	inline private function get_dad():Character return game.dad;
 	inline private function get_gf():Character return game.gf;
@@ -169,6 +176,8 @@ class BaseStage extends FlxBasic
 	inline private function get_boyfriendGroup():FlxSpriteGroup return game.boyfriendGroup;
 	inline private function get_dadGroup():FlxSpriteGroup return game.dadGroup;
 	inline private function get_gfGroup():FlxSpriteGroup return game.gfGroup;
+
+	inline private function get_modchartCharacters():Map<String, Character> return game.modchartCharacters;
 
 	inline private function get_unspawnNotes():Array<Note>
 	{

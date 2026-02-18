@@ -7,11 +7,7 @@ class TankErect extends BaseStage
 {
 	var sniper:BGSprite;
 	var guy:BGSprite;
-
-	var bfRim:DropShadowShader;
-	var dadRim:DropShadowShader;
-	var gfRim:DropShadowShader;
-
+	
 	override function create()
 	{
 		if (!PlayState.instance.variables.exists("stageVariables")){
@@ -48,98 +44,99 @@ class TankErect extends BaseStage
 
 		tankBricks.setPosition(445, 774);
 
-		if (ClientPrefs.data.shaders) 
-			setupCharShaders();
+		if (ClientPrefs.data.shaders) {
+			applyCharacterShader("boyfriend");
+			applyCharacterShader("gf");
+			applyCharacterShader("dad");
+		}
 	}
 
-	function setupCharShaders()
+	function applyCharacterShader(char:String)
 	{
-		bfRim = new DropShadowShader();
-		bfRim.setAdjustColor(-46, -38, -25, -20);
-		bfRim.color = 0xFFDFEF3C;
+		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
 
-		dadRim = new DropShadowShader();
-		dadRim.setAdjustColor(-46, -38, -25, -20);
-		dadRim.color = 0xFFDFEF3C;
+		var charRim = new DropShadowShader();
+		charRim.setAdjustColor(-46, -38, -25, -20);
+		charRim.color = 0xFFDFEF3C;
+		character.shader = charRim;
+		charRim.attachedSprite = character;
 
-		gfRim = new DropShadowShader();
-		gfRim.setAdjustColor(-46, -38, -25, -20);
-		gfRim.color = 0xFFDFEF3C;
-
-		dad.shader = dadRim;
-		gf.shader = gfRim;
-		boyfriend.shader = bfRim;
-
-		bfRim.attachedSprite = boyfriend;
-		gfRim.attachedSprite = gf;
-		dadRim.attachedSprite = dad;
-
-		// bf
-		bfRim.angle = 90;
-
-		// gf
-		gfRim.angle = 90;
-		gfRim.maskThreshold = 0.4;
-        gfRim.useAltMask = true;
-
-		// dad
-		if (dad.curCharacter == "tankman")
-			dadRim.angle = 135;
+		if (character.isPlayer)
+		{
+			charRim.angle = 90;
+		}
+		else if (character.isSpeakerChar)
+		{
+			charRim.angle = 90;
+			charRim.maskThreshold = 0.4;
+		}
 		else
-			dadRim.angle = 25;
-
-        dadRim.threshold = 0.3;
-
-		boyfriend.animation.callback = function(anim, frame, index)
 		{
-			bfRim.updateFrameInfo(boyfriend.frame);
-		};
+			if (character.curCharacter == "tankman")
+				charRim.angle = 135;
+			else
+				charRim.angle = 25;
 
-		dad.animation.callback = function(anim, frame, index)
-		{
-			dadRim.updateFrameInfo(dad.frame);
-		};
+			charRim.threshold = 0.3;
+		}
 
-		gf.animation.callback = function(anim, frame, index)
+		var altMaskPath:Dynamic = Paths.image('erect/masks/' + character.curCharacter + '_mask', "week7"); // wont work without dynamic :(
+
+		#if MODS_ALLOWED
+		if (FileSystem.exists(altMaskPath))
+		#else
+		if (OpenFlAssets.exists(altMaskPath))
+		#end
 		{
-			gfRim.updateFrameInfo(gf.frame);
+			charRim.altMaskImage = altMaskPath.bitmap;
+			charRim.useAltMask = true;
+		}
+
+		character.animation.callback = function(anim, frame, index)
+		{
+			charRim.updateFrameInfo(character.frame);
 		};
 	}
+
+	override function countdownTick(count:Countdown, num:Int)
+	{
+		if (sniper != null) 
+			sniper.animation.play('Tankmanidlebaked instance 1', true);
+
+		if (guy != null) 
+			guy.animation.play('BLTank2 instance 1', true);
+	}
+
+	var sniperSpecialAnim:Bool = true;
+	var sniperSipTimer:FlxTimer = null;
 
 	override function beatHit()
 	{
-		if (sniper != null) 
-			sniper.animation.play('Tankmanidlebaked instance 1');
+		if (curBeat % (gfSpeed * speedBaseMod) == 0)
+		{
+			if (sniper != null && sniperSpecialAnim) 
+				sniper.animation.play('Tankmanidlebaked instance 1', true);
 
-		if (guy != null) 
-			guy.animation.play('BLTank2 instance 1');
+			if (guy != null) 
+				guy.animation.play('BLTank2 instance 1', true);
+		}
 
-		if (FlxG.random.bool(2))
-			sniper.animation.play('tanksippingBaked instance 1');
+		if (sniper != null && FlxG.random.bool(2)){
+			sniper.animation.play('tanksippingBaked instance 1', true);
+			sniperSpecialAnim = false;
+			
+			new FlxTimer().start(sniper.animation.curAnim.numFrames / 24, function(tmr:FlxTimer)
+			{
+				sniperSpecialAnim = true;
+			});
+		}
 	}
 
-	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
-	{
-		switch(eventName)
-		{
-			case "Change Character":
-				if (ClientPrefs.data.shaders){
-					var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(value1);
+	override function characterChangePost(charExist:String, charNew:String) {
+		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
+	}
 
-					/*
-					if (character != null && character.isSpeakerChar){
-						character.shader = gfRim;
-						return;
-					}
-					*/
-
-					if (character != null){
-						if(character.isPlayer)
-							character.shader = bfRim;
-						else 
-							character.shader = dadRim;
-					}
-				}
-		}
+	override public function destroy():Void{
+		super.destroy();
 	}
 }

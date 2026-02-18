@@ -89,7 +89,7 @@ function onEvent(n, v1, v2, v3){
         abotViz.shader = gf.shader;
 
         if (game.gf.curCharacter == 'nene'){
-            onDestroy();
+            //onDestroy();
 
             insert(members.indexOf(game.gf) - 1, stereoBG);
 

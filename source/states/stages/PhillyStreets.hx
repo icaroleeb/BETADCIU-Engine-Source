@@ -58,6 +58,7 @@ class PhillyStreets extends BaseStage
 			solid.scrollFactor.set();
 			stageVars.set('solid', solid);
 			add(solid);
+			darkenable.push(solid);
 
 			scrollingSky = new FlxTiledSprite(Paths.image('phillyStreets/phillySkybox'), 2922, 718, true, false);
 			scrollingSky.antialiasing = ClientPrefs.data.antialiasing;

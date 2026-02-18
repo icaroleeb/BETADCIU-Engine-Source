@@ -198,7 +198,7 @@ class Limo extends BaseStage
 
 	override function beatHit()
 	{
-		if(!ClientPrefs.data.lowQuality) {
+		if(!ClientPrefs.data.lowQuality && curBeat % (gfSpeed * speedBaseMod) == 0) {
 			grpLimoDancers.forEach(function(dancer:BackgroundDancer)
 			{
 				dancer.dance();

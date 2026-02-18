@@ -167,6 +167,9 @@
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED" version="1.2.4"/>
 	<haxelib name="flxanimate"/>
 
+	<!--stuff from V-Slice-->
+	<haxelib name="extension-haptics" if="FEATURE_HAPTICS"/>
+
 	<!-- Disable Discord IO Thread -->
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />

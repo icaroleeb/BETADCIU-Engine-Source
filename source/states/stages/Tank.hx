@@ -159,7 +159,12 @@ class Tank extends BaseStage
 	}
 
 	override function countdownTick(count:Countdown, num:Int) if(num % 2 == 0) everyoneDance();
-	override function beatHit() everyoneDance();
+	
+	override function beatHit()
+	{ 
+		if (curBeat % (gfSpeed * speedBaseMod) == 0) everyoneDance();
+	}
+
 	function everyoneDance()
 	{
 		if(!ClientPrefs.data.lowQuality) tankWatchtower.dance();

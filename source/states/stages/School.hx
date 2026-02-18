@@ -126,7 +126,7 @@ class School extends BaseStage
 
 	override function beatHit()
 	{
-		if(bgGirls != null) bgGirls.dance();
+		if(bgGirls != null && curBeat % (gfSpeed * speedBaseMod) == 0) bgGirls.dance();
 	}
 
 	// For events

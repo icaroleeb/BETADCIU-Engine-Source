@@ -88,33 +88,39 @@ class StageErect extends BaseStage
 		add(lightAbove);
 
 		if(ClientPrefs.data.shaders)
-			setupCharsShaders();
+			applyCharacterShader("boyfriend");
+			applyCharacterShader("dad");
+			applyCharacterShader("gf");
 	}
 
-	function setupCharsShaders()
+	function applyCharacterShader(char:String)
 	{
-		colorShaderBf = new AdjustColorShader();
-		colorShaderDad = new AdjustColorShader();
-		colorShaderGf = new AdjustColorShader();
+		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
+		var colorShader = new AdjustColorShader();
 
-		colorShaderBf.brightness = -23;
-		colorShaderBf.hue = 12;
-		colorShaderBf.contrast = 7;
-		colorShaderBf.saturation = 0;
+		if (character.isPlayer)
+		{
+			colorShader.brightness = -23;
+			colorShader.hue = 12;
+			colorShader.contrast = 7;
+			colorShader.saturation = 0;
+		}
+		else if (character.isSpeakerChar)
+		{
+			colorShader.brightness = -30;
+			colorShader.hue = -9;
+			colorShader.contrast = -4;
+			colorShader.saturation = 0;
+		}
+		else
+		{
+			colorShader.brightness = -33;
+			colorShader.hue = -32;
+			colorShader.contrast = -23;
+			colorShader.saturation = 0;
+		}
 
-		colorShaderGf.brightness = -30;
-		colorShaderGf.hue = -9;
-		colorShaderGf.contrast = -4;
-		colorShaderGf.saturation = 0;
-
-		colorShaderDad.brightness = -33;
-		colorShaderDad.hue = -32;
-		colorShaderDad.contrast = -23;
-		colorShaderDad.saturation = 0;
-
-		boyfriend.shader = colorShaderBf.shader;
-		dad.shader = colorShaderDad.shader;
-		gf.shader = colorShaderGf.shader;
+		character.shader = colorShader.shader;
 	}
 
 	override function eventPushed(event:objects.Note.EventNote)
@@ -178,52 +184,14 @@ class StageErect extends BaseStage
 						defaultCamZoom -= 0.12;
 						FlxTween.tween(dadbattleFog, {alpha: 0}, 0.7, {onComplete: function(twn:FlxTween) dadbattleFog.visible = false});
 				}
-			/*
-			case "Change Character":
-				var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(value1);
-
-				if (character != null && character.isSpeakerChar){
-					character.shader = colorShaderGf.shader;
-					return;
-				}
-
-				if (character != null && character == null){
-					if (character.isPlayer)
-						character.shader = colorShaderBf.shader;
-					else 
-						character.shader = colorShaderDad.shader;
-				}
-			*/
 		}
 	}
 
 	override function characterChangePost(charExist:String, charNew:String) {
-		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(charExist);
-
-		if (character.isSpeakerChar && character != null){
-			character.shader = colorShaderGf.shader;
-			return;
-		}
-
-		if (character != null && character == null){
-			if (character.isPlayer)
-				character.shader = colorShaderBf.shader;
-			else 
-				character.shader = colorShaderDad.shader;
-		}
+		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
 	}
 
 	override public function destroy():Void {
-		if (boyfriend.shader != null){
-			boyfriend.shader = null;
-		}
-		if (dad.shader != null){
-			dad.shader = null;
-		}
-		if (gf.shader != null){
-			gf.shader = null;
-		}
-
 		super.destroy();
 	}
 }

@@ -209,6 +209,8 @@ class Character extends OffsettableSprite
 			isPsychPlayer = json.isPlayerChar || json.is_player_char;
 		}
 
+		if (json.isCharSpeaker) isSpeakerChar = json.isCharSpeaker;
+
 		#if flxanimate
 		var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
 		if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind))
@@ -264,7 +266,6 @@ class Character extends OffsettableSprite
 		vocalsFile = json.vocals_file != null ? json.vocals_file : '';
 		originalFlipX = (json.flip_x == true);
 		editorIsPlayer = json._editor_isPlayer;
-		isSpeakerChar = json.isCharSpeaker;
 
 		var colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
 		var colorPreCut = colorPreString.toHexString();

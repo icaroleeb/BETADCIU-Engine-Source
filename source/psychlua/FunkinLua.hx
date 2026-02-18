@@ -1705,6 +1705,9 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "changeCharacter", function(tag:String, character:String, ?flipped:Bool = false) {
+			//game.stagesFunc(function(stage:BaseStage) stage.characterChange(tag, character)); // putting this beacuse of the function lua
+			//game.callOnScripts('onCharacterChange', [tag, character]);
+
 			switch(tag.toLowerCase().trim()) {
 				case 'gf' | 'girlfriend' | "2":
 					if (flipped == null) flipped = game.gf.flipMode;
@@ -1719,8 +1722,12 @@ class FunkinLua {
 					var shit:Character = game.modchartCharacters.get(tag);
 					if (flipped == null && shit != null) shit.flipMode = flipped;
 					if(shit != null) makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
-					else luaTrace("changeCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);		
+					else luaTrace("changeCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);
+					
 			}
+
+			//game.stagesFunc(function(stage:BaseStage) stage.characterChangePost(tag, character)); // putting this beacuse of the characters shaders including the function lua
+			//game.callOnScripts('onCharacterChangePost', [tag, character]);
 		});
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
 			if(scriptType.toLowerCase() == "stage" || scriptType.toLowerCase() == "stagecamera") 

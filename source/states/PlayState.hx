@@ -219,6 +219,7 @@ class PlayState extends MusicBeatState
 	private var curSong:String = "";
 
 	public var gfSpeed:Int = 1;
+	public var speedBaseMod:Int = 1;
 	public var health(default, set):Float = 1;
 	public var combo:Int = 0;
 
@@ -461,7 +462,7 @@ class PlayState extends MusicBeatState
 			camPos.y += gf.getGraphicMidpoint().y + gf.cameraPosition[1];
 		}
 
-		if(dad.curCharacter.startsWith('gf')) {
+		if(dad.curCharacter.startsWith('gf') || dad.curCharacter.endsWith('speaker') || dad.isSpeakerChar) {
 			dad.setPosition(GF_X, GF_Y);
 			if(gf != null)
 				gf.visible = false;
@@ -605,6 +606,13 @@ class PlayState extends MusicBeatState
 		#end
 		noteTypes = null;
 		eventsPushed = null;
+
+		var scriptSuffix:String = null;
+
+		if (isBETADCIU)
+			scriptSuffix = "-betadciu";
+		else if (isBonus)
+			scriptSuffix = "-bonus";
 
 		// SONG SPECIFIC SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -927,7 +935,7 @@ class PlayState extends MusicBeatState
 		} else if (char == dad){
 			char.setPosition(DAD_X + dad.positionArray[0], DAD_Y + dad.positionArray[1]);
 
-			if(dad.curCharacter.startsWith('gf')) {
+			if(dad.curCharacter.startsWith('gf') || dad.curCharacter.endsWith('speaker') || dad.isSpeakerChar) {
 				dad.setPosition(GF_X + dad.positionArray[0], GF_Y + dad.positionArray[1]);
 				if(gf != null)
 					gf.visible = false;
@@ -1690,6 +1698,7 @@ class PlayState extends MusicBeatState
 				stagesToLoad.push(event.value1); // stage preloading
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
+		callOnScripts('onEventPushedUnique', [event.event, event.value1 != null ? event.value1 : '', event.value2 != null ? event.value2 : '', event.value3 != null ? event.value3 : '', event.strumTime]);
 	}
 
 	function eventEarlyTrigger(event:EventNote):Float {
@@ -2357,7 +2366,7 @@ class PlayState extends MusicBeatState
 				if(flValue2 == null || flValue2 <= 0) flValue2 = 0.6;
 
 				if(value != 0) {
-					if(dad.curCharacter.startsWith('gf')) { //Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
+					if(dad.curCharacter.startsWith('gf') || dad.curCharacter.endsWith('speaker') || dad.isSpeakerChar) { //Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
 						dad.playAnim('cheer', true);
 						dad.specialAnim = true;
 						dad.heyTimer = flValue2;
@@ -4600,6 +4609,8 @@ class PlayState extends MusicBeatState
 		removeObjects(stageData, isCreate);
 
 		if (hardCodedStage != null) {
+			stages = [];
+
 			hardCodedStage.destroy();
 			hardCodedStage = null;
 		}
@@ -4632,6 +4643,7 @@ class PlayState extends MusicBeatState
 
 	public function addStage(?onlyLuas:Bool=false, ?isCreate:Bool=false) {
 		if(!isCreate) setStageDetails(stageData); // for some reason they don't add the chars position on them.
+
 		switch (curStage.toLowerCase())
 		{
 			case 'stage': hardCodedStage = new StageWeek1(); 					  //Week 1
@@ -4646,12 +4658,12 @@ class PlayState extends MusicBeatState
 			case 'phillystreets': hardCodedStage = new PhillyStreets(); 		  //Weekend 1 - Darnell, Lit Up, 2Hot
 			case 'phillyblazin': hardCodedStage = new PhillyBlazin();			  //Weekend 1 - Blazin
 			case 'stageerect': hardCodedStage = new StageErect();	    		  //Week 1 Erect
-			//case 'spookyerect': hardCodedStage = new SpookyErect();     		  //Week 2 Erect
+			case 'spookyerect': hardCodedStage = new SpookyErect();     		  //Week 2 Erect
 			case 'phillyerect': hardCodedStage = new PhillyErect();     	      //Week 3 Erect
 			case 'limoerect': hardCodedStage = new LimoErect();		    		  //Week 4 Erect
-			//case 'mallerect': hardCodedStage = new MallErect();		    	  //Week 5 Erect
+			case 'mallerect': hardCodedStage = new MallErect();					  //Week 5 Erect
 			case 'schoolerect': hardCodedStage = new SchoolErect();			      //Week 6 Erect
-			//case 'schoolevilerect': hardCodedStage = new SchoolEvilErect();	  //Week 6 Erect
+			case 'schoolevilerect': hardCodedStage = new SchoolEvilErect();		  //Week 6 Erect
 			case 'tankerect': hardCodedStage = new TankErect();				  	  //Week 7 Erect
 			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect(); //Weekend 1 Erect
 		}
@@ -4664,7 +4676,8 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(!isCreate){
+		if(!isCreate)
+		{
 			stagesFunc(function(stage:BaseStage) stage.createPost());
 			callLuaFile('stages/' + curStage + '.lua', "onCreatePost");
 			callHScriptFile('stages/' + curStage + '.hx', "onCreatePost");

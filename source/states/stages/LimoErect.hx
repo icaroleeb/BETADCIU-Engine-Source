@@ -297,7 +297,7 @@ class LimoErect extends BaseStage
 
 	override function beatHit()
 	{
-		if(!ClientPrefs.data.lowQuality) {
+		if(!ClientPrefs.data.lowQuality && curBeat % (gfSpeed * speedBaseMod) == 0) {
 			grpLimoDancers.forEach(function(dancer:BackgroundDancer)
 			{
 				dancer.dance();
@@ -334,6 +334,7 @@ class LimoErect extends BaseStage
 		{
 			case "Kill Henchmen":
 				killHenchmen();
+			/*
 			case "Change Character":
 				if (ClientPrefs.data.shaders){
 					var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(value1);
@@ -342,6 +343,17 @@ class LimoErect extends BaseStage
 						character.shader = colorShader.shader;
 					}
 				}
+			*/
+		}
+	}
+
+	override function characterChangePost(charExist:String, charNew:String) {
+		if (ClientPrefs.data.shaders){
+			var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(charExist);
+
+			if (character != null){
+				character.shader = colorShader.shader;
+			}
 		}
 	}
 

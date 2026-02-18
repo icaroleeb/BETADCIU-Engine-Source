@@ -190,6 +190,20 @@ class HScript extends Iris
 			MusicBeatState.getVariables().set(name, value);
 			return value;
 		});
+		set('getVar', function(name:String) {
+			var result:Dynamic = null;
+			if(MusicBeatState.getVariables().exists(name)) result = MusicBeatState.getVariables().get(name);
+			return result;
+		});
+		set('removeVar', function(name:String)
+		{
+			if(MusicBeatState.getVariables().exists(name))
+			{
+				MusicBeatState.getVariables().remove(name);
+				return true;
+			}
+			return false;
+		});
 		set('setStageVar', function(name:String, value:Dynamic) {
 			if (!PlayState.instance.variables.exists("stageVariables")){
 				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
@@ -207,16 +221,15 @@ class HScript extends Iris
 			if(PlayState.instance.variables.get("stageVariables").exists(name)) result = PlayState.instance.variables.get("stageVariables").get(name);
 			return result;
 		});
-		set('getVar', function(name:String) {
-			var result:Dynamic = null;
-			if(MusicBeatState.getVariables().exists(name)) result = MusicBeatState.getVariables().get(name);
-			return result;
-		});
-		set('removeVar', function(name:String)
+		set('removeStageVar', function(name:String)
 		{
-			if(MusicBeatState.getVariables().exists(name))
+			if (!PlayState.instance.variables.exists("stageVariables")){
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+			}
+
+			if(PlayState.instance.variables.get("stageVariables").exists(name))
 			{
-				MusicBeatState.getVariables().remove(name);
+				PlayState.instance.variables.get("stageVariables").remove(name);
 				return true;
 			}
 			return false;

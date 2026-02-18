@@ -1,8 +1,9 @@
 package states.stages;
 
 import states.stages.objects.*;
+import shaders.AdjustColorShader;
 
-class Mall extends BaseStage
+class MallErect extends BaseStage
 {
 	var upperBoppers:BGSprite;
 	var bottomBoppers:MallCrowd;
@@ -15,36 +16,42 @@ class Mall extends BaseStage
 		}
 		var stageVars = PlayState.instance.variables.get("stageVariables");
 
-		var bg:BGSprite = new BGSprite('christmas/bgWalls', -630, -492, 0.2, 0.2);
-		bg.setGraphicSize(Std.int(bg.width * 0.8));
-		bg.updateHitbox();
-		stageVars.set("bg", bg);
-		add(bg);
+		var bgWalls:BGSprite = new BGSprite('christmas/erect/bgWalls', -726, -566, 0.2, 0.2);
+		bgWalls.setGraphicSize(Std.int(bgWalls.width * 0.9));
+		bgWalls.updateHitbox();
+		stageVars.set("bgWalls", bgWalls);
+		add(bgWalls);
 
 		if(!ClientPrefs.data.lowQuality) {
-			upperBoppers = new BGSprite('christmas/upperBop', -396, -98, 0.28, 0.28, ['Upper Crowd Bob']);
+			upperBoppers = new BGSprite('christmas/erect/upperBop', -374, -98, 0.28, 0.28, ['upperBop']);
 			upperBoppers.setGraphicSize(Std.int(upperBoppers.width * 0.85));
 			upperBoppers.updateHitbox();
 			stageVars.set("upperBoppers", upperBoppers);
 			add(upperBoppers);
 
-			var bgEscalator:BGSprite = new BGSprite('christmas/bgEscalator', -1100, -540, 0.3, 0.3);
+			var bgEscalator:BGSprite = new BGSprite('christmas/erect/bgEscalator', -1100, -540, 0.3, 0.3);
 			bgEscalator.setGraphicSize(Std.int(bgEscalator.width * 0.9));
 			bgEscalator.updateHitbox();
 			stageVars.set("bgEscalator", bgEscalator);
 			add(bgEscalator);
 		}
 
-		var tree:BGSprite = new BGSprite('christmas/christmasTree', 370, -250, 0.4, 0.4);
-		stageVars.set("tree", tree);
-		add(tree);
+		var christmasTree:BGSprite = new BGSprite('christmas/erect/christmasTree', 370, -250, 0.4, 0.4);
+		stageVars.set("christmasTree", christmasTree);
+		add(christmasTree);
 
-		bottomBoppers = new MallCrowd(-300, 120);
+		var fog:BGSprite = new BGSprite('christmas/erect/white', -1000, 100, 0.85, 0.85);
+		fog.setGraphicSize(Std.int(fog.width * 0.9));
+		fog.updateHitbox();
+		stageVars.set("fog", fog);
+		add(fog);
+
+		bottomBoppers = new MallCrowd(-410, 100, 'christmas/erect/bottomBop', 'bottomBop');
 		bottomBoppers.scrollFactor.set(0.9, 0.9);
 		stageVars.set("bottomBoppers", bottomBoppers);
 		add(bottomBoppers);
 
-		var snowUnder:FlxSprite = new FlxSprite(-1200, 800).makeGraphic(5400, 3000, 0xFFF3F4F5);
+		var snowUnder:FlxSprite = new FlxSprite(-1500, 800).makeGraphic(5700, 3000, 0xFFF3F4F5);
 		stageVars.set("snowUnder", snowUnder);
 		add(snowUnder);
 
@@ -64,6 +71,22 @@ class Mall extends BaseStage
 		santa = new BGSprite('christmas/santa', -840, 150, 1, 1, ['santa idle in fear']);
 		PlayState.instance.variables.get("stageVariables").set("santa", santa);
 		add(santa);
+
+		if (ClientPrefs.data.shaders)
+		{
+			applyCharacterShader("boyfriend");
+			applyCharacterShader("dad");
+			applyCharacterShader("gf");
+
+			if (santa != null) {
+				var santaSolorShader = new AdjustColorShader();
+
+				santaSolorShader.hue = 5;
+				santaSolorShader.saturation = 20;
+
+				santa.shader = santaSolorShader.shader;
+			}
+		}
 	}
 
 	override function countdownTick(count:Countdown, num:Int) everyoneDance();
@@ -76,6 +99,7 @@ class Mall extends BaseStage
 	{
 		switch(eventName)
 		{
+			/*
 			case "Hey!":
 				switch(value1.toLowerCase().trim()) {
 					case 'bf' | 'boyfriend' | '0':
@@ -83,6 +107,7 @@ class Mall extends BaseStage
 				}
 				bottomBoppers.animation.play('hey', true);
 				bottomBoppers.heyTimer = flValue2;
+			*/
 		}
 	}
 
@@ -123,5 +148,20 @@ class Mall extends BaseStage
 			});
 		}
 		else endSong();
+	}
+
+	override function characterChangePost(charExist:String, charNew:String) {
+		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
+	}
+
+	function applyCharacterShader(char:String)
+	{
+		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
+		var colorShader = new AdjustColorShader();
+
+		colorShader.hue = 5;
+    	colorShader.saturation = 20;
+
+		character.shader = colorShader.shader;
 	}
 }
