@@ -5,7 +5,7 @@ import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
-import flixel.group.FlxTypedSpriteGroup;
+import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.math.FlxPoint;
 
 /**
@@ -14,7 +14,7 @@ import flixel.math.FlxPoint;
  * fighting games..
  * (ignore the fact that this isnt true perspective :sob: just a very cheap imitiation)
  */
-class PerspectiveSprite extends FlxTypedSpriteGroup
+class PerspectiveSprite extends FlxTypedSpriteGroup<FlxSprite>
 {
     public var sprite:FlxSkewedSprite;
 
@@ -106,9 +106,11 @@ class PerspectiveSprite extends FlxTypedSpriteGroup
         sprite.y = correctedBottom.y - sprite.height;
     }
 
+    /*
     override public function isOnScreen(camera:FlxCamera):Bool
     {
         // Turns out skewing an image like crazy fucks up its rendering... oops!
         return true;
     }
+    */
 }

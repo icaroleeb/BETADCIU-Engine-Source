@@ -578,7 +578,7 @@ class PlayState extends MusicBeatState
 
 		add(uiGroup); // leaving the ui group for scripts
 
-		var objects:Array<String> = ['healthBar', 'iconP1', 'iconP2', 'scoreTxt', 'timeBar', 'timeBarBG', 'timeTxt'];
+		var objects:Array<String> = ['healthBar', 'iconP1', 'iconP2', 'scoreTxt', 'timeBar', 'timeTxt'];
 		for (i in 0... objects.length) {
 			var obj:FlxSprite = Reflect.getProperty(PlayState.instance, objects[i]);
 			if (obj != null) obj.cameras = [camHUD];
@@ -1460,10 +1460,27 @@ class PlayState extends MusicBeatState
 		{
 			if (songData.needsVoices)
 			{
+				var voiceStatePostfix:String = "";
+
+				if (isBETADCIU)
+					voiceStatePostfix = '-betadciu';
+				else if (isBonus)
+					voiceStatePostfix = '-bonus';
+
+				var voiceStateFinal = voiceStatePostfix.toLowerCase();
+
 				var playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
+
+				if (FileSystem.exists(playerVocals + voiceStateFinal))
+					playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile + voiceStateFinal);
+					
 				vocals.loadEmbedded(playerVocals != null ? playerVocals : Paths.voices(songData.song));
 				
 				var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
+
+				if (FileSystem.exists(oppVocals + voiceStateFinal))
+					oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile + voiceStateFinal);
+
 				if(oppVocals != null && oppVocals.length > 0) opponentVocals.loadEmbedded(oppVocals);
 			}
 		}
@@ -4666,6 +4683,7 @@ class PlayState extends MusicBeatState
 			case 'schoolevilerect': hardCodedStage = new SchoolEvilErect();		  //Week 6 Erect
 			case 'tankerect': hardCodedStage = new TankErect();				  	  //Week 7 Erect
 			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect(); //Weekend 1 Erect
+			case 'sserafim': hardCodedStage = new Sserafim(); // SPAGHETTI
 		}
 
 		addObjects(stageData, isCreate);
