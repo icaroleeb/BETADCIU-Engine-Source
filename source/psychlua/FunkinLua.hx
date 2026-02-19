@@ -42,6 +42,7 @@ import psychlua.HScript;
 #end
 import psychlua.DebugLuaText;
 import psychlua.ModchartSprite;
+import psychlua.ModchartAnimateSprite;
 
 import shaders.*; // prob moving the ColorSwap functions to the ShaderFunctions.hx file later
 
@@ -1811,7 +1812,7 @@ class FunkinLua {
 
 		Lua_helper.add_callback(lua, "luaSpriteExists", function(tag:String) {
 			var obj:FlxSprite = MusicBeatState.getVariables().get(tag);
-			return (obj != null && (Std.isOfType(obj, ModchartSprite) || Std.isOfType(obj, ModchartAnimateSprite) || Std.isOfType(obj, FlxBackdrop)));
+			return (obj != null && (Std.isOfType(obj, ModchartSprite) || Std.isOfType(obj, FlxBackdrop)));
 		});
 		Lua_helper.add_callback(lua, "luaCharacterExists", function(tag:String) {
 			return (game.modchartCharacters.exists(tag));
@@ -2396,7 +2397,7 @@ class FunkinLua {
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 		#if TRANSLATIONS_ALLOWED Language.addLuaCallbacks(lua); #end
 		HScript.implement(this);
-		#if flxanimate FlxAnimateFunctions.implement(this); #end
+		FlxAnimateFunctions.implement(this);
 		ReflectionFunctions.implement(this);
 		TextFunctions.implement(this);
 		TweenFunctions.implement(this);
@@ -2759,8 +2760,8 @@ class FunkinLua {
 
 			if (daChar.isAnimateAtlas){
 				if (daChar.getAnimationName().startsWith('sing')) {
-					animationName = Std.string(daChar.atlas.anim.curInstance);
-					animationFrame = Std.int(daChar.atlas.anim.curFrame);
+					animationName = Std.string(daChar.animation.curAnim.name);
+					animationFrame = Std.int(daChar.animation.curAnim.curFrame);
 				}
 			} else {
 				if (daChar.animation.curAnim.name.startsWith('sing')) {
@@ -2827,8 +2828,8 @@ class FunkinLua {
 		try {
 			if (PlayState.instance.boyfriend.isAnimateAtlas){
 				if (PlayState.instance.boyfriend.getAnimationName().startsWith('sing')) {
-					animationName = Std.string(PlayState.instance.boyfriend.atlas.anim.curInstance);
-					animationFrame = Std.int(PlayState.instance.boyfriend.atlas.anim.curFrame);
+					animationName = Std.string(PlayState.instance.boyfriend.animation.curAnim.name);
+					animationFrame = Std.int(PlayState.instance.boyfriend.animation.curAnim.curFrame);
 				}
 			} else {
 				if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing')) {
@@ -2841,7 +2842,6 @@ class FunkinLua {
 		}
 		
 		PlayState.instance.stopCharacterScripts(PlayState.instance.boyfriend.curCharacter);
-		PlayState.instance.boyfriend.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend.destroy();
 		PlayState.instance.boyfriend = new Character(0, 0, id, !flipped);
@@ -2890,8 +2890,8 @@ class FunkinLua {
 		try {
 			if (PlayState.instance.dad.isAnimateAtlas){
 				if (PlayState.instance.dad.getAnimationName().startsWith('sing')) {
-					animationName = Std.string(PlayState.instance.dad.atlas.anim.curInstance);
-					animationFrame = Std.int(PlayState.instance.dad.atlas.anim.curFrame);
+					animationName = Std.string(PlayState.instance.dad.animation.curAnim.name);
+					animationFrame = Std.int(PlayState.instance.dad.animation.curAnim.curFrame);
 				}
 			} else {
 				if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing')) {
@@ -2904,7 +2904,6 @@ class FunkinLua {
 		}
 
 		PlayState.instance.stopCharacterScripts(PlayState.instance.dad.curCharacter);
-		PlayState.instance.dad.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.dad);
 		PlayState.instance.dad.destroy();
 		PlayState.instance.dad = new Character(0, 0, id, flipped);
@@ -2956,8 +2955,8 @@ class FunkinLua {
 		try {
 			if (PlayState.instance.gf.isAnimateAtlas){
 				if (PlayState.instance.gf.getAnimationName().startsWith('sing')) {
-					animationName = Std.string(PlayState.instance.gf.atlas.anim.curInstance);
-					animationFrame = Std.int(PlayState.instance.gf.atlas.anim.curFrame);
+					animationName = Std.string(PlayState.instance.gf.animation.curAnim.name);
+					animationFrame = Std.int(PlayState.instance.gf.animation.curAnim.curFrame);
 				}
 			} else {
 				if (PlayState.instance.gf.animation.curAnim.name.startsWith('sing')) {
@@ -2970,7 +2969,6 @@ class FunkinLua {
 		}
 
 		PlayState.instance.stopCharacterScripts(PlayState.instance.gf.curCharacter);
-		PlayState.instance.gf.destroyAtlas();
 		PlayState.instance.remove(PlayState.instance.gf);
 		PlayState.instance.gf.destroy();
 		PlayState.instance.gf = new Character(0, 0, id, flipped);

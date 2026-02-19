@@ -1,8 +1,9 @@
 package psychlua;
 
 import openfl.utils.Assets;
+import psychlua.LuaUtils;
 
-#if (LUA_ALLOWED && flxanimate)
+#if (LUA_ALLOWED)
 class FlxAnimateFunctions
 {
 	public static function implement(funk:FunkinLua)
@@ -19,7 +20,10 @@ class FlxAnimateFunctions
 			}
 
 			var mySprite:ModchartAnimateSprite = new ModchartAnimateSprite(x, y);
-			if(loadFolder != null) Paths.loadAnimateAtlas(mySprite, loadFolder);
+			if(loadFolder != null && loadFolder.length > 0)
+			{
+				LuaUtils.loadFrames(mySprite, loadFolder, 'animateatlas');
+			}
 
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, mySprite);
@@ -37,29 +41,32 @@ class FlxAnimateFunctions
 			mySprite.active = true;
 		});
 
-		Lua_helper.add_callback(lua, "loadAnimateAtlas", function(tag:String, folderOrImg:String, ?spriteJson:String = null, ?animationJson:String = null) {
-			var spr:FlxAnimate = MusicBeatState.getVariables().get(tag);
-			if(spr != null) Paths.loadAnimateAtlas(spr, folderOrImg, spriteJson, animationJson);
+		Lua_helper.add_callback(lua, "loadAnimateAtlas", function(tag:String, loadFolder:String) {
+			var spr:ModchartAnimateSprite = MusicBeatState.getVariables().get(tag);
+			if(loadFolder != null && loadFolder.length > 0)
+			{
+				LuaUtils.loadFrames(spr, loadFolder, 'animateatlas');
+			}
 		});
 		
-		Lua_helper.add_callback(lua, "addAnimationBySymbol", function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0)
+		Lua_helper.add_callback(lua, "addAnimationBySymbol", function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false)
 		{
-			var obj:FlxAnimate = cast MusicBeatState.getVariables().get(tag);
+			var obj:ModchartAnimateSprite = cast MusicBeatState.getVariables().get(tag);
 			if(obj == null) return false;
 
-			obj.anim.addBySymbol(name, symbol, framerate, loop, matX, matY);
-			if(obj.anim.curSymbol == null)
-			{
-				var obj2:ModchartAnimateSprite = cast (obj, ModchartAnimateSprite);
-				if(obj2 != null) obj2.playAnim(name, true); //is ModchartAnimateSprite
-				else obj.anim.play(name, true);
-			}
+			obj.anim.addBySymbol(name, symbol, framerate, loop);
+			// if(obj.anim.curSymbol == null)
+			// {
+			// 	var obj2:ModchartAnimateSprite = cast (obj, ModchartAnimateSprite);
+			// 	if(obj2 != null) obj2.playAnim(name, true); //is ModchartAnimateSprite
+			// 	else obj.anim.play(name, true);
+			// }
 			return true;
 		});
 
-		Lua_helper.add_callback(lua, "addAnimationBySymbolIndices", function(tag:String, name:String, symbol:String, ?indices:Any = null, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0)
+		Lua_helper.add_callback(lua, "addAnimationBySymbolIndices", function(tag:String, name:String, symbol:String, ?indices:Any = null, ?framerate:Float = 24, ?loop:Bool = false)
 		{
-			var obj:FlxAnimate = cast MusicBeatState.getVariables().get(tag);
+			var obj:ModchartAnimateSprite = cast MusicBeatState.getVariables().get(tag);
 			if(obj == null) return false;
 
 			if(indices == null)
@@ -74,13 +81,13 @@ class FlxAnimateFunctions
 				indices = myIndices;
 			}
 
-			obj.anim.addBySymbolIndices(name, symbol, indices, framerate, loop, matX, matY);
-			if(obj.anim.curSymbol == null)
-			{
-				var obj2:ModchartAnimateSprite = cast (obj, ModchartAnimateSprite);
-				if(obj2 != null) obj2.playAnim(name, true); //is ModchartAnimateSprite
-				else obj.anim.play(name, true);
-			}
+			obj.anim.addBySymbolIndices(name, symbol, indices, framerate, loop);
+			// if(obj.anim.curSymbol == null)
+			// {
+			// 	var obj2:ModchartAnimateSprite = cast (obj, ModchartAnimateSprite);
+			// 	if(obj2 != null) obj2.playAnim(name, true); //is ModchartAnimateSprite
+			// 	else obj.anim.play(name, true);
+			// }
 			return true;
 		});
 	}

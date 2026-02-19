@@ -1,8 +1,10 @@
 package objects;
 
+import animate.FlxAnimate;
+
 // Just so I don't need to copy paste these functions every time I need to add offsets to anything
 
-class OffsettableSprite extends FlxSprite{
+class OffsettableSprite extends FlxAnimate {
     public var animOffsets:Map<String, Array<Dynamic>> = new Map<String, Array<Dynamic>>();
 	public var animPlayerOffsets:Map<String, Array<Dynamic>> = new Map<String, Array<Dynamic>>();
 
