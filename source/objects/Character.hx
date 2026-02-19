@@ -104,8 +104,6 @@ class Character extends OffsettableSprite
 	{
 		super(x, y);
 
-		animation = new PsychAnimationController(this);
-
 		animOffsets = new Map<String, Array<Dynamic>>();
 		animPlayerOffsets = new Map<String, Array<Dynamic>>();
 		iconColor = isPlayer ? 'FF66FF33' : 'FFFF0000';
@@ -207,11 +205,9 @@ class Character extends OffsettableSprite
 			isPsychPlayer = json.isPlayerChar || json.is_player_char;
 		}
 
-		#if flxanimate
 		var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
 		if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind))
 			isAnimateAtlas = true;
-		#end
 
 		scale.set(1, 1);
 		updateHitbox();
@@ -220,14 +216,11 @@ class Character extends OffsettableSprite
 		{
 			frames = Paths.getMultiAtlas(json.image.split(','));
 		}
-		#if flxanimate
 		else
 		{
-			atlas = new FlxAnimate();
-			atlas.showPivot = false;
 			try
 			{
-				Paths.loadAnimateAtlas(atlas, json.image);
+				frames = Paths.getAnimateAtlas(json.image);
 			}
 			catch(e:haxe.Exception)
 			{
@@ -235,7 +228,6 @@ class Character extends OffsettableSprite
 				trace(e.stack);
 			}
 		}
-		#end
 
 		imageFile = json.image;
 		jsonScale = json.scale;
@@ -275,12 +267,12 @@ class Character extends OffsettableSprite
 		var itHasPlayerOfs:Bool = false;
 		animationsArray = json.animations;
 		if(animationsArray != null && animationsArray.length > 0) {
-			for (anim in animationsArray) {
-				var animAnim:String = '' + anim.anim;
-				var animName:String = '' + anim.name;
-				var animFps:Int = anim.fps;
-				var animLoop:Bool = !!anim.loop; //Bruh
-				var animIndices:Array<Int> = anim.indices;
+			for (a in animationsArray) {
+				var animAnim:String = '' + a.anim;
+				var animName:String = '' + a.name;
+				var animFps:Int = a.fps;
+				var animLoop:Bool = !!a.loop; //Bruh
+				var animIndices:Array<Int> = a.indices;
 
 				if(!isAnimateAtlas)
 				{
@@ -289,20 +281,19 @@ class Character extends OffsettableSprite
 					else
 						animation.addByPrefix(animAnim, animName, animFps, animLoop);
 				}
-				#if flxanimate
 				else
 				{
 					if(animIndices != null && animIndices.length > 0)
-						atlas.anim.addBySymbolIndices(animAnim, animName, animIndices, animFps, animLoop);
+						this.anim.addBySymbolIndices(animAnim, animName, animIndices, animFps, animLoop);
 					else
-						atlas.anim.addBySymbol(animAnim, animName, animFps, animLoop);
-				}
-				#end
+						this.anim.addBySymbol(animAnim, animName, animFps, animLoop);
 
-				var offsets:Array<Int> = anim.offsets;
-				var playerOffsets:Array<Int> = (anim.playerOffsets != null && anim.playerOffsets.length > 1)
-					? anim.playerOffsets
-					: anim.offsets;
+				}
+
+				var offsets:Array<Int> = a.offsets;
+				var playerOffsets:Array<Int> = (a.playerOffsets != null && a.playerOffsets.length > 1)
+					? a.playerOffsets
+					: a.offsets;
 				var swagOffsets:Array<Int> = offsets;
 
 				if (isPlayer && playerOffsets != null && playerOffsets.length > 1){
@@ -310,11 +301,11 @@ class Character extends OffsettableSprite
 					swagOffsets = playerOffsets;
 				}
 				
-				if(swagOffsets != null && anim.offsets.length > 1) addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-				else addOffset(anim.anim, 0, 0);
+				if(swagOffsets != null && a.offsets.length > 1) addOffset(a.anim, swagOffsets[0], swagOffsets[1]);
+				else addOffset(a.anim, 0, 0);
 
-				if(playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(anim.anim, playerOffsets[0], playerOffsets[1]);
-				else addPlayerOffset(anim.anim, 0, 0);
+				if(playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(a.anim, playerOffsets[0], playerOffsets[1]);
+				else addPlayerOffset(a.anim, 0, 0);
 			}
 
 			if (isPlayer) {
@@ -330,17 +321,12 @@ class Character extends OffsettableSprite
 
 			if (isPlayer && !curCharacter.startsWith('bf') && !itHasPlayerOfs) flipAnims(); // fuck it.
 		}
-		#if flxanimate
-		if(isAnimateAtlas) copyAtlasValues();
-		#end
 		//trace('Loaded file to character ' + curCharacter);
 	}
 
 	override function update(elapsed:Float)
 	{
-		if(isAnimateAtlas) atlas.update(elapsed);
-
-		if(debugMode || (!isAnimateAtlas && animation.curAnim == null) || (isAnimateAtlas && (atlas.anim.curInstance == null || atlas.anim.curSymbol == null)))
+		if(debugMode || (animation.curAnim == null))
 		{
 			super.update(elapsed);
 			return;
@@ -405,7 +391,7 @@ class Character extends OffsettableSprite
 
 	inline public function isAnimationNull():Bool
 	{
-		return !isAnimateAtlas ? (animation.curAnim == null) : (atlas.anim.curInstance == null || atlas.anim.curSymbol == null);
+		return (animation.curAnim == null);
 	}
 
 	var _lastPlayedAnimation:String;
@@ -417,37 +403,101 @@ class Character extends OffsettableSprite
 	public function isAnimationFinished():Bool
 	{
 		if(isAnimationNull()) return false;
-		return !isAnimateAtlas ? animation.curAnim.finished : atlas.anim.finished;
+		return animation.curAnim.finished;
 	}
 
 	public function finishAnimation():Void
 	{
 		if(isAnimationNull()) return;
 
-		if(!isAnimateAtlas) animation.curAnim.finish();
-		else atlas.anim.curFrame = atlas.anim.length - 1;
+		animation.curAnim.finish();
 	}
 
-	public function hasAnimation(anim:String):Bool
+	public function hasAnimation(id:String):Bool
 	{
-		return animOffsets.exists(anim);
+		var animationList:Array<String> = this.animation?.getNameList() ?? [];
+		if (animationList.contains(id))
+		{
+			return true;
+		}
+		else if (this.isAnimate && !animationList.contains(id))
+		{
+			return addAnimationIfMissing(id);
+		}
+
+		return false;
+	}
+
+	public function listAnimations():Array<String>
+	{
+		var frameLabels:Array<String> = getFrameLabelList();
+		var animationList:Array<String> = this.animation?.getNameList() ?? [];
+
+		return frameLabels.concat(animationList);
+	}
+
+	public function getFrameLabelList():Array<String>
+	{
+		if (!this.isAnimate)
+		{
+			trace('WARNING: getFrameLabelList() only works texture atlases!');
+			return [];
+		}
+
+		var foundLabels:Array<String> = [];
+		var mainTimeline:Null<animate.internal.Timeline> = this.library.timeline;
+
+		//trace('Checking for frame labels in the animate atlas...');
+
+		for (layer in mainTimeline.layers)
+		{
+			@:nullSafety(Off)
+			for (frame in layer.frames)
+			{
+					if (frame.name.rtrim() != '')
+					{
+						foundLabels.push(frame.name);
+					}
+			}
+		}
+
+		//trace(foundLabels.length > 0 ? 'Found frame labels: ' + foundLabels.join(', ') : 'No frame labels found.');
+
+		return foundLabels;
+	}
+
+	function addAnimationIfMissing(id:String):Bool
+	{
+		@:privateAccess
+		var symbols:Array<String> = [for (key in this.library.dictionary.keys()) key];
+		var frameLabels:Array<String> = listAnimations();
+
+		if (frameLabels.contains(id))
+		{
+			// Animation exists as a frame label but wasn't added, so we add it
+			anim.addByFrameLabel(id, id, this.library.frameRate, false);
+			return true;
+		}
+		else if (symbols.contains(id))
+		{
+			// Animation exists as a symbol but wasn't added, so we add it
+			anim.addBySymbol(id, id, this.library.frameRate, false);
+			return true;
+		}
+
+		return false;
 	}
 
 	public var animPaused(get, set):Bool;
 	private function get_animPaused():Bool
 	{
 		if(isAnimationNull()) return false;
-		return !isAnimateAtlas ? animation.curAnim.paused : atlas.anim.isPlaying;
+		return animation.curAnim.paused;
 	}
 	private function set_animPaused(value:Bool):Bool
 	{
 		if(isAnimationNull()) return value;
-		if(!isAnimateAtlas) animation.curAnim.paused = value;
-		else
-		{
-			if(value) atlas.pauseAnimation();
-			else atlas.resumeAnimation();
-		}
+		animation.curAnim.paused = value;
 
 		return value;
 	}
@@ -494,14 +544,9 @@ class Character extends OffsettableSprite
 			useFallbackMiss = true;
 		}
 
-		if(!isAnimateAtlas){
-			animation.play(AnimName, Force, Reversed, Frame);
-		}
-		else
-		{
-			atlas.anim.play(AnimName, Force, Reversed, Frame);
-			atlas.update(0);
-		}
+		//trace(anim.exists(AnimName));
+
+		animation.play(AnimName, Force, Reversed, Frame);
 		_lastPlayedAnimation = AnimName;
 
 		if (hasAnimation(AnimName))
@@ -625,8 +670,6 @@ class Character extends OffsettableSprite
 	// special thanks ne_eo for the references, you're the goat!!
 	@:allow(states.editors.CharacterEditorState)
 	public var isAnimateAtlas(default, null):Bool = false;
-	#if flxanimate
-	public var atlas:FlxAnimate;
 	public override function draw()
 	{
 		var lastAlpha:Float = alpha;
@@ -637,23 +680,23 @@ class Character extends OffsettableSprite
 			color = FlxColor.BLACK;
 		}
 
-		if(isAnimateAtlas)
-		{
-			if(atlas.anim.curInstance != null)
-			{
-				copyAtlasValues();
-				atlas.draw();
-				alpha = lastAlpha;
-				color = lastColor;
-				if(missingCharacter && visible)
-				{
-					missingText.x = getMidpoint().x - 150;
-					missingText.y = getMidpoint().y - 10;
-					missingText.draw();
-				}
-			}
-			return;
-		}
+		// if(isAnimateAtlas)
+		// {
+		// 	if(atlas.anim.curInstance != null)
+		// 	{
+		// 		copyAtlasValues();
+		// 		atlas.draw();
+		// 		alpha = lastAlpha;
+		// 		color = lastColor;
+		// 		if(missingCharacter && visible)
+		// 		{
+		// 			missingText.x = getMidpoint().x - 150;
+		// 			missingText.y = getMidpoint().y - 10;
+		// 			missingText.draw();
+		// 		}
+		// 	}
+		// 	return;
+		// }
 		super.draw();
 		if(missingCharacter && visible)
 		{
@@ -666,42 +709,40 @@ class Character extends OffsettableSprite
 		}
 	}
 
-	public function copyAtlasValues()
-	{
-		@:privateAccess
-		{
-			atlas.cameras = cameras;
-			atlas.scrollFactor = scrollFactor;
-			atlas.scale = scale;
-			atlas.offset = offset;
-			atlas.origin = origin;
-			atlas.x = x;
-			atlas.y = y;
-			atlas.angle = angle;
-			atlas.alpha = alpha;
-			atlas.visible = visible;
-			atlas.flipX = flipX;
-			atlas.flipY = flipY;
-			atlas.shader = shader;
-			atlas.antialiasing = antialiasing;
-			atlas.colorTransform = colorTransform;
-			atlas.color = color;
-		}
-	}
+	// public function copyAtlasValues()
+	// {
+	// 	@:privateAccess
+	// 	{
+	// 		atlas.cameras = cameras;
+	// 		atlas.scrollFactor = scrollFactor;
+	// 		atlas.scale = scale;
+	// 		atlas.offset = offset;
+	// 		atlas.origin = origin;
+	// 		atlas.x = x;
+	// 		atlas.y = y;
+	// 		atlas.angle = angle;
+	// 		atlas.alpha = alpha;
+	// 		atlas.visible = visible;
+	// 		atlas.flipX = flipX;
+	// 		atlas.flipY = flipY;
+	// 		atlas.shader = shader;
+	// 		atlas.antialiasing = antialiasing;
+	// 		atlas.colorTransform = colorTransform;
+	// 		atlas.color = color;
+	// 	}
+	// }
 
 	public override function destroy()
 	{
 		if (missingText != null) missingText.visible = false; // this should fix some weird bugs when a character is missing
-		destroyAtlas();
 		super.destroy();
 	}
 
-	public function destroyAtlas()
-	{
-		if (atlas != null)
-			atlas = FlxDestroyUtil.destroy(atlas);
-	}	
-	#end
+	// public function destroyAtlas()
+	// {
+	// 	if (atlas != null)
+	// 		atlas = FlxDestroyUtil.destroy(atlas);
+	// }	
 
 	// Character Perfect Pixel Effect
 

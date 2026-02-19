@@ -12,6 +12,7 @@ import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
 import openfl.system.System;
 import openfl.geom.Rectangle;
+import animate.FlxAnimateFrames;
 
 import lime.utils.Assets;
 import flash.media.Sound;
@@ -511,6 +512,36 @@ class Paths
 		#end
 	}
 
+	public static function getAnimateAtlas(key:String, ?library:String, ?settings:FlxAnimateSettings):FlxAnimateFrames
+	{
+		var assetLibrary:String = library ?? "";
+		var graphicKey:String = "";
+
+		if (assetLibrary != "")
+		{
+			graphicKey = modsAnimateAtlas(key);
+		}
+		else
+		{
+			graphicKey = modsAnimateAtlas(key);
+		}
+
+		var validatedSettings:FlxAnimateSettings =
+			{
+			swfMode: settings?.swfMode ?? false,
+			cacheOnLoad: settings?.cacheOnLoad ?? false,
+			filterQuality: settings?.filterQuality ?? MEDIUM,
+			onSymbolCreate: settings?.onSymbolCreate ?? null,
+			};
+		// Validate asset path.
+		if (!FileSystem.exists('${graphicKey}/Animation.json'))
+		{
+			throw 'No Animation.json file exists at the specified path (${graphicKey})';
+		}
+
+		return FlxAnimateFrames.fromAnimate(graphicKey);
+	}
+
 	inline static public function formatToSongPath(path:String) {
 		final invalidChars = ~/[~&;:<>#\s]/g;
 		final hideChars = ~/[.,'"%?!]/g;
@@ -557,6 +588,9 @@ class Paths
 
 	inline static public function modsVideo(key:String)
 		return modFolders('videos/' + key + '.' + VIDEO_EXT);
+
+	inline static public function modsAnimateAtlas(key:String)
+		return modFolders('images/' + key);
 
 	inline static public function modsSounds(path:String, key:String)
 		return modFolders(path + '/' + key + '.' + SOUND_EXT);
@@ -606,74 +640,74 @@ class Paths
 	}
 	#end
 
-	#if flxanimate
-	public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)
-	{
-		var changedAnimJson = false;
-		var changedAtlasJson = false;
-		var changedImage = false;
+	// #if flxanimate
+	// public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)
+	// {
+	// 	var changedAnimJson = false;
+	// 	var changedAtlasJson = false;
+	// 	var changedImage = false;
 		
-		if(spriteJson != null)
-		{
-			changedAtlasJson = true;
-			spriteJson = File.getContent(spriteJson);
-		}
+	// 	if(spriteJson != null)
+	// 	{
+	// 		changedAtlasJson = true;
+	// 		spriteJson = File.getContent(spriteJson);
+	// 	}
 
-		if(animationJson != null) 
-		{
-			changedAnimJson = true;
-			animationJson = File.getContent(animationJson);
-		}
+	// 	if(animationJson != null) 
+	// 	{
+	// 		changedAnimJson = true;
+	// 		animationJson = File.getContent(animationJson);
+	// 	}
 
-		// is folder or image path
-		if(Std.isOfType(folderOrImg, String))
-		{
-			var originalPath:String = folderOrImg;
-			for (i in 0...10)
-			{
-				var st:String = '$i';
-				if(i == 0) st = '';
+	// 	// is folder or image path
+	// 	if(Std.isOfType(folderOrImg, String))
+	// 	{
+	// 		var originalPath:String = folderOrImg;
+	// 		for (i in 0...10)
+	// 		{
+	// 			var st:String = '$i';
+	// 			if(i == 0) st = '';
 
-				if(!changedAtlasJson)
-				{
-					spriteJson = getTextFromFile('images/$originalPath/spritemap$st.json');
-					if(spriteJson != null)
-					{
-						//trace('found Sprite Json');
-						changedImage = true;
-						changedAtlasJson = true;
-						folderOrImg = image('$originalPath/spritemap$st');
-						break;
-					}
-				}
-				else if(fileExists('images/$originalPath/spritemap$st.png', IMAGE))
-				{
-					//trace('found Sprite PNG');
-					changedImage = true;
-					folderOrImg = image('$originalPath/spritemap$st');
-					break;
-				}
-			}
+	// 			if(!changedAtlasJson)
+	// 			{
+	// 				spriteJson = getTextFromFile('images/$originalPath/spritemap$st.json');
+	// 				if(spriteJson != null)
+	// 				{
+	// 					//trace('found Sprite Json');
+	// 					changedImage = true;
+	// 					changedAtlasJson = true;
+	// 					folderOrImg = image('$originalPath/spritemap$st');
+	// 					break;
+	// 				}
+	// 			}
+	// 			else if(fileExists('images/$originalPath/spritemap$st.png', IMAGE))
+	// 			{
+	// 				//trace('found Sprite PNG');
+	// 				changedImage = true;
+	// 				folderOrImg = image('$originalPath/spritemap$st');
+	// 				break;
+	// 			}
+	// 		}
 
-			if(!changedImage)
-			{
-				//trace('Changing folderOrImg to FlxGraphic');
-				changedImage = true;
-				folderOrImg = image(originalPath);
-			}
+	// 		if(!changedImage)
+	// 		{
+	// 			//trace('Changing folderOrImg to FlxGraphic');
+	// 			changedImage = true;
+	// 			folderOrImg = image(originalPath);
+	// 		}
 
-			if(!changedAnimJson)
-			{
-				//trace('found Animation Json');
-				changedAnimJson = true;
-				animationJson = getTextFromFile('images/$originalPath/Animation.json');
-			}
-		}
+	// 		if(!changedAnimJson)
+	// 		{
+	// 			//trace('found Animation Json');
+	// 			changedAnimJson = true;
+	// 			animationJson = getTextFromFile('images/$originalPath/Animation.json');
+	// 		}
+	// 	}
 
-		//trace(folderOrImg);
-		//trace(spriteJson);
-		//trace(animationJson);
-		spr.loadAtlasEx(folderOrImg, spriteJson, animationJson);
-	}
-	#end
+	// 	//trace(folderOrImg);
+	// 	//trace(spriteJson);
+	// 	//trace(animationJson);
+	// 	spr.loadAtlasEx(folderOrImg, spriteJson, animationJson);
+	// }
+	// #end
 }
