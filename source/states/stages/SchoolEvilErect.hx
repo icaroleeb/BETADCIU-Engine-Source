@@ -295,8 +295,7 @@ class SchoolEvilErect extends BaseStage
 			rim.angle = 90;
 		}
 
-		/*
-		var altMaskPath:Dynamic = Paths.image('weeb/erect/masks/' + character.curCharacter + '_mask', "week6"); // wont work without dynamic :(
+		var altMaskPath:Dynamic = Paths.image('weeb/erect/masks/' + character.curCharacter + '_mask', "week6");
 
 		#if MODS_ALLOWED
 		if (FileSystem.exists(altMaskPath))
@@ -304,10 +303,9 @@ class SchoolEvilErect extends BaseStage
 		if (OpenFlAssets.exists(altMaskPath))
 		#end
 		{
-			rim.altMaskImage = altMaskPath.bitmap;
+			rim.altMaskImage = Paths.image('weeb/erect/masks/' + character.curCharacter + '_mask', "week6").bitmap;
 			rim.useAltMask = true;
 		}
-		*/
 
 		character.shader = rim;
 

@@ -4244,8 +4244,9 @@ class PlayState extends MusicBeatState
 		var stagesPreloaded:Bool = false; // because this is looping for some reason?
 
 		for(stage in stagesToLoad){ // loading stages without the multithread because it didn't worked that well with it
-		var ogStage:String =  "";
-		if (curStage != null) ogStage = curStage;
+			var ogStage:String =  "";
+			if (curStage != null) ogStage = curStage;
+
 			if (!stagesPreloaded) {
 				for (stage in stagesToLoad) {
 					removeStage(true);
@@ -4563,7 +4564,7 @@ class PlayState extends MusicBeatState
 		return stageData;
 	}
 
-	public function removeObjects(stageData:StageFile, isCreate:Bool=false){
+	public function removeObjects(stageData:StageFile, preload:Bool=false){
 		// if you comment out the else part, the stage loads fine but character layers and positions are messed up.
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
@@ -4581,13 +4582,13 @@ class PlayState extends MusicBeatState
 			remove(boyfriend);
 		}
 
-		if (ClientPrefs.data.comboCam == "Game" && !isCreate) // this should help for base stages
-			remove(comboGroup);
+		// this should help for base stages
+		if (ClientPrefs.data.comboCam == "Game" && !preload) remove(comboGroup);
 	}
 
 	public var gfOldChar:String = '';
 
-	public function addObjects(stageData:StageFile, ?isCreate:Bool=false){
+	public function addObjects(stageData:StageFile, ?preload:Bool=false){
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
 			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
@@ -4615,19 +4616,18 @@ class PlayState extends MusicBeatState
 			boyfriend.pixelPerfectRender = stageData.isPixelStage;
 		}
 
-		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
+		if(!preload && ClientPrefs.data.comboCam == "Game") add(comboGroup);
 	}
 
 	public var hardCodedStage:BaseStage;
+	//public var hardCodedStagePreload:BaseStage;
 	public var addedStages:Array<String> = [];
 	public var addedStagesHScript:Array<String> = [];
 
-	public function removeStage(?isCreate:Bool=false) {
-		removeObjects(stageData, isCreate);
+	public function removeStage(?preload:Bool=false) {
+		removeObjects(stageData, preload);
 
 		if (hardCodedStage != null) {
-			stages = [];
-
 			hardCodedStage.destroy();
 			hardCodedStage = null;
 		}
@@ -4658,8 +4658,9 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function addStage(?onlyLuas:Bool=false, ?isCreate:Bool=false) {
-		if(!isCreate) setStageDetails(stageData); // for some reason they don't add the chars position on them.
+	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) {
+		if(!preload) 
+			setStageDetails(stageData); // for some reason they don't add the chars position on them.
 
 		switch (curStage.toLowerCase())
 		{
@@ -4683,10 +4684,10 @@ class PlayState extends MusicBeatState
 			case 'schoolevilerect': hardCodedStage = new SchoolEvilErect();		  //Week 6 Erect
 			case 'tankerect': hardCodedStage = new TankErect();				  	  //Week 7 Erect
 			case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect(); //Weekend 1 Erect
-			case 'sserafim': hardCodedStage = new Sserafim(); // SPAGHETTI
+			case 'sserafim': hardCodedStage = new Sserafim(); 					  //SPAGHETTI
 		}
 
-		addObjects(stageData, isCreate);
+		addObjects(stageData, preload);
 
 		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -4694,8 +4695,7 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(!isCreate)
-		{
+		if(!preload){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
 			callLuaFile('stages/' + curStage + '.lua', "onCreatePost");
 			callHScriptFile('stages/' + curStage + '.hx', "onCreatePost");

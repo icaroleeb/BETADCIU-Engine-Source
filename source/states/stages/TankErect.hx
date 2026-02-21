@@ -80,7 +80,7 @@ class TankErect extends BaseStage
 			charRim.threshold = 0.3;
 		}
 
-		var altMaskPath:Dynamic = Paths.image('erect/masks/' + character.curCharacter + '_mask', "week7"); // wont work without dynamic :(
+		var altMaskPath:Dynamic = Paths.image('erect/masks/' + character.curCharacter + '_mask', "week7");
 
 		#if MODS_ALLOWED
 		if (FileSystem.exists(altMaskPath))
@@ -88,7 +88,7 @@ class TankErect extends BaseStage
 		if (OpenFlAssets.exists(altMaskPath))
 		#end
 		{
-			charRim.altMaskImage = altMaskPath.bitmap;
+			charRim.altMaskImage = Paths.image('erect/masks/' + character.curCharacter + '_mask', "week7").bitmap;
 			charRim.useAltMask = true;
 		}
 

@@ -5,22 +5,42 @@ import states.stages.objects.PerspectiveSprite;
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxAxes;
 
+import shaders.SserafimShader;
+
 class Sserafim extends BaseStage
 {
+    var baseVisible:Array<Bool> = [true, false, false, false, false, false];
+    var baseSinging:Array<Bool> = [false, false, false, false, false, false];
+
     var perspectiveFloor:PerspectiveSprite = null;
+
+    var truckDoor:BGSprite;
+    var backLightColor:BGSprite;
+    var backLightWhite:BGSprite;
+
+    var characterShader:SserafimShader;
+    var stageShader:SserafimShader;
+
+    var SEEYOU1:FlxSprite;
+    var SEEYOU2:FlxSprite;
 
 	override function create()
     {
+        stageShader = new SserafimShader();
+
         if (!PlayState.instance.variables.exists("stageVariables")){
 			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
 		}
 		var stageVars = PlayState.instance.variables.get("stageVariables");
+
+        var spritesShader:Array<Dynamic> = [];
 
         var solid:FlxSprite = new FlxSprite(-5000, -3000).makeGraphic(4000, 3000, 0xFFFFFFFF);
         solid.updateHitbox();
         solid.scrollFactor.set();
         stageVars.set('solid', solid);
         add(solid);
+        spritesShader.push(solid);
 
         var solidCover:FlxSprite = new FlxSprite(-5000, -3000).makeGraphic(4000, 3000, 0xFF000000);
         solidCover.updateHitbox();
@@ -32,11 +52,13 @@ class Sserafim extends BaseStage
         var bg:BGSprite = new BGSprite('bg', -1853, -815, 0.75, 0.75);
         stageVars.set('bg', bg);
         add(bg);
+        spritesShader.push(bg);
 
         var fucker:BGSprite = new BGSprite('floor', 790, 625, 0.85, 0.85);
         fucker.alpha = 0.0;
         stageVars.set('fucker', fucker);
         add(fucker);
+        spritesShader.push(fucker);
 
         perspectiveFloor = new PerspectiveSprite();
         perspectiveFloor.sprite.loadGraphic(Paths.image('floor'));
@@ -44,42 +66,52 @@ class Sserafim extends BaseStage
         perspectiveFloor.setScrollFactors(1.05, 1.05, 0.93, 0.93);
         stageVars.set("perspectiveFloor", perspectiveFloor);
         add(perspectiveFloor);
+        spritesShader.push(perspectiveFloor.sprite);
 
         var backTables:BGSprite = new BGSprite('back-tables', -1857, 267, 0.93, 0.93);
         stageVars.set('backTables', backTables);
         add(backTables);
+        spritesShader.push(backTables);
 
         var backTablesCutscene:BGSprite = new BGSprite('cutscene/counter-stretch', -1858, 377, 0.93, 0.93);
         backTablesCutscene.scale.set(400, 1);
         backTablesCutscene.updateHitbox();
         stageVars.set('backTablesCutscene', backTablesCutscene);
         add(backTablesCutscene);
+        spritesShader.push(backTablesCutscene);
 
         var burgerCutscene:BGSprite = new BGSprite('cutscene/burger-cutscene', -97, 237, 0.93, 0.93);
         stageVars.set('burgerCutscene', burgerCutscene);
         add(burgerCutscene);
+        spritesShader.push(burgerCutscene);
 
         var backStools:BGSprite = new BGSprite('cutscene/back-stools', -1357, 426, 0.94, 0.94);
         stageVars.set('backStools', backStools);
         add(backStools);
+        spritesShader.push(backStools);
 
-        var backLightColor:BGSprite = new BGSprite('lights/back-light-color', -1241, -949, 0.93, 0.93);
+        backLightColor = new BGSprite('lights/back-light-color', -1241, -949, 0.93, 0.93);
         backLightColor.alpha = 0.0;
-        stageVars.set('backStools', backStools);
+        backLightColor.blend = SCREEN;
+        backLightColor.color = 0xFFCC3300;
+        stageVars.set('backLightColor', backLightColor);
         add(backLightColor);
 
-        var backLightWhite:BGSprite = new BGSprite('lights/back-light-white', -771, -599, 0.93, 0.93);
+        backLightWhite = new BGSprite('lights/back-light-white', -771, -599, 0.93, 0.93);
         backLightWhite.alpha = 0.0;
+        backLightWhite.blend = ADD;
         stageVars.set('backLightWhite', backLightWhite);
         add(backLightWhite);
 
         var truck:BGSprite = new BGSprite('truck-stuff', -983, -707, 0.95, 0.95);
         stageVars.set('truck', truck);
         add(truck);
+        spritesShader.push(truck);
 
-        var truckDoor:BGSprite = new BGSprite('truck-door', -980, -173, 0.95, 0.95);
+        truckDoor = new BGSprite('truck-door', -980, -173, 0.95, 0.95);
         stageVars.set('truckDoor', truckDoor);
         add(truckDoor);
+        spritesShader.push(truckDoor);
 
         var truckLight2:BGSprite = new BGSprite('lights/truck-light2', -781, -464, 0.95, 0.95);
         truckLight2.alpha = 0.0;
@@ -88,12 +120,17 @@ class Sserafim extends BaseStage
 
         var truckLight1:BGSprite = new BGSprite('lights/truck-light1', -962, -607, 0.95, 0.95);
         truckLight1.alpha = 0.0;
+        truckLight1.blend = SCREEN;
         stageVars.set('truckLight1', truckLight1);
         add(truckLight1);
 
         var frontStool:BGSprite = new BGSprite('front-stool', -280, 818, 1.0, 1.0);
         stageVars.set('frontStool', frontStool);
         add(frontStool);
+        spritesShader.push(frontStool);
+
+        for (stageSprites in spritesShader)
+            stageSprites = stageShader;
     }
 
     var dust1:FlxBackdrop;
@@ -102,6 +139,8 @@ class Sserafim extends BaseStage
     var dust4:FlxBackdrop;
 
     override function createPost(){
+        characterShader = new SserafimShader(true);
+
         dust1 = new FlxBackdrop(Paths.image('dust/dustMid'), FlxAxes.X);
         dust1.setPosition(-650, -200);
         dust1.scrollFactor.set(1.1, 1.1);
@@ -143,6 +182,11 @@ class Sserafim extends BaseStage
         dust2.color = 0xff8b6c63;
         dust3.color = 0xff6e645c;
         dust4.color = 0xff886a60;
+
+        dust1.alpha = 0;
+        dust2.alpha = 0;
+        dust3.alpha = 0;
+        dust4.alpha = 0;
     }
 
     override function update(elapsed:Float)
@@ -150,10 +194,17 @@ class Sserafim extends BaseStage
         if(perspectiveFloor != null) perspectiveFloor.updateSkew(game.camGame);
     }
 
+    override function beatHit()
+    {
+        // flash lights behind truck
+        if (lightsEnabled) flashBackLight(lightsIntensities[curBeat % lightsIntensities.length], lightsDurations[curBeat % lightsDurations.length],
+            lightsColors[curBeat % lightsColors.length]);
+    }
+
     /*
     override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
     {
-        switch (scriptEvent.eventData.eventKind)
+        switch (eventName)
         {
             case 'sserafimGuitarVibration':
                 HapticUtil.increasingVibrate(Constants.MIN_VIBRATION_AMPLITUDE, Constants.MAX_VIBRATION_AMPLITUDE / 2, scriptEvent.eventData.getFloat('duration'));
@@ -225,8 +276,53 @@ class Sserafim extends BaseStage
     }
     */
 
+    var lightsColors:Array<FlxColor> = [];
+    var lightsDurations:Array<Float> = [];
+    var lightsIntensities:Array<Float> = [];
+    var lightsEnabled:Bool = false;
+
+    function setLightState(enabled:Bool = false, ?colors:Array<String>, ?durations:Array<Float>, ?intensities:Array<Float>)
+    {
+        lightsEnabled = enabled;
+        if (colors == null || durations == null || intensities == null) return;
+
+        lightsColors = [for (i in 0...colors.length) FlxColor.fromString(colors[i])];
+        lightsDurations = durations;
+        lightsIntensities = intensities;
+    }
+
+    function flashBackLight(amount:Float, duration:Float, color:FlxColor)
+    {
+        FlxTween.cancelTweensOf(backLightColor);
+        FlxTween.cancelTweensOf(backLightWhite);
+
+        backLightColor.color = color;
+
+        backLightColor.alpha = amount * 0.8;
+        backLightWhite.alpha = amount * 0.7;
+
+        characterShader.pulseLightColor = color;
+        stageShader.pulseLightColor = color;
+
+        characterShader.pulseLightStrength = backLightColor.alpha;
+        stageShader.pulseLightStrength = backLightColor.alpha;
+
+        FlxTween.tween(backLightColor, {alpha: 0}, duration,
+        {
+        ease: FlxEase.cubeInOut,
+        onUpdate: function(tween:FlxTween) {
+            characterShader.pulseLightStrength = backLightColor.alpha;
+            stageShader.pulseLightStrength = backLightColor.alpha;
+        },
+        onComplete: function(tween:FlxTween) {
+            characterShader.pulseLightStrength = 0;
+            stageShader.pulseLightStrength = 0;
+        }
+        });
+        FlxTween.tween(backLightWhite, {alpha: 0}, duration, {ease: FlxEase.cubeInOut});
+    }
+
     function startClear():Void{
-        /*
         FlxTween.tween(stageShader,
         {
             baseBrightness: 0,
@@ -241,7 +337,6 @@ class Sserafim extends BaseStage
             baseContrast: 0,
             baseSaturation: 0
         }, 6.0 * 4, {ease: FlxEase.sineOut});
-        */
 
         FlxTween.tween(dust1, {alpha: 0, y: dust1.y + 100}, 5.0 * 4, {ease: FlxEase.sineOut});
         FlxTween.tween(dust2, {alpha: 0, y: dust2.y + 200}, 4.0 * 4, {ease: FlxEase.sineOut});
@@ -252,6 +347,44 @@ class Sserafim extends BaseStage
         FlxTween.tween(dust2.velocity, {x: 0}, 4.0 * 4, {ease: FlxEase.sineOut});
         FlxTween.tween(dust3.velocity, {x: 0}, 6.0 * 4, {ease: FlxEase.sineOut});
         FlxTween.tween(dust4.velocity, {x: 0}, 4.0 * 4, {ease: FlxEase.sineOut});
+    }
+
+    function resetClear():Void
+    {
+        truckDoor.visible = false;
+
+        var spriteTweens:Array<Dynamic> = [stageShader, characterShader, dust1, dust2, dust3, dust4];
+
+        for (thing in spriteTweens)
+        {
+            FlxTween.cancelTweensOf(thing);
+        }
+
+        var spriteDusts:Array<FlxBackdrop> = [dust1, dust2, dust3, dust4];
+
+        for(dusts in spriteDusts)
+        {
+            dusts.velocity.x = 0;
+            dusts.velocity.y = 0;
+        }
+
+        stageShader.setAdjustColor(-24, 6, -26, -74);
+        characterShader.setAdjustColor(-24, 6, -26, -74);
+
+        dust1.setPosition(-650, -400);
+        dust2.setPosition(-650, -450);
+        dust3.setPosition(-650, -600);
+        dust4.setPosition(-650, -1500);
+
+        dust1.velocity.x = 350;
+        dust2.velocity.x = -300;
+        dust3.velocity.x = -200;
+        dust4.velocity.x = -150;
+
+        dust1.alpha = 1;
+        dust2.alpha = 1;
+        dust3.alpha = 1;
+        dust4.alpha = 1;
     }
 
     override public function destroy():Void {
