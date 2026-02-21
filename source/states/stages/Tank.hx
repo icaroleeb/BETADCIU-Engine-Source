@@ -1,13 +1,13 @@
 package states.stages;
 
-import animate.FlxAnimate;
-
 import states.stages.objects.*;
 import cutscenes.CutsceneHandler;
 import substates.GameOverSubstate;
 import objects.Character;
 
 import flixel.addons.display.FlxTiledSprite;
+
+import animate.FlxAnimate;
 
 class Tank extends BaseStage
 {
@@ -125,7 +125,7 @@ class Tank extends BaseStage
 				case 'guns':
 					setStartCallback(gunsIntro);
 				case 'stress':
-					//setStartCallback(stressIntro);
+					setStartCallback(stressIntro);
 			}
 		}
 	}
@@ -323,9 +323,9 @@ class Tank extends BaseStage
 		});
 	}
 	var dualWieldAnimPlayed = 0;
-	// function stressIntro()
-	// {
-	// 	prepareCutscene();
+	function stressIntro()
+	{
+		prepareCutscene();
 		
 		cutsceneHandler.endTime = 35.5;
 		gf.alpha = 0.00001;
@@ -340,7 +340,7 @@ class Tank extends BaseStage
 
 		pico = new FlxAnimate(gf.x + 150, gf.y + 450);
 		pico.showPivot = false;
-		Paths.loadAnimateAtlas(pico, 'cutscenes/picoAppears');
+		pico.frames = Paths.getAnimateAtlas('cutscenes/picoAppears');
 		pico.antialiasing = ClientPrefs.data.antialiasing;
 		pico.anim.addBySymbol('dance', 'GF Dancing at Gunpoint', 24, true);
 		pico.anim.addBySymbol('dieBitch', 'GF Time to Die sequence', 24, false);
@@ -353,7 +353,7 @@ class Tank extends BaseStage
 
 		// prepare pico animation cycle
 		function picoStressCycle() {
-			switch (pico.anim.curInstance.symbol.name) {
+			switch (pico.animation.curAnim.name) {
 				case "dieBitch", "GF Time to Die sequence":
 					pico.anim.play('picoAppears', true);
 					boyfriend.alpha = 1;
@@ -372,11 +372,11 @@ class Tank extends BaseStage
 				case "picoEnd", "Pico Dual Wield on Speaker idle":
 					gf.alpha = 1;
 					pico.visible = false;
-					if (pico.anim.onComplete.has(picoStressCycle)) // for safety
-						pico.anim.onComplete.remove(picoStressCycle);
+					//if (pico.animation.onComplete.has(picoStressCycle)) // for safety
+					//	pico.animation.onComplete.remove(picoStressCycle);
 			}
 		}
-		pico.anim.onComplete.add(picoStressCycle);
+		//pico.animation.onComplete.add(picoStressCycle);
 
 		boyfriendCutscene = new FlxSprite(boyfriend.x + 5, boyfriend.y + 20);
 		boyfriendCutscene.antialiasing = ClientPrefs.data.antialiasing;
