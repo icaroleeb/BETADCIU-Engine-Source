@@ -105,7 +105,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('Combo Camera:',
-		"What Camera your combo should be?\nWarining: Offsets will only work on HUD",
+		"What Camera your combo should be?\nWarning: Offsets will only work on HUD", // funny that no one noticed the typo sitting here since april 2025 lol
 		'comboCam',
 		STRING,
 		['Game', 'HUD']);

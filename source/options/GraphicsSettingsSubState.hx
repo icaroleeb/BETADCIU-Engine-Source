@@ -68,6 +68,12 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 
+		var option:Option = new Option('Force 16:9', //Name
+			"If checked, forces the game to run at a 16:9 aspect ratio.\nThis can fix some visual bugs in levels that were not coded aiming at a different aspect ratio.\nWARNING: REQUIRES RESTART!",
+			'oldWindowScaling',
+			BOOL);
+		addOption(option);
+
 		#if !html5 //Apparently other framerates isn't correctly supported on Browser? Probably it has some V-Sync shit enabled by default, idk
 		var option:Option = new Option('Framerate',
 			"Pretty self explanatory, isn't it?",
