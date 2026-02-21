@@ -86,9 +86,9 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		/*var option:Option = new Option('Dark Mode', //TBA
-		'If checked, Most of the menu will be dark.',
-		'darkMode',
-		BOOL);
+			'If checked, Most of the menu will be dark.',
+			'darkMode',
+			BOOL);
 		addOption(option);*/
 
 		var option:Option = new Option('Hide HUD',

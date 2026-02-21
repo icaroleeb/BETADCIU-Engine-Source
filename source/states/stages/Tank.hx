@@ -1,5 +1,7 @@
 package states.stages;
 
+import animate.FlxAnimate;
+
 import states.stages.objects.*;
 import cutscenes.CutsceneHandler;
 import substates.GameOverSubstate;
@@ -123,7 +125,7 @@ class Tank extends BaseStage
 				case 'guns':
 					setStartCallback(gunsIntro);
 				case 'stress':
-					setStartCallback(stressIntro);
+					//setStartCallback(stressIntro);
 			}
 		}
 	}
@@ -189,8 +191,7 @@ class Tank extends BaseStage
 		//inCutscene = true; //this would stop the camera movement, oops
 
 		tankman = new FlxAnimate(dad.x + 419, dad.y + 225);
-		tankman.showPivot = false;
-		Paths.loadAnimateAtlas(tankman, 'cutscenes/tankman');
+		tankman.frames = Paths.getAnimateAtlas('cutscenes/tankman');
 		tankman.antialiasing = ClientPrefs.data.antialiasing;
 		PlayState.instance.variables.get("stageVariables").set("tankman", tankman);
 		addBehindDad(tankman);
@@ -322,9 +323,9 @@ class Tank extends BaseStage
 		});
 	}
 	var dualWieldAnimPlayed = 0;
-	function stressIntro()
-	{
-		prepareCutscene();
+	// function stressIntro()
+	// {
+	// 	prepareCutscene();
 		
 		cutsceneHandler.endTime = 35.5;
 		gf.alpha = 0.00001;

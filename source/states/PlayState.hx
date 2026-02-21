@@ -4697,8 +4697,54 @@ class PlayState extends MusicBeatState
 
 		if(!preload){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
-			callLuaFile('stages/' + curStage + '.lua', "onCreatePost");
-			callHScriptFile('stages/' + curStage + '.hx', "onCreatePost");
+			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
+			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');
 		}
+	}
+
+	public function callLuaFile(luaFile:String, ?callLua:String = "")
+	{
+		#if MODS_ALLOWED
+		var luaToLoad:String = Paths.modFolders(luaFile);
+		if(!FileSystem.exists(luaToLoad))
+			luaToLoad = Paths.getSharedPath(luaFile);
+
+		if(FileSystem.exists(luaToLoad))
+		#elseif sys
+		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		if(OpenFlAssets.exists(luaToLoad))
+		#end
+		{
+			for (script in luaArray) {
+				if (script.scriptName == luaToLoad) {
+					// Custom function call
+					script.call(callLua, []);
+					return true;
+				}
+			}
+
+		}
+		return false;
+	}
+
+	public function callHScriptFile(scriptFile:String, ?callHScript:String = "")
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad))
+		{
+			if (Iris.instances.exists(scriptToLoad)){
+				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+				if(script.exists(callHScript)) script.call(callHScript);
+				return true;
+			};
+		}
+		return false;
 	}
 }
