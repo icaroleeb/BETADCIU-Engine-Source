@@ -303,15 +303,15 @@ class SchoolEvilErect extends BaseStage
 		if (OpenFlAssets.exists(altMaskPath))
 		#end
 		{
-			rim.altMaskImage = Paths.image('weeb/erect/masks/' + character.curCharacter + '_mask', "week6").bitmap;
+			rim.loadAltMask(altMaskPath);
 			rim.useAltMask = true;
 		}
 
 		character.shader = rim;
 
-		character.animation.callback = function(anim, frame, index)
+		character.animation.callback = function(animName:String, frameNumber:Int, frameIndex:Int) 
 		{
 			rim.updateFrameInfo(character.frame);
-		};
+    	}
 	}
 }

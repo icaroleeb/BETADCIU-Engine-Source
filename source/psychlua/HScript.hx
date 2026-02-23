@@ -182,7 +182,7 @@ class HScript extends Iris
 		set('ShaderFilter', openfl.filters.ShaderFilter);
 		set('StringTools', StringTools);
 		#if flxanimate
-		set('FlxAnimate', FlxAnimate);
+		set('FlxAnimate', animate.FlxAnimate);
 		#end
 
 		// Functions & Variables

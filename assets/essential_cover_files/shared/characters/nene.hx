@@ -1,5 +1,6 @@
 import flixel.group.FlxTypedSpriteGroup;
 import funkin.vis.dsp.SpectralAnalyzer;
+import animate.FlxAnimate;
 
 var analyzer:SpectralAnalyzer;
 
@@ -8,7 +9,7 @@ var pupilState:Int = 0;
 var PUPIL_STATE_NORMAL = 0;
 var PUPIL_STATE_LEFT = 1;
 
-function onCreate(){
+function onCreatePost(){
     stereoBG = new FlxSprite(0, 0).loadGraphic(Paths.image('characters/abot/stereoBG'));
 
     setupAbotViz();
@@ -16,10 +17,12 @@ function onCreate(){
     eyeWhites = new FlxSprite(0, 0).makeGraphic(160, 60, 0xFFFFFFFF);
 
     pupil = new FlxAnimate(0, 0);
-    Paths.loadAnimateAtlas(pupil, 'characters/abot/systemEyes');
+    pupil.frames = Paths.getAnimateAtlas('characters/abot/systemEyes');
+    pupil.anim.addBySymbolIndices('lookleft', 'a bot eyes lookin', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], 24, false);
+	pupil.anim.addBySymbolIndices('lookright', 'a bot eyes lookin', [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35], 24, false);
 
     abot = new FlxAnimate(0, 0);
-    Paths.loadAnimateAtlas(abot, 'characters/abot/abotSystem');
+    abot.frames = Paths.getAnimateAtlas('characters/abot/abotSystem');
     abot.anim.addBySymbol('anim', 'Abot System', 24, false);
 
     abot.antialiasing = ClientPrefs.data.antialiasing;
@@ -31,20 +34,18 @@ function onCreate(){
     abot.x = gf.x - 100;
     abot.y = gf.y + 316; // 764 - 740
 
-    abotViz.x = abot.x + 200;
+    abotViz.x = abot.x + 207;
     abotViz.y = abot.y + 84;
 
     eyeWhites.x = abot.x + 40;
     eyeWhites.y = abot.y + 250;
 
-    pupil.x = abot.x - 507;
-    pupil.y = abot.y - 492;
+    pupil.x = abot.x + 50;
+    pupil.y = abot.y + 238;
 
     stereoBG.x = abot.x + 150;
     stereoBG.y = abot.y + 30;
-}
 
-function onCreatePost(){
     abot.shader = gf.shader;
     eyeWhites.shader = gf.shader;
     pupil.shader = gf.shader;
@@ -73,103 +74,23 @@ function onCreatePost(){
     vis6.color = gf.color;
     vis7.color = gf.color;
 
-    insert(members.indexOf(game.gf) - 1, stereoBG);
-    insert(members.indexOf(game.gf) - 1, abotViz);
-    insert(members.indexOf(game.gf) - 1, eyeWhites);
-    insert(members.indexOf(game.gf) - 1, pupil);
-    insert(members.indexOf(game.gf) - 1, abot);
+    insert(members.indexOf(gf) - 1, stereoBG);
+    insert(members.indexOf(gf) - 1, abotViz);
+    insert(members.indexOf(gf) - 1, eyeWhites);
+    insert(members.indexOf(gf) - 1, pupil);
+    insert(members.indexOf(gf) - 1, abot);
+
+	pupil.anim.play('lookleft');
 }
 
-function onEvent(n, v1, v2, v3){
-    if(n == "Change Stage"){
-        abot.shader = gf.shader;
-        eyeWhites.shader = gf.shader;
-        pupil.shader = gf.shader;
-        stereoBG.shader = gf.shader;
-        abotViz.shader = gf.shader;
+var start = false;
 
-        if (game.gf.curCharacter == 'nene'){
-            //onDestroy();
-
-            insert(members.indexOf(game.gf) - 1, stereoBG);
-
-            insert(members.indexOf(game.gf) - 1, vis1);
-            insert(members.indexOf(game.gf) - 1, vis2);
-            insert(members.indexOf(game.gf) - 1, vis3);
-            insert(members.indexOf(game.gf) - 1, vis4);
-            insert(members.indexOf(game.gf) - 1, vis5);
-            insert(members.indexOf(game.gf) - 1, vis6);
-            insert(members.indexOf(game.gf) - 1, vis7);
-
-            insert(members.indexOf(game.gf) - 1, abotViz);
-
-            initAnalyzer();
-
-            insert(members.indexOf(game.gf) - 1, eyeWhites);
-            insert(members.indexOf(game.gf) - 1, pupil);
-            insert(members.indexOf(game.gf) - 1, abot);
-        }
-    }
-
-    if(n == "Change Character"){
-        if(v1 == "gf" || v1 == 'girlfriend' || v1 == '2'){
-            if(v2 == "nene"){
-                abot.shader = gf.shader;
-                eyeWhites.shader = gf.shader;
-                pupil.shader = gf.shader;
-                stereoBG.shader = gf.shader;
-                abotViz.shader = gf.shader;
-
-                insert(members.indexOf(game.gf) - 1, stereoBG);
-
-                insert(members.indexOf(game.gf) - 1, vis1);
-                insert(members.indexOf(game.gf) - 1, vis2);
-                insert(members.indexOf(game.gf) - 1, vis3);
-                insert(members.indexOf(game.gf) - 1, vis4);
-                insert(members.indexOf(game.gf) - 1, vis5);
-                insert(members.indexOf(game.gf) - 1, vis6);
-                insert(members.indexOf(game.gf) - 1, vis7);
-
-                insert(members.indexOf(game.gf) - 1, abotViz);
-
-                initAnalyzer();
-
-                insert(members.indexOf(game.gf) - 1, eyeWhites);
-                insert(members.indexOf(game.gf) - 1, pupil);
-                insert(members.indexOf(game.gf) - 1, abot);
-            }
-        }
-    }
-}
 function onSongStart(){
     initAnalyzer(); // LET'S GO!!! IT WORKS!
+    start = true;
 }
 
 function onUpdatePost(elapsed){
-    if (pupil.anim.isPlaying){
-        switch (pupilState){
-            case PUPIL_STATE_NORMAL:
-            if (pupil.anim.curFrame >= 17){
-                pupilState = PUPIL_STATE_LEFT;
-                pupil.anim.pause();
-            }
-
-            case PUPIL_STATE_LEFT:
-            if (pupil.anim.curFrame >= 30){
-                pupilState = PUPIL_STATE_NORMAL;
-                pupil.anim.pause();
-            }
-        }
-    }
-
-    refreshAbotSpeaker();
-
-    stereoBG.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
-    eyeWhites.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
-    pupil.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
-    abot.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
-    abotViz.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
-
     if(analyzer == null) {
         return;
     }
@@ -286,19 +207,19 @@ function setupAbotViz():Void{
     vis7.visible = false;
 }
 
-function onSectionHit()
+function onMoveCamera(char)
 {
-	if (mustHitSection)
-	    movePupilsRight();
-	else
-	    movePupilsLeft();
-	
+    if (start){
+        if (char == "dad")
+            pupil.anim.play('lookleft');
+        else
+            pupil.anim.play('lookright');
+    }
 }
 
 function onDestroy()
 {
     remove(abotViz);
-    analyzer = null;
     remove(abot);
     remove(eyeWhites);
     remove(pupil);
@@ -311,33 +232,20 @@ function onDestroy()
     remove(vis5);
     remove(vis6);
     remove(vis7);
-}
 
-function movePupilsLeft() {
-    if (pupilState == PUPIL_STATE_LEFT) return;
-    pupil.anim.play('lookleft');
-    pupil.anim.curFrame = 0;
-}
+    //
 
-function movePupilsRight() {
-    if (pupilState == PUPIL_STATE_NORMAL) return;
-    pupil.anim.play('lookright');
-    pupil.anim.curFrame = 17;
-}
+    abotViz.destroy();
+    abot.destroy();
+    eyeWhites.destroy();
+    pupil.destroy();
+    stereoBG.destroy();
 
-function refreshAbotSpeaker():Void{
-    abot.x = gf.x - 100;
-    abot.y = gf.y + 316; // 764 - 740
-
-    abotViz.x = abot.x + 200;
-    abotViz.y = abot.y + 84;
-
-    eyeWhites.x = abot.x + 40;
-    eyeWhites.y = abot.y + 250;
-
-    pupil.x = abot.x - 507;
-    pupil.y = abot.y - 492;
-
-    stereoBG.x = abot.x + 150;
-    stereoBG.y = abot.y + 30;
+    vis1.destroy();
+    vis2.destroy();
+    vis3.destroy();
+    vis4.destroy();
+    vis5.destroy();
+    vis6.destroy();
+    vis7.destroy();
 }

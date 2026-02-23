@@ -72,8 +72,6 @@ class FunkinLua {
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
 
-	public var audioAnalyzer:SpectralAnalyzer;
-
 	public function new(scriptName:String, ?scriptType:String = "") {
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
@@ -284,13 +282,24 @@ class FunkinLua {
 		});
 
 		//stole from Wii Funkin' Matt V3
-		Lua_helper.add_callback(lua, "initAnalyzer", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
-			initAnalyzer(barCount, maxDelta, peakHold);
-			return true;
+		Lua_helper.add_callback(lua, "initAnalyzer", function(tag:String, barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+			tag = tag.replace('.', '');
+			
+			@:privateAccess
+			var audioAnalyzer:SpectralAnalyzer = new SpectralAnalyzer(FlxG.sound.music._channel.__audioSource, barCount, maxDelta, peakHold);
+
+			#if desktop
+			audioAnalyzer.fftN = 256;
+			#end
+
+			MusicBeatState.getVariables().set(tag, audioAnalyzer);
 		});
 
-		Lua_helper.add_callback(lua, "getAudioLevels", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
-			return getAudioLevels();
+		Lua_helper.add_callback(lua, "getAudioLevels", function(tag:String) {
+			var analyzer:SpectralAnalyzer = PlayState.instance.getLuaObject(tag);
+			var levels = analyzer.getLevels();
+
+			return [for (i in levels) i.value];
 		});
 
 		addLocalCallback("setOnScripts", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
@@ -3082,23 +3091,6 @@ class FunkinLua {
  				}
 				if(PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
 		}
-	}
-
-	public function initAnalyzer(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
-		@:privateAccess
-		if (FlxG.sound.music == null || FlxG.sound.music._channel == null || FlxG.sound.music._channel.__audioSource == null) return;
-
-		@:privateAccess
-		audioAnalyzer = new SpectralAnalyzer(FlxG.sound.music._channel.__audioSource, barCount, maxDelta, peakHold);
-
-		#if desktop
-		audioAnalyzer.fftN = 256;
-		#end
-	}
-
-	public function getAudioLevels() {
-		var levels = audioAnalyzer.getLevels();
-		return [for (i in levels) i.value];
 	}
 }
 #end

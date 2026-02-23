@@ -554,9 +554,9 @@ class RainShader extends FlxShader
 	public function updateFrameInfo(frame:FlxFrame)
 	{
 		#if (flixel >= "6.0.0")
-			uFrameBounds.value = [frame.uv.left, frame.uv.right, frame.uv.top, frame.uv.bottom];
+		uFrameBounds.value = [frame.uv.left, frame.uv.right, frame.uv.top, frame.uv.bottom];
 		#else
-			uFrameBounds.value = [frame.uv.x, frame.uv.y, frame.uv.width, frame.uv.height];
+		uFrameBounds.value = [frame.uv.x, frame.uv.y, frame.uv.width, frame.uv.height];
 		#end
 	}
 

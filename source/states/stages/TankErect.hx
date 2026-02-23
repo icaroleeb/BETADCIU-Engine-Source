@@ -59,7 +59,7 @@ class TankErect extends BaseStage
 		charRim.setAdjustColor(-46, -38, -25, -20);
 		charRim.color = 0xFFDFEF3C;
 		character.shader = charRim;
-		charRim.attachedSprite = character;
+		//charRim.attachedSprite = character;
 
 		if (character.isPlayer)
 		{
@@ -88,14 +88,14 @@ class TankErect extends BaseStage
 		if (OpenFlAssets.exists(altMaskPath))
 		#end
 		{
-			charRim.altMaskImage = Paths.image('erect/masks/' + character.curCharacter + '_mask', "week7").bitmap;
+			charRim.loadAltMask(altMaskPath);
 			charRim.useAltMask = true;
 		}
 
-		character.animation.callback = function(anim, frame, index)
+		character.animation.callback = function(animName:String, frameNumber:Int, frameIndex:Int)
 		{
 			charRim.updateFrameInfo(character.frame);
-		};
+		}
 	}
 
 	override function countdownTick(count:Countdown, num:Int)
