@@ -512,9 +512,6 @@ class Paths
 		#end
 	}
 
-	inline public static function imagesFolder(file:String = '', library = 'shared')
-		return 'assets/$library/images/$file';
-
 	public static function getAnimateAtlas(key:String, ?folder:String, ?settings:FlxAnimateSettings):FlxAnimateFrames
 	{
 		var graphicKey = getPath('images/$key/', TEXT, folder, true);
