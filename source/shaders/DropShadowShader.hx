@@ -236,14 +236,14 @@ class DropShadowShader extends FlxShader
    * Updates the frame bounds and angle offset of the sprite for the shader
    * @param frame The frame to retrieve the information from
    */
-  public function updateFrameInfo(frame:FlxFrame):Void
+  public function updateFrameInfo(frame:Dynamic):Void
   {
     // NOTE: uv.right is actually the right pos and uv.bottom is the bottom pos
-    #if (flixel >= "6.0.0")
-		uFrameBounds.value = [frame.uv.left, frame.uv.right, frame.uv.top, frame.uv.bottom];
-		#else
+    //#if (flixel >= "6.0.0")
+		//uFrameBounds.value = [frame.uv.left, frame.uv.right, frame.uv.top, frame.uv.bottom];
+		//#else
 		uFrameBounds.value = [frame.uv.x, frame.uv.y, frame.uv.width, frame.uv.height];
-		#end
+		//#end
     
 
     // if a frame is rotated the shader will look completely wrong lol
