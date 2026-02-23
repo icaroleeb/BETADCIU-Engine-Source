@@ -23,6 +23,9 @@ import sys.thread.Mutex;
 import objects.Note;
 import objects.NoteSplash;
 
+import flixel.addons.display.FlxBackdrop;
+import flixel.util.FlxAxes;
+
 #if HSCRIPT_ALLOWED
 import psychlua.HScript;
 import crowplexus.iris.Iris;
@@ -68,6 +71,9 @@ class LoadingState extends MusicBeatState
 	var curPercent:Float = 0;
 	var stateChangeDelay:Float = 0;
 
+	var bg:FlxSprite;
+    var titlestatebg:FlxBackdrop;
+
 	#if PSYCH_WATERMARKS
 	var logo:FlxSprite;
 	var pessy:FlxSprite;
@@ -103,7 +109,7 @@ class LoadingState extends MusicBeatState
 		bar.scale.set(0, 15);
 		bar.updateHitbox();
 		barGroup.add(bar);
-		barWidth = Std.int(barBack.width - 10);
+		barWidth = Std.int(FlxG.width - 120);
 
 		#if HSCRIPT_ALLOWED
 		if(Mods.currentModDirectory != null && Mods.currentModDirectory.trim().length > 0)
@@ -142,41 +148,35 @@ class LoadingState extends MusicBeatState
 		}
 		#end
 
-		#if PSYCH_WATERMARKS // PSYCH LOADING SCREEN
-		var bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg = new FlxSprite().loadGraphic(Paths.image('menuBGTemplate2'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
-		bg.setGraphicSize(Std.int(FlxG.width));
-		bg.color = 0xFFD16FFF;
-		bg.updateHitbox();
-		addBehindBar(bg);
-	
+        bg.color = FlxG.random.color();
+        addBehindBar(bg);
+
+		bar.color = bg.color;
+
+		titlestatebg = new FlxBackdrop(Paths.image('titleGrid'), FlxAxes.XY);
+		titlestatebg.antialiasing = ClientPrefs.data.antialiasing;
+		titlestatebg.velocity.set(200, 110);
+		titlestatebg.updateHitbox();
+		titlestatebg.alpha = 0.4;
+		titlestatebg.screenCenter(FlxAxes.X);
+		addBehindBar(titlestatebg);
+
 		loadingText = new FlxText(520, 600, 400, Language.getPhrase('now_loading', 'Now Loading', ['...']), 32);
 		loadingText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, OUTLINE_FAST, FlxColor.BLACK);
 		loadingText.borderSize = 2;
 		addBehindBar(loadingText);
-	
-		logo = new FlxSprite(0, 0).loadGraphic(Paths.image('loading_screen/icon'));
-		logo.antialiasing = ClientPrefs.data.antialiasing;
-		logo.scale.set(0.75, 0.75);
-		logo.updateHitbox();
-		logo.screenCenter();
-		logo.x -= 50;
-		logo.y -= 40;
-		addBehindBar(logo);
 
-		#else // BASE GAME LOADING SCREEN
-		var bg = new FlxSprite().makeGraphic(1, 1, 0xFFCAFF4D);
-		bg.scale.set(FlxG.width, FlxG.height);
-		bg.updateHitbox();
-		bg.screenCenter();
-		addBehindBar(bg);
 
-		funkay = new FlxSprite(0, 0).loadGraphic(Paths.image('funkay'));
-		funkay.antialiasing = ClientPrefs.data.antialiasing;
-		funkay.setGraphicSize(0, FlxG.height);
-		funkay.updateHitbox();
-		addBehindBar(funkay);
-		#end
+		logo = new FlxSprite(FlxG.width / 2, FlxG.height / 2).loadGraphic(Paths.image('BETADCIUEngineLogo'));
+        logo.x -= logo.width / 2 - 200;
+        logo.y -= logo.height / 2 + 100;
+        logo.setGraphicSize(Std.int(logo.width * 0.8));
+        logo.x += 100;
+       // logo.alpha = 0;
+		add(logo);
+
 		super.create();
 
 		if (stateChangeDelay <= 0 && checkLoaded())

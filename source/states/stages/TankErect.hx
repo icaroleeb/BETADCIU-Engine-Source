@@ -59,7 +59,7 @@ class TankErect extends BaseStage
 		charRim.setAdjustColor(-46, -38, -25, -20);
 		charRim.color = 0xFFDFEF3C;
 		character.shader = charRim;
-		//charRim.attachedSprite = character;
+		charRim.attachedSprite = character;
 
 		if (character.isPlayer)
 		{
