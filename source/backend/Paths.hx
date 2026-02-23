@@ -514,7 +514,7 @@ class Paths
 
 	public static function getAnimateAtlas(key:String, ?folder:String, ?settings:FlxAnimateSettings):FlxAnimateFrames
 	{
-		var graphicKey = getPath('images/$key/', TEXT, folder, true);
+		var graphicKey = getPath('images/$key', TEXT, folder, true);
 
 		var validatedSettings:FlxAnimateSettings =
 			{
