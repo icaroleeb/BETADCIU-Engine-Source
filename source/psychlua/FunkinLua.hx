@@ -2913,6 +2913,7 @@ class FunkinLua {
 
 		if (oldChar != "") shit.pastCharacter = oldChar;
 		PlayState.instance.startCharacterScripts(shit.curCharacter);
+		shit.charName = tag;
 	}
 
 	//trying to do some auto stuff so i don't have to set manual x and y values
@@ -2969,6 +2970,7 @@ class FunkinLua {
 		PlayState.instance.boyfriend.pastCharacter = oldChar;
 		PlayState.instance.setOnScripts('boyfriendName', PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
+		PlayState.instance.setOnHScript(id, PlayState.instance.boyfriend);
 	}
 
 	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
@@ -3024,6 +3026,7 @@ class FunkinLua {
 		PlayState.instance.dad.pastCharacter = oldChar;
 		PlayState.instance.setOnScripts('dadName', PlayState.instance.dad.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
+		PlayState.instance.setOnHScript(id, PlayState.instance.dad);
 	}
 
 	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // not tested but i'm almost 100% sure it works		
@@ -3064,6 +3067,7 @@ class FunkinLua {
 		PlayState.instance.gf.pastCharacter = oldChar;
 		PlayState.instance.setOnScripts('gfName', PlayState.instance.gf.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.gf.curCharacter);
+		PlayState.instance.setOnHScript(id, PlayState.instance.gf);
 	}
 
 	#if (!flash && MODS_ALLOWED && sys)
