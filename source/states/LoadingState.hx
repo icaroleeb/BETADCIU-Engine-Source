@@ -168,7 +168,6 @@ class LoadingState extends MusicBeatState
 		loadingText.borderSize = 2;
 		addBehindBar(loadingText);
 
-
 		logo = new FlxSprite(FlxG.width / 2, FlxG.height / 2).loadGraphic(Paths.image('BETADCIUEngineLogo'));
         logo.x -= logo.width / 2 - 200;
         logo.y -= logo.height / 2 + 100;
