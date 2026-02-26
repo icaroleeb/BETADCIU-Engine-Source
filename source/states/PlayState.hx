@@ -2531,12 +2531,14 @@ class PlayState extends MusicBeatState
 				FlxG.sound.play(Paths.sound(value1), flValue2);
 			case "Change Stage":
 				if (value1 != null && value1 != ""){
+					callOnScripts('onStageChange', [value1]);
  					removeStage(); // Remove current stage
 					
 					curStage = value1; // Set new stage name
  					stageData = StageData.getStageFile(curStage); 
  					addStage();
 					setOnScripts('curStage', curStage);
+					callOnScripts('onStageChangePost', [value1]);
  				}
 		}
 

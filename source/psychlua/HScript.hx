@@ -185,6 +185,16 @@ class HScript extends Iris
 		set('FlxAnimate', FlxAnimate);
 		#end
 
+		// some really useful variables that for some reason doesn't comes in the og code
+		set('camGame', PlayState.instance.camGame);
+		set('camHUD', PlayState.instance.camHUD);
+		set('camOther', PlayState.instance.camOther);
+		set('boyfriend', PlayState.instance.boyfriend);
+		set('dad', PlayState.instance.dad);
+		set('gf', PlayState.instance.gf);
+		set('defaultCamZoom', PlayState.instance.defaultCamZoom);
+		//
+
 		// Functions & Variables
 		set('setVar', function(name:String, value:Dynamic) {
 			MusicBeatState.getVariables().set(name, value);
