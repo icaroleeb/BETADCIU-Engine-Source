@@ -33,6 +33,7 @@ typedef CharacterFile = {
 	var vocals_file:String;
 	@:optional var is_player_char:Bool; // New preferred field
 	@:optional var isPlayerChar:Bool;  // Legacy fallback
+	@:optional var isCharSpeaker:Bool;
 	
 	@:optional var _editor_isPlayer:Null<Bool>;
 }
@@ -58,6 +59,7 @@ class Character extends OffsettableSprite
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public var isPlayer:Bool = false;
+	public var isSpeakerChar:Bool = false;
 	public var flipMode:Bool = false;
 	public var charName:String = DEFAULT_CHARACTER; // believe me... this is useful asf
 	public var curCharacter:String = DEFAULT_CHARACTER;
@@ -205,6 +207,8 @@ class Character extends OffsettableSprite
 		if (json.isPlayerChar || json.is_player_char){
 			isPsychPlayer = json.isPlayerChar || json.is_player_char;
 		}
+
+		if (json.isCharSpeaker) isSpeakerChar = json.isCharSpeaker;
 
 		var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
 		if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind))

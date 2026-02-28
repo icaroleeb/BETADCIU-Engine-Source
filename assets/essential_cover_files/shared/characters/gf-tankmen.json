@@ -44,5 +44,6 @@
 	"sing_duration": 4,
 	"isPlayerChar": false,
 	"scale": 1,
-	"_editor_isPlayer": false
+	"_editor_isPlayer": false,
+	"isSpeakerChar": true
 }

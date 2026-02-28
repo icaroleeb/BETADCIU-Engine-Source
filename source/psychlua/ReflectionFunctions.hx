@@ -394,7 +394,7 @@ class ReflectionFunctions
 		var game = PlayState.instance;
 		var newVariable:Dynamic = "";
 		switch(variable) {
-			case "Stage.curStage": newVariable = "curStageLua";
+			case "Stage.curStage": newVariable = "curStage";
 			case ("Stage.gfXOffset"): newVariable = "GF_X";
 			case ("Stage.gfYOffset"): newVariable = "GF_Y";
 			case ("Stage.bfXOffset"): newVariable = "BF_X";

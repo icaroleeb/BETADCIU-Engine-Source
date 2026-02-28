@@ -31,22 +31,22 @@ class Philly extends BaseStage
 			add(bg);
 		}
 
-		var city:BGSprite = new BGSprite('philly/city', -10, 0, 0.3, 0.3);
-		city.setGraphicSize(Std.int(city.width * 0.85));
+		var city:BGSprite = new BGSprite('philly/city', -255, 45, 0.3, 0.3);
+		city.setGraphicSize(Std.int(city.width * 0.9));
 		city.updateHitbox();
 		stageVars.set("city", city);
 		add(city);
 
-		phillyLightsColors = [0xFF31A2FD, 0xFF31FD8C, 0xFFFB33F5, 0xFFFD4531, 0xFFFBA633];
-		phillyWindow = new BGSprite('philly/window', city.x, city.y, 0.3, 0.3);
-		phillyWindow.setGraphicSize(Std.int(phillyWindow.width * 0.85));
+		phillyLightsColors = [0xFF31A2FD,0xFF31FD8C,0xFFFB33F5,0xFFFBA633,0xFFFD4531];
+		phillyWindow = new BGSprite('philly/window', -184, 155, 0.3, 0.3);
+		phillyWindow.setGraphicSize(Std.int(phillyWindow.width * 0.9));
 		phillyWindow.updateHitbox();
 		stageVars.set("phillyWindow", phillyWindow);
 		add(phillyWindow);
 		phillyWindow.alpha = 0;
 
 		if(!ClientPrefs.data.lowQuality) {
-			var streetBehind:BGSprite = new BGSprite('philly/behindTrain', -40, 50);
+			var streetBehind:BGSprite = new BGSprite('philly/behindTrain', -299, 144);
 			stageVars.set("streetBehind", streetBehind);
 			add(streetBehind);
 		}
@@ -55,7 +55,7 @@ class Philly extends BaseStage
 		stageVars.set("phillyTrain", phillyTrain);
 		add(phillyTrain);
 
-		phillyStreet = new BGSprite('philly/street', -40, 50);
+		phillyStreet = new BGSprite('philly/street', -299, 144);
 		stageVars.set("phillyStreet", phillyStreet);
 		add(phillyStreet);
 	}

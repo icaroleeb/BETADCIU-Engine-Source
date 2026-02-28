@@ -21,3 +21,7 @@ gf-tankmen
 tankman
 pico-speaker
 bf-holding-gf
+nene
+darnell
+pico-blazin
+darnell-blazin

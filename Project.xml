@@ -40,6 +40,40 @@
 		<define name="TITLE_SCREEN_EASTER_EGG"/>
 	</section>
 
+	<!-- ____________________________ Android Port ___________________________ -->
+
+	<!--
+	<java if="android" path="source/external/android/java" />
+
+	<config type="android" gradle-version="8.10.2" gradle-plugin="8.8.0" ndkVersion="27.3"
+		minimum-sdk-version="26" target-sdk-version="35"  />
+
+	<haxelib name="extension-androidtools" if="android" />
+
+	<section if="FIREBASE_CRASH_HANDLER">
+		<define name="NO_FIREBASE_ANDROID_PATCHES" />
+		<haxelib name="extension-firebase-crashlytics" />
+	</section>
+
+	<certificate path="key.keystore" password="pslice" alias="pslice" alias-password="pslice"
+		if="android" unless="debug" />
+
+	<section if="FIREBASE_CRASH_HANDLER">
+		<template path="setup/google-services.json" rename="app/google-services.json"/>
+		<config:android pslice-firebase-sdk-path="yes" />
+		<template path="setup/GoogleService-Info.plist" rename="GoogleService-Info.plist" if="ios"/>
+		<template path="setup/GoogleService-Info.plist" rename="../GoogleService-Info.plist" if="ios"/>
+	</section>
+
+		<section if="mobile">
+			<config type="android" pslice-mono-icon="art/mobile/iconMono.png" />
+
+			<config type="ios" pslice-icon-dir="art/mobile/PSlice.appiconset" />
+			<icon path="art/mobile/iconAdaptive.png" if="android" />
+			<icon path="art/mobile/iconMobile.png" unless="android" />
+		</section>
+	-->
+
 	<!-- ____________________________ Window Settings ___________________________ -->
 
 	<!--These window settings apply to all targets-->
@@ -132,6 +166,9 @@
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" version="2.0.1"/>
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED" version="1.2.4"/>
 	<haxelib name="flixel-animate" if="flxanimate" version="1.4.0"/>
+
+	<!--stuff from V-Slice-->
+	<haxelib name="extension-haptics" if="FEATURE_HAPTICS"/>
 
 	<!-- Disable Discord IO Thread -->
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />

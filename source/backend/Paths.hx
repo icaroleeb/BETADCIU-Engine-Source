@@ -512,19 +512,9 @@ class Paths
 		#end
 	}
 
-	public static function getAnimateAtlas(key:String, ?library:String, ?settings:FlxAnimateSettings):FlxAnimateFrames
+	public static function getAnimateAtlas(key:String, ?folder:String, ?settings:FlxAnimateSettings):FlxAnimateFrames
 	{
-		var assetLibrary:String = library ?? "";
-		var graphicKey:String = "";
-
-		if (assetLibrary != "")
-		{
-			graphicKey = modsAnimateAtlas(key);
-		}
-		else
-		{
-			graphicKey = modsAnimateAtlas(key);
-		}
+		var graphicKey = getPath('images/$key', TEXT, folder, true);
 
 		var validatedSettings:FlxAnimateSettings =
 			{

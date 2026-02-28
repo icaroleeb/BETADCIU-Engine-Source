@@ -192,22 +192,22 @@ class PicoBlazinHandler
 
 	function movePicoToBack()
 	{
-		var bfPos:Int = FlxG.state.members.indexOf(boyfriendGroup);
-		var dadPos:Int = FlxG.state.members.indexOf(dadGroup);
+		var bfPos:Int = FlxG.state.members.indexOf(boyfriend);
+		var dadPos:Int = FlxG.state.members.indexOf(dad);
 		if(bfPos < dadPos) return;
 
-		FlxG.state.members[dadPos] = boyfriendGroup;
-		FlxG.state.members[bfPos] = dadGroup;
+		FlxG.state.members[dadPos] = boyfriend;
+		FlxG.state.members[bfPos] = dad;
 	}
 
 	function movePicoToFront()
 	{
-		var bfPos:Int = FlxG.state.members.indexOf(boyfriendGroup);
-		var dadPos:Int = FlxG.state.members.indexOf(dadGroup);
+		var bfPos:Int = FlxG.state.members.indexOf(boyfriend);
+		var dadPos:Int = FlxG.state.members.indexOf(dad);
 		if(bfPos > dadPos) return;
 
-		FlxG.state.members[dadPos] = boyfriendGroup;
-		FlxG.state.members[bfPos] = dadGroup;
+		FlxG.state.members[dadPos] = boyfriend;
+		FlxG.state.members[bfPos] = dad;
 	}
 
 	var alternate:Bool = false;
@@ -342,22 +342,22 @@ class PicoBlazinHandler
 	
 	function moveToBack()
 	{
-		var bfPos:Int = FlxG.state.members.indexOf(boyfriendGroup);
-		var dadPos:Int = FlxG.state.members.indexOf(dadGroup);
+		var bfPos:Int = FlxG.state.members.indexOf(boyfriend);
+		var dadPos:Int = FlxG.state.members.indexOf(dad);
 		if(bfPos < dadPos) return;
 
-		FlxG.state.members[dadPos] = boyfriendGroup;
-		FlxG.state.members[bfPos] = dadGroup;
+		FlxG.state.members[dadPos] = boyfriend;
+		FlxG.state.members[bfPos] = dad;
 	}
 
 	function moveToFront()
 	{
-		var bfPos:Int = FlxG.state.members.indexOf(boyfriendGroup);
-		var dadPos:Int = FlxG.state.members.indexOf(dadGroup);
+		var bfPos:Int = FlxG.state.members.indexOf(boyfriend);
+		var dadPos:Int = FlxG.state.members.indexOf(dad);
 		if(bfPos > dadPos) return;
 
-		FlxG.state.members[dadPos] = boyfriendGroup;
-		FlxG.state.members[bfPos] = dadGroup;
+		FlxG.state.members[dadPos] = boyfriend;
+		FlxG.state.members[bfPos] = dad;
 	}
 
 	var boyfriend(get, never):Character;

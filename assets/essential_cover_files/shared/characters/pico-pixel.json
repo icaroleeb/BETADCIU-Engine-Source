@@ -1,0 +1,126 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "idle",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "idle0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "singLEFT",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "left0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "singRIGHT",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "right0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "singDOWN",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "down0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "singUP",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "up0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "singLEFTmiss",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "leftmiss0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "singRIGHTmiss",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "rightmiss0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "singUPmiss",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "upmiss0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "singDOWNmiss",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "downmiss0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "firstDeath",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "firstDeath0",
+			"indices": []
+		},
+		{
+			"loop": true,
+			"offsets": [0, 0],
+			"anim": "deathLoop",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "deathLoop0",
+			"indices": []
+		},
+		{
+			"loop": true,
+			"offsets": [0, 0],
+			"anim": "deathConfirm",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "deathConfirm0",
+			"indices": []
+		}
+	],
+	"vocals_file": "",
+	"no_antialiasing": true,
+	"image": "characters/picoPixel/picoPixel",
+	"position": [240, 490],
+	"player_camera_position": [370, -80],
+	"is_player_char": true,
+	"healthicon": "pico-pixel",
+	"flip_x": true,
+	"healthbar_colors": [136, 255, 88],
+	"camera_position": [540, -180],
+	"player_position": [240, 490],
+	"sing_duration": 4,
+	"scale": 6,
+	"_editor_isPlayer": true
+}

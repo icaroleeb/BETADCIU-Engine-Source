@@ -78,6 +78,12 @@ class FlxAnimate extends FlxSprite
 	public var renderStage:Bool = false;
 
 	/**
+	 * Compatible with the psych one `showPivot`.
+	*/
+
+	public var showPivot:Bool = true;
+
+	/**
 	 * Whether to internally use a render texture when drawing the Texture Atlas.
 	 * This flattens all of the limbs into a single graphic, making effects such as alpha or shaders apply to
 	 * the entire sprite instead of individual limbs.
