@@ -3021,7 +3021,7 @@ class FunkinLua {
 		PlayState.instance.setOnScripts('boyfriendName', PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.setOnHScript(id, PlayState.instance.boyfriend);
-		PlayState.instance.gf.charName = "boyfriend";
+		PlayState.instance.boyfriend.charName = "boyfriend";
 	}
 
 	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
@@ -3078,7 +3078,7 @@ class FunkinLua {
 		PlayState.instance.setOnScripts('dadName', PlayState.instance.dad.curCharacter);
 		PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
 		PlayState.instance.setOnHScript(id, PlayState.instance.dad);
-		PlayState.instance.gf.charName = "dad";
+		PlayState.instance.dad.charName = "dad";
 	}
 
 	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // not tested but i'm almost 100% sure it works		
