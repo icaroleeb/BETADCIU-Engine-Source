@@ -3706,7 +3706,6 @@ class PlayState extends MusicBeatState
 		if (dad != null && beat % dad.danceEveryNumBeats == 0 && !dad.getAnimationName().startsWith('sing') && !dad.stunned)
 			dad.dance();
 
-
 		for (value in modchartCharacters.keys()) {
 			var char:Character = modchartCharacters.get(value);
 			if (char != null && beat % char.danceEveryNumBeats == 0 && !char.getAnimationName().startsWith('sing') && !char.stunned)

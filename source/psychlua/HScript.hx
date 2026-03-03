@@ -216,7 +216,7 @@ class HScript extends Iris
 		});
 		set('setStageVar', function(name:String, value:Dynamic) {
 			if (!PlayState.instance.variables.exists("stageVariables")){
-				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
 			}
 
 			PlayState.instance.variables.get("stageVariables").set(name, value);
@@ -224,7 +224,7 @@ class HScript extends Iris
 		});
 		set('getStageVar', function(name:String) {
 			if (!PlayState.instance.variables.exists("stageVariables")){
-				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
 			}
 
 			var result:Dynamic = null;
@@ -234,7 +234,7 @@ class HScript extends Iris
 		set('removeStageVar', function(name:String)
 		{
 			if (!PlayState.instance.variables.exists("stageVariables")){
-				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
 			}
 
 			if(PlayState.instance.variables.get("stageVariables").exists(name))
@@ -393,10 +393,9 @@ class HScript extends Iris
 		set('ModchartState', FunkinLua); // lazy ass fix for some scripts ported from betadciu engine
 		set('controls', Controls.instance);
 
-		/*
 		// you don't need to add stageVars anymore.
 		set('add', function(tag:FlxBasic){
-			switch(scriptType.toLowerCase()){
+			switch(daScriptType.toLowerCase()){
 				case "stage":
 					if (!PlayState.instance.variables.exists("stageVariables")){
 						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
@@ -418,7 +417,7 @@ class HScript extends Iris
 		});
 
 		set('insert', function(position:Int, tag:FlxBasic){ 
-			switch(scriptType.toLowerCase()){
+			switch(daScriptType.toLowerCase()){
 				case "stage":
 					if (!PlayState.instance.variables.exists("stageVariables")){
 						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
@@ -440,7 +439,7 @@ class HScript extends Iris
 		});
 
 		set('addBehindGF', function(tag:FlxBasic){
-			switch(scriptType.toLowerCase()){
+			switch(daScriptType.toLowerCase()){
 				case "stage":
 					if (!PlayState.instance.variables.exists("stageVariables")){
 						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
@@ -461,7 +460,7 @@ class HScript extends Iris
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
 		});
 		set('addBehindBF', function(tag:FlxBasic){
-			switch(scriptType.toLowerCase()){
+			switch(daScriptType.toLowerCase()){
 				case "stage":
 					if (!PlayState.instance.variables.exists("stageVariables")){
 						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
@@ -482,7 +481,7 @@ class HScript extends Iris
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
 		});
 		set('addBehindDad', function(tag:FlxBasic){
-			switch(scriptType.toLowerCase()){
+			switch(daScriptType.toLowerCase()){
 				case "stage":
 					if (!PlayState.instance.variables.exists("stageVariables")){
 						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
@@ -502,7 +501,6 @@ class HScript extends Iris
 
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
 		});
-		*/
 
 		set('buildTarget', LuaUtils.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
