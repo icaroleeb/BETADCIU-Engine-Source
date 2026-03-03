@@ -426,14 +426,17 @@ class PlayState extends MusicBeatState
 			if (stageData.hide_girlfriend) SONG.gfVersion = 'emptygf'; // quick change to prevent the null gf bug
 			gf = new Character(0, 0, SONG.gfVersion);
 			gfOldChar = SONG.gfVersion;
+			gf.charName = "gf";
 			startCharacterPos(gf);
 			//gf.scrollFactor.set(0.95, 0.95);
 		// }
 
 		dad = new Character(0, 0, SONG.player2);
+		dad.charName = "dad";
 		startCharacterPos(dad, true);
 
 		boyfriend = new Character(0, 0, SONG.player1, true);
+		boyfriend.charName = "boyfriend";
 		startCharacterPos(boyfriend);
 		
 		addStage(false, true);
