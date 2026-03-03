@@ -501,6 +501,22 @@ class HScript extends Iris
 
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
 		});
+<<<<<<< HEAD
+=======
+
+		set('getColorFromHex', function(color:String):Int {
+			if (color == null) return 0xFFFFFFFF;
+
+			if (color.length >= 4 && color.substr(0,4) == "0xFF")
+				color = color.substr(4);
+			if (color.length >= 2 && color.substr(0,2) == "0x")
+				color = color.substr(2);
+			if (color.length >= 1 && color.substr(0,1) == "#")
+				color = color.substr(1);
+
+			return FlxColor.fromString("#" + color);
+		});
+>>>>>>> 8db24034d33911bfbecdbee1c3ec11886c5d5381
 
 		set('buildTarget', LuaUtils.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
