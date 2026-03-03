@@ -845,7 +845,9 @@ class PlayState extends MusicBeatState
 		//stopCharacterScripts(preloadChar.curCharacter);
 		//preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
 		add(preloadChar);
+		stopCharacterScripts(preloadChar.curCharacter);
 		remove(preloadChar);
+		preloadChar.destroy(); // cuz we don't need to use preload chars so yeah ¯\_(ツ)_/¯
 	}
 
 	public function startCharacterScripts(name:String)

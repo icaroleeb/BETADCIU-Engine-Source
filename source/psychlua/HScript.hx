@@ -393,7 +393,7 @@ class HScript extends Iris
 		set('ModchartState', FunkinLua); // lazy ass fix for some scripts ported from betadciu engine
 		set('controls', Controls.instance);
 
-		// you don't need to add stageVars anymore.
+		// you don't need to add stageVars anymore. -- but isn't compatible with "game.add(sprite);" & "PlayState.instance.add(sprite);"
 		set('add', function(tag:FlxBasic){
 			switch(daScriptType.toLowerCase()){
 				case "stage":
@@ -415,7 +415,6 @@ class HScript extends Iris
 
 			FlxG.state.add(tag);
 		});
-
 		set('insert', function(position:Int, tag:FlxBasic){ 
 			switch(daScriptType.toLowerCase()){
 				case "stage":
@@ -437,7 +436,6 @@ class HScript extends Iris
 			
 			FlxG.state.insert(position, tag);
 		});
-
 		set('addBehindGF', function(tag:FlxBasic){
 			switch(daScriptType.toLowerCase()){
 				case "stage":
@@ -501,8 +499,7 @@ class HScript extends Iris
 
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
 		});
-<<<<<<< HEAD
-=======
+		//
 
 		set('getColorFromHex', function(color:String):Int {
 			if (color == null) return 0xFFFFFFFF;
@@ -516,7 +513,6 @@ class HScript extends Iris
 
 			return FlxColor.fromString("#" + color);
 		});
->>>>>>> 8db24034d33911bfbecdbee1c3ec11886c5d5381
 
 		set('buildTarget', LuaUtils.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
