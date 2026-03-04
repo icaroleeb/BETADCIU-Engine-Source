@@ -86,6 +86,9 @@ class HScript extends Iris
 
 	public var origin:String;
 	public var scriptName:String = null;
+	
+	public var charName:String = ""; // only used for character scripts
+
 	override public function new(?parent:Dynamic, ?file:String, ?scriptType:String = "", ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
 		if (file == null)
@@ -184,6 +187,8 @@ class HScript extends Iris
 		#if flxanimate
 		set('FlxAnimate', animate.FlxAnimate);
 		#end
+
+		set('charNameScript', this.charName);
 
 		// some really useful variables that for some reason doesn't comes in the og code
 		set('camGame', PlayState.instance.camGame);
@@ -413,7 +418,7 @@ class HScript extends Iris
 					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
-			FlxG.state.add(tag);
+			return FlxG.state.add(tag);
 		});
 		set('insert', function(position:Int, tag:FlxBasic){ 
 			switch(daScriptType.toLowerCase()){
@@ -434,7 +439,7 @@ class HScript extends Iris
 					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 			
-			FlxG.state.insert(position, tag);
+			return FlxG.state.insert(position, tag);
 		});
 		set('addBehindGF', function(tag:FlxBasic){
 			switch(daScriptType.toLowerCase()){
@@ -455,7 +460,7 @@ class HScript extends Iris
 					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
-			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
+			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
 		});
 		set('addBehindBF', function(tag:FlxBasic){
 			switch(daScriptType.toLowerCase()){
@@ -476,7 +481,7 @@ class HScript extends Iris
 					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
-			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
+			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
 		});
 		set('addBehindDad', function(tag:FlxBasic){
 			switch(daScriptType.toLowerCase()){
@@ -497,7 +502,7 @@ class HScript extends Iris
 					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
-			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
+			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
 		});
 		//
 

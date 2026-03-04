@@ -476,6 +476,10 @@ class PlayState extends MusicBeatState
 		if(gf != null) startCharacterScripts(gf.curCharacter);
 		startCharacterScripts(dad.curCharacter);
 		startCharacterScripts(boyfriend.curCharacter);
+
+		if(gf != null) nameScriptsCharacter("characters/" + gf.curCharacter, gf.charName);
+		nameScriptsCharacter("characters/" + dad.curCharacter, dad.charName);
+		nameScriptsCharacter("characters/" + boyfriend.curCharacter, boyfriend.charName);
 		#end
 
 		uiGroup = new FlxSpriteGroup();
@@ -3823,6 +3827,56 @@ class PlayState extends MusicBeatState
 				}
 			}
 
+		}
+		return false;
+	}
+
+	public function nameScriptsCharacter(file:String, ?name:String = "")
+	{
+		nameLuaCharacter(file, name);
+		nameHScriptCharacter(file, name);
+	}
+
+	public function nameLuaCharacter(luaFile:String, ?name:String = "")
+	{
+		#if MODS_ALLOWED
+		var luaToLoad:String = Paths.modFolders(luaFile);
+		if(!FileSystem.exists(luaToLoad))
+			luaToLoad = Paths.getSharedPath(luaFile);
+
+		if(FileSystem.exists(luaToLoad))
+		#elseif sys
+		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		if(OpenFlAssets.exists(luaToLoad))
+		#end
+		{
+			for (script in luaArray) {
+				if (script.scriptName == luaToLoad) {
+					script.set("charNameScript", name);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public function nameHScriptCharacter(scriptFile:String, ?name:String = "")
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad))
+		{
+			if (Iris.instances.exists(scriptToLoad)){
+				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+				script.set("charNameScript", name);
+				return true;
+			};
 		}
 		return false;
 	}

@@ -73,6 +73,8 @@ class FunkinLua {
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
 
+	public var charName:String = ""; // only used for character scripts
+
 	public function new(scriptName:String, ?scriptType:String = "") {
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
@@ -181,7 +183,7 @@ class FunkinLua {
 				set('gfName', game.gf != null ? game.gf.curCharacter : PlayState.SONG.gfVersion);
 			}
 
-		
+			set("charNameScript", this.charName); // exclusive for character scripts
 			set("songPos", 0); // kade scrips part 2
 			set('curBeat', game.curBeat);
 			set('curStep', game.curStep);
@@ -2963,6 +2965,7 @@ class FunkinLua {
 
 		if (oldChar != "") shit.pastCharacter = oldChar;
 		PlayState.instance.startCharacterScripts(shit.curCharacter);
+		PlayState.instance.nameScriptsCharacter("characters/" + shit.curCharacter, shit.charName);
 		shit.charName = tag;
 	}
 
@@ -3022,6 +3025,7 @@ class FunkinLua {
 		PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.setOnHScript(id, PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend.charName = "boyfriend";
+		PlayState.instance.nameScriptsCharacter("characters/" + PlayState.instance.boyfriend.curCharacter, PlayState.instance.boyfriend.charName);
 	}
 
 	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
@@ -3079,6 +3083,7 @@ class FunkinLua {
 		PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
 		PlayState.instance.setOnHScript(id, PlayState.instance.dad);
 		PlayState.instance.dad.charName = "dad";
+		PlayState.instance.nameScriptsCharacter("characters/" + PlayState.instance.dad.curCharacter, PlayState.instance.dad.charName);
 	}
 
 	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // not tested but i'm almost 100% sure it works		
@@ -3121,6 +3126,7 @@ class FunkinLua {
 		PlayState.instance.startCharacterScripts(PlayState.instance.gf.curCharacter);
 		PlayState.instance.setOnHScript(id, PlayState.instance.gf);
 		PlayState.instance.gf.charName = "gf";
+		PlayState.instance.nameScriptsCharacter("characters/" + PlayState.instance.gf.curCharacter, PlayState.instance.gf.charName);
 	}
 
 	#if (!flash && MODS_ALLOWED && sys)
