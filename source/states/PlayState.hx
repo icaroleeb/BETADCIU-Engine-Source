@@ -3458,7 +3458,7 @@ class PlayState extends MusicBeatState
 					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
 						var daLuaCharAnim:Character = modchartCharacters.get(value);
 
-						if ((daLuaChar.isPlayer && !daLuaChar.flipMode) || (!daLuaChar.isPlayer && daLuaChar.flipMode) && daLuaChar.playSingAnim)
+						if ((daLuaCharAnim.isPlayer && !daLuaCharAnim.flipMode) || (!daLuaCharAnim.isPlayer && daLuaCharAnim.flipMode) && daLuaCharAnim.playSingAnim)
 						{
 							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
 							daLuaCharAnim.holdTimer = 0;
