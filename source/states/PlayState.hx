@@ -3454,6 +3454,16 @@ class PlayState extends MusicBeatState
 
 					if(canPlay) char.playAnim(animToPlay, true);
 					char.holdTimer = 0;
+
+					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
+						var daLuaCharAnim:Character = modchartCharacters.get(value);
+
+						if ((daLuaChar.isPlayer && !daLuaChar.flipMode) || (!daLuaChar.isPlayer && daLuaChar.flipMode) && daLuaChar.playSingAnim)
+						{
+							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
+							daLuaCharAnim.holdTimer = 0;
+						}
+					}
 				}
 			}
 		}
@@ -3516,8 +3526,17 @@ class PlayState extends MusicBeatState
 	
 					if(canPlay) char.playAnim(animToPlay, true);
 					char.holdTimer = 0;
+
+					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
+						var daLuaCharAnim:Character = modchartCharacters.get(value);
+
+						if ((!daLuaCharAnim.isPlayer && daLuaCharAnim.flipMode) || (daLuaCharAnim.isPlayer && !daLuaCharAnim.flipMode) && daLuaCharAnim.playSingAnim) {
+							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
+						}
+					}
+
 					for (value in modchartCharacters.keys()) {
-						var daLuaChar = modchartCharacters.get(value);
+						var daLuaChar:Character = modchartCharacters.get(value);
 						if ((daLuaChar.isPlayer && !daLuaChar.flipMode) || (!daLuaChar.isPlayer && daLuaChar.flipMode)) daLuaChar.holdTimer = 0;
 					}
 
