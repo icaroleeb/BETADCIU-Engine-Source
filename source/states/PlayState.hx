@@ -4562,21 +4562,26 @@ class PlayState extends MusicBeatState
 
 	public function addStage(?onlyLuas:Bool=false, ?isCreate:Bool=false) {
 		if(!isCreate) setStageDetails(stageData); // for some reason they don't add the chars position on them.
-		switch (curStage.toLowerCase())
-		{
-			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
-			case 'spooky': hardCodedStage = new Spooky();				//Week 2
-			case 'philly': hardCodedStage = new Philly();				//Week 3
-			case 'limo': hardCodedStage = new Limo();					//Week 4
-			case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
-			case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
-			case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
-			case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
-			case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
-			case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
-			case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
-			case 'stageerect': hardCodedStage = new StageErect();	//Stage Erect
-			case 'limoerect': hardCodedStage = new LimoErect();		//Week 4
+		
+		var path:String = Paths.getPath('stages/' + curStage + '.json', TEXT);
+
+		if (!FileSystem.exists(path)) {
+			switch (curStage.toLowerCase())
+			{
+				case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
+				case 'spooky': hardCodedStage = new Spooky();				//Week 2
+				case 'philly': hardCodedStage = new Philly();				//Week 3
+				case 'limo': hardCodedStage = new Limo();					//Week 4
+				case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
+				case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
+				case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
+				case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
+				case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
+				case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
+				case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
+				case 'stageerect': hardCodedStage = new StageErect();	//Stage Erect
+				case 'limoerect': hardCodedStage = new LimoErect();		//Week 4
+			}
 		}
 
 		addObjects(stageData);

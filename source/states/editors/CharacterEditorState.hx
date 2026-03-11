@@ -234,9 +234,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			pos = members.indexOf(character);
 			remove(character);
 			character.destroy();
-
-			remove(ghostCharacter);
-			ghostCharacter.destroy();
 		}
 
 		var isPlayer = (reload ? character.isPlayer : !predictCharacterIsNotPlayer(_char));
@@ -250,13 +247,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		character.debugMode = true;
 		character.missingCharacter = false;
 
-		ghostCharacter = new Character(0, 0, _char, isPlayer);
-		ghostCharacter.alpha = 0;
-
 		if(pos > -1) insert(pos, character);
 		else add(character);
 
-		insert(members.indexOf(character) - 1, ghostCharacter);
 		updateCharacterPositions();
 		reloadAnimList();
 		if(healthBar != null && healthIcon != null) updateHealthBar();
@@ -294,6 +287,16 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			if(!character.isAnimationNull())
 			{
 				var myAnim = anims[curAnim];
+
+				if (ghostCharacter.curCharacter != character.curCharacter)
+				{
+					remove(ghostCharacter);
+					ghostCharacter.destroy();
+
+					ghostCharacter = new Character(0, 0, character.curCharacter);
+					insert(members.indexOf(character) - 1, ghostCharacter);
+				}
+
 				ghostCharacter.animation.play(character.animation.curAnim.name, true, false, character.animation.curAnim.curFrame);
 				ghostCharacter.animation.pause();
 				
@@ -378,7 +381,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		var reloadCharacter:PsychUIButton = new PsychUIButton(140, 20, "Reload Char", function()
 		{
-			addCharacter();
+			addCharacter(true);
 			updatePointerPos();
 			reloadCharacterOptions();
 			reloadCharacterDropDown();
