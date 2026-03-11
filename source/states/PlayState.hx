@@ -4767,7 +4767,7 @@ class PlayState extends MusicBeatState
 		}
 
 		addObjects(stageData, preload);
-
+		
 		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
