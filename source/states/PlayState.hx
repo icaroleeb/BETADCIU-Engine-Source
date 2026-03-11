@@ -4768,13 +4768,52 @@ class PlayState extends MusicBeatState
 
 		addObjects(stageData, preload);
 		
+	public function addStage(?onlyLuas:Bool=false, ?isCreate:Bool=false) {
+		if(!isCreate) setStageDetails(stageData); // for some reason they don't add the chars position on them.
+		
+		var path:String = Paths.getPath('stages/' + curStage + '.json', TEXT);
+
+		if (!FileSystem.exists(path)) {
+			switch (curStage.toLowerCase())
+			{
+				case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
+				case 'spooky': hardCodedStage = new Spooky();				//Week 2
+				case 'philly': hardCodedStage = new Philly();				//Week 3
+				case 'limo': hardCodedStage = new Limo();					//Week 4
+				case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
+				case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
+				case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
+				case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
+				case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
+				case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
+				case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
+				case 'stageerect': hardCodedStage = new StageErect();	//Stage Erect
+				case 'limoerect': hardCodedStage = new LimoErect();		//Week 4
+			}
+		}
+
+		addObjects(stageData);
+
+		if(ClientPrefs.data.perfectPixel == "inGame"){
+			boyfriend.pixelPerfectPosition = stageData.isPixelStage;
+			boyfriend.pixelPerfectRender = stageData.isPixelStage;
+
+			dad.pixelPerfectPosition = stageData.isPixelStage;
+			dad.pixelPerfectRender = stageData.isPixelStage;
+
+			gf.pixelPerfectPosition = stageData.isPixelStage;
+			gf.pixelPerfectRender = stageData.isPixelStage;
+		}
+
+		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
+
 		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
-		
-		if(!preload){
+
+		if(isCreate){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');
