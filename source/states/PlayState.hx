@@ -4708,7 +4708,7 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(!preload){
+		if(isCreate){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');
