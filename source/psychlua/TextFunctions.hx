@@ -1,6 +1,6 @@
 package psychlua;
 
-import options.ModpackMakerState.ModpackAssetRegistry;
+import states.editors.ModpackMakerState.ModpackAssetRegistry;
 
 class TextFunctions
 {

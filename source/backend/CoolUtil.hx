@@ -275,4 +275,9 @@ class CoolUtil
 			return (word.length > 0) ? word.charAt(0).toUpperCase() + word.substr(1).toLowerCase() : "";
 		}).join(" ");
 	}
+
+    public static function getVarToString(variable:Expr):Expr 
+	{
+		if (EConst(CIdent(name))) return macro $v{name};
+	}
 }

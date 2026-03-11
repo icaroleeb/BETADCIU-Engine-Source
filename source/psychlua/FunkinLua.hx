@@ -55,8 +55,8 @@ import haxe.Json;
 import funkin.vis.dsp.SpectralAnalyzer;
 import funkin.vis.audioclip.frontends.LimeAudioClip;
 
-import options.ModpackMakerState;
-import options.ModpackMakerState.ModpackAssetRegistry;
+import states.editors.ModpackMakerState;
+import states.editors.ModpackMakerState.ModpackAssetRegistry;
 
 class FunkinLua {
 	public var lua:State = null;
@@ -2965,8 +2965,10 @@ class FunkinLua {
 
 		if (oldChar != "") shit.pastCharacter = oldChar;
 		PlayState.instance.startCharacterScripts(shit.curCharacter);
-		PlayState.instance.nameScriptsCharacter("characters/" + shit.curCharacter, shit.charName);
 		shit.charName = tag;
+		PlayState.instance.nameScriptsCharacter("characters/" + shit.curCharacter, tag);
+		PlayState.instance.callLuaFile("characters/" + shit.curCharacter + '.lua', 'onCreatePost');
+		PlayState.instance.callHScriptFile("characters/" + shit.curCharacter + '.hx', 'onCreatePost');
 	}
 
 	//trying to do some auto stuff so i don't have to set manual x and y values
@@ -3026,6 +3028,8 @@ class FunkinLua {
 		PlayState.instance.setOnHScript(id, PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend.charName = "boyfriend";
 		PlayState.instance.nameScriptsCharacter("characters/" + PlayState.instance.boyfriend.curCharacter, PlayState.instance.boyfriend.charName);
+		PlayState.instance.callLuaFile("characters/" + PlayState.instance.boyfriend.curCharacter + '.lua', 'onCreatePost');
+		PlayState.instance.callHScriptFile("characters/" + PlayState.instance.boyfriend.curCharacter + '.hx', 'onCreatePost');
 	}
 
 	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
@@ -3084,6 +3088,8 @@ class FunkinLua {
 		PlayState.instance.setOnHScript(id, PlayState.instance.dad);
 		PlayState.instance.dad.charName = "dad";
 		PlayState.instance.nameScriptsCharacter("characters/" + PlayState.instance.dad.curCharacter, PlayState.instance.dad.charName);
+		PlayState.instance.callLuaFile("characters/" + PlayState.instance.dad.curCharacter + '.lua', 'onCreatePost');
+		PlayState.instance.callHScriptFile("characters/" + PlayState.instance.dad.curCharacter + '.hx', 'onCreatePost');
 	}
 
 	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // not tested but i'm almost 100% sure it works		
@@ -3127,6 +3133,8 @@ class FunkinLua {
 		PlayState.instance.setOnHScript(id, PlayState.instance.gf);
 		PlayState.instance.gf.charName = "gf";
 		PlayState.instance.nameScriptsCharacter("characters/" + PlayState.instance.gf.curCharacter, PlayState.instance.gf.charName);
+		PlayState.instance.callLuaFile("characters/" + PlayState.instance.gf.curCharacter + '.lua', 'onCreatePost');
+		PlayState.instance.callHScriptFile("characters/" + PlayState.instance.gf.curCharacter + '.hx', 'onCreatePost');
 	}
 
 	#if (!flash && MODS_ALLOWED && sys)

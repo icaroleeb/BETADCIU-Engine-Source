@@ -17,6 +17,9 @@ import crowplexus.hscript.Printer;
 
 import haxe.ValueException;
 
+import haxe.macro.Expr;
+import haxe.macro.Context;
+
 typedef HScriptInfos = {
 	> haxe.PosInfos,
 	var ?funcName:String;
@@ -407,7 +410,7 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(getVarToString(tag), tag);
 
 				case "stagecamera":
 					if (!PlayState.instance.variables.exists("stageCameraVariables")){
@@ -415,7 +418,7 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(getVarToString(tag), tag);
 			}
 
 			return FlxG.state.add(tag);
@@ -428,7 +431,7 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(getVarToString(tag), tag);
 
 				case "stagecamera":
 					if (!PlayState.instance.variables.exists("stageCameraVariables")){
@@ -436,7 +439,7 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(getVarToString(tag), tag);
 			}
 			
 			return FlxG.state.insert(position, tag);
@@ -449,7 +452,7 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(getVarToString(tag), tag);
 
 				case "stagecamera":
 					if (!PlayState.instance.variables.exists("stageCameraVariables")){
@@ -457,7 +460,7 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(getVarToString(tag), tag);
 			}
 
 			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
@@ -470,7 +473,7 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(getVarToString(tag), tag);
 
 				case "stagecamera":
 					if (!PlayState.instance.variables.exists("stageCameraVariables")){
@@ -478,7 +481,7 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(getVarToString(tag), tag);
 			}
 
 			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
@@ -491,7 +494,7 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(getVarToString(tag), tag);
 
 				case "stagecamera":
 					if (!PlayState.instance.variables.exists("stageCameraVariables")){
@@ -499,7 +502,7 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(getVarToString(tag), tag);
 			}
 
 			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
@@ -678,6 +681,12 @@ class HScript extends Iris
 		}
 
 		return varsToBring = values;
+	}
+
+	// This macro captures the expression and returns its name as a string
+    public static function getVarToString(variable:Expr):Expr 
+	{
+		if (EConst(CIdent(name))) return macro $v{name};
 	}
 }
 
