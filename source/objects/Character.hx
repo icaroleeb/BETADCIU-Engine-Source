@@ -65,7 +65,18 @@ class Character extends OffsettableSprite
 	public var curCharacter:String = DEFAULT_CHARACTER;
 	public var pastCharacter:String = DEFAULT_CHARACTER;
 
-	public var daZoom:Float = 1;
+	public var daZoom(default, set):Float = 1;
+
+	function set_daZoom(value:Float):Float
+	{
+		daZoom = value;
+		var daValue:Float = value * jsonScale;
+		this.scale.set(daValue, daValue);
+
+		trace("fucked with");
+
+		return value;
+	}
 
 	public var holdTimer:Float = 0;
 	public var heyTimer:Float = 0;
@@ -635,11 +646,9 @@ class Character extends OffsettableSprite
 		animation.addByPrefix(name, anim, 24, false);
 	}
 
-	public function setZoom(?toChange:Float = 1, ?isPixel:Bool = false):Void
+	public function setZoom(Zoom:Float)
 	{
-		daZoom = toChange;
-		var daValue:Float = toChange * jsonScale;
-		scale.set(daValue, daValue);
+		set_daZoom(Zoom);
 	}
 
 	public function flipAnims() {

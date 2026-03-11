@@ -9,6 +9,8 @@ class RGBPalette {
 	public var g(default, set):FlxColor;
 	public var b(default, set):FlxColor;
 	public var mult(default, set):Float;
+	public var amount(default, set):Float;
+	public var enabled(default, set):Bool;
 
 	public function copyValues(tempShader:RGBPalette)
 	{
@@ -48,6 +50,18 @@ class RGBPalette {
 		shader.mult.value = [mult];
 		return mult;
 	}
+	
+	private function set_amount(value:Float) {
+		amount = FlxMath.bound(value, 0, 1);
+		shader.amount.value = [amount];
+		return amount;
+	}
+	
+	private function set_enabled(value:Bool) {
+		enabled = value;
+		shader.enabled.value = [enabled];
+		return enabled;
+	}
 
 	public function new()
 	{
@@ -55,6 +69,7 @@ class RGBPalette {
 		g = 0xFF00FF00;
 		b = 0xFF0000FF;
 		mult = 1.0;
+		amount = 0.0;
 	}
 }
 
@@ -65,6 +80,7 @@ class RGBShaderReference
 	public var g(default, set):FlxColor;
 	public var b(default, set):FlxColor;
 	public var mult(default, set):Float;
+	public var amount(default, set):Float;
 	public var enabled(default, set):Bool = true;
 
 	public var parent:RGBPalette;
@@ -106,10 +122,15 @@ class RGBShaderReference
 		if(allowNew && value != _original.mult) cloneOriginal();
 		return (mult = parent.mult = value);
 	}
+	private function set_amount(value:Float)
+	{
+		if(allowNew && value != _original.amount) cloneOriginal();
+		return (amount = parent.amount = value);
+	}
 	private function set_enabled(value:Bool)
 	{
-		_owner.shader = value ? parent.shader : null;
-		return (enabled = value);
+		if(allowNew && value != _original.enabled) cloneOriginal();
+		return (enabled = parent.enabled = value);
 	}
 
 	public var allowNew = true;
@@ -125,6 +146,7 @@ class RGBShaderReference
 			parent.g = _original.g;
 			parent.b = _original.b;
 			parent.mult = _original.mult;
+			parent.amount = _original.amount;
 			_owner.shader = parent.shader;
 			//trace('created new shader');
 		}
@@ -139,6 +161,9 @@ class RGBPaletteShader extends FlxShader {
 		uniform vec3 g;
 		uniform vec3 b;
 		uniform float mult;
+		uniform float amount;
+
+		uniform bool enabled;
 
 		vec4 flixel_texture2DCustom(sampler2D bitmap, vec2 coord) {
 			vec4 color = flixel_texture2D(bitmap, coord);
@@ -146,11 +171,15 @@ class RGBPaletteShader extends FlxShader {
 				return color;
 			}
 
-			vec4 newColor = color;
-			newColor.rgb = min(color.r * r + color.g * g + color.b * b, vec3(1.0));
-			newColor.a = color.a;
+			if (enabled) {
+				vec4 newColor = color;
+				newColor.rgb = min(color.r * r + color.g * g + color.b * b, vec3(1.0));
+				newColor.a = color.a;
+				
+				color = mix(color, newColor, mult);
+			}
 			
-			color = mix(color, newColor, mult);
+			color.rgb = color.rgb + vec3(amount);
 			
 			if(color.a > 0.0) {
 				return vec4(color.rgb, color.a);

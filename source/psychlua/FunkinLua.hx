@@ -1792,13 +1792,13 @@ class FunkinLua {
 			}
 			luaTrace("changeIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
-		Lua_helper.add_callback(lua,"characterZoom", function(id:String, zoomAmount:Float, ?isSenpai:Bool = false) {
+		Lua_helper.add_callback(lua,"characterZoom", function(id:String, zoomAmount:Float) {
 			if(game.modchartCharacters.exists(id)) {
 				var spr:Character = game.modchartCharacters.get(id);
-				spr.setZoom(zoomAmount, isSenpai);
+				spr.setZoom(zoomAmount);
 			}
 			else
-				LuaUtils.getObjectDirectly(id).setZoom(zoomAmount, isSenpai);
+				LuaUtils.getObjectDirectly(id).setZoom(zoomAmount);
 		});
 		Lua_helper.add_callback(lua, "setGraphicSize", function(obj:String, x:Float, y:Float = 0, updateHitbox:Bool = true) {
 			if(game.getLuaObject(obj)!=null) {
