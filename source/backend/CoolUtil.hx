@@ -5,6 +5,9 @@ import lime.utils.Assets as LimeAssets;
 import lime.media.AudioBuffer;
 import haxe.io.Bytes;
 
+import haxe.macro.Expr;
+import haxe.macro.Context;
+
 class CoolUtil
 {
 	public inline static final DEFAULT_VIBRATION_PERIOD:Float = 0.1;
@@ -274,10 +277,5 @@ class CoolUtil
 		return str.split(" ").map(function(word) {
 			return (word.length > 0) ? word.charAt(0).toUpperCase() + word.substr(1).toLowerCase() : "";
 		}).join(" ");
-	}
-
-    public static function getVarToString(variable:Expr):Expr 
-	{
-		if (EConst(CIdent(name))) return macro $v{name};
 	}
 }
