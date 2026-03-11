@@ -1354,7 +1354,7 @@ class FunkinLua {
 
 			leSprite.active = true;
 		});
-		// still doesn't work yet.
+		// still doesn't work yet so yeah.
 		Lua_helper.add_callback(lua, "makeLuaTiledSprite", function(tag:String, ?image:String = null, ?width:Float = 0, ?height:Float = 0, ?repeatX:Bool = true, ?repeatY:Bool = true) {
 			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
 				ModpackAssetRegistry.instance.addAsset("images", image);
