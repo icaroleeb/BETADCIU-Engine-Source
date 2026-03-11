@@ -25,6 +25,13 @@ class SpriteGroupFunctions
 		
 					var stageVars = variables.get("stageVariables");
 					stageVars.set(tag, group);
+				case "stagecamera":
+					if (!variables.exists("stageCameraVariables")){
+						variables.set("stageCameraVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageCameraVariables");
+					stageVars.set(tag, group);
 			}
 		});
 

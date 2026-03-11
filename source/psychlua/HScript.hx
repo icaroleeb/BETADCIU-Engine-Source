@@ -182,8 +182,18 @@ class HScript extends Iris
 		set('ShaderFilter', openfl.filters.ShaderFilter);
 		set('StringTools', StringTools);
 		#if flxanimate
-		set('FlxAnimate', FlxAnimate);
+		set('FlxAnimate', animate.FlxAnimate);
 		#end
+
+		// some really useful variables that for some reason doesn't comes in the og code
+		set('camGame', PlayState.instance.camGame);
+		set('camHUD', PlayState.instance.camHUD);
+		set('camOther', PlayState.instance.camOther);
+		set('boyfriend', PlayState.instance.boyfriend);
+		set('dad', PlayState.instance.dad);
+		set('gf', PlayState.instance.gf);
+		set('defaultCamZoom', PlayState.instance.defaultCamZoom);
+		//
 
 		// Functions & Variables
 		set('setVar', function(name:String, value:Dynamic) {
@@ -200,6 +210,36 @@ class HScript extends Iris
 			if(MusicBeatState.getVariables().exists(name))
 			{
 				MusicBeatState.getVariables().remove(name);
+				return true;
+			}
+			return false;
+		});
+		set('setStageVar', function(name:String, value:Dynamic) {
+			if (!PlayState.instance.variables.exists("stageVariables")){
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+			}
+
+			PlayState.instance.variables.get("stageVariables").set(name, value);
+			return value;
+		});
+		set('getStageVar', function(name:String) {
+			if (!PlayState.instance.variables.exists("stageVariables")){
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+			}
+
+			var result:Dynamic = null;
+			if(PlayState.instance.variables.get("stageVariables").exists(name)) result = PlayState.instance.variables.get("stageVariables").get(name);
+			return result;
+		});
+		set('removeStageVar', function(name:String)
+		{
+			if (!PlayState.instance.variables.exists("stageVariables")){
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+			}
+
+			if(PlayState.instance.variables.get("stageVariables").exists(name))
+			{
+				PlayState.instance.variables.get("stageVariables").remove(name);
 				return true;
 			}
 			return false;
@@ -355,57 +395,124 @@ class HScript extends Iris
 
 		// you don't need to add stageVars anymore.
 		set('add', function(tag:FlxBasic){
-			if(daScriptType.toLowerCase() == "stage") {
-				if (!PlayState.instance.variables.exists("stageVariables")){
-					PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-				}
-		
-				var stageVars = PlayState.instance.variables.get("stageVariables");
-				stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+			switch(daScriptType.toLowerCase()){
+				case "stage":
+					if (!PlayState.instance.variables.exists("stageVariables")){
+						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
+					}
+			
+					var stageVars = PlayState.instance.variables.get("stageVariables");
+					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+
+				case "stagecamera":
+					if (!PlayState.instance.variables.exists("stageCameraVariables")){
+						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
+					}
+			
+					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
+					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
 			FlxG.state.add(tag);
 		});
 
 		set('insert', function(position:Int, tag:FlxBasic){ 
+			switch(daScriptType.toLowerCase()){
+				case "stage":
+					if (!PlayState.instance.variables.exists("stageVariables")){
+						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
+					}
+			
+					var stageVars = PlayState.instance.variables.get("stageVariables");
+					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+
+				case "stagecamera":
+					if (!PlayState.instance.variables.exists("stageCameraVariables")){
+						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
+					}
+			
+					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
+					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+			}
+			
 			FlxG.state.insert(position, tag);
 		});
 
 		set('addBehindGF', function(tag:FlxBasic){
-			if(daScriptType.toLowerCase() == "stage") {
-				if (!PlayState.instance.variables.exists("stageVariables")){
-					PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-				}
-		
-				var stageVars = PlayState.instance.variables.get("stageVariables");
-				stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+			switch(daScriptType.toLowerCase()){
+				case "stage":
+					if (!PlayState.instance.variables.exists("stageVariables")){
+						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
+					}
+			
+					var stageVars = PlayState.instance.variables.get("stageVariables");
+					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+
+				case "stagecamera":
+					if (!PlayState.instance.variables.exists("stageCameraVariables")){
+						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
+					}
+			
+					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
+					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
 		});
 		set('addBehindBF', function(tag:FlxBasic){
-			if(daScriptType.toLowerCase() == "stage") {
-				if (!PlayState.instance.variables.exists("stageVariables")){
-					PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-				}
-		
-				var stageVars = PlayState.instance.variables.get("stageVariables");
-				stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+			switch(daScriptType.toLowerCase()){
+				case "stage":
+					if (!PlayState.instance.variables.exists("stageVariables")){
+						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
+					}
+			
+					var stageVars = PlayState.instance.variables.get("stageVariables");
+					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+
+				case "stagecamera":
+					if (!PlayState.instance.variables.exists("stageCameraVariables")){
+						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
+					}
+			
+					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
+					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
 		});
 		set('addBehindDad', function(tag:FlxBasic){
-			if(daScriptType.toLowerCase() == "stage") {
-				if (!PlayState.instance.variables.exists("stageVariables")){
-					PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-				}
-		
-				var stageVars = PlayState.instance.variables.get("stageVariables");
-				stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+			switch(daScriptType.toLowerCase()){
+				case "stage":
+					if (!PlayState.instance.variables.exists("stageVariables")){
+						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
+					}
+			
+					var stageVars = PlayState.instance.variables.get("stageVariables");
+					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+
+				case "stagecamera":
+					if (!PlayState.instance.variables.exists("stageCameraVariables")){
+						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
+					}
+			
+					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
+					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
+		});
+
+		set('getColorFromHex', function(color:String):Int {
+			if (color == null) return 0xFFFFFFFF;
+
+			if (color.length >= 4 && color.substr(0,4) == "0xFF")
+				color = color.substr(4);
+			if (color.length >= 2 && color.substr(0,2) == "0x")
+				color = color.substr(2);
+			if (color.length >= 1 && color.substr(0,1) == "#")
+				color = color.substr(1);
+
+			return FlxColor.fromString("#" + color);
 		});
 
 		set('buildTarget', LuaUtils.getBuildTarget());

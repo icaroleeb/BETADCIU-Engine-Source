@@ -178,8 +178,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	function addHelpScreen()
 	{
 		var str:Array<String> = ["CAMERA",
-		"E/Q - Camera Zoom In/Out",
-		"J/K/L/I - Move Camera",
+		"E/Q or Wheel Mouse - Camera Zoom In/Out",
+		"J/K/L/I or Left Click - Move Camera",
 		"R - Reset Camera Zoom",
 		"",
 		"CHARACTER",
@@ -916,9 +916,19 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	var holdingFrameTime:Float = 0;
 	var holdingFrameElapsed:Float = 0;
 	var undoOffsets:Array<Float> = null;
+
+	var pressMouseCamera:Bool = true;
+	var cameraZoomEditor:Float = 1.05;
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+		var cameraSpeed:Float = 8;
+
+		if(FlxG.keys.pressed.SHIFT)
+			cameraSpeed = 12;
+
+		FlxG.camera.zoom = FlxMath.lerp(cameraZoomEditor, FlxG.camera.zoom, Math.exp(-elapsed * 3.125 * cameraSpeed));
 
 		if(PsychUIInputText.focusOn != null)
 		{
@@ -935,26 +945,41 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			shiftMult = 4;
 			shiftMultBig = 10;
 		}
+		
 		if(FlxG.keys.pressed.CONTROL) ctrlMult = 0.25;
+		
+		if (FlxG.mouse.wheel != 0) {
+			shiftMult = 8;
+			shiftMultBig = 14;
+		}
 
 		// CAMERA CONTROLS
+		if(pressMouseCamera && FlxG.mouse.pressed && (FlxG.mouse.deltaScreenX != 0 || FlxG.mouse.deltaScreenY != 0))
+		{
+			FlxG.camera.scroll.x -= FlxG.mouse.deltaScreenX;
+			FlxG.camera.scroll.y -= FlxG.mouse.deltaScreenY;
+		}
+
 		if (FlxG.keys.pressed.J) FlxG.camera.scroll.x -= elapsed * 500 * shiftMult * ctrlMult;
 		if (FlxG.keys.pressed.K) FlxG.camera.scroll.y += elapsed * 500 * shiftMult * ctrlMult;
 		if (FlxG.keys.pressed.L) FlxG.camera.scroll.x += elapsed * 500 * shiftMult * ctrlMult;
 		if (FlxG.keys.pressed.I) FlxG.camera.scroll.y -= elapsed * 500 * shiftMult * ctrlMult;
 
 		var lastZoom = FlxG.camera.zoom;
-		if(FlxG.keys.justPressed.R && !FlxG.keys.pressed.CONTROL) FlxG.camera.zoom = 1;
+		if(FlxG.keys.justPressed.R && !FlxG.keys.pressed.CONTROL) cameraZoomEditor = 1;
 		else if (FlxG.keys.pressed.E && FlxG.camera.zoom < 3) {
-			FlxG.camera.zoom += elapsed * FlxG.camera.zoom * shiftMult * ctrlMult;
-			if(FlxG.camera.zoom > 3) FlxG.camera.zoom = 3;
+			cameraZoomEditor += elapsed * FlxG.camera.zoom * shiftMult * ctrlMult;
+			if(FlxG.camera.zoom > 3) cameraZoomEditor = 3;
 		}
 		else if (FlxG.keys.pressed.Q && FlxG.camera.zoom > 0.1) {
-			FlxG.camera.zoom -= elapsed * FlxG.camera.zoom * shiftMult * ctrlMult;
-			if(FlxG.camera.zoom < 0.1) FlxG.camera.zoom = 0.1;
+
+			cameraZoomEditor -= elapsed * FlxG.camera.zoom * shiftMult * ctrlMult;
+			if(FlxG.camera.zoom < 0.1) cameraZoomEditor = 0.1;
 		}
 
-		if(lastZoom != FlxG.camera.zoom) cameraZoomText.text = 'Zoom: ' + FlxMath.roundDecimal(FlxG.camera.zoom, 2) + 'x';
+		if (FlxG.mouse.wheel != 0) cameraZoomEditor -= elapsed * FlxG.camera.zoom * shiftMult * ctrlMult * FlxG.mouse.wheel;
+
+		if(lastZoom != cameraZoomEditor) cameraZoomText.text = 'Zoom: ' + FlxMath.roundDecimal(cameraZoomEditor, 2) + 'x';
 
 		// CHARACTER CONTROLS
 		var changedAnim:Bool = false;
@@ -1145,7 +1170,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		/////////////
 		var canLoadBG:Bool = false;
 
-		#if BASE_GAME_FILES canLoadBG = true; #end
 		#if ESSENTIAL_COVER_FILES canLoadBG = true; #end
 
 		if (!canLoadBG) {

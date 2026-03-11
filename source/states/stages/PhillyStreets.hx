@@ -54,6 +54,12 @@ class PhillyStreets extends BaseStage
 
 		if(!ClientPrefs.data.lowQuality)
 		{
+			var solid:FlxSprite = new FlxSprite(-500, -1000).makeGraphic(4000, 3000, 0xFF8E9191);
+			solid.scrollFactor.set();
+			stageVars.set('solid', solid);
+			add(solid);
+			darkenable.push(solid);
+
 			scrollingSky = new FlxTiledSprite(Paths.image('phillyStreets/phillySkybox'), 2922, 718, true, false);
 			scrollingSky.antialiasing = ClientPrefs.data.antialiasing;
 			scrollingSky.setPosition(-650, -375);
@@ -68,7 +74,7 @@ class PhillyStreets extends BaseStage
 			add(phillySkyline);
 			darkenable.push(phillySkyline);
 
-			var phillyForegroundCity:BGSprite = new BGSprite('phillyStreets/phillyForegroundCity', 625, 94, 0.3, 0.3);
+			var phillyForegroundCity:BGSprite = new BGSprite('phillyStreets/phillyForegroundCity', 600, 69, 0.3, 0.3);
 			stageVars.set('phillyForegroundCity', phillyForegroundCity);
 			add(phillyForegroundCity);
 			darkenable.push(phillyForegroundCity);
@@ -79,14 +85,14 @@ class PhillyStreets extends BaseStage
 		add(phillyConstruction);
 		darkenable.push(phillyConstruction);
 
-		var phillyHighwayLights:BGSprite = new BGSprite('phillyStreets/phillyHighwayLights', 284, 305, 1, 1);
+		var phillyHighwayLights:BGSprite = new BGSprite('phillyStreets/phillyHighwayLights', 122, 201, 0.8, 0.8);
 		stageVars.set('phillyHighwayLights', phillyHighwayLights);
 		add(phillyHighwayLights);
 		darkenable.push(phillyHighwayLights);
 
 		if(!ClientPrefs.data.lowQuality)
 		{
-			var phillyHighwayLightsLightmap:BGSprite = new BGSprite('phillyStreets/phillyHighwayLights_lightmap', 284, 305, 1, 1);
+			var phillyHighwayLightsLightmap:BGSprite = new BGSprite('phillyStreets/phillyHighwayLights_lightmap', 122, 201, 0.8, 0.8);
 			phillyHighwayLightsLightmap.blend = ADD;
 			phillyHighwayLightsLightmap.alpha = 0.6;
 			stageVars.set('phillyHighwayLightsLightmap', phillyHighwayLightsLightmap);
@@ -94,14 +100,14 @@ class PhillyStreets extends BaseStage
 			darkenable.push(phillyHighwayLightsLightmap);
 		}
 
-		var phillyHighway:BGSprite = new BGSprite('phillyStreets/phillyHighway', 139, 209, 1, 1);
+		var phillyHighway:BGSprite = new BGSprite('phillyStreets/phillyHighway', -23, 105, 0.8, 0.8);
 		stageVars.set('phillyHighway', phillyHighway);
 		add(phillyHighway);
 		darkenable.push(phillyHighway);
 
 		if(!ClientPrefs.data.lowQuality)
 		{
-			var phillySmog:BGSprite = new BGSprite('phillyStreets/phillySmog', -6, 245, 0.8, 1);
+			var phillySmog:BGSprite = new BGSprite('phillyStreets/phillySmog', -6, 305, 0.8, 1);
 			stageVars.set('phillySmog', phillySmog);
 			add(phillySmog);
 			darkenable.push(phillySmog);
@@ -233,6 +239,9 @@ class PhillyStreets extends BaseStage
 			});
 			PlayState.instance.camGame.filters = filters;
 		}
+
+		FlxTween.cancelTweensOf(phillyCars);
+		FlxTween.cancelTweensOf(phillyCars2);
 		super.destroy();
 	}
 

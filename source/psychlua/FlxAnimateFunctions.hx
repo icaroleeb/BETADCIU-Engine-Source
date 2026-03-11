@@ -36,6 +36,13 @@ class FlxAnimateFunctions
 		
 					var stageVars = variables.get("stageVariables");
 					stageVars.set(tag, mySprite);
+				case "stagecamera":
+					if (!variables.exists("stageCameraVariables")){
+						variables.set("stageCameraVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageCameraVariables");
+					stageVars.set(tag, mySprite);
 			}
 			
 			mySprite.active = true;

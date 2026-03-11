@@ -26,27 +26,28 @@ class School extends BaseStage
 		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
 		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'bf-pixel-dead';
 
-		//var bgSky:BGSprite = new BGSprite('weeb/weebSky', 0, 0, 0.1, 0.1);
-		var bgSky:FunkinSprite = FunkinSprite.create(0, 0, 'weeb/weebSky');
-		bgSky.scrollFactor.set(0.1, 0.1);
+		var bgSky:FunkinSprite = FunkinSprite.create(-626, -78, 'weeb/weebSky');
+		bgSky.scrollFactor.set(0.2, 0.2);
 		stageVars.set("bgSky", bgSky);
 		add(bgSky);
 		bgSky.antialiasing = false;
 		pixelPerfectEffectArray.push(bgSky);
 
-		var repositionShit = -200;
+		var backTrees:FunkinSprite = FunkinSprite.create(-842, -80, 'weeb/weebBackTrees');
+		backTrees.scrollFactor.set(0.5, 0.5);
+		stageVars.set("backTrees", backTrees);
+		add(backTrees);
+		backTrees.antialiasing = false;
+		pixelPerfectEffectArray.push(backTrees);
 
-		//var bgSchool:BGSprite = new BGSprite('weeb/weebSchool', repositionShit, 0, 0.6, 0.90);
-		var bgSchool:FunkinSprite = FunkinSprite.create(repositionShit, 0, 'weeb/weebSchool');
-		bgSchool.scrollFactor.set(0.6, 0.90);
+		var bgSchool:FunkinSprite = FunkinSprite.create(-816, -38, 'weeb/weebSchool');
+		bgSchool.scrollFactor.set(0.75, 0.75);
 		stageVars.set("bgSchool", bgSchool);
 		add(bgSchool);
 		bgSchool.antialiasing = false;
 		pixelPerfectEffectArray.push(bgSchool);
 
-		//var bgStreet:BGSprite = new BGSprite('weeb/weebStreet', repositionShit, 0, 0.95, 0.95);
-		var bgStreet:FunkinSprite = FunkinSprite.create(repositionShit, 0, 'weeb/weebStreet');
-		bgStreet.scrollFactor.set(0.95, 0.95);
+		var bgStreet:FunkinSprite = FunkinSprite.create(-662, 6, 'weeb/weebStreet');
 		stageVars.set("bgStreet", bgStreet);
 		add(bgStreet);
 		bgStreet.antialiasing = false;
@@ -54,19 +55,14 @@ class School extends BaseStage
 
 		var widShit = Std.int(bgSky.width * PlayState.daPixelZoom);
 		if(!ClientPrefs.data.lowQuality) {
-			//var fgTrees:BGSprite = new BGSprite('weeb/weebTreesBack', repositionShit + 170, 130, 0.9, 0.9);
-			var fgTrees:FunkinSprite = FunkinSprite.create(repositionShit + 170, 130, 'weeb/weebTreesBack');
-			fgTrees.scrollFactor.set(0.9, 0.9);
-			fgTrees.setGraphicSize(Std.int(widShit * 0.8));
-			fgTrees.updateHitbox();
+			var fgTrees:FunkinSprite = FunkinSprite.create(-500, 6, 'weeb/weebTreesBack');
 			stageVars.set("fgTrees", fgTrees);
 			add(fgTrees);
 			fgTrees.antialiasing = false;
 			pixelPerfectEffectArray.push(fgTrees);
 		}
 
-		//var bgTrees:FlxSprite = new FlxSprite(repositionShit - 380, -800);
-		var bgTrees:FunkinSprite = FunkinSprite.create(repositionShit - 380, -800, null);
+		var bgTrees:FunkinSprite = FunkinSprite.create(-806, -1050, null);
 		bgTrees.frames = Paths.getPackerAtlas('weeb/weebTrees');
 		bgTrees.animation.add('treeLoop', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 12);
 		bgTrees.animation.play('treeLoop');
@@ -77,32 +73,19 @@ class School extends BaseStage
 		pixelPerfectEffectArray.push(bgTrees);
 
 		if(!ClientPrefs.data.lowQuality) {
-			//var treeLeaves:BGSprite = new BGSprite('weeb/petals', repositionShit, -40, 0.85, 0.85, ['PETALS ALL'], true);
-			var treeLeaves:FunkinSprite = FunkinSprite.create(repositionShit, -40, null);
+			var treeLeaves:FunkinSprite = FunkinSprite.create(-20, -40, null);
 			treeLeaves.frames = Paths.getSparrowAtlas('weeb/petals');
 			treeLeaves.scrollFactor.set(0.85, 0.85);
-			treeLeaves.animation.addByPrefix('PETALS ALL', 'PETALS ALL', 24, true);
-			treeLeaves.animation.play('PETALS ALL');
-			treeLeaves.setGraphicSize(widShit);
-			treeLeaves.updateHitbox();
+			treeLeaves.animation.addByPrefix('leaves', 'PETALS ALL', 24, true);
+			treeLeaves.animation.play('leaves');
 			stageVars.set("treeLeaves", treeLeaves);
 			add(treeLeaves);
 			treeLeaves.antialiasing = false;
 			pixelPerfectEffectArray.push(treeLeaves);
 		}
 
-		bgSky.setGraphicSize(widShit);
-		bgSchool.setGraphicSize(widShit);
-		bgStreet.setGraphicSize(widShit);
-		bgTrees.setGraphicSize(Std.int(widShit * 1.4));
-
-		bgSky.updateHitbox();
-		bgSchool.updateHitbox();
-		bgStreet.updateHitbox();
-		bgTrees.updateHitbox();
-
 		if(!ClientPrefs.data.lowQuality) {
-			bgGirls = new BackgroundGirls(-100, 190);
+			bgGirls = new BackgroundGirls(-646, 222);
 			bgGirls.scrollFactor.set(0.9, 0.9);
 			stageVars.set("bgGirls", bgGirls);
 			add(bgGirls);
@@ -117,6 +100,12 @@ class School extends BaseStage
 				sprite.pixelPerfectPosition = true;
 				sprite.pixelPerfectRender = true;
 			}
+		}
+
+		for (sprite in pixelPerfectEffectArray)
+		{ 
+			sprite.scale.set(6, 6);
+			sprite.updateHitbox();
 		}
 
 		switch (songName)
@@ -137,7 +126,7 @@ class School extends BaseStage
 
 	override function beatHit()
 	{
-		if(bgGirls != null) bgGirls.dance();
+		if(bgGirls != null && curBeat % (gfSpeed * speedBaseMod) == 0) bgGirls.dance();
 	}
 
 	// For events

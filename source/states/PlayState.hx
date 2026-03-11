@@ -219,6 +219,7 @@ class PlayState extends MusicBeatState
 	private var curSong:String = "";
 
 	public var gfSpeed:Int = 1;
+	public var speedBaseMod:Int = 1;
 	public var health(default, set):Float = 1;
 	public var combo:Int = 0;
 
@@ -278,6 +279,7 @@ class PlayState extends MusicBeatState
 	private var singAnimations:Array<String> = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
 
 	public var inCutscene:Bool = false;
+	public var defaultBar:Bool = true;
 	public var skipCountdown:Bool = false;
 	var songLength:Float = 0;
 
@@ -423,14 +425,18 @@ class PlayState extends MusicBeatState
 			if(SONG.gfVersion == null || SONG.gfVersion.length < 1) SONG.gfVersion = 'gf'; //Fix for the Chart Editor
 			if (stageData.hide_girlfriend) SONG.gfVersion = 'emptygf'; // quick change to prevent the null gf bug
 			gf = new Character(0, 0, SONG.gfVersion);
+			gfOldChar = SONG.gfVersion;
+			gf.charName = "gf";
 			startCharacterPos(gf);
 			//gf.scrollFactor.set(0.95, 0.95);
 		// }
 
 		dad = new Character(0, 0, SONG.player2);
+		dad.charName = "dad";
 		startCharacterPos(dad, true);
 
 		boyfriend = new Character(0, 0, SONG.player1, true);
+		boyfriend.charName = "boyfriend";
 		startCharacterPos(boyfriend);
 		
 		addStage(false, true);
@@ -459,7 +465,7 @@ class PlayState extends MusicBeatState
 			camPos.y += gf.getGraphicMidpoint().y + gf.cameraPosition[1];
 		}
 
-		if(dad.curCharacter.startsWith('gf')) {
+		if(dad.curCharacter.startsWith('gf') || dad.curCharacter.endsWith('speaker') || dad.isSpeakerChar) {
 			dad.setPosition(GF_X, GF_Y);
 			if(gf != null)
 				gf.visible = false;
@@ -575,7 +581,7 @@ class PlayState extends MusicBeatState
 
 		add(uiGroup); // leaving the ui group for scripts
 
-		var objects:Array<String> = ['healthBar', 'iconP1', 'iconP2', 'scoreTxt', 'timeBar', 'timeBarBG', 'timeTxt'];
+		var objects:Array<String> = ['healthBar', 'iconP1', 'iconP2', 'scoreTxt', 'timeBar', 'timeTxt'];
 		for (i in 0... objects.length) {
 			var obj:FlxSprite = Reflect.getProperty(PlayState.instance, objects[i]);
 			if (obj != null) obj.cameras = [camHUD];
@@ -603,6 +609,13 @@ class PlayState extends MusicBeatState
 		#end
 		noteTypes = null;
 		eventsPushed = null;
+
+		var scriptSuffix:String = null;
+
+		if (isBETADCIU)
+			scriptSuffix = "-betadciu";
+		else if (isBonus)
+			scriptSuffix = "-bonus";
 
 		// SONG SPECIFIC SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -925,7 +938,7 @@ class PlayState extends MusicBeatState
 		} else if (char == dad){
 			char.setPosition(DAD_X + dad.positionArray[0], DAD_Y + dad.positionArray[1]);
 
-			if(dad.curCharacter.startsWith('gf')) {
+			if(dad.curCharacter.startsWith('gf') || dad.curCharacter.endsWith('speaker') || dad.isSpeakerChar) {
 				dad.setPosition(GF_X + dad.positionArray[0], GF_Y + dad.positionArray[1]);
 				if(gf != null)
 					gf.visible = false;
@@ -1450,10 +1463,27 @@ class PlayState extends MusicBeatState
 		{
 			if (songData.needsVoices)
 			{
+				var voiceStatePostfix:String = "";
+
+				if (isBETADCIU)
+					voiceStatePostfix = '-betadciu';
+				else if (isBonus)
+					voiceStatePostfix = '-bonus';
+
+				var voiceStateFinal = voiceStatePostfix.toLowerCase();
+
 				var playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
+
+				if (FileSystem.exists(playerVocals + voiceStateFinal))
+					playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile + voiceStateFinal);
+					
 				vocals.loadEmbedded(playerVocals != null ? playerVocals : Paths.voices(songData.song));
 				
 				var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
+
+				if (FileSystem.exists(oppVocals + voiceStateFinal))
+					oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile + voiceStateFinal);
+
 				if(oppVocals != null && oppVocals.length > 0) opponentVocals.loadEmbedded(oppVocals);
 			}
 		}
@@ -1682,13 +1712,13 @@ class PlayState extends MusicBeatState
 				var newCharacter:String = event.value2;
 				// addCharacterToList(newCharacter, charType);
 				charactersToLoad.push(newCharacter);
-
 			case 'Play Sound':
 				Paths.sound(event.value1); //Precache sound
 			case "Change Stage":
 				stagesToLoad.push(event.value1); // stage preloading
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
+		callOnScripts('onEventPushedUnique', [event.event, event.value1 != null ? event.value1 : '', event.value2 != null ? event.value2 : '', event.value3 != null ? event.value3 : '', event.strumTime]);
 	}
 
 	function eventEarlyTrigger(event:EventNote):Float {
@@ -2096,6 +2126,7 @@ class PlayState extends MusicBeatState
 		}
 
 		setOnScripts('botPlay', cpuControlled);
+		stagesFunc(function(stage:BaseStage) stage.updatePost(elapsed));
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
 
@@ -2355,7 +2386,7 @@ class PlayState extends MusicBeatState
 				if(flValue2 == null || flValue2 <= 0) flValue2 = 0.6;
 
 				if(value != 0) {
-					if(dad.curCharacter.startsWith('gf')) { //Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
+					if(dad.curCharacter.startsWith('gf') || dad.curCharacter.endsWith('speaker') || dad.isSpeakerChar) { //Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
 						dad.playAnim('cheer', true);
 						dad.specialAnim = true;
 						dad.heyTimer = flValue2;
@@ -2461,7 +2492,10 @@ class PlayState extends MusicBeatState
 
 
 			case 'Change Character':
-				var charType:Int = 0;
+				stagesFunc(function(stage:BaseStage) stage.characterChange(value1, value2)); // putting this beacuse of the function lua
+				callOnScripts('onCharacterChange', [value1, value2]);
+
+				//var charType:Int = 0;
 				switch(value1.toLowerCase().trim()) {
 					case 'gf' | 'girlfriend' | "2":
 						FunkinLua.changeGFAuto(value2);
@@ -2479,6 +2513,8 @@ class PlayState extends MusicBeatState
 				}
 				reloadHealthBarColors();
 
+				stagesFunc(function(stage:BaseStage) stage.characterChangePost(value1, value2)); // putting this beacuse of the characters shaders including the function lua
+				callOnScripts('onCharacterChangePost', [value1, value2]);
 			case 'Change Scroll Speed':
 				if (songSpeedType != "constant")
 				{
@@ -2531,12 +2567,14 @@ class PlayState extends MusicBeatState
 				FlxG.sound.play(Paths.sound(value1), flValue2);
 			case "Change Stage":
 				if (value1 != null && value1 != ""){
+					callOnScripts('onStageChange', [value1]);
  					removeStage(); // Remove current stage
 					
 					curStage = value1; // Set new stage name
  					stageData = StageData.getStageFile(curStage); 
  					addStage();
 					setOnScripts('curStage', curStage);
+					callOnScripts('onStageChangePost', [value1]);
  				}
 		}
 
@@ -3787,6 +3825,31 @@ class PlayState extends MusicBeatState
 		}
 		return false;
 	}
+
+	public function callLuaFile(luaFile:String, ?callLua:String = "")
+	{
+		#if MODS_ALLOWED
+		var luaToLoad:String = Paths.modFolders(luaFile);
+		if(!FileSystem.exists(luaToLoad))
+			luaToLoad = Paths.getSharedPath(luaFile);
+
+		if(FileSystem.exists(luaToLoad))
+		#elseif sys
+		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		if(OpenFlAssets.exists(luaToLoad))
+		#end
+		{
+			for (script in luaArray) {
+				if (script.scriptName == luaToLoad) {
+					// Custom function call
+					script.call(callLua, []);
+					return true;
+				}
+			}
+
+		}
+		return false;
+	}
 	#end
 
 	#if HSCRIPT_ALLOWED
@@ -3832,6 +3895,27 @@ class PlayState extends MusicBeatState
 			}
 			return false;
 		}
+
+	public function callHScriptFile(scriptFile:String, ?callHScript:String = "")
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad))
+		{
+			if (Iris.instances.exists(scriptToLoad)){
+				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+				if(script.exists(callHScript)) script.call(callHScript);
+				return true;
+			};
+		}
+		return false;
+	}
 
 	public function initHScript(file:String, ?scriptType:String = "")
 	{
@@ -3990,7 +4074,7 @@ class PlayState extends MusicBeatState
 	public var ratingPercent:Float;
 	public var accuracy:Float; // old scripts
 	public var ratingFC:String;
-	public function RecalculateRating(badHit:Bool = false, scoreBop:Bool = true) {
+	public function RecalculateRating(badHit:Bool = false, scoreBop:Bool = true):Void {
 		setOnScripts('score', songScore);
 		setOnScripts('misses', songMisses);
 		setOnScripts('hits', songHits);
@@ -4165,17 +4249,18 @@ class PlayState extends MusicBeatState
 		var stagesPreloaded:Bool = false; // because this is looping for some reason?
 
 		for(stage in stagesToLoad){ // loading stages without the multithread because it didn't worked that well with it
-		var ogStage:String =  "";
-		if (curStage != null) ogStage = curStage;
+			var ogStage:String =  "";
+			if (curStage != null) ogStage = curStage;
+
 			if (!stagesPreloaded) {
 				for (stage in stagesToLoad) {
-					removeStage();
+					removeStage(true);
 					curStage = stage;
 					stageData = StageData.getStageFile(curStage); 
 					addStage(false, true);
 					trace('Stage Loaded: ' + stage + '!');
 				}
-				removeStage();
+				removeStage(true);
 				curStage = ogStage;
 				stageData = StageData.getStageFile(curStage); 
 				addStage(false, true);
@@ -4484,7 +4569,7 @@ class PlayState extends MusicBeatState
 		return stageData;
 	}
 
-	public function removeObjects(stageData:StageFile){
+	public function removeObjects(stageData:StageFile, preload:Bool=false){
 		// if you comment out the else part, the stage loads fine but character layers and positions are messed up.
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
@@ -4501,9 +4586,14 @@ class PlayState extends MusicBeatState
 			remove(dad);
 			remove(boyfriend);
 		}
+
+		// this should help for base stages
+		if (ClientPrefs.data.comboCam == "Game" && !preload) remove(comboGroup);
 	}
 
-	public function addObjects(stageData:StageFile){
+	public var gfOldChar:String = '';
+
+	public function addObjects(stageData:StageFile, ?preload:Bool=false){
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
 			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
@@ -4521,15 +4611,26 @@ class PlayState extends MusicBeatState
 			add(dad);
 			add(boyfriend);
 		}
+
+		if(ClientPrefs.data.perfectPixel == "inGame"){
+			gf.pixelPerfectPosition = stageData.isPixelStage;
+			gf.pixelPerfectRender = stageData.isPixelStage;
+			dad.pixelPerfectPosition = stageData.isPixelStage;
+			dad.pixelPerfectRender = stageData.isPixelStage;
+			boyfriend.pixelPerfectPosition = stageData.isPixelStage;
+			boyfriend.pixelPerfectRender = stageData.isPixelStage;
+		}
+
+		if(!preload && ClientPrefs.data.comboCam == "Game") add(comboGroup);
 	}
 
 	public var hardCodedStage:BaseStage;
+	//public var hardCodedStagePreload:BaseStage;
 	public var addedStages:Array<String> = [];
-	public function removeStage(){
-		removeObjects(stageData);
+	public var addedStagesHScript:Array<String> = [];
 
-		if (ClientPrefs.data.comboCam == "Game") // this should help for base stages
-			remove(comboGroup);
+	public function removeStage(?preload:Bool=false) {
+		removeObjects(stageData, preload);
 
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
@@ -4541,7 +4642,9 @@ class PlayState extends MusicBeatState
 		#if LUA_ALLOWED 
 		stopLuasNamed('stages/' + curStage + '.lua', "stage");
 		for (stage in addedStages) stopLuasNamed(stage, "stage"); #end
-		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
+		#if HSCRIPT_ALLOWED 
+		stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
+		for (stage in addedStagesHScript) stopHScriptsNamed(stage, "stage"); #end
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
@@ -4605,56 +4708,10 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(!isCreate){
+		if(!preload){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');
 		}
-	}
-
-	public function callLuaFile(luaFile:String, ?callLua:String = "")
-	{
-		#if MODS_ALLOWED
-		var luaToLoad:String = Paths.modFolders(luaFile);
-		if(!FileSystem.exists(luaToLoad))
-			luaToLoad = Paths.getSharedPath(luaFile);
-
-		if(FileSystem.exists(luaToLoad))
-		#elseif sys
-		var luaToLoad:String = Paths.getSharedPath(luaFile);
-		if(OpenFlAssets.exists(luaToLoad))
-		#end
-		{
-			for (script in luaArray) {
-				if (script.scriptName == luaToLoad) {
-					// Custom function call
-					script.call(callLua, []);
-					return true;
-				}
-			}
-
-		}
-		return false;
-	}
-
-	public function callHScriptFile(scriptFile:String, ?callHScript:String = "")
-	{
-		#if MODS_ALLOWED
-		var scriptToLoad:String = Paths.modFolders(scriptFile);
-		if(!FileSystem.exists(scriptToLoad))
-			scriptToLoad = Paths.getSharedPath(scriptFile);
-		#else
-		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
-		#end
-
-		if(FileSystem.exists(scriptToLoad))
-		{
-			if (Iris.instances.exists(scriptToLoad)){
-				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
-				if(script.exists(callHScript)) script.call(callHScript);
-				return true;
-			};
-		}
-		return false;
 	}
 }

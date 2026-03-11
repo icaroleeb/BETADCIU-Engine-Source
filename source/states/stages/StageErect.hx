@@ -2,6 +2,7 @@ package states.stages;
 
 import states.stages.objects.*;
 import objects.Character;
+import shaders.AdjustColorShader;
 
 class StageErect extends BaseStage
 {
@@ -10,6 +11,11 @@ class StageErect extends BaseStage
 	var dadbattleFog:DadBattleFog;
 
 	public static var inGameplay:Bool = true;
+
+	var colorShaderBf:AdjustColorShader;
+	var colorShaderDad:AdjustColorShader;
+	var colorShaderGf:AdjustColorShader;
+
 	override function create()
 	{
 		var stageVars:Map<String, FlxSprite> = new Map<String, FlxSprite>(); // offset menu fix.
@@ -25,37 +31,98 @@ class StageErect extends BaseStage
 			stageVars = PlayState.instance.variables.get("stageVariables");
 		}
 
-		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
+		var solid:FlxSprite = new FlxSprite(-500, -1000).makeGraphic(2400, 2000, 0xFF222026);
+		solid.scrollFactor.set();
+		if (inGameplay) stageVars.set("solid", solid);
+		add(solid);
+
+		var crowd:BGSprite = new BGSprite('erect/crowd', 682, 290, 0.8, 0.8, ['idle0'], true);
+		crowd.animation.curAnim.frameRate = 12;
+		if (inGameplay) stageVars.set("crowd", crowd);
+		add(crowd);
+
+		var brightLightSmall:BGSprite = new BGSprite('erect/brightLightSmall', 967, -103, 1.2, 1.2);
+		brightLightSmall.blend = ADD;
+		if (inGameplay) stageVars.set("brightLightSmall", brightLightSmall);
+		add(brightLightSmall);
+
+		var bg:BGSprite = new BGSprite('erect/bg', -765, -247, 1, 1);
 		if (inGameplay) stageVars.set("bg", bg);
 		add(bg);
 
-		var stageFront:BGSprite = new BGSprite('stagefront', -650, 600, 0.9, 0.9);
-		stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
-		stageFront.updateHitbox();
-		if (inGameplay) stageVars.set("stageFront", stageFront);
-		add(stageFront);
+		var server:BGSprite = new BGSprite('erect/server', -991, 205, 1, 1);
+		if (inGameplay) stageVars.set("server", server);
+		add(server);
 
-		if(!ClientPrefs.data.lowQuality) {
-			var stageLight:BGSprite = new BGSprite('stage_light', -125, -100, 0.9, 0.9);
-			stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
-			stageLight.updateHitbox();
-			if (inGameplay) stageVars.set("stageLight", stageLight);
-			add(stageLight);
+		var lights:BGSprite = new BGSprite('erect/lights', 189, -500, 1.2, 1.2);
+		if (inGameplay) stageVars.set("lights", lights);
+		add(lights);
 
-			var stageLight:BGSprite = new BGSprite('stage_light', 1225, -100, 0.9, 0.9);
-			stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
-			stageLight.updateHitbox();
-			stageLight.flipX = true;
-			if (inGameplay) stageVars.set("stageLight2", stageLight);
-			add(stageLight);
+		var orangeLight:BGSprite = new BGSprite('erect/orangeLight', 189, -500, 1, 1);
+		orangeLight.scale.set(1, 1700);
+		orangeLight.updateHitbox();
+		orangeLight.blend = ADD;
+		if (inGameplay) stageVars.set("orangeLight", orangeLight);
+		add(orangeLight);
 
-			var stageCurtains:BGSprite = new BGSprite('stagecurtains', -500, -300, 1.3, 1.3);
-			stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.9));
-			stageCurtains.updateHitbox();
-			if (inGameplay) stageVars.set("stageCurtains", stageCurtains);
-			add(stageCurtains);
-		}
+		var lightgreen:BGSprite = new BGSprite('erect/lightgreen', -171, 242, 1, 1);
+		lightgreen.blend = ADD;
+		if (inGameplay) stageVars.set("lightgreen", lightgreen);
+		add(lightgreen);
+
+		var lightred:BGSprite = new BGSprite('erect/lightred', -101, 560, 1, 1);
+		lightred.blend = ADD;
+		if (inGameplay) stageVars.set("lightred", lightred);
+		add(lightred);
 	}
+
+	override function createPost()
+	{
+		var lights:BGSprite = new BGSprite('erect/lights', -847, -245, 1.2, 1.2);
+		if (inGameplay) PlayState.instance.variables.get("stageVariables").set("lights", lights);
+		add(lights);
+
+		var lightAbove:BGSprite = new BGSprite('erect/lightAbove', 804, -117, 1, 1);
+		lightAbove.blend = ADD;
+		if (inGameplay) PlayState.instance.variables.get("stageVariables").set("lightAbove", lightAbove);
+		add(lightAbove);
+
+		if(ClientPrefs.data.shaders)
+			applyCharacterShader("boyfriend");
+			applyCharacterShader("dad");
+			applyCharacterShader("gf");
+	}
+
+	function applyCharacterShader(char:String)
+	{
+		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
+		var colorShader = new AdjustColorShader();
+
+		if (character.isPlayer)
+		{
+			colorShader.brightness = -23;
+			colorShader.hue = 12;
+			colorShader.contrast = 7;
+			colorShader.saturation = 0;
+		}
+		else if (character.isSpeakerChar)
+		{
+			colorShader.brightness = -30;
+			colorShader.hue = -9;
+			colorShader.contrast = -4;
+			colorShader.saturation = 0;
+		}
+		else
+		{
+			colorShader.brightness = -33;
+			colorShader.hue = -32;
+			colorShader.contrast = -23;
+			colorShader.saturation = 0;
+		}
+
+		character.shader = colorShader.shader;
+	}
+
 	override function eventPushed(event:objects.Note.EventNote)
 	{
 		switch(event.event)
@@ -118,5 +185,13 @@ class StageErect extends BaseStage
 						FlxTween.tween(dadbattleFog, {alpha: 0}, 0.7, {onComplete: function(twn:FlxTween) dadbattleFog.visible = false});
 				}
 		}
+	}
+
+	override function characterChangePost(charExist:String, charNew:String) {
+		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
+	}
+
+	override public function destroy():Void {
+		super.destroy();
 	}
 }

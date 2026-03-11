@@ -7,6 +7,13 @@ import haxe.io.Bytes;
 
 class CoolUtil
 {
+	public inline static final DEFAULT_VIBRATION_PERIOD:Float = 0.1;
+	public inline static final DEFAULT_VIBRATION_DURATION:Float = 0.1;
+	public inline static final DEFAULT_VIBRATION_AMPLITUDE:Float = 0.5;
+	public inline static final DEFAULT_VIBRATION_SHARPNESS:Float = 1;
+
+	public inline static final MIN_VIBRATION_AMPLITUDE:Float = 0.25;
+
 	public static function checkForUpdates(url:String = null):String {
 		if (url == null || url.length == 0)
 			url = "https://raw.githubusercontent.com/Blantados/BETADCIU-Engine-Source/Psych-Based/gitVersion.txt";

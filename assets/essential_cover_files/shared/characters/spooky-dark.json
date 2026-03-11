@@ -1,0 +1,81 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [-20, 25],
+			"anim": "singUP",
+			"fps": 24,
+			"playerOffsets": [-64, 25],
+			"name": "spooky UP NOTE",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-20, -145],
+			"anim": "singDOWN",
+			"fps": 24,
+			"playerOffsets": [-1, -142],
+			"name": "spooky DOWN note",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [130, -20],
+			"anim": "singLEFT",
+			"fps": 24,
+			"playerOffsets": [80, -10],
+			"name": "note sing left",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-130, -15],
+			"anim": "singRIGHT",
+			"fps": 24,
+			"playerOffsets": [-51, -15],
+			"name": "spooky sing right",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "danceLeft",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "spooky dance idle",
+			"indices": [0, 1, 2, 3, 4, 5, 6, 7]
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "danceRight",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "spooky dance idle",
+			"indices": [8, 9, 10, 11, 12, 13, 14, 15]
+		},
+		{
+			"offsets": [52, 28],
+			"loop": false,
+			"fps": 24,
+			"anim": "hey",
+			"indices": [],
+			"name": "spooky kids YEAH!!",
+			"playerOffsets": [100, 27]
+		}
+	],
+	"vocals_file": "",
+	"no_antialiasing": false,
+	"image": "characters/dark/spooky_dark",
+	"position": [-70, 200],
+	"player_camera_position": [140, 0],
+	"healthicon": "spooky",
+	"flip_x": false,
+	"healthbar_colors": [213, 126, 0],
+	"camera_position": [0, 0],
+	"player_position": [10, 200],
+	"sing_duration": 4,
+	"isPlayerChar": false,
+	"scale": 1,
+	"_editor_isPlayer": true
+}

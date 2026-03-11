@@ -170,7 +170,7 @@ class Main extends Sprite
 
 		#if !html5
 		game.addEventListener(Event.ADDED_TO_STAGE, function(_) {
-			FlxG.scaleMode = new FullScreenScaleMode();
+			if (!ClientPrefs.data.oldWindowScaling) FlxG.scaleMode = new FullScreenScaleMode();
 		});
 		#end
 
