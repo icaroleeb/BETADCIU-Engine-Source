@@ -4325,18 +4325,19 @@ class PlayState extends MusicBeatState
 		for(stage in stagesToLoad){ // loading stages without the multithread because it didn't worked that well with it
 			var ogStage:String =  "";
 			if (curStage != null) ogStage = curStage;
-
 			if (!stagesPreloaded) {
 				for (stage in stagesToLoad) {
 					removeStage(true);
 					curStage = stage;
-					stageData = StageData.getStageFile(curStage); 
+					stageData = StageData.getStageFile(curStage);
+					isCreatePost = true;
 					addStage(false, true);
 					trace('Stage Loaded: ' + stage + '!');
 				}
 				removeStage(true);
 				curStage = ogStage;
 				stageData = StageData.getStageFile(curStage); 
+				isCreatePost = false;
 				addStage(false, true);
 				stagesPreloaded = true;
 				trace('Stage Preloading Finished.');
@@ -4643,7 +4644,7 @@ class PlayState extends MusicBeatState
 		return stageData;
 	}
 
-	public function removeObjects(stageData:StageFile, preload:Bool=false){
+	public function removeObjects(stageData:StageFile){
 		// if you comment out the else part, the stage loads fine but character layers and positions are messed up.
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
@@ -4662,12 +4663,12 @@ class PlayState extends MusicBeatState
 		}
 
 		// this should help for base stages
-		if (ClientPrefs.data.comboCam == "Game" && !preload) remove(comboGroup);
+		if (ClientPrefs.data.comboCam == "Game") remove(comboGroup);
 	}
 
 	public var gfOldChar:String = '';
 
-	public function addObjects(stageData:StageFile, ?preload:Bool=false){
+	public function addObjects(stageData:StageFile){
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
 			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
@@ -4695,7 +4696,7 @@ class PlayState extends MusicBeatState
 			boyfriend.pixelPerfectRender = stageData.isPixelStage;
 		}
 
-		if(!preload && ClientPrefs.data.comboCam == "Game") add(comboGroup);
+		if(ClientPrefs.data.comboCam == "Game") add(comboGroup);
 	}
 
 	public var hardCodedStage:BaseStage;
@@ -4704,7 +4705,7 @@ class PlayState extends MusicBeatState
 	public var addedStagesHScript:Array<String> = [];
 
 	public function removeStage(?preload:Bool=false) {
-		removeObjects(stageData, preload);
+		removeObjects(stageData);
 
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
@@ -4737,7 +4738,10 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) {
+	public var isCreatePost:Bool = false; // createPost Preload
+
+	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) 
+	{
 		if(!preload) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 
 		var path:String = Paths.getPath('stages/' + curStage + '.json', TEXT);
@@ -4770,7 +4774,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		addObjects(stageData, preload);
+		addObjects(stageData);
 
 		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -4778,7 +4782,8 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(!preload){
+		if(isCreatePost)
+		{
 			stagesFunc(function(stage:BaseStage) stage.createPost());
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');
