@@ -73,7 +73,7 @@ class Character extends OffsettableSprite
 		var daValue:Float = value * jsonScale;
 		this.scale.set(daValue, daValue);
 
-		trace("fucked with");
+		// trace("fucked with");
 
 		return value;
 	}

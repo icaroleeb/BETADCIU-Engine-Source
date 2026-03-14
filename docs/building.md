@@ -1,3 +1,5 @@
+This BUILDING file came with PE.
+
 # Psych Engine Build Instructions
 
 * [Dependencies](#dependencies)

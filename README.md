@@ -1,10 +1,12 @@
-![PsychionalEngineLogo](docs/img/PsychEngineLogoTweak.png)
+This README file came with PE. I just updated a few things.
 
-Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
+![BetadciuEngineLogo](docs/img/BETADCIUEngineLogo.png)
+
+Engine originally used on [Blantados](https://www.youtube.com/@Blantados21) BETADCIU's and Covers, intended to be a easy and versatile engine for cover makers.
 
 ## Installation:
 
-Refer to [the Build Instructions](/docs/BUILDING.md)
+Refer to [the Build Instructions](/docs/building.md)
 
 ## Customization:
 
@@ -17,15 +19,22 @@ To start you off, disabling *Video Cutscenes* should be simple, simply delete th
 Same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, this and other customization options are all available within the `Project.xml` file.
 
 ## Softcoding (.lua/.hx)
-For this you can head over to [the wiki](https://shadowmario.github.io/psychengine.lua)
+For this you can head over to [the Psych's Lua wiki](https://shadowmario.github.io/psychengine.lua)
 
-There you can learn how to use the 212 PlayState funcions in your mod!
+There you can learn how to use the 212 PlayState funcions of the original Psych Engine in your mod!
 
 ## Credits:
-* Shadow Mario - Main Programmer and Head of Psych Engine.
-* Riveren - Main Artist/Animator of Psych Engine.
+
+* [Blantados](https://www.youtube.com/@Blantados21) - Main Programmer and Head of BETADCIU Engine.
+* [Ryiuu](https://www.youtube.com/@Ryiuu) - Additional Programmer for BETADCIU Engine.
+* [Tacos](https://www.youtube.com/@Tacos360) - Additional Programmer for BETADCIU Engine.
 
 ### Special Thanks
+
+* Digi - Custom Stickers Artist.
+* Icaro Lee - Ported legacy Main Menu, Some options and Fixed some Stuff.
+* Shadow Mario - Main Programmer and Head of Psych Engine.
+* Riveren - Main Artist/Animator of Psych Engine.
 * bbpanzu - Ex-Team Member (Programmer).
 * crowplexus - HScript Iris, Input System v3, and Other PRs.
 * Kamizeta - Creator of Pessy, Psych Engine's mascot.
@@ -45,41 +54,26 @@ There you can learn how to use the 212 PlayState funcions in your mod!
 
 # Features
 
-## Attractive animated dialogue boxes:
+## Proper Stage Switching:
+* A dedicated Event/Function to make Stage Changes, making Stage transitions easier to do.
+![Stage Switching](docs/img/StageSwitch.gif)
 
-![Animated Dialogue Boxes](docs/img/dialogue.gif)
+## Character Flipping and Offsets:
+* So you don't have to make "character-player.json" ;)
+![Player Offsets](docs/img/PlayerOffsets.png)
 
 ## New Main Menu
 * A brand new menu that makes your experience even better!
 ![Main Menu](docs/img/MainMenu.png)
 
+## Attractive animated dialogue boxes:
+![Animated Dialogue Boxes](docs/img/dialogue.gif)
+
+
 ## Mod Support
 * Probably one of the main points of this engine, you can code in .lua files outside of the source code, making your own weeks without even messing with the source!
 * Comes with a Mod Organizing/Disabling Menu.
 ![Mod Support](docs/img/ModsMenu.png)
-
-
-## Atleast one change to every week:
-### Week 1:
-  * New Dad Left sing sprite
-  * Unused stage lights are now used
-  * Dad Battle has a spotlight effect for the breakdown
-### Week 2:
-  * Both BF and Skid & Pump does "Hey!" animations
-  * Thunders does a quick light flash and zooms the camera in slightly
-  * Added a quick transition/cutscene to Monster
-### Week 3:
-  * BF does "Hey!" during Philly Nice
-  * Blammed has a cool new colors flash during that sick part of the song
-### Week 4:
-  * Better hair physics for Mom/Boyfriend (Maybe even slightly better than Week 7's :eyes:)
-  * Henchmen die during all songs. Yeah :(
-### Week 5:
-  * Bottom Boppers and GF does "Hey!" animations during Cocoa and Eggnog
-  * On Winter Horrorland, GF bops her head slower in some parts of the song.
-### Week 6:
-  * On Thorns, the HUD is hidden during the cutscene
-  * Also there's the Background girls being spooky during the "Hey!" parts of the Instrumental
 
 ## Cool new Chart Editor changes and countless bug fixes
 ![Chart Editor](docs/img/chart.png)
@@ -124,4 +118,4 @@ There you can learn how to use the 212 PlayState funcions in your mod!
 * You can enable "Combo Stacking" in Gameplay Options. This causes the combo sprites to just be one sprite with an animation rather than sprites spawning each note hit.
 
 
-#### Psych Engine by ShadowMario, Friday Night Funkin' by ninjamuffin99
+#### BETADCIU Engine by Blantados, Psych Engine by ShadowMario, Friday Night Funkin' by ninjamuffin99

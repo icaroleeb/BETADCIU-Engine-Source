@@ -242,19 +242,19 @@ function onMoveCamera(focus:String)
 
 
 // Event notes hooks
-function onEvent(name:String, value1:String, value2:String, strumTime:Float)
+function onEvent(name:String, value1:String, value2:String, value3:String, strumTime:Float)
 {
 	// Event note triggered
 
 	// print('Event triggered: ', name, value1, value2, strumTime);
 }
 
-function onEventPushed(name:String, value1:String, value2:String, strumTime:Float)
+function onEventPushed(name:String, value1:String, value2:String, value3:String, strumTime:Float)
 {
 	// Called for every event note, recommended to precache assets
 }
 
-function eventEarlyTrigger(name:String, value1:String, value2:String, strumTime:Float)
+function eventEarlyTrigger(name:String, value1:String, value2:String, value3:String, strumTime:Float)
 {
 	/*
 	Here's a port of the Kill Henchmen early trigger:
@@ -294,4 +294,33 @@ function onCustomSubstateDestroy(name:String)
 {
 	// "name" is defined on "openCustomSubstate(name)"
 	// Called when you use "closeCustomSubstate()"
+}
+
+function onRestart()
+{
+	// Called when the restart button on the pause menu is pressed
+}
+
+function onRestartPost() {
+	// Called right after the onCreatePost when the song is restarted
+}
+
+function onCharacterChange(characterType:String, character:String)
+{
+	// Called before a character is changed with the "Change Character" event
+	// "characterType" can be: "dad", "bf", "gf"
+	// "character" is the name of the character.json, like: "MrBeast"
+}
+
+function onCharacterChangePost() {
+	// Called after a character is changed with the "Change Character" event
+}
+
+function onStageChange(newStage:String)
+{
+	// Called before a stage is changed with the "Change Stage" event
+}
+
+function onStageChangePost() {
+	// Called after a stage is changed with the "Change Stage" event
 }

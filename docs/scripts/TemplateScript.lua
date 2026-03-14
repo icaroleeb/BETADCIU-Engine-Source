@@ -275,3 +275,31 @@ end
 function onSoundFinished(tag)
 	-- Only called if you use playSound() with a tag
 end
+
+function onRestart()
+	-- Called when the restart button on the pause menu is pressed
+end
+
+function onRestartPost() 
+	-- Called right after the onCreatePost when the song is restarted
+end
+
+function onCharacterChange(characterType, character)
+
+	-- Called before a character is changed with the "Change Character" event
+	-- "characterType" can be: "dad", "bf", "gf"
+	-- "character" is the name of the character.json, like: "MrBeast"
+end
+
+function onCharacterChangePost(characterType, character) 
+	-- Called after a character is changed with the "Change Character" event
+end
+
+function onStageChange(newStage)
+
+	-- Called before a stage is changed with the "Change Stage" event
+end
+
+function onStageChangePost(newStage) 
+	-- Called after a stage is changed with the "Change Stage" event
+end

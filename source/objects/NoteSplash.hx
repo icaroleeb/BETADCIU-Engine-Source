@@ -69,26 +69,29 @@ class NoteSplash extends FlxSprite
 			if (PlayState.SONG != null && PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) splash = PlayState.SONG.splashSkin;
 		}
 
-		if (splash == 'noteSkins/NOTE_assets') splash = 'noteSplashes/noteSplashes'; // lets avoid some problems with the default stuff.
-		texture = splash;
-		var splashPaths:Array<String> = [
-			'notes/noteSplashes-$texture',
-			'noteSkins/noteSplashes-$texture',
-			'noteSplashes/$texture/noteSplashes',
-			'noteSplashes/$texture'
-		];
-		
-		isLegacyNoteSkin = false;
-		
-		for (path in splashPaths) {
-			if (Paths.fileExists('images/$path.png', IMAGE)) {
-				texture = path;
-				isLegacyNoteSkin = (path == 'notes/noteSplashes-$splash');
-				break;
-			} else {
-				texture = "noteSplashes/noteSplashes"; // default if couldn't find anything
+		if (Type.getClassName(Type.getClass(FlxG.state)) == "states.PlayState") {
+			if (splash == 'noteSkins/NOTE_assets') splash = defaultNoteSplash + getSplashSkinPostfix();; // lets avoid some problems with the default stuff.
+			texture = splash;
+			var splashPaths:Array<String> = [
+				'notes/noteSplashes-$texture',
+				'noteSkins/noteSplashes-$texture',
+				'noteSplashes/$texture/noteSplashes',
+				'noteSplashes/$texture'
+			];
+			
+			isLegacyNoteSkin = false;
+			
+			for (path in splashPaths) {
+				if (Paths.fileExists('images/$path.png', IMAGE)) {
+					texture = path;
+					isLegacyNoteSkin = (path == 'notes/noteSplashes-$splash');
+					break;
+				} else {
+					texture = "noteSplashes/noteSplashes"; // default if couldn't find anything
+				}
 			}
-		}
+		} else
+			texture = splash;
 
 		frames = Paths.getSparrowAtlas(texture);
 		// trace(texture);
