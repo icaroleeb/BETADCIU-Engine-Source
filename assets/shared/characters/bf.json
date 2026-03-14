@@ -5,62 +5,8 @@
 			"offsets": [-5, 0],
 			"anim": "idle",
 			"fps": 24,
-			"playerOffsets": [-5, 0],
+			"playerOffsets": [0, 0],
 			"name": "BF idle dance",
-			"indices": []
-		},
-		{
-			"loop": false,
-			"offsets": [1, 27],
-			"anim": "singUP",
-			"fps": 24,
-			"playerOffsets": [-45, 28],
-			"name": "BF NOTE UP0",
-			"indices": []
-		},
-		{
-			"loop": false,
-			"offsets": [-30, -55],
-			"anim": "singDOWN",
-			"fps": 24,
-			"playerOffsets": [-10, -50],
-			"name": "BF NOTE DOWN0",
-			"indices": []
-		},
-		{
-			"loop": false,
-			"offsets": [-9, 27],
-			"anim": "singUPmiss",
-			"fps": 24,
-			"playerOffsets": [-42, 26],
-			"name": "BF NOTE UP MISS",
-			"indices": []
-		},
-		{
-			"loop": false,
-			"offsets": [-21, -19],
-			"anim": "singDOWNmiss",
-			"fps": 24,
-			"playerOffsets": [-21, -19],
-			"name": "BF NOTE DOWN MISS",
-			"indices": []
-		},
-		{
-			"loop": false,
-			"offsets": [-3, 4],
-			"anim": "hey",
-			"fps": 24,
-			"playerOffsets": [-3, 6],
-			"name": "BF HEY",
-			"indices": []
-		},
-		{
-			"loop": false,
-			"offsets": [-3, 4],
-			"anim": "singUP-alt",
-			"fps": 24,
-			"playerOffsets": [-3, 5],
-			"name": "BF HEY",
 			"indices": []
 		},
 		{
@@ -68,8 +14,26 @@
 			"offsets": [36, -5],
 			"anim": "singLEFT",
 			"fps": 24,
-			"playerOffsets": [4, -6],
-			"name": "BF NOTE LEFT0",
+			"playerOffsets": [3, 3],
+			"name": "BF NOTE LEFT",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-30, -55],
+			"anim": "singDOWN",
+			"fps": 24,
+			"playerOffsets": [-11, -43],
+			"name": "BF NOTE DOWN",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [1, 27],
+			"anim": "singUP",
+			"fps": 24,
+			"playerOffsets": [-18, 69],
+			"name": "BF NOTE UP",
 			"indices": []
 		},
 		{
@@ -77,8 +41,8 @@
 			"offsets": [-39, -6],
 			"anim": "singRIGHT",
 			"fps": 24,
-			"playerOffsets": [-48, -5],
-			"name": "BF NOTE RIGHT0",
+			"playerOffsets": [-50, 9],
+			"name": "BF NOTE RIGHT",
 			"indices": []
 		},
 		{
@@ -86,8 +50,26 @@
 			"offsets": [43, 24],
 			"anim": "singLEFTmiss",
 			"fps": 24,
-			"playerOffsets": [4, 21],
+			"playerOffsets": [4, 18],
 			"name": "BF NOTE LEFT MISS",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-21, -19],
+			"anim": "singDOWNmiss",
+			"fps": 24,
+			"playerOffsets": [-17, -26],
+			"name": "BF NOTE DOWN MISS",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-9, 27],
+			"anim": "singUPmiss",
+			"fps": 24,
+			"playerOffsets": [-18, 71],
+			"name": "BF NOTE UP MISS",
 			"indices": []
 		},
 		{
@@ -95,32 +77,59 @@
 			"offsets": [-40, 21],
 			"anim": "singRIGHTmiss",
 			"fps": 24,
-			"playerOffsets": [-44, 22],
+			"playerOffsets": [-42, 17],
 			"name": "BF NOTE RIGHT MISS",
 			"indices": []
 		},
 		{
 			"offsets": [-4, 0],
-			"indices": [],
+			"loop": true,
 			"fps": 24,
 			"anim": "scared",
-			"loop": true,
+			"indices": [],
 			"name": "BF idle shaking",
-			"playerOffsets": [0, 0]
+			"playerOffsets": [-12, -5]
+		},
+		{
+			"loop": false,
+			"offsets": [-3, 4],
+			"anim": "singUP-alt",
+			"fps": 24,
+			"playerOffsets": [-2, 9],
+			"name": "BF HEY!!",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-3, 4],
+			"anim": "hey",
+			"fps": 24,
+			"playerOffsets": [-2, 9],
+			"name": "BF HEY!!",
+			"indices": []
+		},
+		{
+			"offsets": [0, 0],
+			"indices": [],
+			"fps": 24,
+			"anim": "cheer",
+			"loop": false,
+			"name": "Boyfriend YEAH cheer",
+			"playerOffsets": [-30, 38]
 		}
 	],
 	"vocals_file": "",
 	"no_antialiasing": false,
-	"image": "characters/BOYFRIEND",
-	"position": [0, 350],
-	"player_camera_position": [0, 0],
+	"image": "characters/bf",
+	"position": [-7, 342],
+	"player_camera_position": [-18, 36],
+	"is_player_char": false,
 	"healthicon": "bf",
 	"flip_x": true,
 	"healthbar_colors": [14, 174, 254],
-	"camera_position": [0, 0],
-	"player_position": [0, 350],
+	"camera_position": [-18, 36],
+	"player_position": [-7, 342],
 	"sing_duration": 4,
-	"isPlayerChar": false,
 	"scale": 1,
 	"_editor_isPlayer": true
 }
