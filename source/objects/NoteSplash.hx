@@ -70,7 +70,7 @@ class NoteSplash extends FlxSprite
 		}
 
 		if (Type.getClassName(Type.getClass(FlxG.state)) == "states.PlayState") {
-			if (splash == 'noteSkins/NOTE_assets') splash = defaultNoteSplash + getSplashSkinPostfix();; // lets avoid some problems with the default stuff.
+			if (splash == 'noteSkins/NOTE_assets') splash = defaultNoteSplash + getSplashSkinPostfix(); // lets avoid some problems with the default stuff.
 			texture = splash;
 			var splashPaths:Array<String> = [
 				'notes/noteSplashes-$texture',
