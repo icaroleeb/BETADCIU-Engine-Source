@@ -141,12 +141,13 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 		
 		#if !mobile
-		var option:Option = new Option('FPS Counter',
-			'If unchecked, hides FPS Counter.',
-			'showFPS',
-			BOOL);
+		var option:Option = new Option('Debug Display:',
+			"Show some debug info on the top left corner of the screen.\nThis includes FPS, Memory usage, Chart info and more.\nNote: Chart info will only be shown if you have at least the FPS only option enabled.",
+			'debugDisplay',
+			STRING,
+			['Disabled', 'FPS Only', 'FPS and Memory', 'Everything']);
 		addOption(option);
-		option.onChange = onChangeFPSCounter;
+		option.onChange = onChangeDebugDisplay;
 		#end
 		
 		var option:Option = new Option('Pause Music:',
@@ -340,10 +341,12 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 	}
 
 	#if !mobile
-	function onChangeFPSCounter()
+	function onChangeDebugDisplay()
 	{
 		if(Main.fpsVar != null)
-			Main.fpsVar.visible = ClientPrefs.data.showFPS;
+			Main.fpsVar.visible = (ClientPrefs.data.debugDisplay != 'Disabled');
+
+		Main.fpsVar.updateDebugType(ClientPrefs.data.debugDisplay);
 	}
 	#end
 

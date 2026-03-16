@@ -11,7 +11,8 @@ import states.TitleState;
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
-	public var showFPS:Bool = true;
+	// public var showFPS:Bool = true;
+	public var debugDisplay:String = 'Fps and Memory';
 	public var flashing:Bool = true;
 	public var autoPause:Bool = true;
 	public var antialiasing:Bool = true;
@@ -85,6 +86,7 @@ import states.TitleState;
 	public var ogIconBop:Bool = false;
 	public var gameResolution:String = 'Native'; // Adding a resolution option
 	public var oldWindowScaling:Bool = true;
+	public var streamedNotes:Bool = false; // 
 	public var perfectPixel:String = "Disable";
 }
 
@@ -186,9 +188,11 @@ class ClientPrefs {
 			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key))
 				Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));
 		
-		if(Main.fpsVar != null)
-			Main.fpsVar.visible = data.showFPS;
-
+		if(Main.fpsVar != null){
+			Main.fpsVar.visible = (data.debugDisplay != 'Disabled');
+			Main.fpsVar.updateDebugType(ClientPrefs.data.debugDisplay);
+		}
+			
 		#if (!html5 && !switch)
 		FlxG.autoPause = ClientPrefs.data.autoPause;
 

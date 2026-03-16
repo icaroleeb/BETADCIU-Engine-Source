@@ -1,5 +1,6 @@
 package backend.tools;
 
+import openfl.Lib;
 import openfl.display.BitmapData;
 import openfl.display.Bitmap;
 import openfl.text.TextField;
@@ -10,6 +11,12 @@ import lime.graphics.opengl.GL;
 import lime.utils.Int32Array;
 
 import flixel.FlxG;
+
+import backend.ClientPrefs;
+import backend.Conductor;
+import backend.MusicBeatState;
+
+import states.PlayState;
 
 /**
 	The FPS class provides an easy-to-use monitor to display
@@ -22,8 +29,10 @@ class DebugDisplay extends Sprite
 {
 	var updating:Bool = true;
 	
-	var text:TextField;
+	var leftText:TextField;
+	var rightText:TextField;
 	var underlay:Bitmap;
+	var rightUnderlay:Bitmap;
 	
 	/**
 		The current frame rate, expressed using frames-per-second
@@ -48,21 +57,41 @@ class DebugDisplay extends Sprite
 		underlay = new Bitmap();
 		underlay.bitmapData = new BitmapData(1, 1, true, 0x6F000000);
 		addChild(underlay);
+
+		rightUnderlay = new Bitmap();
+		rightUnderlay.bitmapData = new BitmapData(1, 1, true, 0x6F000000);
+		addChild(rightUnderlay);
 		
-		text = new TextField();
-		addChild(text);
+		leftText = new TextField();
+		addChild(leftText);
 		
 		currentFPS = 0;
-		text.selectable = false;
-		text.mouseEnabled = false;
-		text.defaultTextFormat = new TextFormat("Monsterrat", 14, color);
-		text.autoSize = LEFT;
-		text.multiline = true;
-		text.text = "FPS: ";
-		
+		leftText.selectable = false;
+		leftText.mouseEnabled = false;
+		leftText.defaultTextFormat = new TextFormat("Monsterrat", 14, color);
+		leftText.autoSize = LEFT;
+		leftText.multiline = true;
+		leftText.text = "FPS: ";
+
+		rightText = new TextField();
+		addChild(rightText);
+
+		rightText.selectable = false;
+		rightText.mouseEnabled = false;
+		rightText.defaultTextFormat = new TextFormat("Monsterrat", 14, color);
+		rightText.autoSize = LEFT;
+		rightText.multiline = true;
+		rightText.text = "Chart info: ";
+
+		rightText.visible = false;
+		rightUnderlay.visible = false;
+
 		times = [];
 		
 		FlxG.signals.postStateSwitch.add(() -> updateText = __updateTxt);
+
+		if (ClientPrefs.data.debugDisplay != null)
+			updateDebugType(ClientPrefs.data.debugDisplay);
 	}
 	
 	var deltaTimeout:Float = 0.0;
@@ -84,9 +113,13 @@ class DebugDisplay extends Sprite
 		
 		currentFPS = times.length < FlxG.updateFramerate ? times.length : FlxG.updateFramerate;
 		updateText();
-        underlay.width = 370;
-		// underlay.width = text.width + 3;
-		underlay.height = text.height;
+		if (ClientPrefs.data.debugDisplay == "FPS Only" || ClientPrefs.data.debugDisplay == "FPS and Memory") underlay.width = leftText.width + 3;
+		else underlay.width = 370;
+		underlay.height = leftText.height;
+
+		rightUnderlay.width = rightText.width + 3;
+		rightUnderlay.height = rightText.height;
+		rightUnderlay.visible = rightText.visible;
 		
 		deltaTimeout = 0.0;
 	}
@@ -101,6 +134,14 @@ class DebugDisplay extends Sprite
 		if (!updating) return;
         if (memoryMegas > memoryPeak) memoryPeak = memoryMegas;
 
+		updateLeftText();
+		updateRightText();
+
+		leftText.textColor = 0xFFFFFFFF;
+		if (currentFPS < FlxG.drawFramerate * 0.5) leftText.textColor = 0xFFFF0000;
+	}
+
+	function updateLeftText() {
         var gpuStr:String = "";
 
         try {
@@ -116,10 +157,27 @@ class DebugDisplay extends Sprite
             ramText += ' | VRAM: ${flixel.util.FlxStringUtil.formatBytes(get_vramMegas() * 1024)}';
         }
 
-		text.text = 'FPS: $currentFPS\n${ramText}\nState: ${Type.getClassName(Type.getClass(FlxG.state))}\n${gpuStr}';
-		
-		text.textColor = 0xFFFFFFFF;
-		if (currentFPS < FlxG.drawFramerate * 0.5) text.textColor = 0xFFFF0000;
+		switch(debugType)
+		{
+			case 'FPS Only':
+				leftText.text = 'FPS: $currentFPS';
+			case 'FPS and Memory':
+				leftText.text = 'FPS: $currentFPS\n${ramText}';
+			case 'Everything':
+				leftText.text = 'FPS: $currentFPS\n${ramText}\nState: ${Type.getClassName(Type.getClass(FlxG.state))}\n${gpuStr}';
+		}
+	}
+
+	function updateRightText() {
+		if (Std.isOfType(FlxG.state, PlayState) && PlayState.chartingMode == true) {
+			var curState = MusicBeatState.getState();
+			@:privateAccess
+			rightText.text = 'Chart info:\nStep: ${curState.curStep}\nBeat: ${curState.curBeat}\nSection: ${curState.curSection}\nBPM: ${Conductor.bpm}';
+			rightText.visible = true;
+		} else {
+			rightText.visible = false;
+		}
+		rightUnderlay.x = rightText.x = Lib.current.stage.stageWidth - rightText.width - 20;
 	}
 
     inline function get_memoryMegas():Float
@@ -150,4 +208,22 @@ class DebugDisplay extends Sprite
 
         return -1;
     }
+
+	var debugType:String = 'Disabled';
+
+	public function updateDebugType(type:String):Void
+	{
+		updating = true;
+		switch (type)
+		{
+			case 'FPS Only':
+				debugType = 'FPS Only';
+			case 'FPS and Memory':
+				debugType = 'FPS and Memory';
+			case 'Everything':
+				debugType = 'Everything';
+			default:
+				updating = false;
+		}
+	}
 }

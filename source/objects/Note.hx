@@ -119,6 +119,8 @@ class Note extends OffsettableSprite
 	public static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
 	public static var defaultNoteSkin(default, never):String = 'NOTE_assets';
 
+	public var spawnedHoldCover:Bool = false;
+
 	public var noteSplashData:NoteSplashData = {
 		disabled: false,
 		texture: null,

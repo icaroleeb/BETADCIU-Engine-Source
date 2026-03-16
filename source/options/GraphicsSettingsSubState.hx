@@ -74,6 +74,12 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 
+		var option:Option = new Option('Stream Notes', //Name
+			"Load notes gradually during gameplay instead of all at once.\nWARNING: This feature is in BETA, so you'll probably have some problems with this enabled.",
+			'streamedNotes',
+			BOOL);
+		addOption(option);
+
 		#if !html5 //Apparently other framerates isn't correctly supported on Browser? Probably it has some V-Sync shit enabled by default, idk
 		var option:Option = new Option('Framerate',
 			"Pretty self explanatory, isn't it?",
