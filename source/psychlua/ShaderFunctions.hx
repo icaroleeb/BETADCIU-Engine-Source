@@ -67,12 +67,13 @@ class ShaderFunctions
 		var lua = funk.lua;
 		// shader shit
 		funk.addLocalCallback("initLuaShader", function(name:String) {
-			if(!ClientPrefs.data.shaders) return false;
-
 			if (funk.scriptType == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("shaders", name);
 				return true;
 			}
+			
+			if(!ClientPrefs.data.shaders) return false;
+
 			#if (!flash && MODS_ALLOWED && sys)
 			return initLuaShader(name);
 			#else
@@ -82,12 +83,12 @@ class ShaderFunctions
 		});
 
 		funk.addLocalCallback('makeLuaShader', function(tag:String, shader:String) {
-			if(!ClientPrefs.data.shaders) return false;
-
 			if (funk.scriptType == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("shaders", shader);
 				return true;
 			}
+
+			if(!ClientPrefs.data.shaders) return false;
 
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
@@ -116,12 +117,12 @@ class ShaderFunctions
 
 		
 		funk.addLocalCallback("setSpriteShader", function(obj:String, shader:String, ?keepOtherShaders:Bool = true) {
-			if(!ClientPrefs.data.shaders) return false;
-			
 			if (funk.scriptType == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("shaders", shader);
 				return true;
 			}
+
+			if(!ClientPrefs.data.shaders) return false;
 
 			#if (!flash && sys)
 			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader) && LuaUtils.getObjectDirectly(shader) == null)
@@ -186,12 +187,12 @@ class ShaderFunctions
 
 		// Dedicated callbacks for cameras now
 		funk.addLocalCallback("setCameraShader", function(obj:String, shader:String, ?keepOtherShaders:Bool = true) {
-			if(!ClientPrefs.data.shaders) return false;
-
 			if (funk.scriptType == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("shaders", shader);
 				return true;
 			}
+
+			if(!ClientPrefs.data.shaders) return false;
 			
 			#if (!flash && sys)
 			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader) && LuaUtils.getObjectDirectly(shader) == null)

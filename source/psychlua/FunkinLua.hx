@@ -153,8 +153,8 @@ class FunkinLua {
 			set('scrollSpeed', 1.0);
 			set('curStage', "stage");
 			set('hasVocals', false);
-			set('songName', (scriptType == "modpack" ? ModpackMakerState.selectedSongName : ""));
-			set('songPath', (scriptType == "modpack" ? Paths.formatToSongPath(ModpackMakerState.selectedSongName) : ""));
+			set('songName', (scriptType.toLowerCase() == "modpack" ? ModpackMakerState.selectedSongName : ""));
+			set('songPath', (scriptType.toLowerCase() == "modpack" ? Paths.formatToSongPath(ModpackMakerState.selectedSongName) : ""));
 		}
 
 		// Screen stuff
@@ -499,7 +499,7 @@ class FunkinLua {
 			var cervix = luaFile + ".lua";
 			if(luaFile.endsWith(".lua"))cervix=luaFile;
 
-			if (scriptType == "modpack"){
+			if (scriptType.toLowerCase() == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("", cervix);
 				return;
 			}
@@ -529,7 +529,7 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "addHScript", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false, ?type:String = "") {
 			#if HSCRIPT_ALLOWED
-			if (scriptType == "modpack"){
+			if (scriptType.toLowerCase() == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("", scriptFile);
 				return;
 			}
@@ -894,7 +894,7 @@ class FunkinLua {
 
 		// others
 		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '', ?value3:String = '') {
-			if (scriptType == "modpack"){
+			if (scriptType.toLowerCase() == "modpack"){
 				if (FileSystem.exists(Paths.modFolders('custom_events/$name.txt'))){
 					ModpackAssetRegistry.instance.addAsset("", 'custom_events/$name.txt');
 				}
@@ -1723,13 +1723,13 @@ class FunkinLua {
 			switch(tag.toLowerCase().trim()) {
 				case 'gf' | 'girlfriend' | "2":
 					if (flipped == null) flipped = game.gf.flipMode;
-					changeGFAuto(character, flipped);
+					changeCharacterAuto("gf", character, flipped);
 				case 'dad' | "opponent" | "1":
 					if (flipped == null) flipped = game.dad.flipMode;
-					changeDadAuto(character, flipped);
+					changeCharacterAuto("dad", character, flipped);
 				case 'boyfriend' | 'bf' | 'player' | "0":
 					if (flipped == null) flipped = game.boyfriend.flipMode;
-					changeBFAuto(character, flipped);	
+					changeCharacterAuto("boyfriend", character, flipped);	
 				default: 
 					var shit:Character = game.modchartCharacters.get(tag);
 					if (flipped == null && shit != null) shit.flipMode = flipped;
@@ -2538,7 +2538,9 @@ class FunkinLua {
 		
 		call('onCreate', []);
 
-		scriptType = ""; // Idk if this breaks anything but it fixes that one bug where anything added after switching stages gets incorrectly placed in stageVariables
+		if (scriptType != "modpack"){
+			scriptType = ""; // Idk if this breaks anything but it fixes that one bug where anything added after switching stages gets incorrectly placed in stageVariables. EDIT: It broke something
+		}
 	}
 
 	//main
@@ -2916,161 +2918,90 @@ class FunkinLua {
 		shit.charName = tag;
 	}
 
-	//trying to do some auto stuff so i don't have to set manual x and y values
-	public static function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
+	// Combined them all into one function
+	public static function changeCharacterAuto(target:String, id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {
+		var charObj:Character;
+		var posX:Float = 0;
+		var posY:Float = 0;
+		var oldChar:String;
+		
+		switch(target) {
+			case "boyfriend" | "bf":
+				target = "boyfriend";
+				charObj = PlayState.instance.boyfriend;
+			case "dad":
+				charObj = PlayState.instance.dad;
+			case "gf":
+				charObj = PlayState.instance.gf;
+			default:
+				return;
+		}
+
+		oldChar = charObj.curCharacter;
+
 		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;				
-		var oldChar:String = PlayState.instance.boyfriend.curCharacter;
+		var animationFrame:Int = 0;
 		
 		try {
-			if (PlayState.instance.boyfriend.isAnimateAtlas){
-				if (PlayState.instance.boyfriend.getAnimationName().startsWith('sing')) {
-					animationName = Std.string(PlayState.instance.boyfriend.animation.curAnim.name);
-					animationFrame = Std.int(PlayState.instance.boyfriend.animation.curAnim.curFrame);
+			if (charObj.isAnimateAtlas) {
+				if (charObj.getAnimationName().startsWith("sing")) {
+					animationName = Std.string(charObj.animation.curAnim.name);
+					animationFrame = Std.int(charObj.animation.curAnim.curFrame);
 				}
 			} else {
-				if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing')) {
-					animationName = PlayState.instance.boyfriend.animation.curAnim.name;
-					animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
-				}		
+				if (charObj.animation.curAnim.name.startsWith("sing")) {
+					animationName = charObj.animation.curAnim.name;
+					animationFrame = charObj.animation.curAnim.curFrame;
+				}
 			}
-		} catch (e:Dynamic) {
-			// do absolutely nothing
+		} catch (e:Dynamic) {}
+
+		PlayState.instance.stopCharacterScripts(oldChar);
+		PlayState.instance.remove(charObj);
+		charObj.destroy();
+		
+		charObj = new Character(0, 0, id, (target == "boyfriend" ? !flipped : flipped));
+		charObj.flipMode = flipped;
+
+		switch(target) {
+			case "boyfriend":
+				PlayState.instance.boyfriend = charObj;
+				posX = PlayState.instance.BF_X + charObj.playerPositionArray[0];
+				posY = PlayState.instance.BF_Y + charObj.playerPositionArray[1];
+				PlayState.instance.add(charObj);
+				PlayState.instance.iconP1.changeIcon(charObj.healthIcon);
+			case "dad":
+				PlayState.instance.dad = charObj;
+				posX = PlayState.instance.DAD_X + charObj.positionArray[0];
+				posY = PlayState.instance.DAD_Y + charObj.positionArray[1];
+				PlayState.instance.add(charObj);
+				PlayState.instance.iconP2.changeIcon(charObj.healthIcon);
+			case "gf":
+				PlayState.instance.gf = charObj;
+				posX = PlayState.instance.GF_X + charObj.positionArray[0];
+				posY = PlayState.instance.GF_Y + charObj.positionArray[1];
+				PlayState.instance.add(charObj);
 		}
-		
-		PlayState.instance.stopCharacterScripts(PlayState.instance.boyfriend.curCharacter);
-		PlayState.instance.remove(PlayState.instance.boyfriend);
-		PlayState.instance.boyfriend.destroy();
-		PlayState.instance.boyfriend = new Character(0, 0, id, !flipped);
-		PlayState.instance.boyfriend.flipMode = flipped;
 
-		var isFlipped = PlayState.instance.boyfriend.flipMode;
-		var charX:Float = 0;
-		var charY:Float = (isFlipped ? 350 : 0);
+		charObj.x = posX;
+		charObj.y = posY;
 
-		var charX:Float = 0;
-		var charY:Float =  (!isFlipped ? 0 : 350);
-		
-		charX = PlayState.instance.boyfriend.playerPositionArray[0];
-		charY = PlayState.instance.boyfriend.playerPositionArray[1];
-	
-		PlayState.instance.boyfriend.x = PlayState.instance.BF_X + charX;
-		PlayState.instance.boyfriend.y = PlayState.instance.BF_Y + charY;
-
-		PlayState.instance.add(PlayState.instance.boyfriend);
-
-		PlayState.instance.iconP1.changeIcon(PlayState.instance.boyfriend.healthIcon);
-
-		if (PlayState.instance.defaultBar) 
+		if (target != "gf")
 			PlayState.instance.reloadHealthBarColors();
 
-		if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
-			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
+		if (charObj.animOffsets.exists(animationName))
+			charObj.playAnim(animationName, true, false, animationFrame);
 
-		PlayState.instance.boyfriend.pastCharacter = oldChar;
-		PlayState.instance.setOnScripts('boyfriendName', PlayState.instance.boyfriend.curCharacter);
-		PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
-		PlayState.instance.setOnHScript(id, PlayState.instance.boyfriend);
-		PlayState.instance.boyfriend.charName = "boyfriend";
-	}
+		charObj.pastCharacter = oldChar;
+		charObj.charName = target; // I don't know what this is for but I ported it to my new function as well
 
-	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {	
-		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;						
-		var oldChar:String = PlayState.instance.dad.curCharacter;
-
-		try {
-			if (PlayState.instance.dad.isAnimateAtlas){
-				if (PlayState.instance.dad.getAnimationName().startsWith('sing')) {
-					animationName = Std.string(PlayState.instance.dad.animation.curAnim.name);
-					animationFrame = Std.int(PlayState.instance.dad.animation.curAnim.curFrame);
-				}
-			} else {
-				if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing')) {
-					animationName = PlayState.instance.dad.animation.curAnim.name;
-					animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
-				}		
-			}
-		} catch (e:Dynamic) {
-			// do absolutely nothing
+		switch(target) {
+			case "boyfriend": PlayState.instance.setOnScripts("boyfriendName", charObj.curCharacter);
+			case "dad": PlayState.instance.setOnScripts("dadName", charObj.curCharacter);
+			case "gf": PlayState.instance.setOnScripts("gfName", charObj.curCharacter);
 		}
 
-		PlayState.instance.stopCharacterScripts(PlayState.instance.dad.curCharacter);
-		PlayState.instance.remove(PlayState.instance.dad);
-		PlayState.instance.dad.destroy();
-		PlayState.instance.dad = new Character(0, 0, id, flipped);
-		PlayState.instance.dad.flipMode = flipped;
-
-		var isFlipped = PlayState.instance.dad.flipMode;
-		var charX:Float = 0;
-		var charY:Float = (isFlipped ? 350 : 0);
-
-		var charX:Float = 0;
-		var charY:Float =  (!isFlipped ? 0 : 350);
-		
-		charX = PlayState.instance.dad.positionArray[0];
-		charY = PlayState.instance.dad.positionArray[1];
-	
-		PlayState.instance.dad.x = PlayState.instance.DAD_X + charX;
-		PlayState.instance.dad.y = PlayState.instance.DAD_Y + charY;
-
-		PlayState.instance.add(PlayState.instance.dad);
-
-		PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
-
-		if (PlayState.instance.defaultBar) 
-			PlayState.instance.reloadHealthBarColors();
-
-		if (PlayState.instance.dad.animOffsets.exists(animationName))
-			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
-
-		PlayState.instance.dad.pastCharacter = oldChar;
-		PlayState.instance.setOnScripts('dadName', PlayState.instance.dad.curCharacter);
-		PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
-		PlayState.instance.setOnHScript(id, PlayState.instance.dad);
-		PlayState.instance.dad.charName = "dad";
-	}
-
-	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // not tested but i'm almost 100% sure it works		
-		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;		
-		var oldChar:String = PlayState.instance.gf.curCharacter;
-
-		try {
-			if (PlayState.instance.gf.isAnimateAtlas){
-				if (PlayState.instance.gf.getAnimationName().startsWith('sing')) {
-					animationName = Std.string(PlayState.instance.gf.animation.curAnim.name);
-					animationFrame = Std.int(PlayState.instance.gf.animation.curAnim.curFrame);
-				}
-			} else {
-				if (PlayState.instance.gf.animation.curAnim.name.startsWith('sing')) {
-					animationName = PlayState.instance.gf.animation.curAnim.name;
-					animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
-				}		
-			}
-		} catch (e:Dynamic) {
-			// do absolutely nothing
-		}
-
-		PlayState.instance.stopCharacterScripts(PlayState.instance.gf.curCharacter);
-		PlayState.instance.remove(PlayState.instance.gf);
-		PlayState.instance.gf.destroy();
-		PlayState.instance.gf = new Character(0, 0, id, flipped);
-		PlayState.instance.gf.flipMode = flipped;
-		var stageData:StageFile = PlayState.instance.stageData;
-		PlayState.instance.gf.x = PlayState.instance.GF_X + PlayState.instance.gf.positionArray[0];
-		PlayState.instance.gf.y = PlayState.instance.GF_Y + PlayState.instance.gf.positionArray[1];
-		// PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
-		PlayState.instance.add(PlayState.instance.gf);
-
-		if (PlayState.instance.gf.animOffsets.exists(animationName))
-			PlayState.instance.gf.playAnim(animationName, true, false, animationFrame);
-
-		PlayState.instance.gf.pastCharacter = oldChar;
-		PlayState.instance.setOnScripts('gfName', PlayState.instance.gf.curCharacter);
-		PlayState.instance.startCharacterScripts(PlayState.instance.gf.curCharacter);
-		PlayState.instance.setOnHScript(id, PlayState.instance.gf);
-		PlayState.instance.gf.charName = "gf";
+		PlayState.instance.startCharacterScripts(charObj.curCharacter);
 	}
 
 	#if (!flash && MODS_ALLOWED && sys)
