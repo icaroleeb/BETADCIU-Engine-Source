@@ -476,6 +476,10 @@ class PlayState extends MusicBeatState
 		if(gf != null) startCharacterScripts(gf.curCharacter);
 		startCharacterScripts(dad.curCharacter);
 		startCharacterScripts(boyfriend.curCharacter);
+
+		if(gf != null) nameScriptsCharacter("characters/" + gf.curCharacter, gf.charName);
+		nameScriptsCharacter("characters/" + dad.curCharacter, dad.charName);
+		nameScriptsCharacter("characters/" + boyfriend.curCharacter, boyfriend.charName);
 		#end
 
 		uiGroup = new FlxSpriteGroup();
@@ -845,7 +849,9 @@ class PlayState extends MusicBeatState
 		//stopCharacterScripts(preloadChar.curCharacter);
 		//preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
 		add(preloadChar);
+		stopCharacterScripts(preloadChar.curCharacter);
 		remove(preloadChar);
+		preloadChar.destroy(); // cuz we don't need to use preload chars so yeah ¯\_(ツ)_/¯
 	}
 
 	public function startCharacterScripts(name:String)
@@ -3667,6 +3673,16 @@ class PlayState extends MusicBeatState
 
 					if(canPlay) char.playAnim(animToPlay, true);
 					char.holdTimer = 0;
+
+					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
+						var daLuaCharAnim:Character = modchartCharacters.get(value);
+
+						if ((!daLuaCharAnim.isPlayer && daLuaCharAnim.flipMode) && daLuaCharAnim.playSingAnim)
+						{
+							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
+							daLuaCharAnim.holdTimer = 0;
+						}
+					}
 				}
 			}
 		}
@@ -3734,8 +3750,17 @@ class PlayState extends MusicBeatState
 	
 					if(canPlay) char.playAnim(animToPlay, true);
 					char.holdTimer = 0;
+
+					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
+						var daLuaCharAnim:Character = modchartCharacters.get(value);
+
+						if ((daLuaCharAnim.isPlayer && !daLuaCharAnim.flipMode) && daLuaCharAnim.playSingAnim) {
+							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
+						}
+					}
+
 					for (value in modchartCharacters.keys()) {
-						var daLuaChar = modchartCharacters.get(value);
+						var daLuaChar:Character = modchartCharacters.get(value);
 						if ((daLuaChar.isPlayer && !daLuaChar.flipMode) || (!daLuaChar.isPlayer && daLuaChar.flipMode)) daLuaChar.holdTimer = 0;
 					}
 
@@ -3940,7 +3965,6 @@ class PlayState extends MusicBeatState
 		if (dad != null && beat % dad.danceEveryNumBeats == 0 && !dad.getAnimationName().startsWith('sing') && !dad.stunned)
 			dad.dance();
 
-
 		for (value in modchartCharacters.keys()) {
 			var char:Character = modchartCharacters.get(value);
 			if (char != null && beat % char.danceEveryNumBeats == 0 && !char.getAnimationName().startsWith('sing') && !char.stunned)
@@ -4053,6 +4077,56 @@ class PlayState extends MusicBeatState
 				}
 			}
 
+		}
+		return false;
+	}
+
+	public function nameScriptsCharacter(file:String, ?name:String = "")
+	{
+		nameLuaCharacter(file, name);
+		nameHScriptCharacter(file, name);
+	}
+
+	public function nameLuaCharacter(luaFile:String, ?name:String = "")
+	{
+		#if MODS_ALLOWED
+		var luaToLoad:String = Paths.modFolders(luaFile);
+		if(!FileSystem.exists(luaToLoad))
+			luaToLoad = Paths.getSharedPath(luaFile);
+
+		if(FileSystem.exists(luaToLoad))
+		#elseif sys
+		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		if(OpenFlAssets.exists(luaToLoad))
+		#end
+		{
+			for (script in luaArray) {
+				if (script.scriptName == luaToLoad) {
+					script.set("charNameScript", name);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public function nameHScriptCharacter(scriptFile:String, ?name:String = "")
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad))
+		{
+			if (Iris.instances.exists(scriptToLoad)){
+				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+				script.set("charNameScript", name);
+				return true;
+			};
 		}
 		return false;
 	}
@@ -4482,18 +4556,19 @@ class PlayState extends MusicBeatState
 		for(stage in stagesToLoad){ // loading stages without the multithread because it didn't worked that well with it
 			var ogStage:String =  "";
 			if (curStage != null) ogStage = curStage;
-
 			if (!stagesPreloaded) {
 				for (stage in stagesToLoad) {
 					removeStage(true);
 					curStage = stage;
-					stageData = StageData.getStageFile(curStage); 
+					stageData = StageData.getStageFile(curStage);
+					isCreatePost = true;
 					addStage(false, true);
 					trace('Stage Loaded: ' + stage + '!');
 				}
 				removeStage(true);
 				curStage = ogStage;
 				stageData = StageData.getStageFile(curStage); 
+				isCreatePost = false;
 				addStage(false, true);
 				stagesPreloaded = true;
 				trace('Stage Preloading Finished.');
@@ -4800,7 +4875,7 @@ class PlayState extends MusicBeatState
 		return stageData;
 	}
 
-	public function removeObjects(stageData:StageFile, preload:Bool=false){
+	public function removeObjects(stageData:StageFile){
 		// if you comment out the else part, the stage loads fine but character layers and positions are messed up.
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
@@ -4819,12 +4894,12 @@ class PlayState extends MusicBeatState
 		}
 
 		// this should help for base stages
-		if (ClientPrefs.data.comboCam == "Game" && !preload) remove(comboGroup);
+		if (ClientPrefs.data.comboCam == "Game") remove(comboGroup);
 	}
 
 	public var gfOldChar:String = '';
 
-	public function addObjects(stageData:StageFile, ?preload:Bool=false){
+	public function addObjects(stageData:StageFile){
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
 			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
@@ -4852,7 +4927,7 @@ class PlayState extends MusicBeatState
 			boyfriend.pixelPerfectRender = stageData.isPixelStage;
 		}
 
-		if(!preload && ClientPrefs.data.comboCam == "Game") add(comboGroup);
+		if(ClientPrefs.data.comboCam == "Game") add(comboGroup);
 	}
 
 	public var hardCodedStage:BaseStage;
@@ -4861,7 +4936,7 @@ class PlayState extends MusicBeatState
 	public var addedStagesHScript:Array<String> = [];
 
 	public function removeStage(?preload:Bool=false) {
-		removeObjects(stageData, preload);
+		removeObjects(stageData);
 
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
@@ -4894,44 +4969,43 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function addStage(?onlyLuas:Bool=false, ?isCreate:Bool=false) {
-		if(!isCreate) setStageDetails(stageData); // for some reason they don't add the chars position on them.
-		
+	public var isCreatePost:Bool = false; // createPost Preload
+
+	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) 
+	{
+		if(!preload) setStageDetails(stageData); // for some reason they don't add the chars position on them.
+
 		var path:String = Paths.getPath('stages/' + curStage + '.json', TEXT);
 
-		if (!FileSystem.exists(path)) {
+		if (FileSystem.exists(path))
+		{
 			switch (curStage.toLowerCase())
 			{
-				case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
-				case 'spooky': hardCodedStage = new Spooky();				//Week 2
-				case 'philly': hardCodedStage = new Philly();				//Week 3
-				case 'limo': hardCodedStage = new Limo();					//Week 4
-				case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
-				case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
-				case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
-				case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
-				case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
-				case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
-				case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
-				case 'stageerect': hardCodedStage = new StageErect();	//Stage Erect
-				case 'limoerect': hardCodedStage = new LimoErect();		//Week 4
+				case 'stage': hardCodedStage = new StageWeek1(); 					  //Week 1
+				case 'spooky': hardCodedStage = new Spooky();						  //Week 2
+				case 'philly': hardCodedStage = new Philly();						  //Week 3
+				case 'limo': hardCodedStage = new Limo();							  //Week 4
+				case 'mall': hardCodedStage = new Mall();							  //Week 5 - Cocoa, Eggnog
+				case 'mallevil': hardCodedStage = new MallEvil();					  //Week 5 - Winter Horrorland
+				case 'school': hardCodedStage = new School();						  //Week 6 - Senpai, Roses
+				case 'schoolevil': hardCodedStage = new SchoolEvil();				  //Week 6 - Thorns
+				case 'tank': hardCodedStage = new Tank();							  //Week 7 - Ugh, Guns, Stress
+				case 'phillystreets': hardCodedStage = new PhillyStreets(); 		  //Weekend 1 - Darnell, Lit Up, 2Hot
+				case 'phillyblazin': hardCodedStage = new PhillyBlazin();			  //Weekend 1 - Blazin
+				case 'stageerect': hardCodedStage = new StageErect();	    		  //Week 1 Erect
+				case 'spookyerect': hardCodedStage = new SpookyErect();     		  //Week 2 Erect
+				case 'phillyerect': hardCodedStage = new PhillyErect();     	      //Week 3 Erect
+				case 'limoerect': hardCodedStage = new LimoErect();		    		  //Week 4 Erect
+				case 'mallerect': hardCodedStage = new MallErect();					  //Week 5 Erect
+				case 'schoolerect': hardCodedStage = new SchoolErect();			      //Week 6 Erect
+				case 'schoolevilerect': hardCodedStage = new SchoolEvilErect();		  //Week 6 Erect
+				case 'tankerect': hardCodedStage = new TankErect();				  	  //Week 7 Erect
+				case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect(); //Weekend 1 Erect
+				case 'sserafim': hardCodedStage = new Sserafim(); 					  //SPAGHETTI
 			}
 		}
 
 		addObjects(stageData);
-
-		if(ClientPrefs.data.perfectPixel == "inGame"){
-			boyfriend.pixelPerfectPosition = stageData.isPixelStage;
-			boyfriend.pixelPerfectRender = stageData.isPixelStage;
-
-			dad.pixelPerfectPosition = stageData.isPixelStage;
-			dad.pixelPerfectRender = stageData.isPixelStage;
-
-			gf.pixelPerfectPosition = stageData.isPixelStage;
-			gf.pixelPerfectRender = stageData.isPixelStage;
-		}
-
-		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
 
 		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -4939,7 +5013,7 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(isCreate){
+		if(!preload){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');

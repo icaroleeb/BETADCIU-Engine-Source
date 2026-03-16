@@ -88,7 +88,7 @@ class Character extends OffsettableSprite
 	public var danceIdle:Bool = false; //Character use "danceLeft" and "danceRight" instead of "idle"
 	public var stopIdle:Bool = false;
 	public var skipDance:Bool = false;
-
+	public var playSingAnim = false;
 	public var healthIcon:String = 'face';
 	public var isPsychPlayer:Null<Bool>;
 	public var animationsArray:Array<AnimArray> = [];

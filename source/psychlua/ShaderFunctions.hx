@@ -14,7 +14,7 @@ import openfl.filters.ShaderFilter;
 import shaders.ErrorHandledShader;
 import sys.io.File;
 
-import options.ModpackMakerState.ModpackAssetRegistry;
+import states.editors.ModpackMakerState.ModpackAssetRegistry;
 
 class ShaderFunctions
 {
