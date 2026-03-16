@@ -235,7 +235,7 @@ class DeprecatedFunctions
 			//PlayState.instance.stagesFunc(function(stage:BaseStage) stage.characterChange("boyfriend", id)); // putting this beacuse of the function lua
 			//PlayState.instance.callOnScripts('onCharacterChange', ["boyfriend", character]);
 
-			FunkinLua.changeBFAuto(id, flipped);
+			FunkinLua.changeCharacterAuto("boyfriend", id, flipped);
 			FunkinLua.luaTrace('changeBFAuto is deprecated! Use changeCharacter instead.', false, true);
 
 			//PlayState.instance.stagesFunc(function(stage:BaseStage) stage.characterChangePost("boyfriend", character)); // putting this beacuse of the characters shaders including the function lua

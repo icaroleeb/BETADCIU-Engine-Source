@@ -19,6 +19,8 @@ import objects.Character.CharacterFile;
 import backend.Song.SwagSong;
 import backend.StageData.StageFile;
 
+import states.MainMenuState;
+
 #if cpp
 import sys.thread.Thread;
 #end
