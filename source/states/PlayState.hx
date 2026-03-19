@@ -596,14 +596,14 @@ class PlayState extends MusicBeatState
 
 		#if LUA_ALLOWED
 		for (notetype in noteTypes)
-			startLuasNamed('custom_notetypes/' + notetype + '.lua');
+			startLuasNamed('custom_notetypes/' + notetype + '.lua', "noteType");
 		for (event in eventsPushed)
 			startLuasNamed('custom_events/' + event + '.lua');
 		#end
 
 		#if HSCRIPT_ALLOWED
 		for (notetype in noteTypes)
-			startHScriptsNamed('custom_notetypes/' + notetype + '.hx');
+			startHScriptsNamed('custom_notetypes/' + notetype + '.hx', "noteType");
 		for (event in eventsPushed)
 			startHScriptsNamed('custom_events/' + event + '.hx');
 		#end
@@ -1441,7 +1441,7 @@ class PlayState extends MusicBeatState
 
 	var chartSections:Array<SwagSection>;
 	var currentSection:Int = 0;
-	var preloadTime:Float = 5000; // miliseconds
+	var preloadTime:Float = 6000; // miliseconds // 6 seconds instead of 5 because it fix some issues with some charts
 
 	private function generateSong():Void
 	{
@@ -1523,7 +1523,7 @@ class PlayState extends MusicBeatState
 
 
 		if (ClientPrefs.data.streamedNotes) { // da new note loading system
-			// var sectionsData:Array<SwagSection> = PlayState.SONG.notes;
+			var sectionsData:Array<SwagSection> = PlayState.SONG.notes;
 			chartSections = PlayState.SONG.notes;
 			currentSection = 0;
 
@@ -1532,6 +1532,14 @@ class PlayState extends MusicBeatState
 			}
 		
 			loadUpcomingNotes();
+
+			for (section in sectionsData) {
+				for (i in 0...section.sectionNotes.length) {
+					var songNotes: Array<Dynamic> = section.sectionNotes[i];
+					var noteType: String = !Std.isOfType(songNotes[3], String) ? Note.defaultNoteTypes[songNotes[3]] : songNotes[3];
+					if (!noteTypes.contains(noteType)) noteTypes.push(noteType);
+				}
+			}
 		} else { // the good n' old' note loading system
 			var arrowSwitches:Array<String> = [];
 
@@ -1872,6 +1880,7 @@ class PlayState extends MusicBeatState
 
 			loadNotes(section, currentSection);
 
+			callOnNoteScripts();
 			currentSection++;
 		}
 
@@ -1895,7 +1904,25 @@ class PlayState extends MusicBeatState
 					unspawnNotes.splice(index, 1);
 				}
 			}
+	}
 
+	function callOnNoteScripts() { // temporary code, i'll make one that works better later
+		#if HSCRIPT_ALLOWED
+		for (script in hscriptArray)
+			if(script != null && script.scriptType == "noteType")
+			{
+				// trace('Calling onCreate for ' + script.scriptName);
+				script.call('onCreate', []);
+			}
+		#end
+		#if LUA_ALLOWED
+		for (script in luaArray)
+			if(script != null && script.scriptType == "noteType")
+			{
+				// trace('Calling onCreate for ' + script.scriptName);
+				script.call('onCreate', []);
+			}
+		#end
 	}
 
 	// called only once per different event (Used for precaching)
@@ -3072,7 +3099,7 @@ class PlayState extends MusicBeatState
 			Paths.image(uiFolder + 'num' + i + uiPostfix);
 	}
 
-	public var NVScoreTween:Bool = false; // (NV = Nightmare Vision) some people likes this, and its good for recreating mods made on it.
+	public var NVScoreTween:Bool = true; // (NV = Nightmare Vision) some people likes this, and its good for recreating mods made on it.
 
 	private function popUpScore(note:Note = null):Void
 	{
