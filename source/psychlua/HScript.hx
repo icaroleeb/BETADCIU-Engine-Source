@@ -86,6 +86,9 @@ class HScript extends Iris
 
 	public var origin:String;
 	public var scriptName:String = null;
+	
+	public var charName:String = ""; // only used for character scripts
+
 	override public function new(?parent:Dynamic, ?file:String, ?scriptType:String = "", ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
 		if (file == null)
@@ -185,6 +188,8 @@ class HScript extends Iris
 		set('FlxAnimate', animate.FlxAnimate);
 		#end
 
+		set('charNameScript', this.charName);
+
 		// some really useful variables that for some reason doesn't comes in the og code
 		set('camGame', PlayState.instance.camGame);
 		set('camHUD', PlayState.instance.camHUD);
@@ -216,7 +221,7 @@ class HScript extends Iris
 		});
 		set('setStageVar', function(name:String, value:Dynamic) {
 			if (!PlayState.instance.variables.exists("stageVariables")){
-				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
 			}
 
 			PlayState.instance.variables.get("stageVariables").set(name, value);
@@ -224,7 +229,7 @@ class HScript extends Iris
 		});
 		set('getStageVar', function(name:String) {
 			if (!PlayState.instance.variables.exists("stageVariables")){
-				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
 			}
 
 			var result:Dynamic = null;
@@ -234,7 +239,7 @@ class HScript extends Iris
 		set('removeStageVar', function(name:String)
 		{
 			if (!PlayState.instance.variables.exists("stageVariables")){
-				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+				PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
 			}
 
 			if(PlayState.instance.variables.get("stageVariables").exists(name))
@@ -393,7 +398,7 @@ class HScript extends Iris
 		set('ModchartState', FunkinLua); // lazy ass fix for some scripts ported from betadciu engine
 		set('controls', Controls.instance);
 
-		// you don't need to add stageVars anymore.
+		// you don't need to add stageVars anymore. -- but isn't compatible with "game.add(sprite);" & "PlayState.instance.add(sprite);"
 		set('add', function(tag:FlxBasic){
 			switch(daScriptType.toLowerCase()){
 				case "stage":
@@ -402,20 +407,20 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
-
+					stageVars.set(tag.toString(), tag);
+					trace('Added sprite to Stage: ${tag.toString()}');
 				case "stagecamera":
 					if (!PlayState.instance.variables.exists("stageCameraVariables")){
 						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(tag.toString(), tag);
+					trace('Added sprite to Stage: ${tag.toString()}');
 			}
 
-			FlxG.state.add(tag);
+			return FlxG.state.add(tag);
 		});
-
 		set('insert', function(position:Int, tag:FlxBasic){ 
 			switch(daScriptType.toLowerCase()){
 				case "stage":
@@ -424,7 +429,8 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(tag.toString(), tag);
+					trace('Added sprite to Stage: ${tag.toString()}');
 
 				case "stagecamera":
 					if (!PlayState.instance.variables.exists("stageCameraVariables")){
@@ -432,12 +438,12 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(tag.toString(), tag);
+					trace('Added sprite to Stage: ${tag.toString()}');
 			}
 			
-			FlxG.state.insert(position, tag);
+			return FlxG.state.insert(position, tag);
 		});
-
 		set('addBehindGF', function(tag:FlxBasic){
 			switch(daScriptType.toLowerCase()){
 				case "stage":
@@ -446,18 +452,19 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
-
+					stageVars.set(tag.toString(), tag);
+					trace('Added sprite to Stage: ${tag.toString()}');
 				case "stagecamera":
 					if (!PlayState.instance.variables.exists("stageCameraVariables")){
 						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(tag.toString(), tag);
+					trace('Added sprite to Stage: ${tag.toString()}');
 			}
 
-			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
+			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
 		});
 		set('addBehindBF', function(tag:FlxBasic){
 			switch(daScriptType.toLowerCase()){
@@ -467,18 +474,19 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
-
+					stageVars.set(tag.toString(), tag);
+					trace('Added sprite to Stage: ${tag.toString()}');
 				case "stagecamera":
 					if (!PlayState.instance.variables.exists("stageCameraVariables")){
 						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(tag.toString(), tag);
+					trace('Added sprite to Stage: ${tag.toString()}');
 			}
 
-			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
+			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
 		});
 		set('addBehindDad', function(tag:FlxBasic){
 			switch(daScriptType.toLowerCase()){
@@ -488,19 +496,21 @@ class HScript extends Iris
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
-
+					stageVars.set(tag.toString(), tag);
+					trace('Added sprite to Stage: ${tag.toString()}');
 				case "stagecamera":
 					if (!PlayState.instance.variables.exists("stageCameraVariables")){
 						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
 					}
 			
 					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
+					stageVars.set(tag.toString(), tag);
+					trace('Added sprite to Stage: ${tag.toString()}');
 			}
 
-			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
+			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
 		});
+		//
 
 		set('getColorFromHex', function(color:String):Int {
 			if (color == null) return 0xFFFFFFFF;

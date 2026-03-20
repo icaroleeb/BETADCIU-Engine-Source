@@ -137,6 +137,18 @@ class TankErect extends BaseStage
 	}
 
 	override public function destroy():Void{
+		if (boyfriend.shader != null) {
+			boyfriend.shader = null;
+		}
+		
+		if (dad.shader != null) {
+			dad.shader = null;
+		}
+
+		if (gf.shader != null) {
+			gf.shader = null;
+		}
+
 		super.destroy();
 	}
 }
