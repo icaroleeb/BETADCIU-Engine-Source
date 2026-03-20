@@ -449,7 +449,7 @@ class BETADCIUState extends MusicBeatState
 				playerBETADCIU.pauseOrResume(!playerBETADCIU.playing);
 			}
 		}
-		else if (controls.ACCEPT && !FlxG.keys.pressed.ALT && !playerBETADCIU.playingMusic)
+		else if (persistentUpdate && controls.ACCEPT && !FlxG.keys.pressed.ALT && !playerBETADCIU.playingMusic)
 		{
 			persistentUpdate = false;
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
@@ -654,6 +654,10 @@ class BETADCIUState extends MusicBeatState
 
 		var min:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected - _drawDistance)));
 		var max:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected + _drawDistance)));
+
+		var confirmSound:FlxSound = FlxG.sound.load(Paths.sound('confirmMenu'));
+		if (accepted) confirmSound.play();
+
 		for (i in min...max)
 		{
 			var item:Alphabet = grpSongs.members[i];
@@ -663,7 +667,7 @@ class BETADCIUState extends MusicBeatState
 			if (accepted) { // i could do this in a better way, except that i'm dumb. - Ryiuu
 				try
 				{
-					var musicLength:Float = FlxG.sound.play(Paths.sound('confirmMenu'), FlxG.sound.volume).length;
+					var musicLength:Float = confirmSound.length;
 					var daFuckingtween:FlxTween;
 
 					if (item.text != songs[curSelected].songName){

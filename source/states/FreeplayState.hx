@@ -447,7 +447,7 @@ class FreeplayState extends MusicBeatState
 				player.pauseOrResume(!player.playing);
 			}
 		}
-		else if (controls.ACCEPT && !FlxG.keys.pressed.ALT && !player.playingMusic)
+		else if (persistentUpdate && controls.ACCEPT && !FlxG.keys.pressed.ALT && !player.playingMusic)
 		{
 			persistentUpdate = false;
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
@@ -649,6 +649,10 @@ class FreeplayState extends MusicBeatState
 
 		var min:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected - _drawDistance)));
 		var max:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected + _drawDistance)));
+
+		var confirmSound:FlxSound = FlxG.sound.load(Paths.sound('confirmMenu'));
+		if (accepted) confirmSound.play();
+
 		for (i in min...max)
 		{
 			var item:Alphabet = grpSongs.members[i];
@@ -658,7 +662,7 @@ class FreeplayState extends MusicBeatState
 			if (accepted) { // i could do this in a better way, except that i'm dumb. - Ryiuu
 				try
 				{
-					var musicLength:Float = FlxG.sound.play(Paths.sound('confirmMenu'), FlxG.sound.volume).length;
+					var musicLength:Float = confirmSound.length;
 					var daFuckingtween:FlxTween;
 
 					if (item.text != songs[curSelected].songName){

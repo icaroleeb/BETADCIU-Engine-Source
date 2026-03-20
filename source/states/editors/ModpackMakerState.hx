@@ -19,6 +19,8 @@ import objects.Character.CharacterFile;
 import backend.Song.SwagSong;
 import backend.StageData.StageFile;
 
+import states.MainMenuState;
+
 #if cpp
 import sys.thread.Thread;
 #end
@@ -70,6 +72,23 @@ class ModpackMakerState extends MusicBeatState {
     }
 
     override function create() {
+        if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
+		{
+			FlxG.sound.music.volume = 1;
+			FlxG.sound.playMusic(Paths.music('songSelect'));
+		}
+
+		if (FlxG.sound.music.playing || MainMenuState.mainMusic)
+		{
+			FlxG.sound.playMusic(Paths.music('songSelect'));
+			MainMenuState.mainMusic = false;
+		}
+		if (!FlxG.sound.music.playing || MainMenuState.mainMusic == false)
+		{
+			FlxG.sound.playMusic(Paths.music('songSelect'));
+			MainMenuState.mainMusic = false;
+		}
+
         // Cameras
         camEditor = initPsychCamera();
 
@@ -256,10 +275,30 @@ class ModpackMakerState extends MusicBeatState {
             }
         }
 
+        // Helper to capitalize each word and replace dashes with spaces
+		function formatSongName(name:String):String {
+			if (name == null || name.length == 0) return name;
+			// Replace dashes with spaces
+			name = name.split("-").join(" ");
+			
+			// Capitalize each word
+			var words = name.split(" ");
+			for (i in 0...words.length) {
+				if (words[i].length > 0)
+					words[i] = words[i].charAt(0).toUpperCase() + words[i].substr(1);
+			}
+			return words.join(" ");
+		}
+        
+
         selectedSongName = swagSongDirectory;
 
         if (foundBetadciu && songName != "") {
             defaultName = songName + "-bonus";
+        }
+
+        if (modpackNameInput != null) {
+            modpackNameInput.text = formatSongName(songName) + " Modpack";
         }
 
         if (weekFileNameInput != null) {
@@ -384,7 +423,6 @@ class ModpackMakerState extends MusicBeatState {
 
             if (file.endsWith('.lua')) {
                 var openLua = new FunkinLua(initPath, "modpack");
-                openLua.call("onCreate", []);
                 openLua.call("onCreatePost", []);
             }
 
@@ -492,20 +530,20 @@ class ModpackMakerState extends MusicBeatState {
 				}
 			}
 
-            // THESE ARE WEIRD. Try not to use them for now
-            // Handle texts
-			if (Reflect.hasField(preloadData, "texts")) {
-				var texts:Array<String> = cast preloadData.texts;
-				for (text in texts) {
-					ModpackAssetRegistry.instance.addAsset("", text);
-				}
-			}
-
             // Handle scripts
 			if (Reflect.hasField(preloadData, "scripts")) {
 				var scripts:Array<String> = cast preloadData.scripts;
 				for (script in scripts) {
 					ModpackAssetRegistry.instance.addAsset("", script);
+				}
+			}
+
+            // THIS IS WEIRD. Try not to use it for now
+            // Handle texts
+			if (Reflect.hasField(preloadData, "texts")) {
+				var texts:Array<String> = cast preloadData.texts;
+				for (text in texts) {
+					ModpackAssetRegistry.instance.addAsset("", text);
 				}
 			}
 
@@ -607,7 +645,6 @@ class ModpackMakerState extends MusicBeatState {
             var luaPath = Paths.modFolders("custom_events/" + ev + ".lua");
             if (FileSystem.exists(luaPath)) {
                 var openLua = new FunkinLua(luaPath, "modpack");
-                openLua.call("onCreate", []);
                 openLua.call("onCreatePost", []);
             }
 
@@ -644,7 +681,6 @@ class ModpackMakerState extends MusicBeatState {
             var luaPath = Paths.modFolders("custom_notetypes/" + nt + ".lua");
             if (FileSystem.exists(luaPath)) {
                 var openLua = new FunkinLua(luaPath, "modpack");
-                openLua.call("onCreate", []);
                 openLua.call("onCreatePost", []);
             }
             ntCopyArray.push(nt + ".txt");
@@ -688,7 +724,7 @@ class ModpackMakerState extends MusicBeatState {
 		if (!FileSystem.exists(charModpackFolder)) FileSystem.createDirectory(charModpackFolder);
 
 		for (file in FileSystem.readDirectory(charFolder)) {
-			if (file == name + ".json" || file == name + ".lua") {
+			if (file == name + ".json" || file == name + ".lua" || file == name + ".hx") {
 				if (file.endsWith(".json")) {
 					var rawJson = FileSystem.exists(charFolder + file) ? File.getContent(charFolder + file) : Assets.getText(charFolder + file);
 					var json:CharacterFile = cast Json.parse(rawJson);
@@ -696,7 +732,6 @@ class ModpackMakerState extends MusicBeatState {
 				}
 				if (file.endsWith(".lua")) {
 					var openLua = new FunkinLua(charFolder + file, "modpack");
-					openLua.call("onCreate", []);
 					openLua.call("onCreatePost", []);
 				}
 				sys.io.File.copy(charFolder + file, charModpackFolder + file);
@@ -743,7 +778,6 @@ class ModpackMakerState extends MusicBeatState {
 				}
 				if (file.endsWith(".lua")) {
 					var openLua = new FunkinLua(stageFolder + file, "modpack");
-					openLua.call("onCreate", []);
 					openLua.call("onCreatePost", []);
 				}
 				sys.io.File.copy(stageFolder + file, stageModpackFolder + file);
@@ -871,7 +905,7 @@ class ModpackMakerState extends MusicBeatState {
         toastText.borderSize = 2;
         toastText.scrollFactor.set();
         toastText.alpha = 1;
-        toastText.updateHitbox(); // 👈 Force layout calculation!
+        toastText.updateHitbox();
 
         var bgWidth = toastText.width + padding * 2;
         var bgHeight = toastText.height + padding * 2;
@@ -1035,9 +1069,32 @@ class ModpackMakerState extends MusicBeatState {
     } //unzip
 }
 
+function dirHasAllowedFiles(folder:String, checkFiles:Array<String>):Bool {
+    for (file in FileSystem.readDirectory(folder)) {
+        var full = folder + "/" + file;
+
+        if (FileSystem.isDirectory(full)) {
+            if (dirHasAllowedFiles(full, checkFiles))
+                return true;
+        } else {
+            if (checkFiles == null || checkFiles.length == 0 || checkFiles.indexOf(file) != -1)
+                return true;
+        }
+    }
+    return false;
+}
+
+
+
 // Helper function for copying files with optional filtering
 function doCopyShit(srcFolder:String, destFolder:String, checkFiles:Array<String> = null):Void {
     if (!FileSystem.exists(srcFolder)) return;
+
+    if (checkFiles != null && checkFiles.length > 0) {
+        if (!dirHasAllowedFiles(srcFolder, checkFiles))
+            return;
+    }
+
     if (!FileSystem.exists(destFolder)) FileSystem.createDirectory(destFolder);
 
     if (!srcFolder.endsWith("/")) srcFolder += "/";
@@ -1048,7 +1105,6 @@ function doCopyShit(srcFolder:String, destFolder:String, checkFiles:Array<String
         var fullDest = destFolder + file;
 
         if (FileSystem.isDirectory(fullSrc)) {
-            if (!FileSystem.exists(fullDest)) FileSystem.createDirectory(fullDest);
             doCopyShit(fullSrc, fullDest, checkFiles);
             continue;
         }
