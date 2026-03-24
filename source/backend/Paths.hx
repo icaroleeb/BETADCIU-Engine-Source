@@ -418,6 +418,42 @@ class Paths
 		return (OpenFlAssets.exists(getPath(key, type, parentFolder, false)));
 	}
 
+	public static function getContent(path:String):String
+	{
+		#if (MODS_ALLOWED || ASSET_REDIRECT)
+		if (FileSystem.exists(path)) return File.getContent(path);
+		else
+		#end
+		if (Assets.exists(path)) return Assets.getText(path);
+		else
+		{
+			throw 'Couldnt find file at path [$path]';
+		}
+	}
+
+	public static function exists(path:String, ?type:AssetType):Bool
+	{
+		var exists:Bool = false;
+		
+		#if (MODS_ALLOWED || ASSET_REDIRECT)
+		if (FileSystem.exists(path)) exists = true;
+		else
+		#end
+		if (Assets.exists(path, cast type)) exists = true;
+		
+		return exists;
+	}
+
+	public static inline function fragment(key:String, checkMods:Bool = true):String
+	{
+		return getPath('shaders/$key.frag', null, checkMods);
+	}
+	
+	public static inline function vertex(key:String, checkMods:Bool = true):String
+	{
+		return getPath('shaders/$key.vert', null, checkMods);
+	}
+
 	static public function getAtlas(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
 		var useMod = false;

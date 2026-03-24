@@ -6,6 +6,7 @@ import backend.WeekData;
 import backend.Song;
 import backend.Rating;
 
+import extensions.flixel.FlxCameraEx;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxSubState;
@@ -366,10 +367,10 @@ class PlayState extends MusicBeatState
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay');
 		guitarHeroSustains = ClientPrefs.data.guitarHeroSustains;
 
-		// var gameCam:FlxCamera = FlxG.camera;
+		// var gameCam:FlxCameraEx = FlxG.camera;
 		camGame = initPsychCamera();
-		camHUD = new FlxCamera();
-		camOther = new FlxCamera();
+		camHUD = new FlxCameraEx();
+		camOther = new FlxCameraEx();
 		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
 
@@ -3258,8 +3259,7 @@ class PlayState extends MusicBeatState
 				fadeEase = EaseUtil.stepped(2);
 		}
 
-		if(NVScoreTween)
-		{
+		if(NVScoreTween) {
 			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
 				rating.scale.set(0.785 * daPixelZoom, 0.785 * daPixelZoom);
 				FlxTween.tween(rating.scale, {x: 0.7 * daPixelZoom, y: 0.7 * daPixelZoom}, 0.5, {ease: fadeEase});
@@ -4053,6 +4053,8 @@ class PlayState extends MusicBeatState
 				setOnScripts('curBpm', Conductor.bpm);
 				setOnScripts('crochet', Conductor.crochet);
 				setOnScripts('stepCrochet', Conductor.stepCrochet);
+				setOnScripts('crotchet', Conductor.crochet); // NV
+				setOnScripts('stepCrotchet', Conductor.stepCrochet); // NV
 			}
 			setOnScripts('mustHitSection', SONG.notes[curSection].mustHitSection);
 			setOnScripts('altAnim', SONG.notes[curSection].altAnim);
@@ -5002,10 +5004,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public var isCreatePost:Bool = false; // createPost Preload
-
-	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) 
-	{
+	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) {
 		if(!preload) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 
 		var path:String = Paths.getPath('stages/' + curStage + '.json', TEXT);

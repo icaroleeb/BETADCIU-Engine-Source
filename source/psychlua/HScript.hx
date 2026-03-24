@@ -1,15 +1,26 @@
 package psychlua;
 
+import backend.WeekData;
+
 import flixel.FlxBasic;
+import flixel.math.FlxRandom;
+import flixel.FlxState;
+import flixel.util.FlxDestroyUtil;
 import objects.Character;
+import objects.Bopper;
 import psychlua.LuaUtils;
 import psychlua.CustomSubstate;
+import substates.GameOverSubstate;
 
 #if LUA_ALLOWED
 import psychlua.FunkinLua;
 #end
 
+import states.MainMenuState;
+
 #if HSCRIPT_ALLOWED
+import extensions.hscript.*;
+
 import crowplexus.iris.Iris;
 import crowplexus.iris.IrisConfig;
 import crowplexus.hscript.Expr.Error as IrisError;
@@ -26,7 +37,9 @@ typedef HScriptInfos = {
 	#end
 }
 
-class HScript extends Iris
+@:access(crowplexus.iris.Iris)
+@:access(states.PlayState)
+class HScript extends IrisEx implements IFlxDestroyable
 {
 	public var filePath:String;
 	public var daScriptType:String;
@@ -86,10 +99,7 @@ class HScript extends Iris
 
 	public var origin:String;
 	public var scriptName:String = null;
-	
-	public var charName:String = ""; // only used for character scripts
-
-	override public function new(?parent:Dynamic, ?file:String, ?scriptType:String = "", ?varsToBring:Any = null, ?manualRun:Bool = false)
+	override public function new(?parent:Dynamic, ?file:String, ?scriptType:String = "", ?varsToBring:Any = null, ?manualRun:Bool = false, ?shareables:Sharables)
 	{
 		if (file == null)
 			file = '';
@@ -119,7 +129,7 @@ class HScript extends Iris
 		if (scriptName == null && parent != null)
 			scriptName = parent.scriptName;
 		#end
-		super(scriptThing, new IrisConfig(scriptName, false, false));
+		super(scriptThing, new IrisConfig(scriptName, false, false), shareables);
 		var customInterp:CustomInterp = new CustomInterp();
 		customInterp.parentInstance = FlxG.state;
 		customInterp.showPosOnLog = false;
@@ -135,8 +145,9 @@ class HScript extends Iris
 		preset();
 		this.varsToBring = varsToBring;
 		if (!manualRun) {
+			var ret:Dynamic = null;
 			try {
-				var ret:Dynamic = execute();
+				ret = execute();
 				returnValue = ret;
 			} catch(e:IrisError) {
 				returnValue = null;
@@ -145,50 +156,190 @@ class HScript extends Iris
 			}
 		}
 	}
-
+	
 	var varsToBring(default, set):Any = null;
 	override function preset() {
 		super.preset();
-
-		// Some very commonly used classes
+		
+		set('StringTools', StringTools);
+		
 		set('Type', Type);
-		#if sys
-		set('File', File);
-		set('FileSystem', FileSystem);
-		#end
+		set("script", this);
+		set("Dynamic", Dynamic);
+		
+		set('StringMap', haxe.ds.StringMap);
+		set('IntMap', haxe.ds.IntMap);
+		set('ObjectMap', haxe.ds.ObjectMap);
+		
+		set("Main", Main);
+		set("Lib", openfl.Lib);
+		set("Assets", lime.utils.Assets);
+		set("OpenFlAssets", openfl.utils.Assets);
+		
+		set('curBpm', Conductor.bpm);
+		set('crochet', Conductor.crochet);
+		set('stepCrochet', Conductor.stepCrochet);
+		set('crotchet', Conductor.crochet); // NV
+		set('stepCrotchet', Conductor.stepCrochet); // NV
+		set('Function_Stop', LuaUtils.Function_Stop);
+		set('Function_Continue', LuaUtils.Function_Continue);
+		set('Function_StopLua', LuaUtils.Function_StopLua); //doesnt do much cuz HScript has a lower priority than Lua
+		set('Function_StopHScript', LuaUtils.Function_StopHScript);
+		set('Function_StopAll', LuaUtils.Function_StopAll);
+		set('curBeat', 0);
+		set('curStep', 0);
+		set('curSection', 0);
+		set('curDecBeat', 0);
+		set('curDecStep', 0);
+		set('version', MainMenuState.betadciuEngineVersion.trim());
+		// set('Defines', backend.Defines); // not yet
+		
+		// set flixel related stuff
 		set('FlxG', flixel.FlxG);
-		set('FlxMath', flixel.math.FlxMath);
 		set('FlxSprite', flixel.FlxSprite);
-		set('FlxText', flixel.text.FlxText);
-		set('FlxCamera', flixel.FlxCamera);
+		set("FlxTypedGroup", flixel.group.FlxGroup.FlxTypedGroup);
+		set("FlxSpriteGroup", flixel.group.FlxSpriteGroup);
+		set('FlxCamera', extensions.flixel.FlxCameraEx);
 		set('PsychCamera', backend.PsychCamera);
+		set('FlxMath', flixel.math.FlxMath);
 		set('FlxTimer', flixel.util.FlxTimer);
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
-		set('FlxColor', CustomFlxColor);
-		set('Countdown', backend.BaseStage.Countdown);
-		set('PlayState', PlayState);
-		set('Paths', Paths);
-		set('Conductor', Conductor);
-		set('ClientPrefs', ClientPrefs);
-		#if ACHIEVEMENTS_ALLOWED
-		set('Achievements', Achievements);
-		#end
-		set('Character', Character);
-		set('Alphabet', Alphabet);
-		set('Note', objects.Note);
-		set('CustomSubstate', CustomSubstate);
+		set("FlxSound", flixel.sound.FlxSound);
+		set('FlxText', flixel.text.FlxText);
 		#if (!flash && sys)
 		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
 		set('ErrorHandledRuntimeShader', shaders.ErrorHandledShader.ErrorHandledRuntimeShader);
 		#end
 		set('ShaderFilter', openfl.filters.ShaderFilter);
-		set('StringTools', StringTools);
+		set("FlxFlicker", flixel.effects.FlxFlicker);
+		set('FlxSpriteUtil', flixel.util.FlxSpriteUtil);
+		set("FlxBackdrop", flixel.addons.display.FlxBackdrop);
+		set("FlxTiledSprite", flixel.addons.display.FlxTiledSprite);
+		set('FlxPoint', flixel.math.FlxPoint.FlxBasePoint);
+		set('FlxObject', flixel.FlxObject);
+		
+		set('FlxCameraFollowStyle', flixel.FlxCamera.FlxCameraFollowStyle);
+		set("FlxTextBorderStyle", flixel.text.FlxText.FlxTextBorderStyle);
+		set("FlxBarFillDirection", flixel.ui.FlxBar.FlxBarFillDirection);
+
 		#if flxanimate
 		set('FlxAnimate', animate.FlxAnimate);
+		set("FlxAnimateFrames", animate.FlxAnimateFrames);
+		set("FlxSpriteElement", animate.internal.elements.FlxSpriteElement);
 		#end
 
-		set('charNameScript', this.charName);
+		set('Controls', Controls.instance);
+		set('controls', Controls.instance); // in lower case bcuz default psych use this in lower case
+
+		// abstracts
+		set("FlxTextAlign", backend.MacroUtil.buildAbstract(flixel.text.FlxText.FlxTextAlign));
+		set('FlxAxes', backend.MacroUtil.buildAbstract(flixel.util.FlxAxes));
+		set("FlxKey", backend.MacroUtil.buildAbstract(flixel.input.keyboard.FlxKey));
+		set('BlendMode', backend.MacroUtil.buildAbstract(openfl.display.BlendMode));
+
+		set("keyToString", (key:Int) -> { return flixel.input.keyboard.FlxKey.toStringMap.get(key); });
+		set("keyFromString", (str:String) -> { return flixel.input.keyboard.FlxKey.fromStringMap.get(str); });
+
+		// FNF-specific Things
+		set('Paths', Paths);
+		set("MusicBeatState", backend.MusicBeatState);
+		set("Conductor", backend.Conductor);
+		set('ClientPrefs', ClientPrefs);
+		set("CoolUtil", backend.CoolUtil);
+		// set('WindowUtil', backend.WindowUtil);
+		set("StageData", backend.StageData);
+		set('PlayState', PlayState);
+		set("GameOverSubstate", substates.GameOverSubstate);
+		// set('FunkinSound', funkin.audio.FunkinSound);
+
+		// custom
+		set('FlxColor', CustomFlxColor);
+		set('Random', CustomFlxRandom);
+
+		// objects
+		set('Note', objects.Note);
+		set("Bar", objects.Bar);
+		#if VIDEOS_ALLOWED
+		set("PsychVideoSprite", objects.PsychVideoSprite);
+		#end
+		set('Bopper', objects.Bopper);
+		set("BackgroundDancer", states.stages.objects.BackgroundDancer);
+		set("BackgroundGirls", states.stages.objects.BackgroundGirls);
+		set("HealthIcon", objects.HealthIcon);
+		set('Character', Character);
+		set("NoteSplash", objects.NoteSplash);
+		set("BGSprite", objects.BGSprite);
+		set("StrumNote", objects.StrumNote);
+		set('Alphabet', Alphabet);
+		set("AttachedSprite", objects.AttachedSprite);
+		
+		set("CutsceneHandler", cutscenes.CutsceneHandler);
+		set('DialogueBox', cutscenes.DialogueBox);
+
+		set('inGameOver', false);
+
+		if (FlxG.state is PlayState) {
+			set("inPlaystate", true);
+			set('bpm', PlayState.SONG.bpm);
+			set('scrollSpeed', PlayState.SONG.speed);
+			set('songName', PlayState.SONG.song);
+			set('isStoryMode', PlayState.isStoryMode);
+			set('difficulty', PlayState.storyDifficulty);
+			set('weekRaw', PlayState.storyWeek);
+			set('seenCutscene', PlayState.seenCutscene);
+			set('week', WeekData.getCurrentWeek().weekName);
+			set('difficultyName', Difficulty.getString());
+			set('songLength', FlxG.sound.music.length);
+			set('instakillOnMiss', PlayState.instance.instakillOnMiss);
+			set('botPlay', PlayState.instance.cpuControlled);
+			set('practice', PlayState.instance.practiceMode);
+			set('startedCountdown', false);
+			set('mustHitSection', PlayState.SONG?.notes[0]?.mustHitSection ?? false);
+
+			set('game', FlxG.state);
+			set("global", MusicBeatState.getVariables());
+			set('getInstance', function():FlxState {
+				return PlayState.instance == null ? FlxG.state : PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
+			});
+
+			set('setVar', (varName:String, val:Dynamic) -> MusicBeatState.getVariables().set(varName, val));
+			set('getVar', (varName:String) -> MusicBeatState.getVariables().get(varName));
+
+			set('initScript', (path:String, ?type:String = "") -> {
+				PlayState.instance.startHScriptsNamed(path, type);
+			});
+		} else {
+			set("inPlaystate", false);
+		}
+
+		set("newShader", (?fragFile:String, ?vertFile:String) -> {
+			var fragPath = fragFile != null ? Paths.fragment(fragFile) : null;
+			var vertPath = vertFile != null ? Paths.vertex(vertFile) : null;
+			
+			if (fragPath != null)
+			{
+				if (Paths.exists(fragPath)) fragPath = Paths.getContent(fragPath);
+			}
+			
+			if (vertPath != null)
+			{
+				if (Paths.exists(vertPath)) vertPath = Paths.getContent(vertPath);
+			}
+			
+			return new flixel.addons.display.FlxRuntimeShader(fragPath, vertPath);
+		});
+
+		// default psych stuff
+		#if sys
+		set('File', File);
+		set('FileSystem', FileSystem);
+		#end
+		set('Countdown', backend.BaseStage.Countdown);
+		#if ACHIEVEMENTS_ALLOWED
+		set('Achievements', Achievements);
+		#end
+		set('CustomSubstate', CustomSubstate);
 
 		// some really useful variables that for some reason doesn't comes in the og code
 		set('camGame', PlayState.instance.camGame);
@@ -201,15 +352,6 @@ class HScript extends Iris
 		//
 
 		// Functions & Variables
-		set('setVar', function(name:String, value:Dynamic) {
-			MusicBeatState.getVariables().set(name, value);
-			return value;
-		});
-		set('getVar', function(name:String) {
-			var result:Dynamic = null;
-			if(MusicBeatState.getVariables().exists(name)) result = MusicBeatState.getVariables().get(name);
-			return result;
-		});
 		set('removeVar', function(name:String)
 		{
 			if(MusicBeatState.getVariables().exists(name))
@@ -220,31 +362,24 @@ class HScript extends Iris
 			return false;
 		});
 		set('setStageVar', function(name:String, value:Dynamic) {
-			if (!PlayState.instance.variables.exists("stageVariables")){
-				PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-			}
+			if (!MusicBeatState.getVariables().exists("stageVariables")) MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxSprite>());
 
-			PlayState.instance.variables.get("stageVariables").set(name, value);
+			MusicBeatState.getVariables().get("stageVariables").set(name, value);
 			return value;
 		});
 		set('getStageVar', function(name:String) {
-			if (!PlayState.instance.variables.exists("stageVariables")){
-				PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-			}
+			if (!MusicBeatState.getVariables().exists("stageVariables")) MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxSprite>());
 
 			var result:Dynamic = null;
-			if(PlayState.instance.variables.get("stageVariables").exists(name)) result = PlayState.instance.variables.get("stageVariables").get(name);
+			if(MusicBeatState.getVariables().get("stageVariables").exists(name)) result = MusicBeatState.getVariables().get("stageVariables").get(name);
 			return result;
 		});
 		set('removeStageVar', function(name:String)
 		{
-			if (!PlayState.instance.variables.exists("stageVariables")){
-				PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-			}
+			if (!MusicBeatState.getVariables().exists("stageVariables")) MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxSprite>());
 
-			if(PlayState.instance.variables.get("stageVariables").exists(name))
-			{
-				PlayState.instance.variables.get("stageVariables").remove(name);
+			if(MusicBeatState.getVariables().get("stageVariables").exists(name)) {
+				MusicBeatState.getVariables().get("stageVariables").remove(name);
 				return true;
 			}
 			return false;
@@ -394,121 +529,28 @@ class HScript extends Iris
 		set('parentLua', null);
 		#end
 		set('this', this);
-		set('game', FlxG.state);
 		set('ModchartState', FunkinLua); // lazy ass fix for some scripts ported from betadciu engine
-		set('controls', Controls.instance);
 
 		// you don't need to add stageVars anymore. -- but isn't compatible with "game.add(sprite);" & "PlayState.instance.add(sprite);"
 		set('add', function(tag:FlxBasic){
-			switch(daScriptType.toLowerCase()){
-				case "stage":
-					if (!PlayState.instance.variables.exists("stageVariables")){
-						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-					}
-			
-					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(tag.toString(), tag);
-					trace('Added sprite to Stage: ${tag.toString()}');
-				case "stagecamera":
-					if (!PlayState.instance.variables.exists("stageCameraVariables")){
-						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
-					}
-			
-					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(tag.toString(), tag);
-					trace('Added sprite to Stage: ${tag.toString()}');
-			}
-
-			return FlxG.state.add(tag);
+			checkStageVar(tag);
+			FlxG.state.add(tag);
 		});
 		set('insert', function(position:Int, tag:FlxBasic){ 
-			switch(daScriptType.toLowerCase()){
-				case "stage":
-					if (!PlayState.instance.variables.exists("stageVariables")){
-						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-					}
-			
-					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(tag.toString(), tag);
-					trace('Added sprite to Stage: ${tag.toString()}');
-
-				case "stagecamera":
-					if (!PlayState.instance.variables.exists("stageCameraVariables")){
-						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
-					}
-			
-					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(tag.toString(), tag);
-					trace('Added sprite to Stage: ${tag.toString()}');
-			}
-			
-			return FlxG.state.insert(position, tag);
+			checkStageVar(tag);
+			FlxG.state.insert(position, tag);
 		});
 		set('addBehindGF', function(tag:FlxBasic){
-			switch(daScriptType.toLowerCase()){
-				case "stage":
-					if (!PlayState.instance.variables.exists("stageVariables")){
-						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-					}
-			
-					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(tag.toString(), tag);
-					trace('Added sprite to Stage: ${tag.toString()}');
-				case "stagecamera":
-					if (!PlayState.instance.variables.exists("stageCameraVariables")){
-						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
-					}
-			
-					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(tag.toString(), tag);
-					trace('Added sprite to Stage: ${tag.toString()}');
-			}
-
-			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
+			checkStageVar(tag);
+			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
 		});
 		set('addBehindBF', function(tag:FlxBasic){
-			switch(daScriptType.toLowerCase()){
-				case "stage":
-					if (!PlayState.instance.variables.exists("stageVariables")){
-						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-					}
-			
-					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(tag.toString(), tag);
-					trace('Added sprite to Stage: ${tag.toString()}');
-				case "stagecamera":
-					if (!PlayState.instance.variables.exists("stageCameraVariables")){
-						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
-					}
-			
-					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(tag.toString(), tag);
-					trace('Added sprite to Stage: ${tag.toString()}');
-			}
-
-			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
+			checkStageVar(tag);
+			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
 		});
 		set('addBehindDad', function(tag:FlxBasic){
-			switch(daScriptType.toLowerCase()){
-				case "stage":
-					if (!PlayState.instance.variables.exists("stageVariables")){
-						PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
-					}
-			
-					var stageVars = PlayState.instance.variables.get("stageVariables");
-					stageVars.set(tag.toString(), tag);
-					trace('Added sprite to Stage: ${tag.toString()}');
-				case "stagecamera":
-					if (!PlayState.instance.variables.exists("stageCameraVariables")){
-						PlayState.instance.variables.set("stageCameraVariables", new Map<String, FlxBasic>());
-					}
-			
-					var stageVars = PlayState.instance.variables.get("stageCameraVariables");
-					stageVars.set(tag.toString(), tag);
-					trace('Added sprite to Stage: ${tag.toString()}');
-			}
-
-			return FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
+			checkStageVar(tag);
+			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
 		});
 		//
 
@@ -525,15 +567,43 @@ class HScript extends Iris
 			return FlxColor.fromString("#" + color);
 		});
 
+		set("include", function(path:String) { // just testing
+			var scriptText:String = Paths.getTextFromFile(path);
+
+			if(scriptText == null)
+			{
+				trace('Script not found: ' + path);
+				return;
+			}
+
+			this.scriptCode += "\n" + scriptText;
+
+			this.parse(true);
+			this.execute();
+		});
+
 		set('buildTarget', LuaUtils.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
 
-		set('Function_Stop', LuaUtils.Function_Stop);
-		set('Function_Continue', LuaUtils.Function_Continue);
-		set('Function_StopLua', LuaUtils.Function_StopLua); //doesnt do much cuz HScript has a lower priority than Lua
-		set('Function_StopHScript', LuaUtils.Function_StopHScript);
-		set('Function_StopAll', LuaUtils.Function_StopAll);
+	}
+
+	public function checkStageVar(obj:FlxBasic) {
+		switch(daScriptType.toLowerCase()){
+			case "stage":
+				if (!MusicBeatState.getVariables().exists("stageVariables"))
+					MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxBasic>());
+
+				var stageVars = MusicBeatState.getVariables().get("stageVariables");
+				stageVars.set(Std.string(obj), obj);
+			case "stagecamera":
+				if (!MusicBeatState.getVariables().exists("stageCameraVariables"))
+					MusicBeatState.getVariables().set("stageCameraVariables", new Map<String, FlxBasic>());
+
+				var stageVars = MusicBeatState.getVariables().get("stageCameraVariables");
+				stageVars.set(Std.string(obj), obj);
+		}
+
 	}
 
 	#if LUA_ALLOWED
@@ -725,6 +795,106 @@ class CustomFlxColor {
 
 	public static function fromString(str:String):Int
 		return cast FlxColor.fromString(str);
+}
+
+@:access(flixel.math.FlxRandom)
+class CustomFlxRandom
+{
+	@:inheritDoc(flixel.math.FlxRandom.resetInitialSeed)
+	public static inline function resetInitialSeed():Int
+	{
+		return FlxG.random.initialSeed = FlxRandom.rangeBound(Std.int(Math.random() * FlxMath.MAX_VALUE_INT));
+	}
+	
+	@:inheritDoc(flixel.math.FlxRandom.int)
+	public function int(min:Int = 0, max:Int = FlxMath.MAX_VALUE_INT, ?excludes:Array<Int>):Int
+	{
+		return FlxG.random.int(min, max, excludes);
+	}
+	
+	@:inheritDoc(flixel.math.FlxRandom.float)
+	public static function float(min:Float = 0, max:Float = 1, ?excludes:Array<Float>):Float
+	{
+		return FlxG.random.float(min, max, excludes);
+	}
+	
+	@:inheritDoc(flixel.math.FlxRandom.floatNormal)
+	public function floatNormal(mean:Float = 0, stdDev:Float = 1):Float
+	{
+		return FlxG.random.floatNormal(mean, stdDev);
+	}
+	
+	@:inheritDoc(flixel.math.FlxRandom.bool)
+	public static inline function bool(chance:Float = 50):Bool
+	{
+		return float(0, 100) < chance;
+	}
+	
+	@:inheritDoc(flixel.math.FlxRandom.sign)
+	public static inline function sign(chance:Float = 50):Int
+	{
+		return bool(chance) ? 1 : -1;
+	}
+	
+	@:inheritDoc(flixel.math.FlxRandom.weightedPick)
+	public static function weightedPick(weightsArray:Array<Float>):Int
+	{
+		return FlxG.random.weightedPick(weightsArray);
+	}
+	
+	@:inheritDoc(flixel.math.FlxRandom.getObject)
+	public static function getObject<T>(objects:Array<T>, ?weightsArray:Array<Float>, startIndex:Int = 0, ?endIndex:Null<Int>)
+	{
+		var selected:Null<T> = null;
+		
+		if (objects.length != 0)
+		{
+			weightsArray ??= [for (i in 0...objects.length) 1];
+			
+			endIndex ??= objects.length - 1;
+			
+			startIndex = Std.int(FlxMath.bound(startIndex, 0, objects.length - 1));
+			endIndex = Std.int(FlxMath.bound(endIndex, 0, objects.length - 1));
+			
+			// Swap values if reversed
+			if (endIndex < startIndex)
+			{
+				startIndex = startIndex + endIndex;
+				endIndex = startIndex - endIndex;
+				startIndex = startIndex - endIndex;
+			}
+			
+			if (endIndex > weightsArray.length - 1)
+			{
+				endIndex = weightsArray.length - 1;
+			}
+			
+			final arrayHelper = [for (i in startIndex...endIndex + 1) weightsArray[i]];
+			
+			selected = objects[startIndex + weightedPick(arrayHelper)];
+		}
+		
+		return selected;
+	}
+	
+	@:inheritDoc(flixel.math.FlxRandom.shuffle)
+	public static function shuffle<T>(array:Array<T>):Void
+	{
+		var maxValidIndex = array.length - 1;
+		for (i in 0...maxValidIndex)
+		{
+			var j = FlxG.random.int(i, maxValidIndex);
+			var tmp = array[i];
+			array[i] = array[j];
+			array[j] = tmp;
+		}
+	}
+	
+	@:inheritDoc(flixel.math.FlxRandom.color)
+	public static function color(?min:FlxColor, ?max:FlxColor, ?alpha:Int, greyScale:Bool = false):FlxColor
+	{
+		return FlxG.random.color(min, max, alpha, greyScale);
+	}
 }
 
 class CustomInterp extends crowplexus.hscript.Interp

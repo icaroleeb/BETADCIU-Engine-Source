@@ -135,8 +135,87 @@ class Character extends OffsettableSprite
 		}
 	}
 
-	public function changeCharacter(character:String)
-	{
+	public function resetCharacter(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false) {
+		this.x = x;
+		this.y = y;
+
+		resetVariables();
+
+		animOffsets = new Map<String, Array<Dynamic>>();
+		animPlayerOffsets = new Map<String, Array<Dynamic>>();
+		iconColor = isPlayer ? 'FF66FF33' : 'FFFF0000';
+		this.isPlayer = isPlayer;
+		
+		changeCharacter(character);
+
+		switch(curCharacter)
+		{
+			case 'pico-speaker':
+				skipDance = true;
+				loadMappedAnims();
+				playAnim("shoot1");
+			case 'pico-blazin', 'darnell-blazin':
+				skipDance = true;
+		}
+	}
+
+	public function resetVariables() {
+		missingCharacter = false;
+		if (missingText != null) missingText.kill();
+		
+		for (i in ['flipMode', 'stopIdle', 'skipDance', 'specialAnim', 'stunned'])
+			Reflect.setProperty(this, i, false);
+		
+		idleSuffix = '';
+
+		setZoom(1);
+		
+		this.cameras = [FlxG.camera];
+		this.alpha = 1;
+		this.visible = true;
+		this.active = true;
+		this.exists = true;
+		this.alive = true;
+
+		this.angle = 0;
+		this.scale.set(1, 1);
+		this.offset.set(0, 0);
+		this.origin.set(0, 0);
+
+		this.velocity.set(0, 0);
+		this.acceleration.set(0, 0);
+		this.drag.set(0, 0);
+		this.maxVelocity.set(10000, 10000);
+
+		this.angularVelocity = 0;
+		this.angularAcceleration = 0;
+		this.angularDrag = 0;
+
+		this.color = 0xFFFFFF;
+		this.blend = null;
+		this.shader = null;
+		this.antialiasing = true;
+
+		this.flipX = false;
+		this.flipY = false;
+
+		this.scrollFactor.set(1, 1);
+
+		if (this.animation != null)
+		{
+			this.animation.stop();
+			this.animation.curAnim = null;
+		}
+
+		this.clipRect = null;
+
+		this.updateHitbox();
+
+		this.moves = true;
+		this.immovable = false;
+	}
+
+	public function changeCharacter(character:String) {
 		animationsArray = [];
 		animOffsets = [];
 		animPlayerOffsets = [];
