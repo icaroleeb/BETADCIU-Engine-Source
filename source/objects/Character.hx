@@ -652,20 +652,41 @@ class Character extends OffsettableSprite
 	}
 
 	public function flipAnims() {
-		//rewrote it
-		for (anim in animationsArray){
-			if (anim.anim.contains("singRIGHT")){
-				var animSplit:Array<String> = anim.anim.split('singRIGHT');
+        //rewrote it
+        if (isAnimateAtlas) {
+            for (anim in animationsArray) {
+                if (anim.anim.contains("singRIGHT")) {
+                    var animSplit:Array<String> = anim.anim.split('singRIGHT');
+                    var suffix = animSplit[1];
 
-				if (animation.getByName('singRIGHT' + animSplit[1]) != null && animation.getByName('singLEFT' + animSplit[1]) != null)
-				{
-					var oldRight = animation.getByName('singRIGHT' + animSplit[1]).frames;
-					animation.getByName('singRIGHT' + animSplit[1]).frames = animation.getByName('singLEFT' + animSplit[1]).frames;
-					animation.getByName('singLEFT' + animSplit[1]).frames = oldRight;
-				}
-			}
-		}
-	}
+                    var singRightName = 'singRIGHT' + suffix;
+                    var singLeftName = 'singLEFT' + suffix;
+
+                    @:privateAccess {
+                        var oldRightAnim = this.anim._animations.get(singRightName);
+                        var oldLeftAnim = this.anim._animations.get(singLeftName);
+
+                        if (oldRightAnim != null && oldLeftAnim != null) {
+                            this.anim._animations.set(singRightName, oldLeftAnim);
+                            this.anim._animations.set(singLeftName, oldRightAnim);
+                        }
+                    }
+                }
+            }
+        } else {
+            for (anim in animationsArray){
+                if (anim.anim.contains("singRIGHT")) {
+                    var animSplit:Array<String> = anim.anim.split('singRIGHT');
+
+                    if (animation.getByName('singRIGHT' + animSplit[1]) != null && animation.getByName('singLEFT' + animSplit[1]) != null) {
+                        var oldRight = animation.getByName('singRIGHT' + animSplit[1]).frames;
+                        animation.getByName('singRIGHT' + animSplit[1]).frames = animation.getByName('singLEFT' + animSplit[1]).frames;
+                        animation.getByName('singLEFT' + animSplit[1]).frames = oldRight;
+                    }
+                }
+            }
+        }
+    }
 
 	inline function predictCharacterIsPlayer(name:String) { // if i remove this later, is because people didn't liked it. -Ryiuu
 		if (name.startsWith('bf') || name.startsWith('bf-') || name.endsWith('-player') || name.endsWith('-playable'))

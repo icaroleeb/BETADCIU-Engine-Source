@@ -3254,13 +3254,19 @@ class PlayState extends MusicBeatState
 		var fadeEase = FlxEase.expoOut;
 
 		if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
-			if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel')
+			if(NVScoreTween && isPixelStage || NVScoreTween && uiPostfix == '-pixel')
 				fadeEase = EaseUtil.stepped(2);
 		}
 
-		if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel'){
-			rating.scale.set(0.785, 0.785);	
-			FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.5, {ease: fadeEase});	
+		if(NVScoreTween)
+		{
+			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
+				rating.scale.set(0.785 * daPixelZoom, 0.785 * daPixelZoom);
+				FlxTween.tween(rating.scale, {x: 0.7 * daPixelZoom, y: 0.7 * daPixelZoom}, 0.5, {ease: fadeEase});
+			}else{
+				rating.scale.set(0.785, 0.785);
+				FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.5, {ease: fadeEase});
+			}
 		}
 
 		var daLoop:Int = 0;
