@@ -5,6 +5,9 @@ import lime.utils.Assets as LimeAssets;
 import lime.media.AudioBuffer;
 import haxe.io.Bytes;
 
+import haxe.macro.Expr;
+import haxe.macro.Context;
+
 class CoolUtil
 {
 	public inline static final DEFAULT_VIBRATION_PERIOD:Float = 0.1;
