@@ -6,6 +6,7 @@ import backend.WeekData;
 import backend.Song;
 import backend.Rating;
 
+import extensions.flixel.FlxCameraEx;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxSubState;
@@ -366,10 +367,10 @@ class PlayState extends MusicBeatState
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay');
 		guitarHeroSustains = ClientPrefs.data.guitarHeroSustains;
 
-		// var gameCam:FlxCamera = FlxG.camera;
+		// var gameCam:FlxCameraEx = FlxG.camera;
 		camGame = initPsychCamera();
-		camHUD = new FlxCamera();
-		camOther = new FlxCamera();
+		camHUD = new FlxCameraEx();
+		camOther = new FlxCameraEx();
 		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
 
@@ -3248,13 +3249,18 @@ class PlayState extends MusicBeatState
 		var fadeEase = FlxEase.expoOut;
 
 		if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
-			if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel')
+			if(NVScoreTween && isPixelStage || NVScoreTween && uiPostfix == '-pixel')
 				fadeEase = EaseUtil.stepped(2);
 		}
 
-		if(NVScoreTween && !isPixelStage || NVScoreTween && uiPostfix != '-pixel'){
-			rating.scale.set(0.785, 0.785);	
-			FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.5, {ease: fadeEase});	
+		if(NVScoreTween) {
+			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
+				rating.scale.set(0.785 * daPixelZoom, 0.785 * daPixelZoom);
+				FlxTween.tween(rating.scale, {x: 0.7 * daPixelZoom, y: 0.7 * daPixelZoom}, 0.5, {ease: fadeEase});
+			}else{
+				rating.scale.set(0.785, 0.785);
+				FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.5, {ease: fadeEase});
+			}
 		}
 
 		var daLoop:Int = 0;
@@ -4023,6 +4029,8 @@ class PlayState extends MusicBeatState
 				setOnScripts('curBpm', Conductor.bpm);
 				setOnScripts('crochet', Conductor.crochet);
 				setOnScripts('stepCrochet', Conductor.stepCrochet);
+				setOnScripts('crotchet', Conductor.crochet); // NV
+				setOnScripts('stepCrotchet', Conductor.stepCrochet); // NV
 			}
 			setOnScripts('mustHitSection', SONG.notes[curSection].mustHitSection);
 			setOnScripts('altAnim', SONG.notes[curSection].altAnim);
@@ -4921,44 +4929,40 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function addStage(?onlyLuas:Bool=false, ?isCreate:Bool=false) {
-		if(!isCreate) setStageDetails(stageData); // for some reason they don't add the chars position on them.
-		
+	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) {
+		if(!preload) setStageDetails(stageData); // for some reason they don't add the chars position on them.
+
 		var path:String = Paths.getPath('stages/' + curStage + '.json', TEXT);
 
-		if (!FileSystem.exists(path)) {
+		if (FileSystem.exists(path))
+		{
 			switch (curStage.toLowerCase())
 			{
-				case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
-				case 'spooky': hardCodedStage = new Spooky();				//Week 2
-				case 'philly': hardCodedStage = new Philly();				//Week 3
-				case 'limo': hardCodedStage = new Limo();					//Week 4
-				case 'mall': hardCodedStage = new Mall();					//Week 5 - Cocoa, Eggnog
-				case 'mallevil': hardCodedStage = new MallEvil();			//Week 5 - Winter Horrorland
-				case 'school': hardCodedStage = new School();				//Week 6 - Senpai, Roses
-				case 'schoolevil': hardCodedStage = new SchoolEvil();		//Week 6 - Thorns
-				case 'tank': hardCodedStage = new Tank();					//Week 7 - Ugh, Guns, Stress
-				case 'phillystreets': hardCodedStage = new PhillyStreets(); //Weekend 1 - Darnell, Lit Up, 2Hot
-				case 'phillyblazin': hardCodedStage = new PhillyBlazin();	//Weekend 1 - Blazin
-				case 'stageerect': hardCodedStage = new StageErect();	//Stage Erect
-				case 'limoerect': hardCodedStage = new LimoErect();		//Week 4
+				case 'stage': hardCodedStage = new StageWeek1(); 					  //Week 1
+				case 'spooky': hardCodedStage = new Spooky();						  //Week 2
+				case 'philly': hardCodedStage = new Philly();						  //Week 3
+				case 'limo': hardCodedStage = new Limo();							  //Week 4
+				case 'mall': hardCodedStage = new Mall();							  //Week 5 - Cocoa, Eggnog
+				case 'mallevil': hardCodedStage = new MallEvil();					  //Week 5 - Winter Horrorland
+				case 'school': hardCodedStage = new School();						  //Week 6 - Senpai, Roses
+				case 'schoolevil': hardCodedStage = new SchoolEvil();				  //Week 6 - Thorns
+				case 'tank': hardCodedStage = new Tank();							  //Week 7 - Ugh, Guns, Stress
+				case 'phillystreets': hardCodedStage = new PhillyStreets(); 		  //Weekend 1 - Darnell, Lit Up, 2Hot
+				case 'phillyblazin': hardCodedStage = new PhillyBlazin();			  //Weekend 1 - Blazin
+				case 'stageerect': hardCodedStage = new StageErect();	    		  //Week 1 Erect
+				case 'spookyerect': hardCodedStage = new SpookyErect();     		  //Week 2 Erect
+				case 'phillyerect': hardCodedStage = new PhillyErect();     	      //Week 3 Erect
+				case 'limoerect': hardCodedStage = new LimoErect();		    		  //Week 4 Erect
+				case 'mallerect': hardCodedStage = new MallErect();					  //Week 5 Erect
+				case 'schoolerect': hardCodedStage = new SchoolErect();			      //Week 6 Erect
+				case 'schoolevilerect': hardCodedStage = new SchoolEvilErect();		  //Week 6 Erect
+				case 'tankerect': hardCodedStage = new TankErect();				  	  //Week 7 Erect
+				case 'phillystreetserect': hardCodedStage = new PhillyStreetsErect(); //Weekend 1 Erect
+				case 'sserafim': hardCodedStage = new Sserafim(); 					  //SPAGHETTI
 			}
 		}
 
 		addObjects(stageData);
-
-		if(ClientPrefs.data.perfectPixel == "inGame"){
-			boyfriend.pixelPerfectPosition = stageData.isPixelStage;
-			boyfriend.pixelPerfectRender = stageData.isPixelStage;
-
-			dad.pixelPerfectPosition = stageData.isPixelStage;
-			dad.pixelPerfectRender = stageData.isPixelStage;
-
-			gf.pixelPerfectPosition = stageData.isPixelStage;
-			gf.pixelPerfectRender = stageData.isPixelStage;
-		}
-
-		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
 
 		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -4966,7 +4970,7 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(isCreate){
+		if(!preload){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');

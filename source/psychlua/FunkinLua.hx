@@ -2850,72 +2850,53 @@ class FunkinLua {
 		var animationFrame:Int = 0;	
 		var position:Int = -1;
 		var oldChar:String = "";
-							
-		if (PlayState.instance.modchartCharacters.get(tag) != null)
-		{
-			var daChar:Character = PlayState.instance.modchartCharacters.get(tag);
+
+		var modCharMap = PlayState.instance.modchartCharacters;
+		var daChar = modCharMap.get(tag);
+
+		if (daChar != null) {
 			oldChar = daChar.curCharacter;
+			var curAnim = daChar.animation.curAnim;
 
-			if (daChar.isAnimateAtlas){
-				if (daChar.getAnimationName().startsWith('sing')) {
-					animationName = Std.string(daChar.animation.curAnim.name);
-					animationFrame = Std.int(daChar.animation.curAnim.curFrame);
-				}
-			} else {
-				if (daChar.animation.curAnim.name.startsWith('sing')) {
-					animationName = daChar.animation.curAnim.name;
-					animationFrame = daChar.animation.curAnim.curFrame;
-				}		
+			if ((daChar.isAnimateAtlas && daChar.getAnimationName().startsWith('sing')) || (!daChar.isAnimateAtlas && curAnim.name.startsWith('sing'))) {
+				animationName = Std.string(curAnim.name);
+				animationFrame = Std.int(curAnim.curFrame);
 			}
-			position = LuaUtils.getTargetInstance().members.indexOf(daChar);
-		}
-		
-		LuaUtils.resetCharacterTag(tag);
-		var leSprite:Character = new Character(0, 0, character, isPlayer);
-		//leSprite.flipMode = flipped;
-		PlayState.instance.modchartCharacters.set(tag, leSprite); //yes
-		var shit:Character = PlayState.instance.modchartCharacters.get(tag);
-		LuaUtils.getTargetInstance().add(shit);
-
-		if (position >= 0) //this should keep them in the same spot if they switch
-		{
-			LuaUtils.getTargetInstance().remove(shit, true);
-			LuaUtils.getTargetInstance().insert(position, shit);
 		}
 
-		var stageData:StageFile = StageData.getStageFile(PlayState.SONG.stage);
-		var charX:Float = 0;
-		var charY:Float = (flipped ? 350 : 0);
-
-		if (!isPlayer)
-		{
-			//if (flipped) shit.flipMode = true;
-	
-			charX = shit.positionArray[0];
-			charY = shit.positionArray[1];
-	
-			shit.x = PlayState.instance.DAD_X + charX;
-			shit.y = PlayState.instance.DAD_Y + charY;
-		}
-		else
-		{
-			//if (flipped) shit.flipMode = true;
-	
-			var charX:Float = 0;
-			var charY:Float =  (!flipped ? 0 : 350);
-		
-			charX = shit.playerPositionArray[0];
-			charY = shit.playerPositionArray[1];
-	
-			shit.x = PlayState.instance.BF_X + charX;
-			shit.y = PlayState.instance.BF_Y + charY;
+		if (daChar == null) {
+			var newChar:Character = new Character(0, 0, character, isPlayer);
+			modCharMap.set(tag, newChar);
+			LuaUtils.getTargetInstance().add(newChar);
+			daChar = newChar;
+		} else {
+			daChar.resetCharacter(0, 0, character, isPlayer);
 		}
 
-		if (shit.animOffsets.exists(animationName)) shit.playAnim(animationName, true, false, animationFrame);
+		var charX:Float;
+		var charY:Float;
 
-		if (oldChar != "") shit.pastCharacter = oldChar;
-		PlayState.instance.startCharacterScripts(shit.curCharacter);
-		shit.charName = tag;
+		if (isPlayer) {
+			charX = daChar.playerPositionArray[0];
+			charY = daChar.playerPositionArray[1];
+			daChar.x = PlayState.instance.BF_X + charX;
+			daChar.y = PlayState.instance.BF_Y + charY;
+		} else {
+			charX = daChar.positionArray[0];
+			charY = daChar.positionArray[1];
+			daChar.x = PlayState.instance.DAD_X + charX;
+			daChar.y = PlayState.instance.DAD_Y + charY;
+		}
+
+		if (daChar.animOffsets.exists(animationName)) 
+			daChar.playAnim(animationName, true, false, animationFrame);
+
+		if (oldChar != "") 
+			daChar.pastCharacter = oldChar;
+
+		PlayState.instance.startCharacterScripts(daChar.curCharacter);
+		PlayState.instance.setOnHScript(tag, daChar);
+		daChar.charName = tag;
 	}
 
 	// Combined them all into one function
@@ -2957,10 +2938,11 @@ class FunkinLua {
 		} catch (e:Dynamic) {}
 
 		PlayState.instance.stopCharacterScripts(oldChar);
-		PlayState.instance.remove(charObj);
-		charObj.destroy();
+		// PlayState.instance.remove(charObj);
+		// charObj.destroy();
 		
-		charObj = new Character(0, 0, id, (target == "boyfriend" ? !flipped : flipped));
+		// charObj = new Character(0, 0, id, (target == "boyfriend" ? !flipped : flipped));
+		charObj.resetCharacter(0, 0, id, (target == "boyfriend" ? !flipped : flipped)); // trying to not remove them
 		charObj.flipMode = flipped;
 
 		switch(target) {
@@ -3001,6 +2983,7 @@ class FunkinLua {
 			case "gf": PlayState.instance.setOnScripts("gfName", charObj.curCharacter);
 		}
 
+		PlayState.instance.setOnHScript(target, charObj);
 		PlayState.instance.startCharacterScripts(charObj.curCharacter);
 	}
 
