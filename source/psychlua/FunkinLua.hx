@@ -157,8 +157,8 @@ class FunkinLua {
 			set('scrollSpeed', 1.0);
 			set('curStage', "stage");
 			set('hasVocals', false);
-			set('songName', (scriptType.toLowerCase() == "modpack" ? ModpackMakerState.selectedSongName : ""));
-			set('songPath', (scriptType.toLowerCase() == "modpack" ? Paths.formatToSongPath(ModpackMakerState.selectedSongName) : ""));
+			set('songName', (this.scriptType.toLowerCase() == "modpack" ? ModpackMakerState.selectedSongName : ""));
+			set('songPath', (this.scriptType.toLowerCase() == "modpack" ? Paths.formatToSongPath(ModpackMakerState.selectedSongName) : ""));
 		}
 
 		// Screen stuff
@@ -503,7 +503,7 @@ class FunkinLua {
 			var cervix = luaFile + ".lua";
 			if(luaFile.endsWith(".lua"))cervix=luaFile;
 
-			if (scriptType.toLowerCase() == "modpack"){
+			if (this.scriptType.toLowerCase() == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("", cervix);
 				return;
 			}
@@ -533,7 +533,7 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "addHScript", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false, ?type:String = "") {
 			#if HSCRIPT_ALLOWED
-			if (scriptType.toLowerCase() == "modpack"){
+			if (this.scriptType.toLowerCase() == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("", scriptFile);
 				return;
 			}
@@ -654,7 +654,7 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "loadGraphic", function(variable:String, image:String, ?gridX:Int = 0, ?gridY:Int = 0) {
-			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+			if (this.scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
 				ModpackAssetRegistry.instance.addAsset("images", image);
 				return;
 			}
@@ -877,7 +877,7 @@ class FunkinLua {
 			game.addCharacterToList(name, charType);
 		});
 		Lua_helper.add_callback(lua, "precacheImage", function(name:String, ?allowGPU:Bool = true) {
-			if (scriptType.toLowerCase() == "modpack" && name != null && name.length > 0){
+			if (this.scriptType.toLowerCase() == "modpack" && name != null && name.length > 0){
 				ModpackAssetRegistry.instance.addAsset("images", name);
 				return;
 			}
@@ -885,7 +885,7 @@ class FunkinLua {
 			Paths.image(name, allowGPU);
 		});
 		Lua_helper.add_callback(lua, "precacheSound", function(name:String) {
-			if (scriptType.toLowerCase() == "modpack" && name != null && name.length > 0){
+			if (this.scriptType.toLowerCase() == "modpack" && name != null && name.length > 0){
 				ModpackAssetRegistry.instance.addAsset("sounds", name);
 				return;
 			}
@@ -898,7 +898,7 @@ class FunkinLua {
 
 		// others
 		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '', ?value3:String = '') {
-			if (scriptType.toLowerCase() == "modpack"){
+			if (this.scriptType.toLowerCase() == "modpack"){
 				if (FileSystem.exists(Paths.modFolders('custom_events/$name.txt'))){
 					ModpackAssetRegistry.instance.addAsset("", 'custom_events/$name.txt');
 				}
@@ -1248,7 +1248,7 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "makeLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {
-			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+			if (this.scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
 				ModpackAssetRegistry.instance.addAsset("images", image);
 				return;
 			}
@@ -1264,7 +1264,7 @@ class FunkinLua {
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leSprite);
 
-			switch(scriptType.toLowerCase()){
+			switch(this.scriptType.toLowerCase()){
 				case "stage":
 					if (!variables.exists("stageVariables")){
 						variables.set("stageVariables", new Map<String, FlxSprite>());
@@ -1284,7 +1284,7 @@ class FunkinLua {
 			leSprite.active = true;
 		});
 		Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?spriteType:String = 'auto') {
-			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+			if (this.scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
 				ModpackAssetRegistry.instance.addAsset("images", image);
 				return;
 			}
@@ -1301,7 +1301,7 @@ class FunkinLua {
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leSprite);
 
-			switch(scriptType.toLowerCase()){
+			switch(this.scriptType.toLowerCase()){
 				case "stage":
 					if (!variables.exists("stageVariables")){
 						variables.set("stageVariables", new Map<String, FlxSprite>());
@@ -1319,7 +1319,7 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, ?image:String = null, ?spacingX:Float = 0, ?spacingY:Float = 0, ?axes:String = "XY") {
-			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+			if (this.scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
 				ModpackAssetRegistry.instance.addAsset("images", image);
 				return;
 			}
@@ -1335,7 +1335,7 @@ class FunkinLua {
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leSprite);
 
-			switch(scriptType.toLowerCase()){
+			switch(this.scriptType.toLowerCase()){
 				case "stage":
 					if (!variables.exists("stageVariables")){
 						variables.set("stageVariables", new Map<String, FlxSprite>());
@@ -1395,7 +1395,7 @@ class FunkinLua {
 			leSprite.active = true;
 		});
 		Lua_helper.add_callback(lua, "makeAnimatedLuaBackdrop", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?axes:String = "XY", ?spriteType:String = 'auto') {
-			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+			if (this.scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
 				ModpackAssetRegistry.instance.addAsset("images", image);
 				return;
 			}
@@ -1411,7 +1411,7 @@ class FunkinLua {
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leSprite);
 
-			switch(scriptType.toLowerCase()){
+			switch(this.scriptType.toLowerCase()){
 				case "stage":
 					if (!variables.exists("stageVariables")){
 						variables.set("stageVariables", new Map<String, FlxSprite>());
@@ -1433,7 +1433,7 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String="camGame", ?shouldLoop:Bool=false, ?muted:Bool=true) {
 			// I hate you FlxVideoSprite....
 			#if VIDEOS_ALLOWED
-			if (scriptType.toLowerCase() == "modpack"){
+			if (this.scriptType.toLowerCase() == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("videos", videoFile);
 				return;
 			}
@@ -1467,7 +1467,7 @@ class FunkinLua {
 
 				variables.set(tag, leVSprite);
 				
-				switch(scriptType.toLowerCase()){
+				switch(this.scriptType.toLowerCase()){
 					case "stage":
 						if (!variables.exists("stageVariables")){
 							variables.set("stageVariables", new Map<String, FlxSprite>());
@@ -1493,7 +1493,7 @@ class FunkinLua {
 			#end
 		});
 		Lua_helper.add_callback(lua, "makeLuaCamera", function(tag:String, ?x:Float = 0.0, ?y:Float = 0.0, ?resX:Int = 1280, ?resY:Int = 720, ?zoom:Float = 1.0) { // creates the camera
-			if (scriptType.toLowerCase() == "modpack"){
+			if (this.scriptType.toLowerCase() == "modpack"){
 				return;
 			}
 
@@ -1584,7 +1584,7 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "reorderCameras", function(cameraNames:Array<String>) { 
-			if (scriptType.toLowerCase() == "modpack"){
+			if (this.scriptType.toLowerCase() == "modpack"){
 				return;
 			}
 		
@@ -1786,7 +1786,7 @@ class FunkinLua {
 			//game.callOnScripts('onCharacterChangePost', [tag, character]);
 		});
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
-			if(scriptType.toLowerCase() == "stage" || scriptType.toLowerCase() == "stagecamera") 
+			if(this.scriptType.toLowerCase() == "stage" || this.scriptType.toLowerCase() == "stagecamera") 
 				luaTrace("The makeLuaCharacter can't be added in script stages!", false, false, FlxColor.RED);
 			else
 				makeLuaCharacter(tag, character, isPlayer, flipped);
@@ -1816,7 +1816,7 @@ class FunkinLua {
 			game.callOnScripts('onStageChangePost', [id]);
 		});
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
-			if (scriptType.toLowerCase() == "modpack"){
+			if (this.scriptType.toLowerCase() == "modpack"){
 				ModpackAssetRegistry.instance.addAsset("images", 'icons/icon-'+character);
 				return;
 			}
@@ -2239,7 +2239,7 @@ class FunkinLua {
 			#if VIDEOS_ALLOWED
 			if(FileSystem.exists(Paths.video(videoFile)))
 			{
-				if (scriptType.toLowerCase() == "modpack"){
+				if (this.scriptType.toLowerCase() == "modpack"){
 					ModpackAssetRegistry.instance.addAsset("videos", videoFile);
 					return true;
 				}
@@ -2276,7 +2276,7 @@ class FunkinLua {
 			FlxG.sound.playMusic(Paths.music(sound), volume, loop);
 		});
 		Lua_helper.add_callback(lua, "playSound", function(sound:String, ?volume:Float = 1, ?tag:String = null, ?loop:Bool = false) {
-			if (scriptType.toLowerCase() == "modpack" && sound != null && sound.length > 0){
+			if (this.scriptType.toLowerCase() == "modpack" && sound != null && sound.length > 0){
 				ModpackAssetRegistry.instance.addAsset("sounds", sound);
 				return null;
 			}
