@@ -4082,8 +4082,8 @@ class PlayState extends MusicBeatState
 				if (script.scriptName == luaToLoad) {
 					// Because the shaders weren't getting destroyed properly. Changed it to onDestroy
 					script.call("onDestroy", []);
-					
 					luaArray.remove(script);
+					script = null;
 					return true;
 				}
 			}
@@ -4920,7 +4920,7 @@ class PlayState extends MusicBeatState
 				var sprite:FlxSprite = stageVars.get(key);
 
 				if (sprite != null) {
-					remove(sprite);
+					sprite.kill();
 					variables.remove(key);
 					sprite.destroy();
 				}
