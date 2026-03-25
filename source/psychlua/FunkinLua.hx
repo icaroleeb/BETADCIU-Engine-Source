@@ -2948,9 +2948,10 @@ class FunkinLua {
 
 		PlayState.instance.startCharacterScripts(daChar.curCharacter);
 		PlayState.instance.setOnHScript(tag, daChar);
-    PlayState.instance.nameScriptsCharacter("characters/" + shit.curCharacter, tag);
-		PlayState.instance.callLuaFile("characters/" + shit.curCharacter + '.lua', 'onCreatePost');
-		PlayState.instance.callHScriptFile("characters/" + shit.curCharacter + '.hx', 'onCreatePost');
+
+    	PlayState.instance.nameScriptsCharacter("characters/" + daChar.curCharacter, tag);
+		PlayState.instance.callLuaFile("characters/" + daChar.curCharacter + '.lua', 'onCreatePost');
+		PlayState.instance.callHScriptFile("characters/" + daChar.curCharacter + '.hx', 'onCreatePost');
 		daChar.charName = tag;
 	}
 

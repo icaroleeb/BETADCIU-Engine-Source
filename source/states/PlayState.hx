@@ -5004,6 +5004,8 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public var isCreatePost:Bool = true;
+
 	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) {
 		if(!preload) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 
@@ -5045,7 +5047,7 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(!preload){
+		if(isCreatePost){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');
