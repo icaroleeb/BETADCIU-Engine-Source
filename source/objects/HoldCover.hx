@@ -96,10 +96,15 @@ class CoverSprite extends FlxSprite
 		}
 	}
 
+	public var loopAnim:String = "";
+
 	public function initAnimations(i:Int, hColor:String)
 	{
-		this.animation.addByPrefix(Std.string(i), 'holdCover$hColor', 24, true);
-		this.animation.addByPrefix(Std.string(i) + 'p', 'holdCoverEnd$hColor', 24, false);
+		// this.animation.addByPrefix(Std.string(i), 'holdCover'+hColor+'0', 24, true);
+		this.animation.addByIndices(Std.string(i), 'holdCover' + hColor, [0,1,2,3], "", 24, true);
+		this.animation.addByPrefix(Std.string(i) + 'p', 'holdCoverEnd'+hColor+'0', 24, false);
+		loopAnim = Std.string(i);
+		this.animation.play(Std.string(i), false);
 	}
 
 	public function smoothSprite()
@@ -114,7 +119,13 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 {
 	public var enabled:Bool = true;
 	public var isPlayer:Bool = false;
-	public var rgbShader:PixelHoldShaderRef;
+
+	// I can't change the color without creating multiple shaders :HeartBreaking:
+	public var rgbShaderPurple:PixelHoldShaderRef;
+	public var rgbShaderBlue:PixelHoldShaderRef;
+	public var rgbShaderGreen:PixelHoldShaderRef;
+	public var rgbShaderRed:PixelHoldShaderRef;
+
 	public var config(default, set):NoteHoldCoverConfig;
 	public static var configs:Map<String, NoteHoldCoverConfig> = new Map();
 	var noteDataMap:Map<Int, String> = new Map();
@@ -124,7 +135,10 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		this.enabled = enabled;
 		this.isPlayer = isPlayer;
 
-		rgbShader = new PixelHoldShaderRef();
+		rgbShaderPurple = new PixelHoldShaderRef();
+		rgbShaderBlue = new PixelHoldShaderRef();
+		rgbShaderGreen = new PixelHoldShaderRef();
+		rgbShaderRed = new PixelHoldShaderRef();
 		
 		super(0, 0, 4);
 		for (i in 0...maxSize)
@@ -148,127 +162,62 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 
 	public function spawnOnNoteHit(note:Note, isReady:Bool):Void
 	{
-		if (note == null) return;
+		if (note == null || !enabled || !isReady) return;
 
 		config = null;
 		var noteData:Int = note.noteData;
-		var isSus:Bool = note.isSustainNote;
 		var isHoldEnd:Bool = false;
 		if (note.animation.curAnim != null) isHoldEnd = note.animation.curAnim.name.endsWith('end');
+		var rgbShader:Array<PixelHoldShaderRef> = [rgbShaderPurple, rgbShaderBlue, rgbShaderGreen, rgbShaderRed];
 
 		// HoldCovers with no json
 		var tempConfig:NoteHoldCoverConfig = createConfig();
 
-		if (enabled && isReady)
-		{
-			var data:Int = Std.int(noteData) % 4;
+		var data:Int = Std.int(noteData) % 4;
 
-			if (isSus)
-			{
-				var coverSpriteMember = this.members[data];
+		if (!note.isSustainNote) 
+			return;
 
-				if (note.texture != null && note.texture.length > 0 && coverSpriteMember.texture != note.texture) {
-					coverSpriteMember.texture = note.texture;
-				}
+		var coverSpriteMember = this.members[data];
 
-				coverSpriteMember.smoothSprite();
-				// RGB shader hold cover stuff
-				var tempShader:RGBPalette = null;
-				if (config.allowRGB)
-				{
-					Note.initializeGlobalRGBShader(noteData % Note.colArray.length);
-					if ((note == null || note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableNoteRGB))
-					{
-						tempShader = new RGBPalette();
-						// If Note RGB is enabled:
-						if ((note == null || !note.noteSplashData.useGlobalShader))
-						{
-							var colors = config.rgb;
-							if (colors != null)
-							{
-								for (i in 0...3)
-								{
-									var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData % Note.colArray.length];
-									if (note != null && note.isPixelNote) arr = ClientPrefs.data.arrowRGBPixel[noteData % Note.colArray.length];
+		if (note.texture != null && note.texture.length > 0 && coverSpriteMember.texture != note.texture) {
+			coverSpriteMember.texture = note.texture;
+		}
 
-									var rgb = colors[i];
-									if (rgb == null)
-									{
-										if (i == 0) tempShader.r = arr[0];
-										else if (i == 1) tempShader.g = arr[1];
-										else if (i == 2) tempShader.b = arr[2];
-										continue;
-									}
+		coverSpriteMember.smoothSprite();
+		// RGB shader hold cover stuff
 
-									var r:Null<Int> = rgb.r;
-									var g:Null<Int> = rgb.g;
-									var b:Null<Int> = rgb.b;
+		var daShadersInString:Array<String> = ["rgbShaderPurple", "rgbShaderBlue", "rgbShaderGreen", "rgbShaderRed"];
+		for (i in 0... daShadersInString.length) {
+			var daShader:PixelHoldShaderRef = Reflect.getProperty(this, daShadersInString[i]);
 
-									if (r == null || Math.isNaN(r) || r < 0) r = arr[0];
-									if (g == null || Math.isNaN(g) || g < 0) g = arr[1];
-									if (b == null || Math.isNaN(b) || b < 0) b = arr[2];
+			daShader.copyValues(Note.globalRgbShaders[i % Note.colArray.length]);
+			if (!config.allowPixel || !note.isPixelNote) daShader.pixelAmount = 1;
+			else if (config.allowPixel && note != null && note.isPixelNote) daShader.pixelAmount = 6;
 
-									var color:FlxColor = FlxColor.fromRGB(r, g, b);
-									if (i == 0) tempShader.r = color;
-									else if (i == 1) tempShader.g = color;
-									else if (i == 2) tempShader.b = color;
-								}
-							}
-							else tempShader.copyValues(Note.globalRgbShaders[noteData % Note.colArray.length]);
+			if (tempConfig.allowRGB) this.members[i].shader = daShader.shader;
+			else this.members[i].shader = null;
+		}
 
-							if (note != null)
-							{
-								if (note.noteSplashData.r != -1) tempShader.r = note.noteSplashData.r;
-								if (note.noteSplashData.g != -1) tempShader.g = note.noteSplashData.g;
-								if (note.noteSplashData.b != -1) tempShader.b = note.noteSplashData.b;
-							}
-						}
-						else tempShader.copyValues(Note.globalRgbShaders[noteData % Note.colArray.length]);
-					}
-				}
-				rgbShader.copyValues(tempShader);
-				if (!config.allowPixel) rgbShader.pixelAmount = 1;
-				else if (note != null && note.isPixelNote) rgbShader.pixelAmount = 6;
+		if (CoverSprite.isCustomHoldCoverSkin)
+			tempConfig.allowRGB = false;
 
-				if(tempConfig.allowRGB) 
-					coverSpriteMember.shader = rgbShader.shader;
-				else
-					coverSpriteMember.shader = null;
 
-				if (CoverSprite.isCustomHoldCoverSkin){
-					tempConfig.allowRGB = false;
-				}
+		// end RGB shader hold cover stuff
+		// if (coverSpriteMember.animation.curAnim == null || coverSpriteMember.animation.curAnim.name != Std.string(data)) {
+			// coverSpriteMember.animation.play(Std.string(data), false);
+			if (!coverSpriteMember.boom) coverSpriteMember.visible = true;
+			// coverSpriteMember.animation.curAnim.curFrame = 0; 
+		// }
 
-				// end RGB shader hold cover stuff
-
-				if (isHoldEnd)
-				{
-					if (isPlayer)
-					{
-						coverSpriteMember.isPlaying = false;
-						coverSpriteMember.boom = true;
-						coverSpriteMember.animation.play(Std.string(data) + 'p');
-					}
-					else
-					{
-						coverSpriteMember.isPlaying = false;
-						coverSpriteMember.boom = false;
-						hideHoldCoverLater(data, 0.075);
-					}
-				}
-				else
-				{
-					if (coverSpriteMember.isPlaying == false)
-					{
-						if (coverSpriteMember.boom == false){
-							coverSpriteMember.visible = true;
-						}
-							
-						coverSpriteMember.animation.play(Std.string(data));
-						coverSpriteMember.isPlaying = false;
-					}
-				}
-			}	
+		if (isHoldEnd) {
+			if (isPlayer) {
+				coverSpriteMember.boom = true;
+				coverSpriteMember.animation.play(Std.string(data) + 'p', false);
+			} else {
+				coverSpriteMember.boom = false;
+				hideHoldCoverLater(data, 0.075);
+			}
 		}
 	}
 
@@ -279,7 +228,6 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		{
 			var data:Int = noteData;
 			this.members[data].smoothSprite();
-			this.members[data].isPlaying = false;
 			this.members[data].boom = false;
 			this.members[data].visible = false;
 			this.members[data].animation.stop();
@@ -316,12 +264,13 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 				this.members[i].alpha = ni(i, "alpha");
 			}
 
-			if (this.members[i].boom == true)
+			if (this.members[i].boom)
 			{
-				if (this.members[i].animation.curAnim.finished)
+				if (this.members[i].animation.curAnim != null && this.members[i].animation.curAnim.finished)
 				{
 				this.members[i].visible = false;
 				this.members[i].boom = false;
+				this.members[i].animation.play(this.members[i].loopAnim);
 				}
 			}
 			}
