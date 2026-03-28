@@ -256,6 +256,7 @@ class BETADCIUState extends MusicBeatState
 	public var holdTime:Float = 0;
 
 	public var stopMusicPlay:Bool = false;
+	var canMove:Bool = true;
 	override function update(elapsed:Float)
 	{
 		PlayState.isBETADCIU = true; //gotta move this cuz of the format thing
@@ -294,6 +295,7 @@ class BETADCIUState extends MusicBeatState
 			
 			if(songs.length > 1)
 			{
+				if(canMove) { // whoops
 				if(FlxG.keys.justPressed.HOME)
 				{
 					curSelected = 0;
@@ -332,8 +334,9 @@ class BETADCIUState extends MusicBeatState
 					FlxG.sound.play(Paths.sound('scrollMenu'), 0.2);
 					changeSelection(-shiftMult * FlxG.mouse.wheel, false);
 				}
+				}
 			}
-
+			if(canMove) { // whoops
 			if (controls.UI_LEFT_P)
 			{
 				changeDiff(-1);
@@ -343,6 +346,7 @@ class BETADCIUState extends MusicBeatState
 			{
 				changeDiff(1);
 				_updateSongLastDifficulty();
+			}
 			}
 		}
 
@@ -667,6 +671,7 @@ class BETADCIUState extends MusicBeatState
 			if (accepted) { // i could do this in a better way, except that i'm dumb. - Ryiuu
 				try
 				{
+					canMove = false;
 					var musicLength:Float = confirmSound.length;
 					var daFuckingtween:FlxTween;
 
@@ -713,6 +718,7 @@ class BETADCIUState extends MusicBeatState
 				}
 				catch(e:haxe.Exception)
 				{
+					canMove = true;
 					trace('ERROR! ${e.message}');
 
 					var errorStr:String = e.message;

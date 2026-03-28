@@ -256,6 +256,7 @@ class FreeplayState extends MusicBeatState
 	var holdTime:Float = 0;
 
 	var stopMusicPlay:Bool = false;
+	var canMove:Bool = true;
 	override function update(elapsed:Float)
 	{
 		PlayState.isBETADCIU = false; 
@@ -292,6 +293,7 @@ class FreeplayState extends MusicBeatState
 			
 			if(songs.length > 1)
 			{
+				if(canMove) { // whoops
 				if(FlxG.keys.justPressed.HOME)
 				{
 					curSelected = 0;
@@ -330,8 +332,10 @@ class FreeplayState extends MusicBeatState
 					FlxG.sound.play(Paths.sound('scrollMenu'), 0.2);
 					changeSelection(-shiftMult * FlxG.mouse.wheel, false);
 				}
+				}
 			}
 
+			if(canMove) { // whoops
 			if (controls.UI_LEFT_P)
 			{
 				changeDiff(-1);
@@ -341,6 +345,7 @@ class FreeplayState extends MusicBeatState
 			{
 				changeDiff(1);
 				_updateSongLastDifficulty();
+			}
 			}
 		}
 
@@ -655,6 +660,7 @@ class FreeplayState extends MusicBeatState
 
 		for (i in min...max)
 		{
+
 			var item:Alphabet = grpSongs.members[i];
 			item.visible = item.active = true;
 			// item.x = 450; //+ ((item.targetY - lerpSelected) * 0.01 * item.distancePerItem.x) + item.startPosition.x;
@@ -662,6 +668,7 @@ class FreeplayState extends MusicBeatState
 			if (accepted) { // i could do this in a better way, except that i'm dumb. - Ryiuu
 				try
 				{
+					canMove = false;
 					var musicLength:Float = confirmSound.length;
 					var daFuckingtween:FlxTween;
 
@@ -708,6 +715,7 @@ class FreeplayState extends MusicBeatState
 				}
 				catch(e:haxe.Exception)
 				{
+					canMove = true;
 					trace('ERROR! ${e.message}');
 
 					var errorStr:String = e.message;
