@@ -98,15 +98,8 @@ class CoverSprite extends FlxSprite
 
 	public var loopAnim:String = "";
 
-	public var loopAnim:String = "";
-
 	public function initAnimations(i:Int, hColor:String)
 	{
-		// this.animation.addByPrefix(Std.string(i), 'holdCover'+hColor+'0', 24, true);
-		this.animation.addByIndices(Std.string(i), 'holdCover' + hColor, [0,1,2,3], "", 24, true);
-		this.animation.addByPrefix(Std.string(i) + 'p', 'holdCoverEnd'+hColor+'0', 24, false);
-		loopAnim = Std.string(i);
-		this.animation.play(Std.string(i), false);
 		// this.animation.addByPrefix(Std.string(i), 'holdCover'+hColor+'0', 24, true);
 		this.animation.addByIndices(Std.string(i), 'holdCover' + hColor, [0,1,2,3], "", 24, true);
 		this.animation.addByPrefix(Std.string(i) + 'p', 'holdCoverEnd'+hColor+'0', 24, false);
@@ -127,7 +120,8 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 	public var enabled:Bool = true;
 	public var isPlayer:Bool = false;
 
-	// I can't change the color without creating multiple shaders :HeartBreaking:
+
+	// I can't change the color without create multiple shaders :HeartBreaking:
 	public var rgbShaderPurple:PixelHoldShaderRef;
 	public var rgbShaderBlue:PixelHoldShaderRef;
 	public var rgbShaderGreen:PixelHoldShaderRef;
@@ -170,25 +164,18 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 	public function spawnOnNoteHit(note:Note, isReady:Bool):Void
 	{
 		if (note == null || !enabled || !isReady) return;
-		if (note == null || !enabled || !isReady) return;
 
 		config = null;
 		var noteData:Int = note.noteData;
 		var isHoldEnd:Bool = false;
 		if (note.animation.curAnim != null) isHoldEnd = note.animation.curAnim.name.endsWith('end');
 		var rgbShader:Array<PixelHoldShaderRef> = [rgbShaderPurple, rgbShaderBlue, rgbShaderGreen, rgbShaderRed];
-		var rgbShader:Array<PixelHoldShaderRef> = [rgbShaderPurple, rgbShaderBlue, rgbShaderGreen, rgbShaderRed];
 
 		// HoldCovers with no json
 		var tempConfig:NoteHoldCoverConfig = createConfig();
 
 		var data:Int = Std.int(noteData) % 4;
-		var data:Int = Std.int(noteData) % 4;
 
-		if (!note.isSustainNote) 
-			return;
-
-		var coverSpriteMember = this.members[data];
 		if (!note.isSustainNote) 
 			return;
 
@@ -216,19 +203,13 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		if (CoverSprite.isCustomHoldCoverSkin)
 			tempConfig.allowRGB = false;
 
-			if (tempConfig.allowRGB) this.members[i].shader = daShader.shader;
-			else this.members[i].shader = null;
-		}
-
-		if (CoverSprite.isCustomHoldCoverSkin)
-			tempConfig.allowRGB = false;
-
 
 		// end RGB shader hold cover stuff
 		// if (coverSpriteMember.animation.curAnim == null || coverSpriteMember.animation.curAnim.name != Std.string(data)) {
 			// coverSpriteMember.animation.play(Std.string(data), false);
 			if (!coverSpriteMember.boom) coverSpriteMember.visible = true;
-			// coverSpriteMember.animation.curAnim.curFrame = 0; 
+				// coverSpriteMember.animation.curAnim.curFrame = 0; 
+			
 		// }
 
 		if (isHoldEnd) {
@@ -286,14 +267,11 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 			}
 
 			if (this.members[i].boom)
-			if (this.members[i].boom)
 			{
-				if (this.members[i].animation.curAnim != null && this.members[i].animation.curAnim.finished)
 				if (this.members[i].animation.curAnim != null && this.members[i].animation.curAnim.finished)
 				{
 				this.members[i].visible = false;
 				this.members[i].boom = false;
-				this.members[i].animation.play(this.members[i].loopAnim);
 				this.members[i].animation.play(this.members[i].loopAnim);
 				}
 			}
