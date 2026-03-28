@@ -1913,7 +1913,7 @@ class PlayState extends MusicBeatState
 			if(script != null && script.scriptType == "noteType")
 			{
 				// trace('Calling onCreate for ' + script.scriptName);
-				script.call('onCreate', []);
+				if (script.exists('onCreate')) script.call('onCreate', []);
 			}
 		#end
 		#if LUA_ALLOWED
@@ -3485,26 +3485,26 @@ class PlayState extends MusicBeatState
 		}
 
 		//RELEASING, check for hold covers
-		if (releaseArray.contains(true))
-		{
-			if (playerHoldCovers != null && enabledHolds)
-			{
-				playerHoldCovers.forEach(function(spr:CoverSprite)
-				{
-					var idToInt:String = spr.spriteId;
-					var sprId:Int = Std.parseInt(idToInt.split("-")[1]);
-					if (!releaseArray[sprId])
-					{
-						if (spr.animation.curAnim != null && !spr.animation.curAnim.name.endsWith('p'))
-						{
-							spr.smoothSprite();
-							spr.visible = spr.boom = spr.isPlaying = false;
-							spr.animation.stop();
-						}
-					}
-			    });
-			}
-		}
+		// if (releaseArray.contains(true))
+		// {
+		// 	if (playerHoldCovers != null && enabledHolds)
+		// 	{
+		// 		playerHoldCovers.forEach(function(spr:CoverSprite)
+		// 		{
+		// 			var idToInt:String = spr.spriteId;
+		// 			var sprId:Int = Std.parseInt(idToInt.split("-")[1]);
+		// 			if (!releaseArray[sprId])
+		// 			{
+		// 				if (spr.animation.curAnim != null && !spr.animation.curAnim.name.endsWith('p'))
+		// 				{
+		// 					spr.smoothSprite();
+		// 					spr.visible = spr.boom = spr.isPlaying = false;
+		// 					spr.animation.stop();
+		// 				}
+		// 			}
+		// 	    });
+		// 	}
+		// }
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
 		if(controls.controllerMode && pressArray.contains(true))
@@ -3708,11 +3708,7 @@ class PlayState extends MusicBeatState
 		strumPlayAnim(true, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 		note.hitByOpponent = true;
 
-		if(enabledHolds && !note.spawnedHoldCover) {
-			opponentHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
-			note.spawnedHoldCover = true;
-		} else if (enabledHolds && note.animation.curAnim.name.endsWith('holdend'))
-			opponentHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
+		if (enabledHolds) opponentHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
 
 		stagesFunc(function(stage:BaseStage) stage.opponentNoteHit(note));
 		var result:Dynamic = callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote, note.dType]);
@@ -3822,14 +3818,7 @@ class PlayState extends MusicBeatState
 			if(!note.noteSplashData.disabled && !note.isSustainNote) spawnNoteSplashOnNote(note);
 		}
 
-		// if (enabledHolds) playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
-
-		if(enabledHolds && !note.spawnedHoldCover) {
-			playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
-			note.spawnedHoldCover = true;
-		} else if (enabledHolds && note.animation.curAnim.name.endsWith('holdend'))
-			playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
-
+		if (enabledHolds) playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
 
 		stagesFunc(function(stage:BaseStage) stage.goodNoteHit(note));
 		var result:Dynamic = callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.dType]);
@@ -4839,7 +4828,7 @@ class PlayState extends MusicBeatState
 		// if you comment out the else part, the stage loads fine but character layers and positions are messed up.
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
-			var list:Map<String, FlxSprite> = StageData.removeObjectsFromState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
+			var list:Map<String, FlxSprite> = StageData.removeObjectsFromState(stageData.objects, !stageData.hide_girlfriend ? gf : null, dad, boyfriend, this);
 			for (key => spr in list)
 				if(!StageData.reservedNames.contains(key))
 					variables.remove(key);
@@ -4862,7 +4851,7 @@ class PlayState extends MusicBeatState
 	public function addObjects(stageData:StageFile, ?preload:Bool=false){
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
-			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, !stageData.hide_girlfriend ? gfGroup : null, dadGroup, boyfriendGroup, this);
+			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, !stageData.hide_girlfriend ? gf : null, dad, boyfriend, this);
 			for (key => spr in list)
 				if (!StageData.reservedNames.contains(key))
 					variables.set(key, spr);

@@ -681,6 +681,7 @@ class NotesColorSubState extends MusicBeatSubstate
 			if(instant) note.animation.curAnim.finish();
 		}
 		bigNote.animation.play('note$curSelectedNote', true);
+		bigNote.rgbShader.enabled = true;
 		updateColors();
 	}
 

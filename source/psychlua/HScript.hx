@@ -42,7 +42,6 @@ typedef HScriptInfos = {
 class HScript extends IrisEx implements IFlxDestroyable
 {
 	public var filePath:String;
-	public var daScriptType:String;
 	public var modFolder:String;
 	public var returnValue:Dynamic;
 
@@ -105,7 +104,7 @@ class HScript extends IrisEx implements IFlxDestroyable
 			file = '';
 
 		filePath = file;
-		daScriptType = scriptType;
+		this.scriptType = scriptType;
 		if (filePath != null && filePath.length > 0)
 		{
 			this.origin = filePath;
@@ -318,14 +317,10 @@ class HScript extends IrisEx implements IFlxDestroyable
 			var vertPath = vertFile != null ? Paths.vertex(vertFile) : null;
 			
 			if (fragPath != null)
-			{
 				if (Paths.exists(fragPath)) fragPath = Paths.getContent(fragPath);
-			}
 			
 			if (vertPath != null)
-			{
 				if (Paths.exists(vertPath)) vertPath = Paths.getContent(vertPath);
-			}
 			
 			return new flixel.addons.display.FlxRuntimeShader(fragPath, vertPath);
 		});
@@ -590,7 +585,7 @@ class HScript extends IrisEx implements IFlxDestroyable
 	}
 
 	public function checkStageVar(obj:FlxBasic) {
-		switch(daScriptType.toLowerCase()){
+		switch(this.scriptType.toLowerCase()){
 			case "stage":
 				if (!MusicBeatState.getVariables().exists("stageVariables"))
 					MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxBasic>());

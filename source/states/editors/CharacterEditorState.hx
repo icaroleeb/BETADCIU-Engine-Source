@@ -562,27 +562,37 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		});
 
 		var removeButton:PsychUIButton = new PsychUIButton(180, animationIndicesInputText.y + 60, "Remove", function() {
-			for (anim in character.animationsArray)
-				if(animationInputText.text == anim.anim)
-				{
-					var resetAnim:Bool = false;
-					if(anim.anim == character.getAnimationName()) resetAnim = true;
-					if(character.hasAnimation(anim.anim))
-					{
-						character.animation.remove(anim.anim);
-						character.animOffsets.remove(anim.anim);
-						character.animationsArray.remove(anim);
-					}
+			var animToFind:String = animationInputText.text;
+			var foundAnim:AnimArray = null;
 
-					if(resetAnim && character.animationsArray.length > 0) {
-						curAnim = FlxMath.wrap(curAnim, 0, anims.length-1);
-						character.playAnim(anims[curAnim].anim, true);
-					}
-					reloadAnimList();
-					trace('Removed animation: ' + animationInputText.text);
+			for (anim in character.animationsArray) 
+				if (anim.anim == animToFind) {
+					foundAnim = anim;
 					break;
 				}
-		});
+
+			if (foundAnim != null) {
+				if (character.animation.getByName(foundAnim.anim) != null) {
+					@:privateAccess
+					character.animation._animations.remove(foundAnim.anim);
+				}
+				
+				character.animOffsets.remove(foundAnim.anim);
+				if (character.animPlayerOffsets != null) character.animPlayerOffsets.remove(foundAnim.anim);
+				character.animationsArray.remove(foundAnim);
+
+				if (character.animationsArray.length > 0) {
+					var nextAnim = character.animationsArray[0].anim;
+					character.playAnim(nextAnim, true);
+					animationInputText.text = nextAnim; 
+				} else {
+					animationInputText.text = '';
+				}
+
+				reloadAnimList(); 
+				trace('Removed animation: ' + animToFind);
+			}
+		});		
 		reloadAnimList();
 		animationDropDown.selectedLabel = anims[0] != null ? anims[0].anim : '';
 
