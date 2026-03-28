@@ -1786,9 +1786,9 @@ class FunkinLua {
 			//game.callOnScripts('onCharacterChangePost', [tag, character]);
 		});
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
-			if(this.scriptType.toLowerCase() == "stage" || this.scriptType.toLowerCase() == "stagecamera") 
-				luaTrace("The makeLuaCharacter can't be added in script stages!", false, false, FlxColor.RED);
-			else
+			// if(this.scriptType.toLowerCase() == "stage" || this.scriptType.toLowerCase() == "stagecamera") 
+			// 	luaTrace("The makeLuaCharacter can't be added in script stages!", false, false, FlxColor.RED);
+			// else
 				makeLuaCharacter(tag, character, isPlayer, flipped);
 		});
 		Lua_helper.add_callback(lua, "flipCharacterAnim", function(character:String) {

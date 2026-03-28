@@ -257,6 +257,7 @@ class BonusSongsState extends MusicBeatState
 	public var holdTime:Float = 0;
 
 	public var stopMusicPlay:Bool = false;
+	var canMove:Bool = true;
 	override function update(elapsed:Float)
 	{
 		PlayState.isBonus = true; //gotta move this cuz of the format thing
@@ -295,6 +296,7 @@ class BonusSongsState extends MusicBeatState
 			
 			if(songs.length > 1)
 			{
+				if(canMove) {
 				if(FlxG.keys.justPressed.HOME)
 				{
 					curSelected = 0;
@@ -333,8 +335,10 @@ class BonusSongsState extends MusicBeatState
 					FlxG.sound.play(Paths.sound('scrollMenu'), 0.2);
 					changeSelection(-shiftMult * FlxG.mouse.wheel, false);
 				}
+				}
 			}
 
+			if (canMove) {
 			if (controls.UI_LEFT_P)
 			{
 				changeDiff(-1);
@@ -344,6 +348,7 @@ class BonusSongsState extends MusicBeatState
 			{
 				changeDiff(1);
 				_updateSongLastDifficulty();
+			}
 			}
 		}
 
@@ -668,6 +673,7 @@ class BonusSongsState extends MusicBeatState
 			if (accepted) { // i could do this in a better way, except that i'm dumb. - Ryiuu
 				try
 				{
+					canMove = false;
 					var musicLength:Float = confirmSound.length;
 					var daFuckingtween:FlxTween;
 
@@ -714,6 +720,7 @@ class BonusSongsState extends MusicBeatState
 				}
 				catch(e:haxe.Exception)
 				{
+					canMove = true;
 					trace('ERROR! ${e.message}');
 
 					var errorStr:String = e.message;

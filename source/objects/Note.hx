@@ -119,8 +119,6 @@ class Note extends OffsettableSprite
 	public static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
 	public static var defaultNoteSkin(default, never):String = 'NOTE_assets';
 
-	public var spawnedHoldCover:Bool = false;
-
 	public var noteSplashData:NoteSplashData = {
 		disabled: false,
 		texture: null,
@@ -313,8 +311,8 @@ class Note extends OffsettableSprite
 
 		if (isSustainNote && prevNote != null)
 		{
-			alpha = 0.6;
-			multAlpha = 0.6;
+			// alpha = 0.6;
+			// multAlpha = 0.6;
 			hitsoundDisabled = true;
 			if(ClientPrefs.data.downScroll) flipY = true;
 
@@ -393,21 +391,20 @@ class Note extends OffsettableSprite
 	public var isLegacyNoteSkin:Bool = false;
 
 	public function reloadNote(texture:String = '', postfix:String = '') {
-		rgbShader.enabled = true; // It should always set back to true in case texture is empty or texture.length < 1;
+		rgbShader.enabled = true;
 
 		if(texture == null) texture = "";
 		if(postfix == null) postfix = '';
 
 		if(texture.length < 1) {
-			// if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
-			// 	texture = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
-			// } else{
-			// 	texture = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
-			// }
+			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
+				texture = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
+			} else{
+				texture = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
+			}
 
 			if(texture == null || texture.length < 1) texture = defaultNoteSkin + postfix;
 		}
-		else rgbShader.enabled = false;
 
 		separateSheets = false;
 		separateXMLExists = false;
