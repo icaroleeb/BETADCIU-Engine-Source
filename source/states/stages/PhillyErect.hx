@@ -77,6 +77,12 @@ class PhillyErect extends BaseStage
 			boyfriend.shader = colorShader.shader;
 			dad.shader = colorShader.shader;
 			gf.shader = colorShader.shader;
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				var daLuaChars:Character = modchartCharacters.get(value);
+				daLuaChars.shader = colorShader.shader;
+			}
 		}
 	}
 
@@ -252,5 +258,24 @@ class PhillyErect extends BaseStage
 		if(!ClientPrefs.data.flashing) color.alphaFloat = 0.5;
 
 		FlxG.camera.flash(color, 0.15, null, true);
+	}
+
+	override public function destroy():Void
+	{
+		if (ClientPrefs.data.shaders)
+		{
+			for (defaultChars in [boyfriend, dad, gf])
+			{
+				if (defaultChars.shader != null) defaultChars.shader = null;
+			}
+
+			for (value in modchartCharacters.keys()) 
+			{
+				var luaChars = modchartCharacters.get(value);
+				if (luaChars.shader != null) luaChars.shader = null;
+			}
+		}
+
+		super.destroy();
 	}
 }

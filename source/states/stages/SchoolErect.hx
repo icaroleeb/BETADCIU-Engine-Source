@@ -116,11 +116,17 @@ class SchoolErect extends BaseStage
 
 	override function createPost()
 	{
-		if (ClientPrefs.data.shaders) 
+		if (ClientPrefs.data.shaders)
 		{
 			applyCharacterShader("dad");
 			applyCharacterShader("gf");
 			applyCharacterShader("boyfriend");
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				// var daLuaChars:Character = modchartCharacters.get(value);
+				applyCharacterShader(value);
+			}
 		}
 	}
 
@@ -241,5 +247,24 @@ class SchoolErect extends BaseStage
 			}
 			else tmr.reset(0.3);
 		});
+	}
+
+	override public function destroy():Void
+	{
+		if (ClientPrefs.data.shaders)
+		{
+			for (defaultChars in [boyfriend, dad, gf])
+			{
+				if (defaultChars.shader != null) defaultChars.shader = null;
+			}
+
+			for (value in modchartCharacters.keys()) 
+			{
+				var luaChars = modchartCharacters.get(value);
+				if (luaChars.shader != null) luaChars.shader = null;
+			}
+		}
+
+		super.destroy();
 	}
 }

@@ -116,9 +116,19 @@ class SchoolEvilErect extends BaseStage
 		backspike.shader = wiggleSpike.shader;
 
 		// characters shaders that don't have in game
-		applyCharacterShader("boyfriend");
-		applyCharacterShader("dad");
-		applyCharacterShader("gf");
+
+		if (ClientPrefs.data.shaders)
+		{
+			applyCharacterShader("boyfriend");
+			applyCharacterShader("dad");
+			applyCharacterShader("gf");
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				// var daLuaChars:Character = modchartCharacters.get(value);
+				applyCharacterShader(value);
+			}
+		}
 	}
 
 	override function update(elapsed:Float)

@@ -87,10 +87,17 @@ class StageErect extends BaseStage
 		if (inGameplay) PlayState.instance.variables.get("stageVariables").set("lightAbove", lightAbove);
 		add(lightAbove);
 
-		if(ClientPrefs.data.shaders)
+		if(ClientPrefs.data.shaders){
 			applyCharacterShader("boyfriend");
 			applyCharacterShader("dad");
 			applyCharacterShader("gf");
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				// var daLuaChars:Character = modchartCharacters.get(value);
+				applyCharacterShader(value);
+			}
+		}
 	}
 
 	function applyCharacterShader(char:String)
@@ -192,6 +199,20 @@ class StageErect extends BaseStage
 	}
 
 	override public function destroy():Void {
+		if (ClientPrefs.data.shaders)
+		{
+			for (defaultChars in [boyfriend, dad, gf])
+			{
+				if (defaultChars.shader != null) defaultChars.shader = null;
+			}
+
+			for (value in modchartCharacters.keys()) 
+			{
+				var luaChars = modchartCharacters.get(value);
+				if (luaChars.shader != null) luaChars.shader = null;
+			}
+		}
+
 		super.destroy();
 	}
 }

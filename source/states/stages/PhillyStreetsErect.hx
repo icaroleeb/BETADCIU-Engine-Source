@@ -275,14 +275,18 @@ class PhillyStreetsErect extends BaseStage
 		FlxTween.cancelTweensOf(phillyCars);
 		FlxTween.cancelTweensOf(phillyCars2);
 
-		if (boyfriend.shader != null) {
-			boyfriend.shader = null;
-		}
-		if (dad.shader != null) {
-			dad.shader = null;
-		}
-		if (gf.shader != null) {
-			gf.shader = null;
+		if (ClientPrefs.data.shaders)
+		{
+			for (defaultChars in [boyfriend, dad, gf])
+			{
+				if (defaultChars.shader != null) defaultChars.shader = null;
+			}
+
+			for (value in modchartCharacters.keys()) 
+			{
+				var luaChars = modchartCharacters.get(value);
+				if (luaChars.shader != null) luaChars.shader = null;
+			}
 		}
 
 		super.destroy();

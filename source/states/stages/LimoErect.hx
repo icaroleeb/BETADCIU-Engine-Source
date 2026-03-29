@@ -187,6 +187,12 @@ class LimoErect extends BaseStage
 			boyfriend.shader = colorShader.shader;
 			dad.shader = colorShader.shader;
 			gf.shader = colorShader.shader;
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				var daLuaChars = modchartCharacters.get(value);
+				daLuaChars.shader = colorShader.shader;
+			}
 		}
 	}
 
@@ -195,6 +201,20 @@ class LimoErect extends BaseStage
 			remove(grpLimoDancers);
 			grpLimoDancers.destroy();
 			grpLimoDancers = null;
+		}
+
+		if (ClientPrefs.data.shaders)
+		{
+			for (defaultChars in [boyfriend, dad, gf])
+			{
+				if (defaultChars.shader != null) defaultChars.shader = null;
+			}
+
+			for (value in modchartCharacters.keys()) 
+			{
+				var luaChars = modchartCharacters.get(value);
+				if (luaChars.shader != null) luaChars.shader = null;
+			}
 		}
 		super.destroy();
 	}

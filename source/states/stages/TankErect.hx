@@ -144,15 +144,18 @@ class TankErect extends BaseStage
 
 	override public function destroy():Void
 	{
-		for (defaultChars in [boyfriend, dad, gf])
+		if (ClientPrefs.data.shaders)
 		{
-			if (defaultChars.shader != null) defaultChars.shader = null;
-		}
+			for (defaultChars in [boyfriend, dad, gf])
+			{
+				if (defaultChars.shader != null) defaultChars.shader = null;
+			}
 
-		for (value in modchartCharacters.keys()) 
-		{
-			var luaChars = modchartCharacters.get(value);
-			if (luaChars.shader != null) luaChars.shader = null;
+			for (value in modchartCharacters.keys()) 
+			{
+				var luaChars = modchartCharacters.get(value);
+				if (luaChars.shader != null) luaChars.shader = null;
+			}
 		}
 
 		super.destroy();
