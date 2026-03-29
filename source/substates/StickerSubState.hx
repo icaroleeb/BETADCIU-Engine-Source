@@ -96,8 +96,7 @@ class StickerSubState extends MusicBeatSubstate
     add(grpStickers);
 
     // makes the stickers on the most recent camera, which is more often than not... a UI camera!!
-    // grpStickers.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-    grpStickers.cameras = FlxG.cameras.list;
+    grpStickers.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 
     if (oldStickers != null)
     {
@@ -167,6 +166,9 @@ class StickerSubState extends MusicBeatSubstate
     // var globalMods = Mods.getGlobalMods().map(s -> "mods/"+s);
     // globalMods.pushUnique("mods/"+Mods.currentModDirectory);
     // globalMods.push("assets/shared"); // base stickers
+
+    if (WeekData.getCurrentWeek().stickers[0] == null)
+      WeekData.getCurrentWeek().stickers = ['stickers-set-1', 'all'];
 
       #if sys
       #if !LEGACY_PSYCH
