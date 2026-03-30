@@ -1,9 +1,11 @@
 package backend;
 
+import extensions.flixel.FlxCameraEx;
+
 // PsychCamera handles followLerp based on elapsed
 // and stops camera from snapping at higher framerates
 
-class PsychCamera extends FlxCamera
+class PsychCamera extends FlxCameraEx
 {
 	override public function update(elapsed:Float):Void
 	{

@@ -42,7 +42,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
 			noteSkins.insert(0, ClientPrefs.defaultData.noteSkin); //Default skin always comes first
 			var option:Option = new Option('Note Skins:',
-				"Select your prefered Note skin.",
+				"Select your preferred Note skin.",
 				'noteSkin',
 				STRING,
 				noteSkins);
