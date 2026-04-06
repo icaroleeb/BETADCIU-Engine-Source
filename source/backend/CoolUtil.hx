@@ -278,4 +278,38 @@ class CoolUtil
 			return (word.length > 0) ? word.charAt(0).toUpperCase() + word.substr(1).toLowerCase() : "";
 		}).join(" ");
 	}
+
+	// CREDIT TO ruby0x1 https://gist.github.com/ruby0x1/8dc3a206c325fbc9a97e. I just modified it to fit our use case
+	public static function unzip(_path:String, _dest:String, ?ignoreRootFolder:String = "") {
+		var _in_file = sys.io.File.read(_path);
+		var _entries = haxe.zip.Reader.readZip(_in_file);
+		_in_file.close();
+
+		for(_entry in _entries) {
+			var fileName = _entry.fileName;
+			if (fileName.charAt(0) != "/" && fileName.charAt(0) != "\\" && fileName.split("..").length <= 1) {
+				var dirs = ~/[\/\\]/g.split(fileName);
+				if ((ignoreRootFolder != "" && dirs.length > 1) || ignoreRootFolder == "") {
+					if (ignoreRootFolder != "") {
+						dirs.shift();
+					}
+				
+					var path = "";
+					var file = dirs.pop();
+					for(d in dirs) {
+						path += d;
+						if(!sys.FileSystem.exists(_dest + "/" + path)) sys.FileSystem.createDirectory(_dest + "/" + path);
+						path += "/";
+					}
+
+					if(file != "") {
+						var data = haxe.zip.Reader.unzip(_entry);
+						var f = sys.io.File.write(_dest + "/" + path + file, true);
+						f.write(data);
+						f.close();
+					}
+				}
+			}
+		}
+	}
 }

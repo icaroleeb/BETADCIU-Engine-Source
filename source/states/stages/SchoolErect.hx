@@ -119,7 +119,7 @@ class SchoolErect extends BaseStage
 		if (ClientPrefs.data.shaders)
 		{
 			applyCharacterShader("dad");
-			applyCharacterShader("gf");
+			if (gf != null) applyCharacterShader("gf");
 			applyCharacterShader("boyfriend");
 
 			for (value in modchartCharacters.keys()) // apply for the lua characters too
@@ -186,7 +186,17 @@ class SchoolErect extends BaseStage
 	// For events
 
 	override function characterChangePost(charExist:String, charName:String) {
-		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
+		if (ClientPrefs.data.shaders)
+		{
+			if (charExist == "bf") 
+				charExist = "boyfriend";
+			else if (charExist == "girlfriend")
+				charExist = "gf";
+			else if (charExist == "opponent")
+				charExist = "dad";
+
+			applyCharacterShader(charExist);
+		}
 	}
 
 	var doof:DialogueBox = null;

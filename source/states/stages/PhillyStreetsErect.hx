@@ -652,6 +652,16 @@ class PhillyStreetsErect extends BaseStage
 	}
 
 	override function characterChangePost(charExist:String, charName:String) {
-		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
+		if (ClientPrefs.data.shaders)
+		{
+			if (charExist == "bf") 
+				charExist = "boyfriend";
+			else if (charExist == "girlfriend")
+				charExist = "gf";
+			else if (charExist == "opponent")
+				charExist = "dad";
+
+			applyCharacterShader(charExist);
+		}
 	}
 }

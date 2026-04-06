@@ -193,7 +193,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 			var daShader:PixelHoldShaderRef = Reflect.getProperty(this, daShadersInString[i]);
 
 			daShader.copyValues(Note.globalRgbShaders[i % Note.colArray.length]);
-			if (!config.allowPixel || !note.isPixelNote) daShader.pixelAmount = 1;
+			if (!config.allowPixel || !note.isPixelNote) daShader.pixelAmount = 0.00001;
 			else if (config.allowPixel && note != null && note.isPixelNote) daShader.pixelAmount = 6;
 
 			if (tempConfig.allowRGB) this.members[i].shader = daShader.shader;

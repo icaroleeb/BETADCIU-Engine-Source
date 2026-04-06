@@ -87,7 +87,7 @@ class NoteSplash extends FlxSprite
 					isLegacyNoteSkin = (path == 'notes/noteSplashes-$splash');
 					break;
 				} else {
-					texture = "noteSplashes/noteSplashes"; // default if couldn't find anything
+					texture = "noteSplashes/noteSplashes-vanilla"; // default if couldn't find anything
 				}
 			}
 		} else
@@ -318,7 +318,7 @@ class NoteSplash extends FlxSprite
 			}
 		}
 		rgbShader.copyValues(tempShader);
-		if (!config.allowPixel) rgbShader.pixelAmount = 1;
+		if (!config.allowPixel) rgbShader.pixelAmount = 0.00001;
 		else if (note != null && note.isPixelNote) rgbShader.pixelAmount = 6;
 
 		offset.set(10, 10);

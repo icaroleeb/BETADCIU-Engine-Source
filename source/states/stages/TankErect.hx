@@ -46,7 +46,7 @@ class TankErect extends BaseStage
 
 		if (ClientPrefs.data.shaders) {
 			applyCharacterShader("boyfriend");
-			applyCharacterShader("gf");
+			if (gf != null) applyCharacterShader("gf");
 			applyCharacterShader("dad");
 
 			for (value in modchartCharacters.keys()) // apply for the lua characters too
@@ -139,7 +139,17 @@ class TankErect extends BaseStage
 	}
 
 	override function characterChangePost(charExist:String, charNew:String) {
-		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
+		if (ClientPrefs.data.shaders)
+		{
+			if (charExist == "bf") 
+				charExist = "boyfriend";
+			else if (charExist == "girlfriend")
+				charExist = "gf";
+			else if (charExist == "opponent")
+				charExist = "dad";
+
+			applyCharacterShader(charExist);
+		}
 	}
 
 	override public function destroy():Void

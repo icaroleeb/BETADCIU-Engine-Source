@@ -186,7 +186,7 @@ class LimoErect extends BaseStage
 		if (ClientPrefs.data.shaders){
 			boyfriend.shader = colorShader.shader;
 			dad.shader = colorShader.shader;
-			gf.shader = colorShader.shader;
+			if (gf != null) gf.shader = colorShader.shader;
 
 			for (value in modchartCharacters.keys()) // apply for the lua characters too
 			{
@@ -368,6 +368,13 @@ class LimoErect extends BaseStage
 
 	override function characterChangePost(charExist:String, charNew:String) {
 		if (ClientPrefs.data.shaders){
+			if (charExist == "bf") 
+				charExist = "boyfriend";
+			else if (charExist == "girlfriend")
+				charExist = "gf";
+			else if (charExist == "opponent")
+				charExist = "dad";
+
 			var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(charExist);
 
 			if (character != null){

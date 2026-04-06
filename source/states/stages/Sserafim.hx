@@ -388,11 +388,13 @@ class Sserafim extends BaseStage
     }
 
     override public function destroy():Void {
+        /*
 		if (perspectiveFloor != null) { // fuck u <3.
 			remove(perspectiveFloor);
 			perspectiveFloor.destroy();
 			perspectiveFloor = null;
 		}
+        */
 		super.destroy();
 	}
 }

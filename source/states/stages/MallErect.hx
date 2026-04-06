@@ -76,7 +76,7 @@ class MallErect extends BaseStage
 		{
 			applyCharacterShader("boyfriend");
 			applyCharacterShader("dad");
-			applyCharacterShader("gf");
+			if (gf != null) applyCharacterShader("gf");
 
 			for (value in modchartCharacters.keys()) // apply for the lua characters too
 			{
@@ -157,7 +157,12 @@ class MallErect extends BaseStage
 	}
 
 	override function characterChangePost(charExist:String, charNew:String) {
-		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
+		if (ClientPrefs.data.shaders){
+			if (charExist == "bf") 
+				charExist = "boyfriend";
+
+			applyCharacterShader(charExist);
+		}
 	}
 
 	function applyCharacterShader(char:String)

@@ -90,7 +90,7 @@ class StageErect extends BaseStage
 		if(ClientPrefs.data.shaders){
 			applyCharacterShader("boyfriend");
 			applyCharacterShader("dad");
-			applyCharacterShader("gf");
+			if (gf != null) applyCharacterShader("gf");
 
 			for (value in modchartCharacters.keys()) // apply for the lua characters too
 			{
@@ -195,7 +195,17 @@ class StageErect extends BaseStage
 	}
 
 	override function characterChangePost(charExist:String, charNew:String) {
-		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
+		if (ClientPrefs.data.shaders)
+		{
+			if (charExist == "bf") 
+				charExist = "boyfriend";
+			else if (charExist == "girlfriend")
+				charExist = "gf";
+			else if (charExist == "opponent")
+				charExist = "dad";
+
+			applyCharacterShader(charExist);
+		}
 	}
 
 	override public function destroy():Void {

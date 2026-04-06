@@ -2889,8 +2889,11 @@ class FunkinLua {
 		tag = tag.replace('.', '');
 		LuaUtils.destroyObject(tag);
 		var leSprite:HealthIcon = new HealthIcon(character, isPlayer);
-		PlayState.instance.variables.set(tag, leSprite); //yes
-		var shit:HealthIcon = PlayState.instance.variables.get(tag);
+
+		var variables = MusicBeatState.getVariables();
+		variables.set(tag, leSprite);
+
+		var shit:HealthIcon = variables.get(tag);
 		shit.cameras = [PlayState.instance.camHUD];
 		LuaUtils.getTargetInstance().add(shit);
 	}
@@ -3024,7 +3027,7 @@ class FunkinLua {
 		charObj.x = posX;
 		charObj.y = posY;
 
-		if (target != "gf")
+		if (target != "gf" || PlayState.instance.defaultBar)
 			PlayState.instance.reloadHealthBarColors();
 
 		if (charObj.animOffsets.exists(animationName))
