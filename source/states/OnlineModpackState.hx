@@ -11,7 +11,7 @@ import openfl.net.URLRequest;
 
 class OnlineModpackState extends MusicBeatState
 {
-	var modpacks:Array<String> = [];
+	var modpacks:Array<Dynamic> = [];
 	var grpModpacks:FlxTypedGroup<ModpackListItem>;
 	var curSelected:Int = 0;
 	var loadingText:FlxText;
@@ -43,7 +43,7 @@ class OnlineModpackState extends MusicBeatState
 
 	function fetchModpacks()
 	{
-		var url = "https://raw.githubusercontent.com/Blantados/BETADCIU-Engine-Modpacks/refs/heads/main/modpacks.json";
+		var url = "https://raw.githubusercontent.com/icaroleeb/BETADCIU-Engine-Modpacks/refs/heads/main/modpacks.json";
 		var http = new Http(url);
 		http.onData = function(data:String) {
 			try {
@@ -69,9 +69,12 @@ class OnlineModpackState extends MusicBeatState
 		grpModpacks.clear();
 		for (i in 0...modpacks.length)
 		{
-			var modName = modpacks[i].replace(".zip", "").replace("_", " ");
+			var modFile:String = modpacks[i][0];
+			var modAuthor:String = modpacks[i][1];
+			
+			var modName = modFile.replace(".zip", "").replace("_", " ");
 
-			var item = new ModpackListItem(0, 0, modName, "Blantados");
+			var item = new ModpackListItem(0, 0, modName, modAuthor);
 			item.targetY = i;
 			grpModpacks.add(item);
 		}
@@ -90,14 +93,13 @@ class OnlineModpackState extends MusicBeatState
 
 		if (controls.ACCEPT && modpacks.length > 0)
 		{
-			downloadModpack(modpacks[curSelected]);
+			downloadModpack(modpacks[curSelected][0]);
 		}
 	}
 
 	function changeSelection(change:Int = 0)
 	{
 		curSelected += change;
-
 		if (curSelected < 0) curSelected = modpacks.length - 1;
 		if (curSelected >= modpacks.length) curSelected = 0;
 
@@ -123,7 +125,6 @@ class OnlineModpackState extends MusicBeatState
 
 		var zipUrl = "https://github.com/Blantados/BETADCIU-Engine-Modpacks/releases/download/v1.0/" + zipName;
 		var localZipPath = Paths.mods() + "tmp_download.zip";
-
 		sys.thread.Thread.create(function() {
 			var cmd = 'curl -L -A "Mozilla/5.0" -o "${localZipPath}" "${zipUrl}"';
 			var result = Sys.command(cmd);
@@ -156,17 +157,17 @@ class OnlineModpackState extends MusicBeatState
 
 class ModpackListItem extends FlxSpriteGroup {
 	public var alphabet:Alphabet;
-	public var icon:ProfileGithub;
+	public var icon:ProfileYoutube;
 	public var targetY:Float = 0;
 
-	public function new(x:Float, y:Float, text:String, githubUser:String) {
+	public function new(x:Float, y:Float, text:String, youtubeUser:String) {
 		super(x, y);
 
 		alphabet = new Alphabet(0, 320, text, true);
 		alphabet.setScale(0.8, 0.8);
 		add(alphabet);
 
-		icon = new ProfileGithub(githubUser);
+		icon = new ProfileYoutube(youtubeUser);
 		add(icon);
 	}
 
@@ -183,26 +184,19 @@ class ModpackListItem extends FlxSpriteGroup {
 	}
 }
 
-class ProfileGithub extends FlxSprite {
-	public function new(username:String) {
+class ProfileYoutube extends FlxSprite {
+	public function new(username:String) 
+	{
 		super();
-		makeGraphic(1, 1, FlxColor.TRANSPARENT); 
+		// makeGraphic(1, 1, FlxColor.TRANSPARENT); 
 		createProfile(username);
 	}
 
-	function createProfile(username:String) {
-		var url = "https://api.github.com/users/" + username;
-		var http = new Http(url);
-		http.setHeader("User-Agent", "Haxe-App");
+	function createProfile(username:String)
+	{
+		var url = "https://unavatar.io/youtube/" + username;
 
-		http.onData = function(data:String) {
-			try {
-				var userProfile = Json.parse(data);
-				var avatarUrl:String = userProfile.avatar_url;
-				loadImageFromUrl(avatarUrl);
-			} catch(e:Dynamic) {}
-		};
-		http.request();
+		loadImageFromUrl(url);
 	}
 
 	function loadImageFromUrl(url:String) {
@@ -210,10 +204,11 @@ class ProfileGithub extends FlxSprite {
 		loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(e:Event) {
 			var bitmapData = cast(loader.content, Bitmap).bitmapData;
 			loadGraphic(bitmapData);
+			antialiasing = ClientPrefs.data.antialiasing; 
 			setGraphicSize(100, 100);
 			updateHitbox();
-			antialiasing = ClientPrefs.data.antialiasing;
 		});
+		
 		loader.load(new URLRequest(url));
 	}
 }
