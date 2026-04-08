@@ -2,6 +2,7 @@ package states.stages;
 
 import states.stages.objects.*;
 import objects.Character;
+import psychlua.LuaUtils;
 import shaders.AdjustColorShader;
 
 class StageErect extends BaseStage
@@ -37,7 +38,8 @@ class StageErect extends BaseStage
 		add(solid);
 
 		var crowd:BGSprite = new BGSprite('erect/crowd', 682, 290, 0.8, 0.8, ['idle0'], true);
-		crowd.animation.curAnim.frameRate = 12;
+		if (crowd.animation.getByName("idle0") != null)
+			crowd.animation.curAnim.frameRate = 12;
 		if (inGameplay) stageVars.set("crowd", crowd);
 		add(crowd);
 
@@ -95,7 +97,7 @@ class StageErect extends BaseStage
 
 	function applyCharacterShader(char:String)
 	{
-		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
+		var character:Character = LuaUtils.getObjectDirectly(char);
 		var colorShader = new AdjustColorShader();
 
 		if (character.isPlayer)

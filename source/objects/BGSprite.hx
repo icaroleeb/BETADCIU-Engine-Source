@@ -1,6 +1,8 @@
 package objects;
 
-class BGSprite extends FlxSprite
+import animate.FlxAnimate;
+
+class BGSprite extends FlxAnimate
 {
 	private var idleAnim:String;
 	public function new(image:String, x:Float = 0, y:Float = 0, ?scrollX:Float = 1, ?scrollY:Float = 1, ?animArray:Array<String> = null, ?loop:Bool = false) {
