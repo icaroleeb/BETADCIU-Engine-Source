@@ -332,7 +332,7 @@ class Note extends OffsettableSprite
 			{
 				prevNote.playAnim(colArray[prevNote.noteData % colArray.length] + 'hold');
 
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.045;
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.045 * (1 / PlayState.holdSubdivisions);
 				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
 
 				if(isPixelNote) {
