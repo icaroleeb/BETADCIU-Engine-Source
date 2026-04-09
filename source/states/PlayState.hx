@@ -186,6 +186,7 @@ class PlayState extends MusicBeatState
 	public static var storyDifficulty:Int = 1;
 
 	public var spawnTime:Float = 2000;
+	public var holdSubdivisions:Int = 1;
 
 	public var inst:FlxSound;
 	public var vocals:FlxSound;
@@ -1638,7 +1639,10 @@ class PlayState extends MusicBeatState
 					swagNote.scrollFactor.set();
 					unspawnNotes.push(swagNote);
 
-					var curStepCrochet:Float = 60 / daBpm * 1000 / 4.0;
+					var curStepCrochet:Float = Math.max((60 / daBpm * 1000 / 4.0) / holdSubdivisions, 10);
+					if (section.changeBPM)
+						curStepCrochet = (15000 / section.bpm / holdSubdivisions);
+
 					final roundSus:Int = Math.round(swagNote.sustainLength / curStepCrochet);
 					if(roundSus > 0)
 					{
@@ -5000,7 +5004,7 @@ class PlayState extends MusicBeatState
 
 		var path:String = Paths.getPath('stages/' + curStage + '.json', TEXT);
 
-		if (FileSystem.exists(path))
+		if (!StringTools.startsWith(path, "mods/"))
 		{
 			switch (curStage.toLowerCase())
 			{
