@@ -60,6 +60,7 @@ class OnlineModpackState extends MusicBeatState
 		}
 		http.onError = function(err) {
 			loadingText.text = "Failed to connect to the server.";
+			FlxTween.tween(loadingText, {alpha: 0}, 0.5, {type: FlxTweenType.PINGPONG});
 		}
 		http.request();
 	}
@@ -72,7 +73,7 @@ class OnlineModpackState extends MusicBeatState
 			var modFile:String = modpacks[i][0];
 			var modAuthor:String = modpacks[i][1];
 			
-			var modName = modFile.replace(".zip", "").replace("_", " ");
+			var modName = modFile.replace(".zip", null).replace("_", " ");
 
 			var item = new ModpackListItem(0, 0, modName, modAuthor);
 			item.targetY = i;
