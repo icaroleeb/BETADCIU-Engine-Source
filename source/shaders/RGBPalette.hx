@@ -179,8 +179,6 @@ class RGBPaletteShader extends FlxShader {
 				color = mix(color, newColor, mult);
 			}
 			
-			color.rgb = color.rgb + vec3(amount);
-			
 			if(color.a > 0.0) {
 				return vec4(color.rgb, color.a);
 			}
@@ -191,7 +189,16 @@ class RGBPaletteShader extends FlxShader {
 		#pragma header
 
 		void main() {
-			gl_FragColor = flixel_texture2DCustom(bitmap, openfl_TextureCoordv);
+			vec4 textureColorOrig = flixel_texture2D(bitmap, openfl_TextureCoordv);
+			vec4 textureColor = flixel_texture2DCustom(bitmap, openfl_TextureCoordv);
+
+			if (amount != 0.0) {
+				textureColor = mix(textureColor, vec4(1.0, 1.0, 1.0, 1.0), amount);	
+			}
+
+			textureColor *= textureColorOrig.a;
+
+			gl_FragColor = textureColor;
 		}')
 
 	public function new()

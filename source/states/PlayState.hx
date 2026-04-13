@@ -186,7 +186,7 @@ class PlayState extends MusicBeatState
 	public static var storyDifficulty:Int = 1;
 
 	public var spawnTime:Float = 2000;
-	public var holdSubdivisions:Int = 1;
+	public static var holdSubdivisions:Int = 1;
 
 	public var inst:FlxSound;
 	public var vocals:FlxSound;
