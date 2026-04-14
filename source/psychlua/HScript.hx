@@ -599,6 +599,7 @@ class HScript extends IrisEx implements IFlxDestroyable
 				stageVars.set(Std.string(obj), obj);
 		}
 
+		trace('Added ' + Std.string(obj) + ' to stage variables');
 	}
 
 	#if LUA_ALLOWED
