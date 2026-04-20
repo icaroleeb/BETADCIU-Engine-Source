@@ -4,7 +4,7 @@ import states.stages.objects.*;
 import substates.GameOverSubstate;
 import cutscenes.DialogueBox;
 
-import backend.FunkinSprite;
+import objects.FunkinSprite;
 
 import openfl.utils.Assets as OpenFlAssets;
 

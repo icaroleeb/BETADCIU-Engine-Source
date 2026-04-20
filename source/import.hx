@@ -44,10 +44,8 @@ import states.LoadingState;
 
 import substates.StickerSubState;
 
-#if flxanimate
-import flxanimate.*;
-import flxanimate.PsychFlxAnimate as FlxAnimate;
-#end
+import animate.FlxAnimate;
+import animate.FlxAnimateFrames;
 
 //Flixel
 import flixel.sound.FlxSound;

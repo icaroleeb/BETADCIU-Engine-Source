@@ -186,26 +186,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 
-		#if (cpp && windows)
-		var resolutions = [
-			'Native',      // triggers DPI scaling
-			'1280x720',
-			'1366x768',
-			'1600x900',
-			'1920x1080',
-			'2560x1440',
-		];
-
-		var option:Option = new Option('Resolution',
-			"Sets the game's window resolution.\nRequires a restart to take full effect.",
-			'gameResolution',
-			STRING,
-			resolutions);
-		option.onChange = onChangeResolution;
-		option.displayFormat = '%v';
-		addOption(option);
-		#end
-
 		var option:Option = new Option('Perfect Pixel Effect',
 		"The Perfect pixel effects\n Based on Codename Engine & VSlice",
 		'perfectPixel',
@@ -349,10 +329,4 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		Main.fpsVar.updateDebugType(ClientPrefs.data.debugDisplay);
 	}
 	#end
-
-	function onChangeResolution()
-	{
-		backend.Native.fixedScaling = false;
-		backend.Native.fixScaling();
-	}
 }

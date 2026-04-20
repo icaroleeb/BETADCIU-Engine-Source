@@ -12,6 +12,14 @@ import openfl.events.IOErrorEvent;
 import openfl.net.FileReference;
 import haxe.Json;
 
+import haxe.ui.components.Button;
+import haxe.ui.components.CheckBox;
+import haxe.ui.components.DropDown;
+import haxe.ui.components.TextField;
+import haxe.ui.containers.Box;
+import haxe.ui.containers.TabView;
+import haxe.ui.components.NumberStepper;
+
 @:access(objects.NoteSplash)
 class NoteSplashEditorState extends MusicBeatState
 {
@@ -58,7 +66,7 @@ class NoteSplashEditorState extends MusicBeatState
 
         properUI = new PsychUIBox(0, 0, 0, 0, ["Properties"]);
         properUI.canMove = properUI.canMinimize = false;
-        properUI.resize(280, 210);
+        properUI.resize(280, 240);
         properUI.y += 20;
         properUI.x = UI.x - properUI.width - 5;
         add(properUI);
@@ -83,6 +91,8 @@ class NoteSplashEditorState extends MusicBeatState
             babyArrow.playerPosition();
             babyArrow.screenCenter(Y);
             babyArrow.ID = i;
+            babyArrow.texture = "NOTE_assets";
+            babyArrow.updateHitbox();
             strums.add(babyArrow);
         }
 
@@ -156,7 +166,7 @@ class NoteSplashEditorState extends MusicBeatState
         var maxFps:PsychUINumericStepper = new PsychUINumericStepper(150, 127.5, 1, 26, 1, 120);
         UI.add(maxFps);
 
-        animDropDown = new PsychUIDropDownMenu(-155, 57, [""], function(id:Int, name:String)
+        animDropDown = new PsychUIDropDownMenu(-155, 87, [""], function(id:Int, name:String)
         {
             if (config != null && name.length > 0)
             {
@@ -319,6 +329,7 @@ class NoteSplashEditorState extends MusicBeatState
     }
 
     var imageInputText:PsychUIInputText;
+    var noteSkinInput:PsychUIInputText;
     var scaleNumericStepper:PsychUINumericStepper;
     function addPropertiesTab()
     {
@@ -334,24 +345,37 @@ class NoteSplashEditorState extends MusicBeatState
         });
         ui.add(reloadButton);
 
-        ui.add(new FlxText(20, 40, "Scale:"));
-        scaleNumericStepper = new PsychUINumericStepper(20, 57.5, 0.1, 1, 0, 4, 2, 60);
+        ui.add(new FlxText(20, imageInputText.y + 30, "Note Skin:"));
+        noteSkinInput = new PsychUIInputText(20, imageInputText.y + 47.5, 120, "NOTE_assets", 8);
+        ui.add(noteSkinInput);
+
+        var reloadNoteSkinButton:PsychUIButton = new PsychUIButton(185, imageInputText.y + 47.5, "Reload Notes", function()
+        {
+            for (strum in strums) {
+                strum.texture = noteSkinInput.text;
+                strum.updateHitbox();
+            }
+        });
+        ui.add(reloadNoteSkinButton);
+
+        ui.add(new FlxText(20, 70, "Scale:"));
+        scaleNumericStepper = new PsychUINumericStepper(20, 87.5, 0.1, 1, 0, 4, 2, 60);
         ui.add(scaleNumericStepper);
 
         scaleNumericStepper.value = config != null ? config.scale : 1;
 
-        ui.add(new FlxText(130, 40, "Animations:"));
+        ui.add(new FlxText(130, 70, "Animations:"));
 
-        var saveButton:PsychUIButton = new PsychUIButton(20, 130, "Save", saveSplash);
+        var saveButton:PsychUIButton = new PsychUIButton(20, 160, "Save", saveSplash);
         ui.add(saveButton);
 
-        templateButton = new PsychUIButton(20, 155, "Template");
+        templateButton = new PsychUIButton(20, 185, "Template");
         ui.add(templateButton);
 
-        var loadButton:PsychUIButton = new PsychUIButton(180, 155, "Convert TXT", loadTxt);
+        var loadButton:PsychUIButton = new PsychUIButton(180, 185, "Convert TXT", loadTxt);
         ui.add(loadButton);
 
-        var allowRGBCheck:PsychUICheckBox = new PsychUICheckBox(20, 105, "", 1);
+        var allowRGBCheck:PsychUICheckBox = new PsychUICheckBox(20, 135, "", 1);
         function check()
         {
             if (config != null)

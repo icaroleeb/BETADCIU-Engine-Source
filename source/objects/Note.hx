@@ -53,7 +53,7 @@ typedef NoteConfig = {
  * 
  * If you want to make a custom note type, you should search for: "function set_noteType"
 **/
-class Note extends OffsettableSprite
+class Note extends FunkinSprite
 {
 	//This is needed for the hardcoded note types to appear on the Chart Editor,
 	//It's also used for backwards compatibility with 0.1 - 0.3.2 charts.
@@ -177,6 +177,8 @@ class Note extends OffsettableSprite
 	}
 	public var hitsound:String = 'hitsound';
 
+	static var _cachedCustomNoteSkins:Array<String> = null;
+
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
 		multSpeed = value;
@@ -204,8 +206,7 @@ class Note extends OffsettableSprite
 
 	public function defaultRGB(?pixelShit:Bool=false)
 	{
-		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData];
-		if(pixelShit) arr = ClientPrefs.data.arrowRGBPixel[noteData];
+		var arr:Array<FlxColor> = pixelShit ? ClientPrefs.data.arrowRGBPixel[noteData] : ClientPrefs.data.arrowRGB[noteData];
 
 		if (arr != null && noteData > -1 && noteData <= arr.length)
 		{
@@ -269,6 +270,8 @@ class Note extends OffsettableSprite
 	{
 		super();
 
+		if (_cachedCustomNoteSkins == null) _cachedCustomNoteSkins = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
+
 		animation = new PsychAnimationController(this);
 
 		antialiasing = ClientPrefs.data.antialiasing;
@@ -283,7 +286,6 @@ class Note extends OffsettableSprite
 		this.moves = false;
 
 		x += (ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X) + 50;
-		// MAKE SURE ITS DEFINITELY OFF SCREEN?
 		y -= 2000;
 		this.strumTime = strumTime;
 		if(!inEditor) this.strumTime += ClientPrefs.data.noteOffset;
@@ -298,9 +300,7 @@ class Note extends OffsettableSprite
 
 			x += swagWidth * (noteData);
 			if(!isSustainNote && noteData < colArray.length) { //Doing this 'if' check to fix the warnings on Senpai songs
-				var animToPlay:String = '';
-				animToPlay = colArray[noteData % colArray.length];
-				playAnim(animToPlay + 'Scroll');
+				playAnim(colArray[noteData % colArray.length] + 'Scroll');
 			}
 		}
 
@@ -331,8 +331,7 @@ class Note extends OffsettableSprite
 			if (prevNote.isSustainNote)
 			{
 				prevNote.playAnim(colArray[prevNote.noteData % colArray.length] + 'hold');
-
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.045 * (1 / PlayState.holdSubdivisions);
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05 * (1 / PlayState.holdSubdivisions);
 				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
 
 				if(isPixelNote) {
@@ -397,11 +396,8 @@ class Note extends OffsettableSprite
 		if(postfix == null) postfix = '';
 
 		if(texture.length < 1) {
-			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
-				texture = PlayState.SONG != null ? PlayState.SONG.noteStyle : null;
-			} else{
-				texture = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
-			}
+			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null) texture = PlayState.SONG.noteStyle;
+			else texture = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
 
 			if(texture == null || texture.length < 1) texture = defaultNoteSkin + postfix;
 		}
@@ -415,27 +411,18 @@ class Note extends OffsettableSprite
 			rgbShader.enabled = true;
 			texture = "NOTE_assets-pixel";
 			skin = texture + postfix;
-		}else if (texture == 'normal') {
+		} else if (texture == 'normal') {
 			rgbShader.enabled = true;
 			texture = "NOTE_assets";
 			skin = texture + postfix;
 		}
-		var notePath:String = texture;
 
-		var isCustomNoteSkin:Bool = false;
-		var CustomNoteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
-		for (i in 0...CustomNoteSkins.length) {
-			if (CustomNoteSkins[i] == skin) isCustomNoteSkin = true;
-		}
+		var isCustomNoteSkin:Bool = _cachedCustomNoteSkins.contains(skin);
 
-		var animName:String = null;
-		if(animation.curAnim != null) {
-			animName = animation.curAnim.name;
-		}
+		var animName:String = animation.curAnim != null ? animation.curAnim.name : null;
 
 		var wasPixelNote:Bool = isPixelNote;
 		isPixelNote = false;
-		var skinPixel:String = skin;
 		var lastScaleY:Float = scale.y;
 		var skinPostfix:String = getNoteSkinPostfix();
 		var customSkin:String = skin + skinPostfix;
@@ -446,7 +433,6 @@ class Note extends OffsettableSprite
 			_lastValidChecked = customSkin;
 		}
 		else skinPostfix = '';
-
 
 		var pathSplit:Array<String> = skin.split('/');
 		var curSkin = skin;
@@ -459,7 +445,6 @@ class Note extends OffsettableSprite
 			if (Paths.fileExists('images/$weekendPath.png', IMAGE)) {
 				separateSheets = true;
 				final jsonName = pathSplit[pathSplit.length - 1];
-				
 				jsonPath = '$noteDirectory$skin/$jsonName';
 				skin = weekendPath;
 			} else if (Paths.fileExists('images/$fullPath.png', IMAGE)) {
@@ -477,23 +462,21 @@ class Note extends OffsettableSprite
 				}
 			}
 
-			if (curSkin != skin){
+			if (curSkin != skin) {
 				isLegacyNoteSkin = (noteDirectory == "notes/");
-				if (noteDirectory.startsWith("pixelUI/") || StringTools.contains(skin, "-pixel")) {
+				if (noteDirectory.startsWith("pixelUI/") || StringTools.contains(skin, "-pixel"))
 					isPixelNote = true;
-				}
 				break;
 			}
 		}
 		
 		if (noteType != 'Hurt Note') defaultRGB(isPixelNote);
-
 		if (isLegacyNoteSkin && !isCustomNoteSkin) rgbShader.enabled = false;
 		
 		if(isPixelNote) {
 			if(isSustainNote) {
 				var graphic = Paths.image(skin + 'ENDS' + skinPostfix);
-				try{
+				try {
 					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
 				} catch(e) {
 					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixelENDS' + skinPostfix);
@@ -506,9 +489,8 @@ class Note extends OffsettableSprite
 				try {
 					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 				} catch(e) {
-					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + skinPostfix);
+					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixel' + skinPostfix);
 					graphic = fallbackShit;
-					var graphic = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixel' + skinPostfix);
 					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 				}
 			}
@@ -525,8 +507,7 @@ class Note extends OffsettableSprite
 		} else {
 			loadNoteFrames(skin, separateSheets);
 			loadNoteAnims();
-			if(!isSustainNote)
-			{
+			if(!isSustainNote) {
 				centerOffsets();
 				centerOrigin();
 			}
@@ -534,17 +515,22 @@ class Note extends OffsettableSprite
 
 		if(isSustainNote) {
 			scale.y = lastScaleY;
-			
-			if (wasPixelNote && !isPixelNote) offsetX += 30;
+			if (wasPixelNote && !isPixelNote) {
+				// if (!ClientPrefs.data.streamedNotes) offsetX += 30;
+				scale.y = scale.y / 6;
+			}
 			if (isPixelNote && !wasPixelNote) offsetX -= 5;
 		}
-		updateHitbox();
-		
 
-		if(animName != null){
-			playAnim(animName, true);
+		updateHitbox();
+		if(animName != null) playAnim(animName, true);
+
+		if(isPixelNote && isSustainNote) {
+			scale.y *= PlayState.daPixelZoom;
+			scale.y *= 1.222;
+			updateHitbox();
 		}
-		
+
 		return texture;
 	}
 
@@ -556,19 +542,19 @@ class Note extends OffsettableSprite
 		return skin;
 	}
 
-	function loadNoteFrames(skin:String, ?separateSheets:Bool = false){
-		if (separateSheets && isSustainNote){
-			if (Paths.fileExists("images/" + skin + "_hold.xml", IMAGE)){
+	function loadNoteFrames(skin:String, ?separateSheets:Bool = false) {
+		if (separateSheets && isSustainNote) {
+			if (Paths.fileExists("images/" + skin + "_hold.xml", IMAGE)) {
 				frames = Paths.getSparrowAtlas(skin + "_hold");
 				separateXMLExists = true;
-			}else{
+			} else {
 				var rawPic:Dynamic = Paths.image(skin + "_hold");
 				loadGraphic(rawPic, true, 52, 87);
 			}
-		}else{
+		} else {
 			try {
 				frames = Paths.getSparrowAtlas(skin);
-			} catch(e){
+			} catch(e) {
 				texture = Note.defaultNoteSkin;
 			}
 		}
@@ -578,27 +564,27 @@ class Note extends OffsettableSprite
 		if (colArray[noteData] == null)
 			return;
 
-		if (separateSheets){
+		if (separateSheets) {
 			if (isSustainNote) {
-				if (separateXMLExists){
+				if (separateXMLExists) {
 					animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + noteAnimSuffixes[2], 24, true);
 					animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + noteAnimSuffixes[1], 24, true);
-				}else{
+				} else {
 					animation.add(colArray[noteData] + 'holdend', [noteData * 2 + 1]);
 					animation.add(colArray[noteData] + 'hold', [noteData * 2]);
 				}
-			}else{
+			} else {
 				var dirScroll:Array<String> = ["Left", "Down", "Up", "Right"];
-				animation.addByPrefix(colArray[noteData]+"Scroll", "note" + dirScroll[noteData]);
+				animation.addByPrefix(colArray[noteData] + "Scroll", "note" + dirScroll[noteData]);
 			}
-		}else{
-			if (isSustainNote)
-			{
+		} else {
+			if (isSustainNote) {
 				attemptToAddAnimationByPrefix('purpleholdend', 'pruple end hold', 24, true); // this fixes some retarded typo from the original note .FLA
 				animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end', 24, true);
 				animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece', 24, true);
+			} else {
+				animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
 			}
-			else animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
 		}
 		
 		// setGraphicSize(Std.int(width * 0.7));
@@ -610,11 +596,12 @@ class Note extends OffsettableSprite
 		if (colArray[noteData] == null)
 			return;
 
-		if(isSustainNote)
-		{
+		if(isSustainNote) {
 			animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
 			animation.add(colArray[noteData] + 'hold', [noteData], 24, true);
-		} else animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
+		} else {
+			animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
+		}
 	}
 
 	function attemptToAddAnimationByPrefix(name:String, prefix:String, framerate:Float = 24, doLoop:Bool = true)
@@ -655,11 +642,8 @@ class Note extends OffsettableSprite
 			}
 		}
 
-		if (tooLate && !inEditor)
-		{
-			if (alpha > 0.3)
-				alpha = 0.3;
-		}
+		if (tooLate && !inEditor && alpha > 0.3)
+			alpha = 0.3;
 	}
 
 	override public function destroy()
@@ -695,9 +679,7 @@ class Note extends OffsettableSprite
 			if(myStrum.downScroll && isSustainNote)
 			{
 				if(isPixelNote)
-				{
 					y -= PlayState.daPixelZoom * 9.5;
-				}
 				y -= (frameHeight * scale.y) - (Note.swagWidth / 2);
 			}
 		}
@@ -735,8 +717,9 @@ class Note extends OffsettableSprite
 
 		var daOffsets = getAnimOffset(anim);
 		
-		offset.x += daOffsets[0] * ((isPixelNote ? PlayState.daPixelZoom : 0.7) / scale.x);
-		offset.y += daOffsets[1] * ((isPixelNote ? PlayState.daPixelZoom : 0.7) / scale.y);
+		var scaleMult:Float = isPixelNote ? PlayState.daPixelZoom : 0.7;
+		offset.x += daOffsets[0] * (scaleMult / scale.x);
+		offset.y += daOffsets[1] * (scaleMult / scale.y);
 		
 		// if(useRGBShader && !isLegacyNoteSkin) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
 		// else if (isLegacyNoteSkin) rgbShader.enabled = false;
@@ -757,38 +740,19 @@ class Note extends OffsettableSprite
 	{
 		return {
 			strumAnimations: [
-				{
-					offsets: [
-						0,
-						0
-					],
-					anim: "confirm"
-				},
-				{
-					offsets: [
-						0,
-						0
-					],
-					anim: "pressed"
-				},
-				{
-					offsets: [
-						0,
-						0
-					],
-					anim: "static"
-				}
+				{ offsets: [0, 0], anim: "confirm" },
+				{ offsets: [0, 0], anim: "pressed" },
+				{ offsets: [0, 0], anim: "static" }
 			],
 			rgbEnabled: true
 		};
 	}
 
-	public static function getNoteConfig(jsonPath:String){
+	public static function getNoteConfig(jsonPath:String) {
 		try
 		{
-			if (!configs.exists(jsonPath)){
+			if (!configs.exists(jsonPath))
 				configs.set(jsonPath, cast tjson.TJSON.parse(Paths.getTextFromFile('$jsonPath.json')));
-			}
 			
 			return configs.get(jsonPath);
 		}

@@ -33,7 +33,7 @@ class Sserafim extends BaseStage
 		}
 		var stageVars = PlayState.instance.variables.get("stageVariables");
 
-        var spritesShader:Array<Dynamic> = [];
+        var spritesShader:Array<FlxSprite> = [];
 
         var solid:FlxSprite = new FlxSprite(-5000, -3000).makeGraphic(4000, 3000, 0xFFFFFFFF);
         solid.updateHitbox();
@@ -130,7 +130,7 @@ class Sserafim extends BaseStage
         spritesShader.push(frontStool);
 
         for (stageSprites in spritesShader)
-            stageSprites = stageShader;
+            stageSprites.shader = stageShader;
     }
 
     var dust1:FlxBackdrop;
@@ -387,12 +387,12 @@ class Sserafim extends BaseStage
         dust4.alpha = 1;
     }
 
-    override public function destroy():Void {
-		if (perspectiveFloor != null) { // fuck u <3.
-			remove(perspectiveFloor);
-			perspectiveFloor.destroy();
-			perspectiveFloor = null;
-		}
-		super.destroy();
-	}
+    // override public function destroy():Void {
+	// 	if (perspectiveFloor != null) { // fuck u <3.
+	// 		remove(perspectiveFloor);
+	// 		perspectiveFloor.destroy();
+	// 		perspectiveFloor = null;
+	// 	}
+	// 	super.destroy();
+	// }
 }

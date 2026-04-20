@@ -523,7 +523,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			}
 
 			var lastAnim:String = (character.animationsArray[curAnim] != null) ? character.animationsArray[curAnim].anim : '';
-			var lastOffsets:Array<Int> = [0, 0];
+			var lastOffsets:Array<Float> = [0, 0];
 			for (anim in character.animationsArray)
 				if(animationInputText.text == anim.anim) {
 					lastOffsets = anim.offsets;
@@ -534,7 +534,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					character.animationsArray.remove(anim);
 				}
 
-			var lastPlayerOffsets:Array<Int> = [0, 0];
+			var lastPlayerOffsets:Array<Float> = [0, 0];
 			for (anim in character.animationsArray)
 				if(animationInputText.text == anim.anim) {
 					if(anim.playerOffsets != null && anim.playerOffsets.length > 1) lastPlayerOffsets = anim.playerOffsets;
@@ -1073,8 +1073,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		var anim = anims[curAnim];
 		if(changedOffset && anim != null && anim.offsets != null && !character.isPlayer)
 		{
-			anim.offsets[0] = Std.int(character.offset.x);
-			anim.offsets[1] = Std.int(character.offset.y);
+			anim.offsets[0] = character.offset.x;
+			anim.offsets[1] = character.offset.y;
 
 			character.addOffset(anim.anim, character.offset.x, character.offset.y);
 			updateText();
@@ -1082,8 +1082,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		if(changedOffset && anim != null && anim.playerOffsets != null && character.isPlayer)
 		{
-			anim.playerOffsets[0] = Std.int(character.offset.x);
-			anim.playerOffsets[1] = Std.int(character.offset.y);
+			anim.playerOffsets[0] = character.offset.x;
+			anim.playerOffsets[1] = character.offset.y;
 
 			character.addPlayerOffset(anim.anim, character.offset.x, character.offset.y);
 			updateText();

@@ -11,6 +11,7 @@ import haxe.Json;
 
 import backend.Song;
 import states.stages.objects.TankmenBG;
+import objects.Bopper;
 
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 
@@ -44,11 +45,11 @@ typedef AnimArray = {
 	var fps:Int;
 	var loop:Bool;
 	var indices:Array<Int>;
-	var offsets:Array<Int>;
-	var playerOffsets:Array<Int>;
+	var offsets:Array<Float>;
+	var playerOffsets:Array<Float>;
 }
 
-class Character extends OffsettableSprite
+class Character extends Bopper
 {
 	/**
 	 * In case a character is missing, it will use this on its place
@@ -84,7 +85,6 @@ class Character extends OffsettableSprite
 	public var animationNotes:Array<Dynamic> = [];
 	public var stunned:Bool = false;
 	public var singDuration:Float = 4; //Multiplier of how long a character holds the sing pose
-	public var idleSuffix:String = '';
 	public var danceIdle:Bool = false; //Character use "danceLeft" and "danceRight" instead of "idle"
 	public var stopIdle:Bool = false;
 	public var skipDance:Bool = false;
@@ -118,8 +118,8 @@ class Character extends OffsettableSprite
 	{
 		super(x, y);
 
-		animOffsets = new Map<String, Array<Dynamic>>();
-		animPlayerOffsets = new Map<String, Array<Dynamic>>();
+		animOffsets = new Map<String, Array<Float>>();
+		animPlayerOffsets = new Map<String, Array<Float>>();
 		iconColor = isPlayer ? 'FF66FF33' : 'FFFF0000';
 		this.isPlayer = isPlayer;
 		changeCharacter(character);
@@ -141,8 +141,8 @@ class Character extends OffsettableSprite
 
 		resetVariables();
 
-		animOffsets = new Map<String, Array<Dynamic>>();
-		animPlayerOffsets = new Map<String, Array<Dynamic>>();
+		animOffsets = new Map<String, Array<Float>>();
+		animPlayerOffsets = new Map<String, Array<Float>>();
 		iconColor = isPlayer ? 'FF66FF33' : 'FFFF0000';
 		this.isPlayer = isPlayer;
 		
@@ -385,17 +385,18 @@ class Character extends OffsettableSprite
 
 				}
 
-				var offsets:Array<Int> = a.offsets;
-				var playerOffsets:Array<Int> = (a.playerOffsets != null && a.playerOffsets.length > 1)
-					? a.playerOffsets
-					: a.offsets;
-				var swagOffsets:Array<Int> = offsets;
-
-				if (isPlayer && playerOffsets != null && playerOffsets.length > 1){
+				var offsets:Array<Float> = a.offsets;
+				var playerOffsets:Array<Float> = a.playerOffsets;
+				var swagOffsets:Array<Float> = offsets;
+				
+				if (playerOffsets == null) {
+					playerOffsets = a.offsets;
+					isPsychPlayer = true;
+				} else if (isPlayer && playerOffsets != null) {
 					itHasPlayerOfs = true;
 					swagOffsets = playerOffsets;
 				}
-				
+
 				if(swagOffsets != null && a.offsets.length > 1) addOffset(a.anim, swagOffsets[0], swagOffsets[1]);
 				else addOffset(a.anim, 0, 0);
 
@@ -405,16 +406,8 @@ class Character extends OffsettableSprite
 
 			if (isPlayer) {
 				flipX = !flipX;
-				// Doesn't flip for BF, since his are already in the right place???
-				if (!missingCharacter)
-					if (!predictCharacterIsPlayer(curCharacter) && !isPsychPlayer) flipAnims();
-			}
-	
-			if (!isPlayer) { // flip for bf
-				if (curCharacter.startsWith('bf') || isPsychPlayer || missingCharacter) flipAnims();
-			}	
-
-			if (isPlayer && !curCharacter.startsWith('bf') && !itHasPlayerOfs) flipAnims(); // fuck it.
+				if (!isPsychPlayer) flipAnims(); //did i just fix all that flipping bug by just using a check that actually makes sense?? -- future me here: yeah, i did.
+			}		
 		}
 		//trace('Loaded file to character ' + curCharacter);
 	}
@@ -487,12 +480,6 @@ class Character extends OffsettableSprite
 	inline public function isAnimationNull():Bool
 	{
 		return (animation.curAnim == null);
-	}
-
-	var _lastPlayedAnimation:String;
-	inline public function getAnimationName():String
-	{
-		return _lastPlayedAnimation;
 	}
 
 	public function isAnimationFinished():Bool
@@ -597,76 +584,63 @@ class Character extends OffsettableSprite
 		return value;
 	}
 
-	public var danced:Bool = false;
-
 	/**
 	 * FOR GF DANCING SHIT
 	 */
-	public function dance()
+	override public function dance(forced:Bool=false)
 	{
 		if (!debugMode && !skipDance && !specialAnim && !stopIdle)
 		{
-			if(danceIdle)
-			{
-				danced = !danced;
+			super.dance();
+			// if(danceIdle)
+			// {
+			// 	danced = !danced;
 
-				if (danced)
-					playAnim('danceRight' + idleSuffix);
-				else
-					playAnim('danceLeft' + idleSuffix);
-			}
-			else if(hasAnimation('idle' + idleSuffix))
-				playAnim('idle' + idleSuffix);
+			// 	if (danced)
+			// 		playAnim('danceRight' + idleSuffix);
+			// 	else
+			// 		playAnim('danceLeft' + idleSuffix);
+			// }
+			// else if(hasAnimation('idle' + idleSuffix))
+			// 	playAnim('idle' + idleSuffix);
 
 			if (color != curColor && !hasMissAnimations)
 				color = curColor;
 		}
 	}
 
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
+	public var useFallbackMiss:Bool = false;
+
+	override public function playAnim(animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0):Void
 	{
+		if (!canPlayAnimations) return;
+
 		specialAnim = false;
-		var useFallbackMiss:Bool = false;
+		var missShit:Bool = false;
 
 		// Reimplemented the fall back for the alt sprites
-		if (AnimName.endsWith('alt') && !hasAnimation(AnimName)){
-			AnimName = AnimName.split('-')[0];
-		}
-			
-		if (AnimName.endsWith('miss') && !hasAnimation(AnimName))
-		{
-			AnimName = AnimName.substr(0, AnimName.length - 4);
-			useFallbackMiss = true;
+		if (animName.endsWith('alt') && !hasAnimation(animName)) {
+			animName = animName.split('-')[0];
 		}
 
-		//trace(anim.exists(AnimName));
-
-		animation.play(AnimName, Force, Reversed, Frame);
-		_lastPlayedAnimation = AnimName;
-
-		if (hasAnimation(AnimName))
-		{
-			var daOffset = animOffsets.get(AnimName);
-			if (isPlayer) daOffset = animPlayerOffsets.get(AnimName);
-
-			if ((animOffsets.exists(AnimName) && !isPlayer) || (animPlayerOffsets.exists(AnimName) && isPlayer)) offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
-			else offset.set(0, 0);
+		if (animName.endsWith('miss') && !hasAnimation(animName)) {
+			animName = animName.substr(0, animName.length - 4);
+			missShit = true;
 		}
-		//else offset.set(0, 0);
+
+		super.playAnim(animName, force, reversed, frame);
+
+		var playedAnim = __prevPlayedAnimation;
 
 		if (curCharacter.startsWith('gf-') || curCharacter == 'gf')
 		{
-			if (AnimName == 'singLEFT')
-				danced = true;
+			if (playedAnim == 'singLEFT') danced = true;
+			else if (playedAnim == 'singRIGHT') danced = false;
 
-			else if (AnimName == 'singRIGHT')
-				danced = false;
-
-			if (AnimName == 'singUP' || AnimName == 'singDOWN')
-				danced = !danced;
+			if (playedAnim == 'singUP' || playedAnim == 'singDOWN') danced = !danced;
 		}
 
-		if (useFallbackMiss){
+		if (missShit && useFallbackMiss) {
 			var realCurColor:FlxColor = curColor;
 			color = CoolUtil.blendColors(curColor, 0xFFCFAFFF);
 			curColor = realCurColor;
@@ -695,29 +669,6 @@ class Character extends OffsettableSprite
 	function sortAnims(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
-	}
-
-	public var danceEveryNumBeats:Int = 2;
-	private var settingCharacterUp:Bool = true;
-	public function recalculateDanceIdle() {
-		var lastDanceIdle:Bool = danceIdle;
-		danceIdle = (hasAnimation('danceLeft' + idleSuffix) && hasAnimation('danceRight' + idleSuffix));
-
-		if(settingCharacterUp)
-		{
-			danceEveryNumBeats = (danceIdle ? 1 : 2);
-		}
-		else if(lastDanceIdle != danceIdle)
-		{
-			var calc:Float = danceEveryNumBeats;
-			if(danceIdle)
-				calc /= 2;
-			else
-				calc *= 2;
-
-			danceEveryNumBeats = Math.round(Math.max(calc, 1));
-		}
-		settingCharacterUp = false;
 	}
 
 	public function quickAnimAdd(name:String, anim:String)
@@ -782,7 +733,7 @@ class Character extends OffsettableSprite
 
 	// Atlas support
 	// special thanks ne_eo for the references, you're the goat!!
-	@:allow(states.editors.CharacterEditorState)
+	@:allow(states.editors.CharacterEditorState, states.editors.CharacterEditorStateWIP)
 	public var isAnimateAtlas(default, null):Bool = false;
 	public override function draw()
 	{

@@ -79,6 +79,8 @@ class Main extends Sprite
 		// backend.Native.fixScaling();
 		// #end
 
+		initHaxeUI();
+
 		// Credits to MAJigsaw77 (he's the og author for this code)
 		#if android
 		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));
@@ -300,6 +302,17 @@ class Main extends Sprite
 			return "Flash";
 		#else
 			return "Unknown";
+		#end
+	}
+
+	function initHaxeUI():Void
+	{
+		#if haxeui_core
+		haxe.ui.Toolkit.init();
+		haxe.ui.themes.ThemeManager.instance.applyTheme('dark');
+		haxe.ui.Toolkit.autoScale = false;
+		haxe.ui.focus.FocusManager.instance.autoFocus = false;
+		haxe.ui.tooltips.ToolTipManager.defaultDelay = 200;
 		#end
 	}
 }
