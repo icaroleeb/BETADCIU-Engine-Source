@@ -3,6 +3,8 @@ package psychlua;
 import openfl.utils.Assets;
 import psychlua.LuaUtils;
 
+import backend.FunkinSprite;
+
 #if (LUA_ALLOWED)
 class FlxAnimateFunctions
 {
@@ -19,7 +21,9 @@ class FlxAnimateFunctions
 				lastSprite.destroy();
 			}
 
-			var mySprite:ModchartAnimateSprite = new ModchartAnimateSprite(x, y);
+			// var mySprite:ModchartAnimateSprite = new ModchartAnimateSprite(x, y);
+			var mySprite:FunkinSprite = FunkinSprite.create(x, y, null);
+
 			if(loadFolder != null && loadFolder.length > 0)
 			{
 				LuaUtils.loadFrames(mySprite, loadFolder, 'animateatlas');

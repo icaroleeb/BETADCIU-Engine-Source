@@ -44,8 +44,8 @@ typedef AnimArray = {
 	var fps:Int;
 	var loop:Bool;
 	var indices:Array<Int>;
-	var offsets:Array<Int>;
-	var playerOffsets:Array<Int>;
+	var offsets:Array<Float>;
+	var playerOffsets:Array<Float>;
 }
 
 class Character extends OffsettableSprite
@@ -385,11 +385,11 @@ class Character extends OffsettableSprite
 
 				}
 
-				var offsets:Array<Int> = a.offsets;
-				var playerOffsets:Array<Int> = (a.playerOffsets != null && a.playerOffsets.length > 1)
+				var offsets:Array<Float> = a.offsets;
+				var playerOffsets:Array<Float> = (a.playerOffsets != null && a.playerOffsets.length > 1)
 					? a.playerOffsets
 					: a.offsets;
-				var swagOffsets:Array<Int> = offsets;
+				var swagOffsets:Array<Float> = offsets;
 
 				if (isPlayer && playerOffsets != null && playerOffsets.length > 1){
 					itHasPlayerOfs = true;
@@ -778,6 +778,12 @@ class Character extends OffsettableSprite
 	{
 		curColor = Color;
 		return super.set_color(Color);
+	}
+
+	override function set_flipX(daFlip:Bool):Bool
+	{
+		flipAnims();
+		super.set_flipX(daFlip);
 	}
 
 	// Atlas support

@@ -2110,7 +2110,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubstate {
 			}
 
 			var lastAnim:String = (target.animations[curAnim] != null) ? target.animations[curAnim].anim : '';
-			var lastOffsets:Array<Int> = null;
+			var lastOffsets:Array<Float> = null;
 			for (anim in target.animations)
 				if(animationInputText.text == anim.anim)
 				{
@@ -2120,7 +2120,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubstate {
 					target.animations.remove(anim);
 				}
 				
-			var lastPlayerOffsets:Array<Int> = null;
+			var lastPlayerOffsets:Array<Float> = null;
 			for (anim in target.animations)
 				if(animationInputText.text == anim.anim)
 				{

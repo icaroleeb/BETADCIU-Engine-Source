@@ -1,8 +1,11 @@
 package backend;
 
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
+import flixel.math.FlxRect;
+import flixel.math.FlxMatrix;
+import animate.FlxAnimate;
 
-class FunkinSprite extends FlxSprite
+class FunkinSprite extends FlxAnimate
 {
 	public static function create(x:Float = 0.0, y:Float = 0.0, key:String)
 	{
@@ -81,4 +84,93 @@ class FunkinSprite extends FlxSprite
 
     camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
   }
+
+  // ZOOM FACTOR
+  public var zoomFactor:Float = 1;
+  public var zoomFactorEnabled:Bool = true;
+  var _rect2:FlxRect;
+
+  // semi stolen from FlxSkewedSprite
+	static var _skewMatrix:FlxMatrix = new FlxMatrix();
+  public static var USE_LEGACY_ZOOM_FACTOR:Null<Bool> = null;
+
+	private inline function __shouldDoZoomFactor()
+		return zoomFactorEnabled && zoomFactor != 1;
+
+	private inline function __prepareZoomFactor(?rect:FlxRect, camera:FlxCamera):FlxRect {
+		if (USE_LEGACY_ZOOM_FACTOR)
+			return (rect ?? FlxRect.get()).set(
+				camera.width * 0.5,
+				camera.height * 0.5,
+				(camera.scaleX > 0 ? Math.max : Math.min)(0, FlxMath.lerp(1 / camera.scaleX, 1, zoomFactor)),
+				(camera.scaleY > 0 ? Math.max : Math.min)(0, FlxMath.lerp(1 / camera.scaleY, 1, zoomFactor))
+			);
+		else
+			return (rect ?? FlxRect.get()).set(
+				camera.width * 0.5 + camera.scroll.x * scrollFactor.x,
+				camera.height * 0.5 + camera.scroll.y * scrollFactor.y,
+				(camera.scaleX > 0 ? Math.max : Math.min)(0, FlxMath.lerp(1 / camera.scaleX, 1, zoomFactor)),
+				(camera.scaleY > 0 ? Math.max : Math.min)(0, FlxMath.lerp(1 / camera.scaleY, 1, zoomFactor))
+			);
+	}
+
+  function prepareDrawMatrix(matrix:FlxMatrix, camera:FlxCamera):Void {
+		prepareDrawMatrixFlxAnimate(matrix, camera);
+
+		if (__shouldDoZoomFactor()) {
+			__prepareZoomFactor(_rect2, camera);
+			matrix.setTo(
+				matrix.a * _rect2.width, matrix.b * _rect2.height,
+				matrix.c * _rect2.width, matrix.d * _rect2.height,
+				(matrix.tx - _rect2.x) * _rect2.width + _rect2.x,
+				(matrix.ty - _rect2.y) * _rect2.height + _rect2.y,
+			);
+		}
+	}
+
+  function prepareDrawMatrixFlxAnimate(matrix:FlxMatrix, camera:FlxCamera):Void
+	{
+		final doStageMatrix:Bool = (isAnimate && applyStageMatrix);
+
+		if (doStageMatrix)
+		{
+			matrix.translate(timeline._bounds.x, timeline._bounds.y);
+		}
+
+		matrix.translate(-origin.x, -origin.y);
+		matrix.scale(scale.x, scale.y);
+
+		if (angle != 0)
+		{
+			updateTrig();
+			matrix.rotateWithTrig(_cosAngle, _sinAngle);
+		}
+
+		if (skew.x != 0 || skew.y != 0)
+		{
+			updateSkew();
+			matrix.concat(_skewMatrix);
+		}
+
+		if (doStageMatrix) // TODO: add some way to customize the order of this thing
+		{
+			matrix.concat(library.matrix);
+		}
+
+		getScreenPosition(_point, camera);
+		_point.x += origin.x - offset.x;
+		_point.y += origin.y - offset.y;
+		matrix.translate(_point.x, _point.y);
+
+		if (isPixelPerfectRender(camera))
+			preparePixelPerfectMatrix(matrix);
+	}
+
+  /*
+	override function preparePixelPerfectMatrix(matrix:FlxMatrix):Void
+	{
+		matrix.tx = Math.floor(matrix.tx);
+		matrix.ty = Math.floor(matrix.ty);
+	}
+    */
 }

@@ -58,6 +58,8 @@ import funkin.vis.audioclip.frontends.LimeAudioClip;
 import states.editors.ModpackMakerState;
 import states.editors.ModpackMakerState.ModpackAssetRegistry;
 
+import backend.FunkinSprite;
+
 class FunkinLua {
 	public var lua:State = null;
 	public var camTarget:FlxCamera;
@@ -1255,7 +1257,8 @@ class FunkinLua {
 
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
-			var leSprite:ModchartSprite = new ModchartSprite(x, y);
+			// var leSprite:ModchartSprite = new ModchartSprite(x, y);
+			var leSprite:FunkinSprite = FunkinSprite.create(x, y, null);
 			if(image != null && image.length > 0)
 			{
 				leSprite.loadGraphic(Paths.image(image));
@@ -1281,6 +1284,7 @@ class FunkinLua {
 					stageVars.set(tag, leSprite);
 			}
 
+			leSprite.antialiasing = ClientPrefs.data.antialiasing;
 			leSprite.active = true;
 		});
 		Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?spriteType:String = 'auto') {
@@ -1291,7 +1295,8 @@ class FunkinLua {
 			
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
-			var leSprite:ModchartSprite = new ModchartSprite(x, y);
+			// var leSprite:ModchartSprite = new ModchartSprite(x, y);
+			var leSprite:FunkinSprite = FunkinSprite.create(x, y, null);
 
 			if(image != null && image.length > 0)
 			{
@@ -1317,6 +1322,8 @@ class FunkinLua {
 					var stageVars = variables.get("stageCameraVariables");
 					stageVars.set(tag, leSprite);
 			}
+
+			leSprite.antialiasing = ClientPrefs.data.antialiasing;
 		});
 		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, ?image:String = null, ?spacingX:Float = 0, ?spacingY:Float = 0, ?axes:String = "XY") {
 			if (this.scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){

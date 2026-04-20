@@ -195,7 +195,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		"OTHER",
 		"F12 - Toggle Silhouettes",
 		"Hold Shift - Move Offsets 10x faster and Camera 4x faster",
-		"Hold Control - Move camera 4x slower"];
+		"Hold Control - Move camera 4x slower",
+		"Ctrl + Arrow Keys - Move Offset like 0.5",
+		"Ctrl + Alt + Arrow Keys - Move Offset like 0.1"];
 
 		helpBg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		helpBg.scale.set(FlxG.width, FlxG.height);
@@ -523,7 +525,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			}
 
 			var lastAnim:String = (character.animationsArray[curAnim] != null) ? character.animationsArray[curAnim].anim : '';
-			var lastOffsets:Array<Int> = [0, 0];
+			var lastOffsets:Array<Float> = [0, 0];
 			for (anim in character.animationsArray)
 				if(animationInputText.text == anim.anim) {
 					lastOffsets = anim.offsets;
@@ -534,7 +536,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					character.animationsArray.remove(anim);
 				}
 
-			var lastPlayerOffsets:Array<Int> = [0, 0];
+			var lastPlayerOffsets:Array<Float> = [0, 0];
 			for (anim in character.animationsArray)
 				if(animationInputText.text == anim.anim) {
 					if(anim.playerOffsets != null && anim.playerOffsets.length > 1) lastPlayerOffsets = anim.playerOffsets;
@@ -950,13 +952,17 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		var shiftMult:Float = 1;
 		var ctrlMult:Float = 1;
 		var shiftMultBig:Float = 1;
+		var ctrlMultBig:Float = 1;
 		if(FlxG.keys.pressed.SHIFT)
 		{
 			shiftMult = 4;
 			shiftMultBig = 10;
 		}
 		
-		if(FlxG.keys.pressed.CONTROL) ctrlMult = 0.25;
+		if(FlxG.keys.pressed.CONTROL) {
+			ctrlMult = 0.25;
+			ctrlMultBig = 1.1;
+		}
 		
 		if (FlxG.mouse.wheel != 0) {
 			shiftMult = 8;
@@ -1010,10 +1016,11 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		var changedOffset = false;
 		var moveKeysP = [FlxG.keys.justPressed.LEFT, FlxG.keys.justPressed.RIGHT, FlxG.keys.justPressed.UP, FlxG.keys.justPressed.DOWN];
 		var moveKeys = [FlxG.keys.pressed.LEFT, FlxG.keys.pressed.RIGHT, FlxG.keys.pressed.UP, FlxG.keys.pressed.DOWN];
+		var daMult = (FlxG.keys.pressed.CONTROL ? (FlxG.keys.pressed.ALT ? 0.1 : 0.5) : 1);
 		if(moveKeysP.contains(true))
 		{
-			character.offset.x += ((moveKeysP[0] ? 1 : 0) - (moveKeysP[1] ? 1 : 0)) * shiftMultBig;
-			character.offset.y += ((moveKeysP[2] ? 1 : 0) - (moveKeysP[3] ? 1 : 0)) * shiftMultBig;
+			character.offset.x += ((moveKeysP[0] ? daMult : 0) - (moveKeysP[1] ? daMult : 0)) * shiftMultBig;
+			character.offset.y += ((moveKeysP[2] ? daMult : 0) - (moveKeysP[3] ? daMult : 0)) * shiftMultBig;
 			changedOffset = true;
 		}
 
@@ -1025,8 +1032,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				holdingArrowsElapsed += elapsed;
 				while(holdingArrowsElapsed > (1/60))
 				{
-					character.offset.x += ((moveKeys[0] ? 1 : 0) - (moveKeys[1] ? 1 : 0)) * shiftMultBig;
-					character.offset.y += ((moveKeys[2] ? 1 : 0) - (moveKeys[3] ? 1 : 0)) * shiftMultBig;
+					character.offset.x += ((moveKeys[0] ? daMult : 0) - (moveKeys[1] ? daMult : 0)) * shiftMultBig;
+					character.offset.y += ((moveKeys[2] ? daMult : 0) - (moveKeys[3] ? daMult : 0)) * shiftMultBig;
 					holdingArrowsElapsed -= (1/60);
 					changedOffset = true;
 				}
@@ -1073,8 +1080,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		var anim = anims[curAnim];
 		if(changedOffset && anim != null && anim.offsets != null && !character.isPlayer)
 		{
-			anim.offsets[0] = Std.int(character.offset.x);
-			anim.offsets[1] = Std.int(character.offset.y);
+			anim.offsets[0] = character.offset.x;
+			anim.offsets[1] = character.offset.y;
 
 			character.addOffset(anim.anim, character.offset.x, character.offset.y);
 			updateText();
@@ -1082,8 +1089,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		if(changedOffset && anim != null && anim.playerOffsets != null && character.isPlayer)
 		{
-			anim.playerOffsets[0] = Std.int(character.offset.x);
-			anim.playerOffsets[1] = Std.int(character.offset.y);
+			anim.playerOffsets[0] = character.offset.x;
+			anim.playerOffsets[1] = character.offset.y;
 
 			character.addPlayerOffset(anim.anim, character.offset.x, character.offset.y);
 			updateText();

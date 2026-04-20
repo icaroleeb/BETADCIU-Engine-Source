@@ -274,7 +274,7 @@ class PhillyStreetsErect extends BaseStage
 		}
 		*/
 
-		PlayState.instance.camGame.removeShader(rainShader);
+		game.camGame.removeShader(rainShader);
 
 		FlxTween.cancelTweensOf(phillyCars);
 		FlxTween.cancelTweensOf(phillyCars2);
@@ -349,7 +349,7 @@ class PhillyStreetsErect extends BaseStage
 		PlayState.instance.camGame.filters = filters;
 		*/
 
-		PlayState.instance.camGame.addShader(rainShader);
+		game.camGame.addShader(rainShader);
 	}
 
 	function applyCharacterShader(char:String):Void
