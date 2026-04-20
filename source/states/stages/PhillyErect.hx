@@ -76,7 +76,13 @@ class PhillyErect extends BaseStage
 
 			boyfriend.shader = colorShader.shader;
 			dad.shader = colorShader.shader;
-			gf.shader = colorShader.shader;
+			if (gf != null) gf.shader = colorShader.shader;
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				var daLuaChars:Character = modchartCharacters.get(value);
+				daLuaChars.shader = colorShader.shader;
+			}
 		}
 	}
 
@@ -235,6 +241,7 @@ class PhillyErect extends BaseStage
 						}
 						phillyGlowGradient.bop();
 				}
+			/*
 			case "Change Character":
 				if (ClientPrefs.data.shaders){
 					var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(value1);
@@ -243,6 +250,7 @@ class PhillyErect extends BaseStage
 						character.shader = colorShader.shader;
 					}
 				}
+			*/
 		}
 	}
 
@@ -252,5 +260,41 @@ class PhillyErect extends BaseStage
 		if(!ClientPrefs.data.flashing) color.alphaFloat = 0.5;
 
 		FlxG.camera.flash(color, 0.15, null, true);
+	}
+
+	override function characterChangePost(charExist:String, charNew:String) {
+		if (ClientPrefs.data.shaders){
+			if (charExist == "bf") 
+				charExist = "boyfriend";
+			else if (charExist == "girlfriend")
+				charExist = "gf";
+			else if (charExist == "opponent")
+				charExist = "dad";
+
+			var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(charExist);
+
+			if (character != null){
+				character.shader = colorShader.shader;
+			}
+		}
+	}
+
+	override public function destroy():Void
+	{
+		if (ClientPrefs.data.shaders)
+		{
+			for (defaultChars in [boyfriend, dad, gf])
+			{
+				if (defaultChars.shader != null) defaultChars.shader = null;
+			}
+
+			for (value in modchartCharacters.keys()) 
+			{
+				var luaChars = modchartCharacters.get(value);
+				if (luaChars.shader != null) luaChars.shader = null;
+			}
+		}
+
+		super.destroy();
 	}
 }

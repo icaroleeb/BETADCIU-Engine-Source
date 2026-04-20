@@ -1,4 +1,4 @@
-package options;
+package states.editors;
 
 import flixel.FlxObject;
 import flixel.FlxState;

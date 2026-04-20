@@ -115,45 +115,6 @@ class LimoErect extends BaseStage
 		stageVars.set("fastCar", fastCar);
 		fastCar.active = true;
 
-		mist1 = new FlxBackdrop(Paths.image('limo/erect/mistMid'), FlxAxes.X);
-		mist1.setPosition(-650, -100);
-		mist1.scrollFactor.set(1.1, 1.1);
-		mist1.blend = ADD;
-		mist1.color = 0xFFc6bfde;
-		mist1.alpha = 0.4;
-		mist1.velocity.x = 1700;
-		stageVars.set("mist1", mist1);
-
-		mist2 = new FlxBackdrop(Paths.image('limo/erect/mistBack'), FlxAxes.X);
-		mist2.setPosition(-650, -100);
-		mist2.scrollFactor.set(1.2, 1.2);
-		mist2.blend = ADD;
-		mist2.color = 0xFF6a4da1;
-		mist2.alpha = 1;
-		mist2.velocity.x = 2100;
-		mist1.scale.set(1.3, 1.3);
-		stageVars.set("mist2", mist2);
-
-		mist3 = new FlxBackdrop(Paths.image('limo/erect/mistMid'), FlxAxes.X);
-		mist3.setPosition(-650, -100);
-		mist3.scrollFactor.set(0.8, 0.8);
-		mist3.blend = ADD;
-		mist3.color = 0xFFa7d9be;
-		mist3.alpha = 0.5;
-		mist3.velocity.x = 900;
-		mist3.scale.set(1.5, 1.5);
-		stageVars.set("mist3", mist3);
-
-		mist4 = new FlxBackdrop(Paths.image('limo/erect/mistBack'), FlxAxes.X);
-		mist4.setPosition(-650, -380);
-		mist4.scrollFactor.set(0.6, 0.6);
-		mist4.blend = ADD;
-		mist4.color = 0xFF9c77c7;
-		mist4.alpha = 1;
-		mist4.velocity.x = 700;
-		mist4.scale.set(1.5, 1.5);
-		stageVars.set("mist4", mist4);
-
 		if (ClientPrefs.data.shaders){
 			colorShader = new AdjustColorShader();
 
@@ -179,15 +140,59 @@ class LimoErect extends BaseStage
 		PlayState.instance.variables.get("stageVariables").set("limo", limo);
 		addBehindDad(limo); //Shitty layering but whatev it works LOL
 
+		mist1 = new FlxBackdrop(Paths.image('limo/erect/mistMid'), FlxAxes.X);
+		mist1.setPosition(-650, -100);
+		mist1.scrollFactor.set(1.1, 1.1);
+		mist1.blend = ADD;
+		mist1.color = 0xFFc6bfde;
+		mist1.alpha = 0.4;
+		mist1.velocity.x = 1700;
+		PlayState.instance.variables.get("stageVariables").set("mist1", mist1);
 		add(mist1);
+
+		mist2 = new FlxBackdrop(Paths.image('limo/erect/mistBack'), FlxAxes.X);
+		mist2.setPosition(-650, -100);
+		mist2.scrollFactor.set(1.2, 1.2);
+		mist2.blend = ADD;
+		mist2.color = 0xFF6a4da1;
+		mist2.alpha = 1;
+		mist2.velocity.x = 2100;
+		mist1.scale.set(1.3, 1.3);
+		PlayState.instance.variables.get("stageVariables").set("mist2", mist2);
 		add(mist2);
+
+		mist3 = new FlxBackdrop(Paths.image('limo/erect/mistMid'), FlxAxes.X);
+		mist3.setPosition(-650, -100);
+		mist3.scrollFactor.set(0.8, 0.8);
+		mist3.blend = ADD;
+		mist3.color = 0xFFa7d9be;
+		mist3.alpha = 0.5;
+		mist3.velocity.x = 900;
+		mist3.scale.set(1.5, 1.5);
+		PlayState.instance.variables.get("stageVariables").set("mist3", mist3);
 		addBehindGF(mist3);
+
+		mist4 = new FlxBackdrop(Paths.image('limo/erect/mistBack'), FlxAxes.X);
+		mist4.setPosition(-650, -380);
+		mist4.scrollFactor.set(0.6, 0.6);
+		mist4.blend = ADD;
+		mist4.color = 0xFF9c77c7;
+		mist4.alpha = 1;
+		mist4.velocity.x = 700;
+		mist4.scale.set(1.5, 1.5);
+		PlayState.instance.variables.get("stageVariables").set("mist4", mist4);
 		addBehindGF(mist4);
 
 		if (ClientPrefs.data.shaders){
 			boyfriend.shader = colorShader.shader;
 			dad.shader = colorShader.shader;
-			gf.shader = colorShader.shader;
+			if (gf != null) gf.shader = colorShader.shader;
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				var daLuaChars = modchartCharacters.get(value);
+				daLuaChars.shader = colorShader.shader;
+			}
 		}
 	}
 
