@@ -38,8 +38,7 @@ class StageErect extends BaseStage
 		add(solid);
 
 		var crowd:BGSprite = new BGSprite('erect/crowd', 682, 290, 0.8, 0.8, ['idle0'], true);
-		if (crowd.animation.getByName("idle0") != null)
-			crowd.animation.curAnim.frameRate = 12;
+		if (crowd.animation.curAnim != null) crowd.animation.curAnim.frameRate = 12;
 		if (inGameplay) stageVars.set("crowd", crowd);
 		add(crowd);
 
@@ -107,29 +106,20 @@ class StageErect extends BaseStage
 		var character:Character = LuaUtils.getObjectDirectly(char);
 		var colorShader = new AdjustColorShader();
 
-		if (character.isPlayer)
-		{
-			colorShader.brightness = -23;
-			colorShader.hue = 12;
-			colorShader.contrast = 7;
-			colorShader.saturation = 0;
-		}
-		else if (character.isSpeakerChar)
-		{
-			colorShader.brightness = -30;
-			colorShader.hue = -9;
-			colorShader.contrast = -4;
-			colorShader.saturation = 0;
-		}
-		else
-		{
-			colorShader.brightness = -33;
-			colorShader.hue = -32;
-			colorShader.contrast = -23;
-			colorShader.saturation = 0;
+		if (character != null) {
+			if(character.isPlayer) setShaderVals(colorShader, -23, 12, 7, 0);
+			else if(character.isSpeakerChar) setShaderVals(colorShader, -30, -9, -4, 0);
+			else setShaderVals(colorShader, -33, -32, -23, 0);
 		}
 
 		character.shader = colorShader.shader;
+	}
+
+	function setShaderVals(shader:AdjustColorShader, b:Float, h:Float, c:Float, s:Float) {
+		shader.brightness = b;
+		shader.hue = h;
+		shader.contrast = c;
+		shader.saturation = s;
 	}
 
 	override function eventPushed(event:objects.Note.EventNote)

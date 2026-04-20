@@ -105,11 +105,13 @@ class MasterEditorMenu extends MusicBeatState
 
 		if (controls.ACCEPT && !FlxG.keys.pressed.ALT )
 		{
+			FlxG.sound.music.volume = 0;
 			switch(options[curSelected]) {
 				case 'Chart Editor'://felt it would be cool maybe
 					LoadingState.loadAndSwitchState(new ChartingState(), false);
 				case 'Character Editor':
-					LoadingState.loadAndSwitchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
+					if (FlxG.keys.pressed.SHIFT) LoadingState.loadAndSwitchState(new states.editors.CharacterEditorStateWIP(Character.DEFAULT_CHARACTER, false));
+					else LoadingState.loadAndSwitchState(new states.editors.CharacterEditorState(Character.DEFAULT_CHARACTER, false));
 				case 'Stage Editor':
 					LoadingState.loadAndSwitchState(new StageEditorState());
 				case 'Week Editor':
@@ -122,10 +124,10 @@ class MasterEditorMenu extends MusicBeatState
 					LoadingState.loadAndSwitchState(new DialogueCharacterEditorState(), false);
 				case 'Note Splash Editor':
 					MusicBeatState.switchState(new NoteSplashEditorState());
+					FlxG.sound.music.volume = 1;
 				case 'Modpack Maker':
 					MusicBeatState.switchState(new states.editors.ModpackMakerState());
 			}
-			FlxG.sound.music.volume = 0;
 			FreeplayState.destroyFreeplayVocals();
 		}
 		

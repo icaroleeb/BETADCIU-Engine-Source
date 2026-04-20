@@ -24,7 +24,7 @@ import objects.Note;
 import objects.NoteSplash;
 
 import flixel.addons.display.FlxBackdrop;
-import flixel.util.FlxAxes;
+import flixel.addons.display.FlxGridOverlay;
 
 #if HSCRIPT_ALLOWED
 import psychlua.HScript;
@@ -74,21 +74,10 @@ class LoadingState extends MusicBeatState
 	var bg:FlxSprite;
     var titlestatebg:FlxBackdrop;
 
-	#if PSYCH_WATERMARKS
-	var logo:FlxSprite;
-	var pessy:FlxSprite;
-	var loadingText:FlxText;
-
 	var timePassed:Float;
-	var shakeFl:Float;
-	var shakeMult:Float = 0;
-	
-	var isSpinning:Bool = false;
-	var spawnedPessy:Bool = false;
-	var pressedTimes:Int = 0;
-	#else
+	var loadingText:FlxText;
+	var logo:FlxSprite;
 	var funkay:FlxSprite;
-	#end
 
 	#if HSCRIPT_ALLOWED
 	var hscript:HScript;
@@ -155,12 +144,9 @@ class LoadingState extends MusicBeatState
 
 		bar.color = bg.color;
 
-		titlestatebg = new FlxBackdrop(Paths.image('titleGrid'), FlxAxes.XY);
-		titlestatebg.antialiasing = ClientPrefs.data.antialiasing;
+		titlestatebg = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0xFF000090, 0x0));
 		titlestatebg.velocity.set(200, 110);
-		titlestatebg.updateHitbox();
-		titlestatebg.alpha = 0.4;
-		titlestatebg.screenCenter(FlxAxes.X);
+		titlestatebg.alpha = 0.5;
 		addBehindBar(titlestatebg);
 
 		loadingText = new FlxText(520, 600, 400, Language.getPhrase('now_loading', 'Now Loading', ['...']), 32);
@@ -228,9 +214,7 @@ class LoadingState extends MusicBeatState
 		}
 		#end
 
-		#if PSYCH_WATERMARKS // PSYCH LOADING SCREEN
 		timePassed += elapsed;
-		shakeFl += elapsed * 3000;
 		var dots:String = '';
 		switch(Math.floor(timePassed % 1 * 3))
 		{
@@ -242,62 +226,6 @@ class LoadingState extends MusicBeatState
 				dots = '...';
 		}
 		loadingText.text = Language.getPhrase('now_loading', 'Now Loading{1}', [dots]);
-
-		if(!spawnedPessy)
-		{
-			if(!transitioning && controls.ACCEPT)
-			{
-				shakeMult = 1;
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-				pressedTimes++;
-			}
-			shakeMult = Math.max(0, shakeMult - elapsed * 5);
-			logo.offset.x = Math.sin(shakeFl * Math.PI / 180) * shakeMult * 100;
-
-			if(pressedTimes >= 5)
-			{
-				FlxG.camera.fade(0xAAFFFFFF, 0.5, true);
-				logo.visible = false;
-				spawnedPessy = true;
-				stateChangeDelay = 5;
-				FlxG.sound.play(Paths.sound('secret'));
-
-				pessy = new FlxSprite(700, 140);
-				pessy.frames = Paths.getSparrowAtlas('loading_screen/pessy');
-				pessy.animation.addByPrefix('run', 'run', 24, true);
-				pessy.animation.addByPrefix('spin', 'spin', 24, true);
-				pessy.antialiasing = ClientPrefs.data.antialiasing;
-				pessy.flipX = (logo.offset.x > 0);
-				pessy.visible = false;
-
-				new FlxTimer().start(0.01, function(tmr:FlxTimer) {
-					pessy.x = FlxG.width + 200;
-					pessy.velocity.x = -1100;
-					if(pessy.flipX)
-					{
-						pessy.x = -pessy.width - 200;
-						pessy.velocity.x *= -1;
-					}
-		
-					pessy.visible = true;
-					pessy.animation.play('run', true);
-					#if ACHIEVEMENTS_ALLOWED Achievements.unlock('pessy_easter_egg'); #end
-					
-					insert(members.indexOf(loadingText), pessy);
-				});
-			}
-		}
-		else if(!isSpinning && (pessy.flipX && pessy.x > FlxG.width) || (!pessy.flipX && pessy.x < -pessy.width))
-		{
-			isSpinning = true;
-			pessy.animation.play('spin', true);
-			pessy.flipX = false;
-			pessy.x = 500;
-			pessy.y = FlxG.height + 500;
-			pessy.velocity.x = 0;
-			FlxTween.tween(pessy, {y: 10}, 0.65, {ease: FlxEase.quadOut});
-		}
-		#end
 	}
 
 	#if HSCRIPT_ALLOWED
@@ -720,11 +648,9 @@ class LoadingState extends MusicBeatState
 			var isAnimateAtlas:Bool = false;
 			var img:String = character.image;
 			img = img.trim();
-			#if flxanimate
 			var animToFind:String = Paths.getPath('images/$img/Animation.json', TEXT);
 			if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind))
 				isAnimateAtlas = true;
-			#end
 
 			if(!isAnimateAtlas)
 			{
@@ -734,7 +660,6 @@ class LoadingState extends MusicBeatState
 					imagesToPrepare.push(file.trim());
 				}
 			}
-			#if flxanimate
 			else
 			{
 				for (i in 0...10)
@@ -750,7 +675,6 @@ class LoadingState extends MusicBeatState
 					}
 				}
 			}
-			#end
 	
 			if (prefixVocals != null && character.vocals_file != null && character.vocals_file.length > 0)
 			{

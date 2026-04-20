@@ -189,5 +189,6 @@
 	],
 	"noteSkin": null,
 	"sing_duration": 4,
+	"isPlayerChar": true,
 	"scale": 1
 }

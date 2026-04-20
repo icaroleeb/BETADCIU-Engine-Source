@@ -111,7 +111,7 @@ class DebugDisplay extends Sprite
 			return;
 		}
 		
-		currentFPS = times.length < FlxG.updateFramerate ? times.length : FlxG.updateFramerate;
+		currentFPS = times.length;
 		updateText();
 		if (ClientPrefs.data.debugDisplay == "FPS Only" || ClientPrefs.data.debugDisplay == "FPS and Memory") underlay.width = leftText.width + 3;
 		else underlay.width = 370;
@@ -222,8 +222,10 @@ class DebugDisplay extends Sprite
 				debugType = 'FPS and Memory';
 			case 'Everything':
 				debugType = 'Everything';
-			default:
+			case "Disabled":
 				updating = false;
+			default:
+				debugType = 'FPS and Memory';
 		}
 	}
 }

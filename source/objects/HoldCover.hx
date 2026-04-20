@@ -9,8 +9,7 @@ import states.PlayState;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 import flixel.system.FlxAssets.FlxShader;
-
-using StringTools;
+import objects.FunkinSprite;
 
 typedef RGB2 = {
 	r:Null<Int>,
@@ -35,22 +34,19 @@ typedef NoteHoldCoverConfig = {
 	rgb:Array<Null<RGB2>>
 }
 
-//Most of the Original code from Mr.Bruh (mr.bruh69)
-//Ported to haxe and edited by glowsoony // thanks man!
-
-class CoverSprite extends FlxSprite
+class CoverSprite extends FunkinSprite
 {
-	public var boom:Bool = false;
-	public var isPlaying:Bool = false;
-	public var activatedSprite:Bool = true;
+	public var spawned:Bool = false;
 
 	public var spriteId:String = "";
 	public var texture(default, set):String = null;
 
+	public var rgbShader:RGBShaderReference;
+
 	public var hColor:String = "";
 	public var noteIndex:Int = 0;
 
-	public static var isCustomHoldCoverSkin:Bool = true;
+	public var isCustomHoldCoverSkin:Bool = true;
 
 	private function set_texture(value:String):String {
 		if(texture != value) {
@@ -96,22 +92,20 @@ class CoverSprite extends FlxSprite
 		}
 	}
 
-	public var loopAnim:String = "";
 
 	public function initAnimations(i:Int, hColor:String)
 	{
-		// this.animation.addByPrefix(Std.string(i), 'holdCover'+hColor+'0', 24, true);
-		this.animation.addByIndices(Std.string(i), 'holdCover' + hColor, [0,1,2,3], "", 24, true);
-		this.animation.addByPrefix(Std.string(i) + 'p', 'holdCoverEnd'+hColor+'0', 24, false);
-		loopAnim = Std.string(i);
-		this.animation.play(Std.string(i), false);
-	}
+		this.animation.addByPrefix("start" + Std.string(i), 'holdCoverStart'+hColor+'0', 24, false);
+		this.animation.addByPrefix("loop" + Std.string(i), 'holdCover'+hColor+'0', 22, true);
+		this.animation.addByPrefix("end" + Std.string(i), 'holdCoverEnd'+hColor+'0', 24, false);
 
-	public function smoothSprite()
-	{
-		this.antialiasing = ClientPrefs.data.antialiasing;
-		if (texture.contains('pixel') || !ClientPrefs.data.antialiasing)
-			this.antialiasing = false;
+		this.animation.onFinish.add((anim) -> {
+			if (anim.contains("start" + Std.string(i))) this.animation.play("loop" + Std.string(i), false);
+			if (anim.contains("end" + Std.string(i))) {
+				this.visible = false;
+				this.kill();
+			}
+		});	
 	}
 }
 
@@ -120,45 +114,29 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 	public var enabled:Bool = true;
 	public var isPlayer:Bool = false;
 
-
-	// I can't change the color without create multiple shaders :HeartBreaking:
-	public var rgbShaderPurple:PixelHoldShaderRef;
-	public var rgbShaderBlue:PixelHoldShaderRef;
-	public var rgbShaderGreen:PixelHoldShaderRef;
-	public var rgbShaderRed:PixelHoldShaderRef;
-
 	public var config(default, set):NoteHoldCoverConfig;
 	public static var configs:Map<String, NoteHoldCoverConfig> = new Map();
 	var noteDataMap:Map<Int, String> = new Map();
+
+	var activeCovers:Map<Int, CoverSprite> = new Map();
 
 	public function new(enabled:Bool, isPlayer:Bool)
 	{
 		this.enabled = enabled;
 		this.isPlayer = isPlayer;
-
-		rgbShaderPurple = new PixelHoldShaderRef();
-		rgbShaderBlue = new PixelHoldShaderRef();
-		rgbShaderGreen = new PixelHoldShaderRef();
-		rgbShaderRed = new PixelHoldShaderRef();
 		
-		super(0, 0, 4);
-		for (i in 0...maxSize)
-			addHolds(i);
+		super(0, 0, 0);
 	}
 
-	public function addHolds(i:Int)
+	function spawnNewCover(i:Int, hColor:String, noteTexture:String):CoverSprite
 	{
-		var colors:Array<String> = ["Purple", "Blue", "Green", "Red", "Purple", "Blue", "Green", "Red"];
-		var hColor:String = colors[i];
 		var hold:CoverSprite = new CoverSprite();
-		hold.initFrames(i, hColor);
+		hold.initFrames(i, hColor, noteTexture != null ? noteTexture : "");
 		hold.initAnimations(i, hColor);
-		hold.boom = false;
-		hold.isPlaying = false;
-		hold.visible = false;
-		hold.activatedSprite = enabled;
+		hold.visible = true;
 		hold.spriteId = '$hColor-$i';
 		this.add(hold);
+		return hold;
 	}
 
 	public function spawnOnNoteHit(note:Note, isReady:Bool):Void
@@ -169,112 +147,112 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		var noteData:Int = note.noteData;
 		var isHoldEnd:Bool = false;
 		if (note.animation.curAnim != null) isHoldEnd = note.animation.curAnim.name.endsWith('end');
-		var rgbShader:Array<PixelHoldShaderRef> = [rgbShaderPurple, rgbShaderBlue, rgbShaderGreen, rgbShaderRed];
 
-		// HoldCovers with no json
 		var tempConfig:NoteHoldCoverConfig = createConfig();
 
 		var data:Int = Std.int(noteData) % 4;
+		var colors:Array<String> = ["Purple", "Blue", "Green", "Red", "Purple", "Blue", "Green", "Red"];
+		var hColor:String = colors[data];
 
 		if (!note.isSustainNote) 
 			return;
 
-		var coverSpriteMember = this.members[data];
-
-		if (note.texture != null && note.texture.length > 0 && coverSpriteMember.texture != note.texture) {
-			coverSpriteMember.texture = note.texture;
-		}
-
-		coverSpriteMember.smoothSprite();
-		// RGB shader hold cover stuff
-
-		var daShadersInString:Array<String> = ["rgbShaderPurple", "rgbShaderBlue", "rgbShaderGreen", "rgbShaderRed"];
-		for (i in 0... daShadersInString.length) {
-			var daShader:PixelHoldShaderRef = Reflect.getProperty(this, daShadersInString[i]);
-
-			daShader.copyValues(Note.globalRgbShaders[i % Note.colArray.length]);
-			if (!config.allowPixel || !note.isPixelNote) daShader.pixelAmount = 0.00001;
-			else if (config.allowPixel && note != null && note.isPixelNote) daShader.pixelAmount = 6;
-
-			if (tempConfig.allowRGB) this.members[i].shader = daShader.shader;
-			else this.members[i].shader = null;
-		}
-
-		if (CoverSprite.isCustomHoldCoverSkin)
-			tempConfig.allowRGB = false;
-
-
-		// end RGB shader hold cover stuff
-		// if (coverSpriteMember.animation.curAnim == null || coverSpriteMember.animation.curAnim.name != Std.string(data)) {
-			// coverSpriteMember.animation.play(Std.string(data), false);
-			if (!coverSpriteMember.boom) coverSpriteMember.visible = true;
-				// coverSpriteMember.animation.curAnim.curFrame = 0; 
-			
-		// }
+		var existingCover:CoverSprite = activeCovers.get(data);
+		if (note.texture != null && note.texture.length > 0 && existingCover != null && existingCover.texture != note.texture && !existingCover.spawned) 
+			existingCover.texture = note.texture;
 
 		if (isHoldEnd) {
-			if (isPlayer) {
-				coverSpriteMember.boom = true;
-				coverSpriteMember.animation.play(Std.string(data) + 'p', false);
-			} else {
-				coverSpriteMember.boom = false;
-				hideHoldCoverLater(data, 0.075);
+			if (existingCover != null && existingCover.spawned && isPlayer) {
+				existingCover.animation.play("end" + Std.string(data), false);
+				existingCover.spawned = false;
+				activeCovers.remove(data);
+			} else if (existingCover != null && existingCover.spawned) {
+				new FlxTimer().start(0.075, function(tmr:FlxTimer) {
+					existingCover.visible = false;
+					existingCover.spawned = false;
+					existingCover.kill();
+					activeCovers.remove(data);
+				});
 			}
+			return;
 		}
+
+		if (existingCover == null || !existingCover.spawned) {
+			var newCover:CoverSprite = spawnNewCover(data, hColor, note.texture);
+			newCover.spawned = true;
+
+			newCover.antialiasing = (ClientPrefs.data.antialiasing && !newCover.texture.contains('pixel'));
+
+			newCover.rgbShader = new RGBShaderReference(newCover, initializeGlobalRGBShader(data));
+			if (note.shader != null && note.rgbShader.enabled || !newCover.isCustomHoldCoverSkin) newCover.rgbShader.enabled = true;
+			else newCover.rgbShader.enabled == false;
+
+			newCover.animation.play("start" + Std.string(data), false);
+
+			activeCovers.set(data, newCover);
+		}
+	}
+
+	public static var globalRgbShaders:Array<RGBPalette> = [];
+
+	public static function initializeGlobalRGBShader(noteData:Int)
+	{
+		if(globalRgbShaders[noteData] == null)
+		{
+			var newRGB:RGBPalette = new RGBPalette();
+			var arr:Array<FlxColor> = (!PlayState.isPixelStage) ? ClientPrefs.data.arrowRGB[noteData] : ClientPrefs.data.arrowRGBPixel[noteData];
+			
+			if (arr != null && noteData > -1 && noteData <= arr.length)
+			{
+				newRGB.r = arr[0];
+				newRGB.g = arr[1];
+				newRGB.b = arr[2];
+			}
+			else
+			{
+				newRGB.r = 0xFFFF0000;
+				newRGB.g = 0xFF00FF00;
+				newRGB.b = 0xFF0000FF;
+			}
+			
+			globalRgbShaders[noteData] = newRGB;
+		}
+		return globalRgbShaders[noteData];
 	}
 
 	public function despawnOnMiss(isReady:Bool, direction:Int, ?note:Note = null):Void
 	{
-		var noteData:Int = (note != null ? Std.int(note.noteData) % 4 : direction);
+		var data:Int = (note != null ? Std.int(note.noteData) % 4 : direction);
 		if (enabled && isReady)
 		{
-			var data:Int = noteData;
-			this.members[data].smoothSprite();
-			this.members[data].boom = false;
-			this.members[data].visible = false;
-			this.members[data].animation.stop();
+			var cover:CoverSprite = activeCovers.get(data);
+			if (cover != null)
+			{
+				cover.antialiasing = (ClientPrefs.data.antialiasing && !cover.texture.contains('pixel'));
+				cover.visible = false;
+				cover.animation.stop();
+				cover.spawned = false;
+				cover.kill();
+				activeCovers.remove(data);
+			}
 		}
-	}
-
-	private function hideHoldCoverLater(data:Int, delay:Float):Void
-	{
-		var timer:FlxTimer = new FlxTimer();
-		var tag:String = "hideHoldCoverFromStrum" + data;
-		PlayState.instance.variables.set(tag, timer.start(delay, function(timer:FlxTimer)
-		{
-		this.members[data].visible = false;
-		PlayState.instance.variables.remove(tag);
-		}));
 	}
 
 	public function updateHold(elapsed:Float, isReady:Bool):Void
 	{
 		if (enabled && isReady)
 		{
-			for (i in 0...this.members.length)
-			{
-			if (this.members[i].x != ni(i, "x") - 110)
-			{
-				this.members[i].x = ni(i, "x") - 110;
-			}
-			if (this.members[i].y != ni(i, "y") - 100)
-			{
-				this.members[i].y = ni(i, "y") - 100;
-			}
-			if (this.members[i].alpha != ni(i, "alpha"))
-			{
-				this.members[i].alpha = ni(i, "alpha");
-			}
+			for (member in members) 
+				if (member != null && !member.alive) this.remove(member, true);
 
-			if (this.members[i].boom)
-			{
-				if (this.members[i].animation.curAnim != null && this.members[i].animation.curAnim.finished)
-				{
-				this.members[i].visible = false;
-				this.members[i].boom = false;
-				this.members[i].animation.play(this.members[i].loopAnim);
+			for (data => cover in activeCovers) {
+				if (cover == null || !cover.alive) {
+					activeCovers.remove(data);
+					continue;
 				}
-			}
+				if (cover.x != ni(data, "x") - 110) cover.x = ni(data, "x") - 110;
+				if (cover.y != ni(data, "y") - 100) cover.y = ni(data, "y") - 100;
+				if (cover.alpha != ni(data, "alpha")) cover.alpha = ni(data, "alpha");
 			}
 		}
   	}

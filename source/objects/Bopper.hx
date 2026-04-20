@@ -9,11 +9,13 @@ import flixel.util.FlxDirectionFlags;
 import animate.FlxAnimateFrames;
 import animate.FlxAnimate;
 
+import objects.FunkinSprite;
+
 import flixel.util.FlxSignal.FlxTypedSignal;
 
 // highly based of base games bopper class
 // i liked it alot
-class Bopper extends FlxAnimate
+class Bopper extends FunkinSprite
 {
 	@:inheritDoc(flixel.animation.FlxAnimationController.onFinish)
 	public final onAnimationFinish = new FlxTypedSignal<(animName:String) -> Void>();
@@ -35,13 +37,6 @@ class Bopper extends FlxAnimate
 		if (library != null) return this;
 		return null;
 	}
-	
-	/**
-	 *	Animation offsets
-	 * 
-	 * applied through `playAnim`
-	 */
-	public var animOffsets:Map<String, Array<Float>> = [];
 	
 	/**
 	 * However many beats between dances
@@ -67,7 +62,7 @@ class Bopper extends FlxAnimate
 	/**
 	 * internal tracker for alternating dance chars.
 	 */
-	var danced:Bool = false;
+	public var danced:Bool = false;
 	
 	/**
 	 * Suffix added to the characters `dance` animation.
@@ -118,15 +113,7 @@ class Bopper extends FlxAnimate
 		}
 		return this;
 	}
-	
-	/**
-	 * Helper function to quickly set an anim offset
-	 */
-	public function addOffset(anim:String, x:Float = 0, y:Float = 0):Void
-	{
-		animOffsets[anim] = [x, y];
-	}
-	
+		
 	/**
 	 * Ensures a anim exists before playing
 	 * 
@@ -207,6 +194,7 @@ class Bopper extends FlxAnimate
 	/**
 	 * Makes the sprite "dance".
 	 */
+	private var settingCharacterUp:Bool = true;
 	public function dance(forced:Bool = false):Void
 	{
 		if (alternatingDance == null)
@@ -254,6 +242,7 @@ class Bopper extends FlxAnimate
 	var __prevPlayedAnimation:String = '';
 	
 	public inline function getAnimName():String return __prevPlayedAnimation;
+	public inline function getAnimationName():String return __prevPlayedAnimation; // me and my laziness to change all the variables around
 	
 	public inline function hasAnim(anim:String):Bool
 	{

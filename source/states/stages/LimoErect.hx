@@ -197,25 +197,11 @@ class LimoErect extends BaseStage
 	}
 
 	override public function destroy():Void {
-		if (grpLimoDancers != null) { // fuck u <3.
-			remove(grpLimoDancers);
-			grpLimoDancers.destroy();
-			grpLimoDancers = null;
-		}
-
-		if (ClientPrefs.data.shaders)
-		{
-			for (defaultChars in [boyfriend, dad, gf])
-			{
-				if (defaultChars.shader != null) defaultChars.shader = null;
-			}
-
-			for (value in modchartCharacters.keys()) 
-			{
-				var luaChars = modchartCharacters.get(value);
-				if (luaChars.shader != null) luaChars.shader = null;
-			}
-		}
+		// if (grpLimoDancers != null) { // fuck u <3.
+		// 	remove(grpLimoDancers);
+		// 	grpLimoDancers.destroy();
+		// 	grpLimoDancers = null;
+		// }
 		super.destroy();
 	}
 
@@ -353,32 +339,21 @@ class LimoErect extends BaseStage
 		{
 			case "Kill Henchmen":
 				killHenchmen();
-			/*
-			case "Change Character":
-				if (ClientPrefs.data.shaders){
-					var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(value1);
-
-					if (character != null){
-						character.shader = colorShader.shader;
-					}
-				}
-			*/
 		}
 	}
 
-	override function characterChangePost(charExist:String, charNew:String) {
-		if (ClientPrefs.data.shaders){
-			if (charExist == "bf") 
-				charExist = "boyfriend";
-			else if (charExist == "girlfriend")
-				charExist = "gf";
-			else if (charExist == "opponent")
-				charExist = "dad";
-
-			var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(charExist);
-
-			if (character != null){
-				character.shader = colorShader.shader;
+	override function characterChangePost(value1:String, value2:String) {
+		if (ClientPrefs.data.shaders) {
+			switch(value1.toLowerCase().trim()) {
+				case 'gf' | 'girlfriend' | "2":
+					game.gf.shader = colorShader.shader;
+				case 'dad' | "opponent" | "1":
+					game.dad.shader = colorShader.shader;
+				case 'boyfriend' | 'bf' | "0":
+					game.boyfriend.shader = colorShader.shader;
+				default: // lua chars
+					var char = game.modchartCharacters.get(value1);	
+					if (char != null) char.shader = colorShader.shader;
 			}
 		}
 	}

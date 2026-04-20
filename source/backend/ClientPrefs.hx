@@ -12,7 +12,7 @@ import states.TitleState;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
 	// public var showFPS:Bool = true;
-	public var debugDisplay:String = 'Fps and Memory';
+	public var debugDisplay:String = 'FPS and Memory';
 	public var flashing:Bool = true;
 	public var autoPause:Bool = true;
 	public var antialiasing:Bool = true;
@@ -24,9 +24,8 @@ import states.TitleState;
 	public var lowQuality:Bool = false;
 	public var shaders:Bool = true;
 	public var cacheOnGPU:Bool = #if !switch false #else true #end; // GPU Caching made by Raltyro
-	public var multicoreLoading:Bool = false;
-	public var loadingThreads:Int = Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"))/2);
 	public var framerate:Int = 60;
+	public var unlimitedFps:Bool = false;
 	public var camZooms:Bool = true;
 	public var hideHud:Bool = false;
 	public var noteOffset:Int = 0;
@@ -84,7 +83,6 @@ import states.TitleState;
 	public var language:String = 'en-US';
 	public var comboCam:String = "Game";// cam game by default because i like it.
 	public var ogIconBop:Bool = false;
-	public var gameResolution:String = 'Native'; // Adding a resolution option
 	public var oldWindowScaling:Bool = true;
 	public var streamedNotes:Bool = false; // 
 	public var perfectPixel:String = "Disable";
@@ -192,27 +190,12 @@ class ClientPrefs {
 			Main.fpsVar.visible = (data.debugDisplay != 'Disabled');
 			Main.fpsVar.updateDebugType(ClientPrefs.data.debugDisplay);
 		}
-			
+
 		#if (!html5 && !switch)
 		FlxG.autoPause = ClientPrefs.data.autoPause;
-
-		if(FlxG.save.data.framerate == null) {
-			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
-			data.framerate = Std.int(FlxMath.bound(refreshRate, 60, 240));
-		}
 		#end
-
-		if(data.framerate > FlxG.drawFramerate)
-		{
-			FlxG.updateFramerate = data.framerate;
-			FlxG.drawFramerate = data.framerate;
-		}
-		else
-		{
-			FlxG.drawFramerate = data.framerate;
-			FlxG.updateFramerate = data.framerate;
-		}
-
+		changeFramerate();
+			
 		if(FlxG.save.data.gameplaySettings != null)
 		{
 			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
@@ -246,6 +229,25 @@ class ClientPrefs {
 					if(gamepadBinds.exists(control)) gamepadBinds.set(control, keys);
 			}
 			reloadVolumeKeys();
+		}
+	}
+
+	public static function changeFramerate() {
+		#if (!html5 && !switch)
+		if(FlxG.save.data.framerate == null) {
+			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
+			data.framerate = Std.int(FlxMath.bound(refreshRate, 60, 240));
+		}
+		#end
+
+		var maxFps = data.unlimitedFps ? 0 : data.framerate;
+
+		if(maxFps > FlxG.drawFramerate) {
+			FlxG.updateFramerate = maxFps;
+			FlxG.drawFramerate = maxFps;
+		} else {
+			FlxG.drawFramerate = maxFps;
+			FlxG.updateFramerate = maxFps;
 		}
 	}
 

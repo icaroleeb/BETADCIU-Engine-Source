@@ -27,7 +27,7 @@ typedef NoteSplashConfig = {
 	rgb:Array<Null<RGB>>
 }
 
-class NoteSplash extends FlxSprite
+class NoteSplash extends FunkinSprite
 {
 	public var rgbShader:PixelSplashShaderRef;
 	public var texture:String;
@@ -93,7 +93,12 @@ class NoteSplash extends FlxSprite
 		} else
 			texture = splash;
 
-		frames = Paths.getSparrowAtlas(texture);
+		try {
+			frames = Paths.getSparrowAtlas(texture);
+		} catch (e:Dynamic) {
+			frames = null;
+			trace("Error loading " + texture + ": " + e);
+		}
 		// trace(texture);
 		if (frames == null)
 		{

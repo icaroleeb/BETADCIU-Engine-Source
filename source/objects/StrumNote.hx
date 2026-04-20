@@ -15,7 +15,7 @@ typedef StrumNoteConfig = {
 	var strumOffset:Array<Float>;
 }
 
-class StrumNote extends OffsettableSprite
+class StrumNote extends FunkinSprite
 {
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;

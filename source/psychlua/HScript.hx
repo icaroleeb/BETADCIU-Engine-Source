@@ -222,11 +222,9 @@ class HScript extends IrisEx implements IFlxDestroyable
 		set("FlxTextBorderStyle", flixel.text.FlxText.FlxTextBorderStyle);
 		set("FlxBarFillDirection", flixel.ui.FlxBar.FlxBarFillDirection);
 
-		#if flxanimate
 		set('FlxAnimate', animate.FlxAnimate);
 		set("FlxAnimateFrames", animate.FlxAnimateFrames);
 		set("FlxSpriteElement", animate.internal.elements.FlxSpriteElement);
-		#end
 
 		set('Controls', Controls.instance);
 		set('controls', Controls.instance); // in lower case bcuz default psych use this in lower case

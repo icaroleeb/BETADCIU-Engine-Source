@@ -1,6 +1,6 @@
 package states.stages.objects;
 
-import backend.FunkinSprite;
+import objects.FunkinSprite;
 
 class BackgroundGirls extends FunkinSprite
 {
