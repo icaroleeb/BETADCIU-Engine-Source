@@ -3,7 +3,7 @@ package psychlua;
 import openfl.utils.Assets;
 import psychlua.LuaUtils;
 
-import backend.FunkinSprite;
+import objects.FunkinSprite;
 
 #if (LUA_ALLOWED)
 class FlxAnimateFunctions

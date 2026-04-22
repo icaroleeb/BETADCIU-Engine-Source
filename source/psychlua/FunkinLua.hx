@@ -44,6 +44,7 @@ import psychlua.HScript;
 import psychlua.DebugLuaText;
 import psychlua.ModchartSprite;
 import psychlua.ModchartAnimateSprite;
+import objects.FunkinSprite;
 
 import shaders.*; // prob moving the ColorSwap functions to the ShaderFunctions.hx file later
 
@@ -57,8 +58,6 @@ import funkin.vis.audioclip.frontends.LimeAudioClip;
 
 import states.editors.ModpackMakerState;
 import states.editors.ModpackMakerState.ModpackAssetRegistry;
-
-import backend.FunkinSprite;
 
 class FunkinLua {
 	public var lua:State = null;
