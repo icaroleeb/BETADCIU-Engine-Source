@@ -1442,6 +1442,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			"healthbar_colors": character.healthColorArray,
 			"vocals_file": character.vocalsFile,
 			"is_player_char": character.isPsychPlayer,
+			"note_skin": character.noteSkin,
 			"_editor_isPlayer": character.isPlayer
 		};
 

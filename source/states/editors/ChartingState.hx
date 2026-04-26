@@ -688,6 +688,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		// SONG TAB
 		songNameInputText.text = PlayState.SONG.song;
+		vocalsSuffixInputText.text = PlayState.SONG.vocalsPostFix;
 		allowVocalsCheckBox.checked = (PlayState.SONG.needsVoices != false); //If the song for some reason does not have this value, it will be set to true
 
 		bpmStepper.value = PlayState.SONG.bpm;
@@ -3297,6 +3298,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	}
 
 	var songNameInputText:PsychUIInputText;
+	var vocalsSuffixInputText:PsychUIInputText;
 	var allowVocalsCheckBox:PsychUICheckBox;
 
 	var bpmStepper:PsychUINumericStepper;
@@ -3318,12 +3320,15 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		songNameInputText = new PsychUIInputText(objX, objY, 100, 'None', 8);
 		songNameInputText.onChange = function(old:String, cur:String) PlayState.SONG.song = cur;
 
+		vocalsSuffixInputText  = new PsychUIInputText(objX + 105, objY, 100, 'None', 8);
+		vocalsSuffixInputText.onChange = function(old:String, cur:String) PlayState.SONG.vocalsPostFix = cur;
+
 		allowVocalsCheckBox = new PsychUICheckBox(objX, objY + 20, 'Allow Vocals', 80, function()
 		{
 			PlayState.SONG.needsVoices = allowVocalsCheckBox.checked;
 			loadMusic();
 		});
-		var reloadAudioButton:PsychUIButton = new PsychUIButton(objX + 120, objY, 'Reload Audio', function() loadMusic(true), 80);
+		var reloadAudioButton:PsychUIButton = new PsychUIButton(objX + 210, objY, 'Reload Audio', function() loadMusic(true), 80);
 
 		#if mac
 		var reloadJsonButton:PsychUIButton = new PsychUIButton(objX + 205, objY, 'Reload JSON', function()
@@ -3380,7 +3385,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		};
 
 		tab_group.add(new FlxText(songNameInputText.x, songNameInputText.y - 15, 80, 'Song Name:'));
+		tab_group.add(new FlxText(vocalsSuffixInputText.x, vocalsSuffixInputText.y - 15, 80, 'Vocals Suffix:'));
 		tab_group.add(songNameInputText);
+		tab_group.add(vocalsSuffixInputText);
 		tab_group.add(allowVocalsCheckBox);
 		tab_group.add(reloadAudioButton);
 		#if mac
