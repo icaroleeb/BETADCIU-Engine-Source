@@ -262,6 +262,7 @@ class PhillyStreetsErect extends BaseStage
 	}
 
 	override public function destroy():Void {
+		/*
 		if (PlayState.instance.camGame.filters != null) {
 			var filters = PlayState.instance.camGame.filters;
 
@@ -271,18 +272,25 @@ class PhillyStreetsErect extends BaseStage
 			});
 			PlayState.instance.camGame.filters = filters;
 		}
+		*/
+
+		game.camGame.removeShader(rainShader);
 
 		FlxTween.cancelTweensOf(phillyCars);
 		FlxTween.cancelTweensOf(phillyCars2);
 
-		if (boyfriend.shader != null) {
-			boyfriend.shader = null;
-		}
-		if (dad.shader != null) {
-			dad.shader = null;
-		}
-		if (gf.shader != null) {
-			gf.shader = null;
+		if (ClientPrefs.data.shaders)
+		{
+			for (defaultChars in [boyfriend, dad, gf])
+			{
+				if (defaultChars.shader != null) defaultChars.shader = null;
+			}
+
+			for (value in modchartCharacters.keys()) 
+			{
+				var luaChars = modchartCharacters.get(value);
+				if (luaChars.shader != null) luaChars.shader = null;
+			}
 		}
 
 		super.destroy();
@@ -330,6 +338,7 @@ class PhillyStreetsErect extends BaseStage
 		rainShader.intensity = rainShaderStartIntensity;
         rainShader.rainColor = 0xFFa8adb5;
 
+		/*
 		var filters = [];
 
 		if (PlayState.instance.camGame.filters != null){
@@ -338,6 +347,9 @@ class PhillyStreetsErect extends BaseStage
 
 		filters.push(new ShaderFilter(rainShader));
 		PlayState.instance.camGame.filters = filters;
+		*/
+
+		game.camGame.addShader(rainShader);
 	}
 
 	function applyCharacterShader(char:String):Void
@@ -648,6 +660,16 @@ class PhillyStreetsErect extends BaseStage
 	}
 
 	override function characterChangePost(charExist:String, charName:String) {
-		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
+		if (ClientPrefs.data.shaders)
+		{
+			if (charExist == "bf") 
+				charExist = "boyfriend";
+			else if (charExist == "girlfriend")
+				charExist = "gf";
+			else if (charExist == "opponent")
+				charExist = "dad";
+
+			applyCharacterShader(charExist);
+		}
 	}
 }

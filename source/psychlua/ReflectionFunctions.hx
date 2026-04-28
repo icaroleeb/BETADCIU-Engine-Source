@@ -4,7 +4,7 @@ import Type.ValueType;
 import haxe.Constraints;
 
 import substates.GameOverSubstate;
-import options.ModpackMakerState.ModpackAssetRegistry;
+import states.editors.ModpackMakerState.ModpackAssetRegistry;
 
 //
 // Functions that use a high amount of Reflections, which are somewhat CPU intensive

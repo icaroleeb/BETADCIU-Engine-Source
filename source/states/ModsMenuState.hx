@@ -29,6 +29,7 @@ class ModsMenuState extends MusicBeatState
 	//var buttonModFolder:MenuButton;
 	var buttonEnableAll:MenuButton;
 	var buttonDisableAll:MenuButton;
+	var buttonOnline:MenuButton;
 	var buttons:Array<MenuButton> = [];
 	var settingsButton:MenuButton;
 
@@ -153,6 +154,14 @@ class ModsMenuState extends MusicBeatState
 		buttonDisableAll.bg.color = 0xFFFF6666;
 		buttonDisableAll.focusChangeCallback = function(focus:Bool) if(!focus) buttonDisableAll.bg.color = 0xFFFF6666;
 		add(buttonDisableAll);
+		
+		buttonOnline = new MenuButton(buttonX, buttonDisableAll.y + buttonDisableAll.bg.height + 20, buttonWidth, buttonHeight, "ONLINE MODPACKS", function() {
+			MusicBeatState.switchState(new OnlineModpackState());
+		});
+		buttonOnline.bg.color = 0xFF665AFF;
+		buttonOnline.focusChangeCallback = function(focus:Bool) if(!focus) buttonOnline.bg.color = 0xFF665AFF;
+		add(buttonOnline);
+		
 		checkToggleButtons();
 
 		if(modsList.all.length < 1)
@@ -494,12 +503,14 @@ class ModsMenuState extends MusicBeatState
 						{
 							switch(curSelectedButton)
 							{
-								case -2:
+								case -3:
 									curSelectedMod = 0;
 									hoveringOnMods = true;
 									var button = getButton();
 									button.ignoreCheck = button.onFocus = false;
 									changeSelectedMod();
+								case -2:
+									changeSelectedButton(-1);
 								case -1:
 									changeSelectedButton(-1);
 							}
@@ -508,6 +519,8 @@ class ModsMenuState extends MusicBeatState
 						{
 							switch(curSelectedButton)
 							{
+								case -3:
+									changeSelectedButton(1);
 								case -2:
 									changeSelectedButton(1);
 								case -1:
@@ -564,8 +577,8 @@ class ModsMenuState extends MusicBeatState
 		button.ignoreCheck = button.onFocus = false;
 
 		curSelectedButton += add;
-		if(curSelectedButton < -2)
-			curSelectedButton = -2;
+		if(curSelectedButton < -3)
+			curSelectedButton = -3;
 		else if(curSelectedButton > max)
 			curSelectedButton = max;
 
@@ -592,8 +605,9 @@ class ModsMenuState extends MusicBeatState
 	{
 		switch(curSelectedButton)
 		{
-			case -2: return buttonReload;
-			case -1: return buttonEnableAll.enabled ? buttonEnableAll : buttonDisableAll;
+			case -3: return buttonReload;
+			case -2: return buttonEnableAll.enabled ? buttonEnableAll : buttonDisableAll;
+			case -1: return buttonOnline;
 		}
 
 		if(modsList.all.length < 1) return buttonReload; //prevent possible crash from my irresponsibility

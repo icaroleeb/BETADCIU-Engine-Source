@@ -116,9 +116,19 @@ class SchoolEvilErect extends BaseStage
 		backspike.shader = wiggleSpike.shader;
 
 		// characters shaders that don't have in game
-		applyCharacterShader("boyfriend");
-		applyCharacterShader("dad");
-		applyCharacterShader("gf");
+
+		if (ClientPrefs.data.shaders)
+		{
+			applyCharacterShader("boyfriend");
+			applyCharacterShader("dad");
+			applyCharacterShader("gf");
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				// var daLuaChars:Character = modchartCharacters.get(value);
+				applyCharacterShader(value);
+			}
+		}
 	}
 
 	override function update(elapsed:Float)
@@ -266,6 +276,36 @@ class SchoolEvilErect extends BaseStage
 				});
 			}
 		});
+	}
+
+	override function characterChangePost(charExist:String, charNew:String) {
+		if (ClientPrefs.data.shaders)
+		{
+			if (charExist == "bf") 
+				charExist = "boyfriend";
+			else if (charExist == "girlfriend")
+				charExist = "gf";
+			else if (charExist == "opponent")
+				charExist = "dad";
+
+			applyCharacterShader(charExist);
+		}
+	}
+
+	override public function destroy():Void
+	{
+		if (ClientPrefs.data.shaders)
+		{
+			applyCharacterShader("boyfriend");
+			applyCharacterShader("dad");
+			if (gf != null) applyCharacterShader("gf");
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				// var daLuaChars:Character = modchartCharacters.get(value);
+				applyCharacterShader(value);
+			}
+		}
 	}
 
 	function applyCharacterShader(char:String):Void

@@ -32,6 +32,7 @@ typedef CharacterFile = {
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
 	var vocals_file:String;
+	@:optional var noteSkin:String;
 	@:optional var is_player_char:Bool; // New preferred field
 	@:optional var isPlayerChar:Bool;  // Legacy fallback
 	@:optional var isCharSpeaker:Bool;
@@ -88,9 +89,11 @@ class Character extends Bopper
 	public var danceIdle:Bool = false; //Character use "danceLeft" and "danceRight" instead of "idle"
 	public var stopIdle:Bool = false;
 	public var skipDance:Bool = false;
+	public var playSingAnim:Bool = false;
 
 	public var healthIcon:String = 'face';
 	public var isPsychPlayer:Null<Bool>;
+	public var noteSkin:String;
 	public var animationsArray:Array<AnimArray> = [];
 
 	public var positionArray:Array<Float> = [0, 0];
@@ -347,6 +350,7 @@ class Character extends Bopper
 		flipX = !!json.flip_x;
 		healthColorArray = (json.healthbar_colors != null && json.healthbar_colors.length > 2) ? json.healthbar_colors : [161, 161, 161];
 		vocalsFile = json.vocals_file != null ? json.vocals_file : '';
+		noteSkin = json.noteSkin != null ? json.noteSkin : '';
 		originalFlipX = (json.flip_x == true);
 		editorIsPlayer = json._editor_isPlayer;
 

@@ -1,6 +1,10 @@
 package psychlua;
 
 import animate.FlxAnimate;
+import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
+import flixel.math.FlxRect;
+import flixel.math.FlxMatrix;
+import animate.FlxAnimate;
 
 class ModchartAnimateSprite extends FlxAnimate
 {
