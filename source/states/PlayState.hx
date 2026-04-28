@@ -2591,24 +2591,27 @@ class PlayState extends MusicBeatState
 				}
 
 			case "Change Note Skin":
-				switch(value2.toLowerCase().trim()) {
+			    var target = value2.toLowerCase().trim();
+
+				switch(target) {
 					case "opponent":
 						for (strum in opponentStrums) strum.texture = value1;
-							
 					case "player":
 						for (strum in playerStrums) strum.texture = value1;
-
 					default:
 						for (strum in opponentStrums) strum.texture = value1;
 						for (strum in playerStrums) strum.texture = value1;
-						
 				}
 
 				for (daNote in notes.members) {
-					if (daNote != null && daNote.spawned) {
-						daNote.texture = value1;
-					}
-				}
+                    if (daNote != null && daNote.spawned) {
+                        var shouldChange = (target == "opponent" && !daNote.mustPress) || (target == "player" && daNote.mustPress) || (target != "opponent" && target != "player");
+
+                        if (shouldChange) {
+                            daNote.texture = value1;
+                        }
+                    }
+                }
 
 				PlayState.SONG.arrowSkin = value1; // so the next notes spawn with the new skin
 				usedNoteSkinEvent = true;
