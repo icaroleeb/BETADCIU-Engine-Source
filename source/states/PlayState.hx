@@ -1484,17 +1484,28 @@ class PlayState extends MusicBeatState
 
 				var voiceStateFinal = voiceStatePostfix.toLowerCase();
 
-				var playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
+				var baseName = (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1)
+					? "Player"
+					: boyfriend.vocalsFile;
 
-				if (FileSystem.exists(playerVocals + voiceStateFinal))
-					playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile + voiceStateFinal);
+				var testPath = Paths.getPath('songs/${songData.song}/Voices-' + baseName + voiceStateFinal + '.ogg');
+
+				var playerVocals = FileSystem.exists(testPath)
+					? Paths.voices(songData.song, baseName + voiceStateFinal)
+					: Paths.voices(songData.song, baseName);
 					
 				vocals.loadEmbedded(playerVocals != null ? playerVocals : Paths.voices(songData.song));
 				
-				var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
+				// Reusing the same variables to save a negligible amount of memory
+				baseName = (dad.vocalsFile == null || dad.vocalsFile.length < 1)
+					? "Opponent"
+					: dad.vocalsFile;
 
-				if (FileSystem.exists(oppVocals + voiceStateFinal))
-					oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile + voiceStateFinal);
+				testPath = Paths.getPath('songs/${songData.song}/Voices-' + baseName + voiceStateFinal + '.ogg');
+
+				var oppVocals = FileSystem.exists(testPath)
+					? Paths.voices(songData.song, baseName + voiceStateFinal)
+					: Paths.voices(songData.song, baseName);
 
 				if(oppVocals != null && oppVocals.length > 0) opponentVocals.loadEmbedded(oppVocals);
 			}
