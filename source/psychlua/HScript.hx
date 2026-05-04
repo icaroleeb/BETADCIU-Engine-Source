@@ -526,23 +526,23 @@ class HScript extends IrisEx implements IFlxDestroyable
 
 		// you don't need to add stageVars anymore. -- but isn't compatible with "game.add(sprite);" & "PlayState.instance.add(sprite);"
 		set('add', function(tag:FlxBasic){
-			checkStageVar(tag);
+			// checkStageVar(tag);
 			FlxG.state.add(tag);
 		});
 		set('insert', function(position:Int, tag:FlxBasic){ 
-			checkStageVar(tag);
+			// checkStageVar(tag);
 			FlxG.state.insert(position, tag);
 		});
 		set('addBehindGF', function(tag:FlxBasic){
-			checkStageVar(tag);
+			// checkStageVar(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
 		});
 		set('addBehindBF', function(tag:FlxBasic){
-			checkStageVar(tag);
+			// checkStageVar(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
 		});
 		set('addBehindDad', function(tag:FlxBasic){
-			checkStageVar(tag);
+			// checkStageVar(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
 		});
 		//

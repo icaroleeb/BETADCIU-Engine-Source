@@ -40,28 +40,28 @@ class SchoolEvil extends BaseStage
 		stageVars.set("solid", solid);
 		add(solid);
 
-		backTrees = FunkinSprite.create(-842, -80, 'weeb/evil/weebBackTrees');
+		backTrees = new FunkinSprite(-842, -80, Paths.image('weeb/evil/weebBackTrees'));
 		backTrees.scrollFactor.set(0.5, 0.5);
 		stageVars.set("backTrees", backTrees);
 		add(backTrees);
 		backTrees.antialiasing = false;
 		pixelPerfectEffectArray.push(backTrees);
 
-		school = FunkinSprite.create(-816, -38, 'weeb/evil/weebSchool');
+		school = new FunkinSprite(-816, -38, Paths.image('weeb/evil/weebSchool'));
 		school.scrollFactor.set(0.75, 0.75);
 		stageVars.set("school", school);
 		add(school);
 		school.antialiasing = false;
 		pixelPerfectEffectArray.push(school);
 
-		street = FunkinSprite.create(-662, 6, 'weeb/evil/weebStreet');
+		street = new FunkinSprite(-662, 6, Paths.image('weeb/evil/weebStreet'));
 		street.scrollFactor.set(0.75, 0.75);
 		stageVars.set("street", street);
 		add(street);
 		street.antialiasing = false;
 		pixelPerfectEffectArray.push(street);
 
-		trees = FunkinSprite.create(-662, 6, 'weeb/evil/weebTrees');
+		trees = new FunkinSprite(-662, 6, Paths.image('weeb/evil/weebTrees'));
 		trees.scrollFactor.set(0.75, 0.75);
 		stageVars.set("trees", trees);
 		add(trees);
@@ -148,7 +148,7 @@ class SchoolEvil extends BaseStage
 				{
 					//bgGhouls = new BGSprite('weeb/bgGhouls', posX, posY, 0.9, 0.9, ['BG freaks glitch instance'], false);
 
-					bgGhouls = FunkinSprite.create(-100, 190, null);
+					bgGhouls = new FunkinSprite(-100, 190, null);
 					bgGhouls.frames = Paths.getSparrowAtlas("weeb/animatedEvilSchool");
 					bgGhouls.scrollFactor.set(0.9, 0.9);
 					bgGhouls.animation.addByPrefix('bgFreak', 'BG freaks glitch instance', 24, true);
@@ -207,13 +207,13 @@ class SchoolEvil extends BaseStage
 	function schoolIntro():Void
 	{
 		inCutscene = true;
-		var red:FunkinSprite = FunkinSprite.create(-100, -100, null);
+		var red:FunkinSprite = new FunkinSprite(-100, -100, null);
 		red.makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
 		red.scrollFactor.set();
 		PlayState.instance.variables.get("stageVariables").set("red", red);
 		add(red);
 
-		var senpaiEvil:FunkinSprite = FunkinSprite.create(0, 0, null);
+		var senpaiEvil:FunkinSprite = new FunkinSprite(0, 0, null);
 		senpaiEvil.frames = Paths.getSparrowAtlas('weeb/senpaiCrazy');
 		senpaiEvil.animation.addByPrefix('idle', 'Senpai Pre Explosion', 24, false);
 		senpaiEvil.setGraphicSize(Std.int(senpaiEvil.width * 6));

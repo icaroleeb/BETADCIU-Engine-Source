@@ -1490,6 +1490,9 @@ class PlayState extends MusicBeatState
 
 				var voiceStateFinal = voiceStatePostfix.toLowerCase();
 
+				if (SONG.vocalsPostFix != null) 
+					voiceStateFinal = SONG.vocalsPostFix.toLowerCase();
+
 				var baseName = (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1)
 					? "Player"
 					: boyfriend.vocalsFile;
@@ -4542,6 +4545,19 @@ class PlayState extends MusicBeatState
 
 		if(ClientPrefs.data.comboCam == "Game") add(comboGroup);
 	}
+
+	/*
+	function callGlobal(tag:String)
+	{
+		if (tag == 'characterChange') {
+			stagesFunc(function(stage:BaseStage) stage.characterChange(value1, value2));
+		} else if (tag == 'characterChangePost') {
+			stagesFunc(function(stage:BaseStage) stage.characterChangePost(value1, value2));
+		}
+
+		callOnScripts('onCharacterChangePost', [value1, value2]);
+	}
+	*/
 
 	public var hardCodedStage:BaseStage;
 	//public var hardCodedStagePreload:BaseStage;

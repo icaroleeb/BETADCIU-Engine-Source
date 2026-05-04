@@ -262,7 +262,6 @@ class PhillyStreetsErect extends BaseStage
 	}
 
 	override public function destroy():Void {
-		/*
 		if (PlayState.instance.camGame.filters != null) {
 			var filters = PlayState.instance.camGame.filters;
 
@@ -272,9 +271,6 @@ class PhillyStreetsErect extends BaseStage
 			});
 			PlayState.instance.camGame.filters = filters;
 		}
-		*/
-
-		game.camGame.removeShader(rainShader);
 
 		FlxTween.cancelTweensOf(phillyCars);
 		FlxTween.cancelTweensOf(phillyCars2);
@@ -338,7 +334,6 @@ class PhillyStreetsErect extends BaseStage
 		rainShader.intensity = rainShaderStartIntensity;
         rainShader.rainColor = 0xFFa8adb5;
 
-		/*
 		var filters = [];
 
 		if (PlayState.instance.camGame.filters != null){
@@ -347,9 +342,6 @@ class PhillyStreetsErect extends BaseStage
 
 		filters.push(new ShaderFilter(rainShader));
 		PlayState.instance.camGame.filters = filters;
-		*/
-
-		game.camGame.addShader(rainShader);
 	}
 
 	function applyCharacterShader(char:String):Void

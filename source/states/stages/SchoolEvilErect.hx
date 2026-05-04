@@ -37,33 +37,33 @@ class SchoolEvilErect extends BaseStage
 		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
 		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'bf-pixel-dead';
 
-		var solid:FlxSprite = new FlxSprite(-500, -1000).makeGraphic(2400, 2000, 0xFF000000);
+		var solid:FlxSprite = new FunkinSprite(-500, -1000).makeGraphic(2400, 2000, 0xFF000000);
 		solid.scrollFactor.set();
 		stageVars.set("solid", solid);
 		add(solid);
 
-		backspikes = FunkinSprite.create(-842, -180, 'weeb/erect/evil/weebBackSpikes');
+		backspikes = new FunkinSprite(-842, -180, Paths.image('weeb/erect/evil/weebBackSpikes'));
 		backspikes.scrollFactor.set(0.5, 0.5);
 		stageVars.set("backspikes", backspikes);
 		add(backspikes);
 		backspikes.antialiasing = false;
 		pixelPerfectEffectArray.push(backspikes);
 
-		school = FunkinSprite.create(-816, -38, 'weeb/erect/evil/weebSchool');
+		school = new FunkinSprite(-816, -38, Paths.image('weeb/erect/evil/weebSchool'));
 		school.scrollFactor.set(0.75, 0.75);
 		stageVars.set("school", school);
 		add(school);
 		school.antialiasing = false;
 		pixelPerfectEffectArray.push(school);
 
-		backspike = FunkinSprite.create(1416, 464, 'weeb/erect/evil/backSpike');
+		backspike = new FunkinSprite(1416, 464, Paths.image('weeb/erect/evil/backSpike'));
 		backspike.scrollFactor.set(0.85, 0.85);
 		stageVars.set("backspike", backspike);
 		add(backspike);
 		backspike.antialiasing = false;
 		pixelPerfectEffectArray.push(backspike);
 
-		evilstreet = FunkinSprite.create(-662, 6, 'weeb/erect/evil/weebStreet');
+		evilstreet = new FunkinSprite(-662, 6, Paths.image('weeb/erect/evil/weebStreet'));
 		stageVars.set("evilstreet", evilstreet);
 		add(evilstreet);
 		evilstreet.antialiasing = false;
@@ -164,7 +164,7 @@ class SchoolEvilErect extends BaseStage
 				{
 					//bgGhouls = new BGSprite('weeb/bgGhouls', posX, posY, 0.9, 0.9, ['BG freaks glitch instance'], false);
 
-					bgGhouls = FunkinSprite.create(-100, 190, null);
+					bgGhouls = new FunkinSprite(-100, 190, null);
 					bgGhouls.frames = Paths.getSparrowAtlas("weeb/animatedEvilSchool");
 					bgGhouls.scrollFactor.set(0.9, 0.9);
 					bgGhouls.animation.addByPrefix('bgFreak', 'BG freaks glitch instance', 24, true);
@@ -223,13 +223,13 @@ class SchoolEvilErect extends BaseStage
 	function schoolIntro():Void
 	{
 		inCutscene = true;
-		var red:FunkinSprite = FunkinSprite.create(-100, -100, null);
+		var red:FunkinSprite = new FunkinSprite(-100, -100, null);
 		red.makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
 		red.scrollFactor.set();
 		PlayState.instance.variables.get("stageVariables").set("red", red);
 		add(red);
 
-		var senpaiEvil:FunkinSprite = FunkinSprite.create(0, 0, null);
+		var senpaiEvil:FunkinSprite = new FunkinSprite(0, 0, null);
 		senpaiEvil.frames = Paths.getSparrowAtlas('weeb/senpaiCrazy');
 		senpaiEvil.animation.addByPrefix('idle', 'Senpai Pre Explosion', 24, false);
 		senpaiEvil.setGraphicSize(Std.int(senpaiEvil.width * 6));

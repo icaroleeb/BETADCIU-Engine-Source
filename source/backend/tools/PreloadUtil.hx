@@ -40,7 +40,7 @@ class PreloadUtil
         if ((FlxG.state is PlayState) && stagesToLoad.length > 0) {
             var ogStage = PlayState.instance.curStage;
             for (stage in stagesToLoad) {
-                PlayState.instance.changeStage(stage, true); 
+                PlayState.instance.changeStage(stage);
                 trace('Stage Loaded: $stage');
             }
             stagesToLoad = [];

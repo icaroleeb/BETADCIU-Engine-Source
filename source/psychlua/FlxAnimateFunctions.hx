@@ -22,7 +22,7 @@ class FlxAnimateFunctions
 			}
 
 			// var mySprite:ModchartAnimateSprite = new ModchartAnimateSprite(x, y);
-			var mySprite:FunkinSprite = FunkinSprite.create(x, y, null);
+			var mySprite:FunkinSprite = new FunkinSprite(x, y, null);
 
 			if(loadFolder != null && loadFolder.length > 0)
 			{
@@ -49,11 +49,12 @@ class FlxAnimateFunctions
 					stageVars.set(tag, mySprite);
 			}
 			
+			mySprite.antialiasing = ClientPrefs.data.antialiasing;
 			mySprite.active = true;
 		});
 
 		Lua_helper.add_callback(lua, "loadAnimateAtlas", function(tag:String, loadFolder:String) {
-			var spr:ModchartAnimateSprite = MusicBeatState.getVariables().get(tag);
+			var spr:FunkinSprite = MusicBeatState.getVariables().get(tag);
 			if(loadFolder != null && loadFolder.length > 0)
 			{
 				LuaUtils.loadFrames(spr, loadFolder, 'animateatlas');
@@ -62,14 +63,14 @@ class FlxAnimateFunctions
 		
 		Lua_helper.add_callback(lua, "addAnimationBySymbol", function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false)
 		{
-			var obj:ModchartAnimateSprite = cast MusicBeatState.getVariables().get(tag);
+			var obj:FunkinSprite = cast MusicBeatState.getVariables().get(tag);
 			if(obj == null) return false;
 
 			obj.anim.addBySymbol(name, symbol, framerate, loop);
 			// if(obj.anim.curSymbol == null)
 			// {
-			// 	var obj2:ModchartAnimateSprite = cast (obj, ModchartAnimateSprite);
-			// 	if(obj2 != null) obj2.playAnim(name, true); //is ModchartAnimateSprite
+			// 	var obj2:FunkinSprite = cast (obj, FunkinSprite);
+			// 	if(obj2 != null) obj2.playAnim(name, true); //is FunkinSprite
 			// 	else obj.anim.play(name, true);
 			// }
 			return true;
@@ -77,7 +78,7 @@ class FlxAnimateFunctions
 
 		Lua_helper.add_callback(lua, "addAnimationBySymbolIndices", function(tag:String, name:String, symbol:String, ?indices:Any = null, ?framerate:Float = 24, ?loop:Bool = false)
 		{
-			var obj:ModchartAnimateSprite = cast MusicBeatState.getVariables().get(tag);
+			var obj:FunkinSprite = cast MusicBeatState.getVariables().get(tag);
 			if(obj == null) return false;
 
 			if(indices == null)
@@ -95,8 +96,8 @@ class FlxAnimateFunctions
 			obj.anim.addBySymbolIndices(name, symbol, indices, framerate, loop);
 			// if(obj.anim.curSymbol == null)
 			// {
-			// 	var obj2:ModchartAnimateSprite = cast (obj, ModchartAnimateSprite);
-			// 	if(obj2 != null) obj2.playAnim(name, true); //is ModchartAnimateSprite
+			// 	var obj2:FunkinSprite = cast (obj, FunkinSprite);
+			// 	if(obj2 != null) obj2.playAnim(name, true); //is FunkinSprite
 			// 	else obj.anim.play(name, true);
 			// }
 			return true;

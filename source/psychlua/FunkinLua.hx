@@ -45,6 +45,7 @@ import psychlua.DebugLuaText;
 import psychlua.ModchartSprite;
 import psychlua.ModchartAnimateSprite;
 import objects.FunkinSprite;
+import extensions.flixel.FlxCameraEx;
 
 import shaders.*; // prob moving the ColorSwap functions to the ShaderFunctions.hx file later
 
@@ -287,11 +288,18 @@ class FunkinLua {
 		});
 
 		//stole from Wii Funkin' Matt V3
-		Lua_helper.add_callback(lua, "initAnalyzer", function(tag:String, barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+		Lua_helper.add_callback(lua, "initLuaAnalyzerAudio", function(tag:String, barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30, audio:String) {
 			tag = tag.replace('.', '');
+
+			var audioSource = FlxG.sound.music;
+
+			if ((audio.toLowerCase() == "vocals" || audio.toLowerCase() == "vocal" || audio.toLowerCase() == "vocal-player") && PlayState.instance.vocals != null)
+				audioSource = PlayState.instance.vocals;
+			else if ((audio.toLowerCase() == "vocalsopp" || audio.toLowerCase() == "vocal-Opponent" || audio.toLowerCase() == "vocal-opponent") && PlayState.instance.opponentVocals != null)
+				audioSource = PlayState.instance.opponentVocals;
 			
 			@:privateAccess
-			var audioAnalyzer:SpectralAnalyzer = new SpectralAnalyzer(FlxG.sound.music._channel.__audioSource, barCount, maxDelta, peakHold);
+			var audioAnalyzer:SpectralAnalyzer = new SpectralAnalyzer(audioSource._channel.__audioSource, barCount, maxDelta, peakHold);
 
 			#if desktop
 			audioAnalyzer.fftN = 256;
@@ -300,7 +308,7 @@ class FunkinLua {
 			MusicBeatState.getVariables().set(tag, audioAnalyzer);
 		});
 
-		Lua_helper.add_callback(lua, "getAudioLevels", function(tag:String) {
+		Lua_helper.add_callback(lua, "getLuaAnalyzerLevels", function(tag:String) {
 			var analyzer:SpectralAnalyzer = PlayState.instance.getLuaObject(tag);
 			var levels = analyzer.getLevels();
 
@@ -1257,7 +1265,7 @@ class FunkinLua {
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 			// var leSprite:ModchartSprite = new ModchartSprite(x, y);
-			var leSprite:FunkinSprite = FunkinSprite.create(x, y, null);
+			var leSprite:FunkinSprite = new FunkinSprite(x, y, null);
 			if(image != null && image.length > 0)
 			{
 				leSprite.loadGraphic(Paths.image(image));
@@ -1295,7 +1303,7 @@ class FunkinLua {
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 			// var leSprite:ModchartSprite = new ModchartSprite(x, y);
-			var leSprite:FunkinSprite = FunkinSprite.create(x, y, null);
+			var leSprite:FunkinSprite = new FunkinSprite(x, y, null);
 
 			if(image != null && image.length > 0)
 			{
@@ -1506,7 +1514,7 @@ class FunkinLua {
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 
-			var leCamera:FlxCamera = new FlxCamera(x, y, resX, resY, zoom);
+			var leCamera:FlxCameraEx = new FlxCameraEx(x, y, resX, resY, zoom);
 			leCamera.bgColor = 0x00000000; // transparent bg for the camera
 
 			var variables = MusicBeatState.getVariables();
@@ -1942,7 +1950,7 @@ class FunkinLua {
 
 		Lua_helper.add_callback(lua, "luaSpriteExists", function(tag:String) {
 			var obj:FlxSprite = MusicBeatState.getVariables().get(tag);
-			return (obj != null && (Std.isOfType(obj, ModchartSprite) || Std.isOfType(obj, FlxBackdrop) || Std.isOfType(obj, FlxTiledSprite)));
+			return (obj != null && (Std.isOfType(obj, FunkinSprite) || Std.isOfType(obj, FlxBackdrop) || Std.isOfType(obj, FlxTiledSprite)));
 		});
 		Lua_helper.add_callback(lua, "luaBackdropExists", function(tag:String) {
 			var obj:FlxSprite = MusicBeatState.getVariables().get(tag);

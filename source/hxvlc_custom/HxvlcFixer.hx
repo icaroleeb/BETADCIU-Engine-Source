@@ -1,10 +1,12 @@
 package;
 import sys.io.File;
+import sys.io.Process;
 import sys.FileSystem;
 
 class HxvlcFixer {
     static function main() {
-        var libPath = "D:/Backup/coisas aleatorias/BETADCIU-Engine-Source/.haxelib/hxvlc/2,0,1/source/hxvlc/openfl/Video.hx";
+        var root = getHaxelibPath();
+        var libPath = root + "/hxvlc/2,0,1/source/hxvlc/openfl/Video.hx";
         
         if (FileSystem.exists(libPath)) {
             var content = File.getContent(libPath);
@@ -15,5 +17,18 @@ class HxvlcFixer {
                 trace("done!");
             }
         }
+    }
+
+    static function getHaxelibPath():String {
+        try {
+            var proc = new Process("haxelib", ["config"]);
+            var output = StringTools.trim(proc.stdout.readAll().toString());
+            proc.close();
+            if (output.length > 0)
+                return output;
+        } catch (e:Dynamic) {
+            trace("failed to get the haxelib path: " + e);
+        }
+        return null;
     }
 }
