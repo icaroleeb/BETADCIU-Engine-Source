@@ -4590,7 +4590,7 @@ class PlayState extends MusicBeatState
 
 				if (sprite != null) {
 					sprite.kill();
-					variables.remove(key);
+					// variables.get("stageVariables").remove(key);
 					sprite.destroy();
 				}
 			}

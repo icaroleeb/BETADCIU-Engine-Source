@@ -166,7 +166,7 @@ class Character extends Bopper
 		missingCharacter = false;
 		if (missingText != null) missingText.kill();
 		
-		for (i in ['flipMode', 'stopIdle', 'skipDance', 'specialAnim', 'stunned'])
+		for (i in ['flipMode', 'stopIdle', 'skipDance', 'specialAnim', 'stunned', "flippedAnims"])
 			Reflect.setProperty(this, i, false);
 		
 		idleSuffix = '';
@@ -635,6 +635,16 @@ class Character extends Bopper
 		super.playAnim(animName, force, reversed, frame);
 
 		var playedAnim = __prevPlayedAnimation;
+		if (isPlayer) {
+			var playerOff = animPlayerOffsets.get(playedAnim);
+			if (playerOff != null) {
+				offset.set(playerOff[0], playerOff[1]);
+				if (scalableOffsets) {
+					offset.x *= scale.x;
+					offset.y *= scale.y;
+				}
+			}
+		}
 
 		if (curCharacter.startsWith('gf-') || curCharacter == 'gf')
 		{
@@ -685,8 +695,11 @@ class Character extends Bopper
 		set_daZoom(Zoom);
 	}
 
+	public var flippedAnims:Bool = false; // mainly for the character editor
+
 	public function flipAnims() {
 		//rewrote it
+		var foundAnim:Bool = false;
 		if (isAnimateAtlas) {
 			for (anim in animationsArray) {
 				if (anim.anim.contains("singRIGHT")) {
@@ -703,6 +716,7 @@ class Character extends Bopper
 						if (oldRightAnim != null && oldLeftAnim != null) {
 							this.anim._animations.set(singRightName, oldLeftAnim);
 							this.anim._animations.set(singLeftName, oldRightAnim);
+							foundAnim = true;
 						}
 					}
 				}
@@ -716,10 +730,13 @@ class Character extends Bopper
 						var oldRight = animation.getByName('singRIGHT' + animSplit[1]).frames;
 						animation.getByName('singRIGHT' + animSplit[1]).frames = animation.getByName('singLEFT' + animSplit[1]).frames;
 						animation.getByName('singLEFT' + animSplit[1]).frames = oldRight;
+						foundAnim = true;
 					}
 				}
 			}
 		}
+
+		if (foundAnim) flippedAnims = !flippedAnims;
 	}
 
 	inline function predictCharacterIsPlayer(name:String) { // if i remove this later, is because people didn't liked it. -Ryiuu

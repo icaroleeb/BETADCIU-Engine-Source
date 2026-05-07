@@ -44,6 +44,7 @@ class HScript extends IrisEx implements IFlxDestroyable
 	public var filePath:String;
 	public var modFolder:String;
 	public var returnValue:Dynamic;
+	public var scriptObjects:Array<FlxBasic> = [];
 
 	#if LUA_ALLOWED
 	public var parentLua:FunkinLua;
@@ -275,6 +276,8 @@ class HScript extends IrisEx implements IFlxDestroyable
 		set('DialogueBox', cutscenes.DialogueBox);
 
 		set('inGameOver', false);
+
+		set('scriptObjects', scriptObjects);
 
 		if (FlxG.state is PlayState) {
 			set("inPlaystate", true);
@@ -526,23 +529,23 @@ class HScript extends IrisEx implements IFlxDestroyable
 
 		// you don't need to add stageVars anymore. -- but isn't compatible with "game.add(sprite);" & "PlayState.instance.add(sprite);"
 		set('add', function(tag:FlxBasic){
-			// checkStageVar(tag);
+			scriptObjects.push(tag);
 			FlxG.state.add(tag);
 		});
 		set('insert', function(position:Int, tag:FlxBasic){ 
-			// checkStageVar(tag);
+			scriptObjects.push(tag);
 			FlxG.state.insert(position, tag);
 		});
 		set('addBehindGF', function(tag:FlxBasic){
-			// checkStageVar(tag);
+			scriptObjects.push(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
 		});
 		set('addBehindBF', function(tag:FlxBasic){
-			// checkStageVar(tag);
+			scriptObjects.push(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
 		});
 		set('addBehindDad', function(tag:FlxBasic){
-			// checkStageVar(tag);
+			scriptObjects.push(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
 		});
 		//
@@ -729,6 +732,17 @@ class HScript extends IrisEx implements IFlxDestroyable
 	{
 		origin = null;
 		#if LUA_ALLOWED parentLua = null; #end
+
+		if (scriptObjects != null) {
+			for (obj in scriptObjects) {
+				if (obj != null) {
+					FlxG.state.remove(obj, true);
+					obj.destroy();
+				}
+			}
+			scriptObjects = [];
+		}
+
 		super.destroy();
 	}
 

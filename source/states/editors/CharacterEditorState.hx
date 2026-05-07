@@ -375,7 +375,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		{
 			character.isPlayer = !character.isPlayer;
 			character.flipX = !character.flipX;
-			character.flipAnims();
+			if (character.isPlayer && (character.flippedAnims && character.isPsychPlayer || !character.isPsychPlayer && !character.flippedAnims)) character.flipAnims();
+			else if (!character.isPlayer && character.flippedAnims) character.flipAnims(); // flip back bro
 			reloadAnimList();
 			updateCharacterPositions();
 			updatePointerPos(true);
@@ -559,7 +560,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 			reloadAnimList();
 			@:arrayAccess curAnim = Std.int(Math.max(0, character.animationsArray.indexOf(addedAnim)));
-			character.playAnim(addedAnim.anim, true);
+			playAnim(addedAnim.anim, true);
 			trace('Added/Updated animation: ' + animationInputText.text);
 		});
 
@@ -585,7 +586,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 				if (character.animationsArray.length > 0) {
 					var nextAnim = character.animationsArray[0].anim;
-					character.playAnim(nextAnim, true);
+					playAnim(nextAnim, true);
 					animationInputText.text = nextAnim; 
 				} else {
 					animationInputText.text = '';
@@ -647,7 +648,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			character.imageFile = imageInputText.text;
 			reloadCharacterImage();
 			if(!character.isAnimationNull()) {
-				character.playAnim(lastAnim, true);
+				playAnim(lastAnim, true);
 			}
 		});
 
@@ -690,6 +691,14 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		playerSpriteSheetCheckBox.checked = character.isPsychPlayer;
 		playerSpriteSheetCheckBox.onClick = function() {
 			character.isPsychPlayer = playerSpriteSheetCheckBox.checked;
+			trace('Psych Player: ' + character.isPsychPlayer + ' | isPlayer: ' + character.isPlayer + ' | flippedAnims: ' + character.flippedAnims);
+
+			if (character.isPlayer && (character.flippedAnims && character.isPsychPlayer || !character.isPsychPlayer && !character.flippedAnims)) 
+				character.flipAnims();
+			else if (!character.isPlayer && !character.isPsychPlayer && character.flippedAnims)
+			character.flipAnims();
+
+			playAnim(character.getAnimationName(), true);
 		};
 
 		// positionXStepper = new PsychUINumericStepper(flipXCheckBox.x + 110, flipXCheckBox.y, 10, character.positionArray[0], -9000, 9000, 0);
@@ -893,7 +902,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		if(anims.length > 0)
 		{
-			if(lastAnim != '') character.playAnim(lastAnim, true);
+			if(lastAnim != '') playAnim(lastAnim, true);
 			else character.dance();
 		}
 	}
@@ -1008,7 +1017,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			{
 				undoOffsets = null;
 				curAnim = FlxMath.wrap(curAnim, 0, anims.length-1);
-				character.playAnim(anims[curAnim].anim, true);
+				playAnim(anims[curAnim].anim, true);
 				updateText();
 			}
 		}
@@ -1108,7 +1117,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			else holdingFrameTime = 0;
 
 			if(FlxG.keys.justPressed.SPACE)
-				character.playAnim(character.getAnimationName(), true);
+				playAnim(character.getAnimationName(), true);
 
 			var frames:Int = -1;
 			var length:Int = -1;
@@ -1253,7 +1262,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	inline function reloadAnimList()
 	{
 		anims = character.animationsArray;
-		if(anims.length > 0) character.playAnim(anims[0].anim, true);
+		if(anims.length > 0) playAnim(anims[0].anim, true);
 		curAnim = 0;
 
 		updateText();
@@ -1458,5 +1467,13 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		}
 
 		FlxG.autoPause = wasAutoPause;
+	}
+
+	function playAnim(animation:String, forced:Bool) { // because the bopperclass resets the offset to the original json offset everytime you play the animation
+		character.playAnim(animation, forced);
+
+		// var anim = anims[curAnim];
+		// character.offset.x = anim.offsets[0];
+		// character.offset.y = anim.offsets[1];
 	}
 }
