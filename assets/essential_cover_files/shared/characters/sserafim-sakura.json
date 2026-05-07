@@ -1,0 +1,87 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "idle",
+			"fps": 24,
+			"name": "idle",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-311, -448],
+			"anim": "singUP",
+			"fps": 24,
+			"name": "sakura up pose",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-312, -449],
+			"anim": "singDOWN",
+			"fps": 24,
+			"name": "sakura down pose",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-312, -449],
+			"anim": "singLEFT",
+			"fps": 24,
+			"name": "sakura left pose",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-313, -449],
+			"anim": "singRIGHT",
+			"fps": 24,
+			"name": "sakura right pose",
+			"indices": []
+		},
+		{
+			"offsets": [-315, -445],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHTmiss",
+			"loop": false,
+			"name": "sakura miss right"
+		},
+		{
+			"offsets": [-311, -452],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWNmiss",
+			"loop": false,
+			"name": "sakura miss down"
+		},
+		{
+			"offsets": [0, 0],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFTmiss",
+			"loop": false,
+			"name": "sakura miss left"
+		},
+		{
+			"offsets": [0, 0],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUPmiss",
+			"loop": false,
+			"name": "sakura miss up"
+		}
+	],
+	"vocals_file": "",
+	"no_antialiasing": false,
+	"image": "characters/sserafim/sakura",
+	"position": [-5, 70],
+	"healthicon": "sakura",
+	"flip_x": true,
+	"healthbar_colors": [178, 2, 92],
+	"camera_position": [-250, 340],
+	"sing_duration": 4,
+	"scale": 1,
+	"_editor_isPlayer": true
+}

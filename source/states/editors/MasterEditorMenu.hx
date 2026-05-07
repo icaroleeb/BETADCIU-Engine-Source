@@ -126,7 +126,7 @@ class MasterEditorMenu extends MusicBeatState
 					MusicBeatState.switchState(new NoteSplashEditorState());
 					FlxG.sound.music.volume = 1;
 				case 'Modpack Maker':
-					MusicBeatState.switchState(new options.ModpackMakerState());
+					MusicBeatState.switchState(new states.editors.ModpackMakerState());
 			}
 			FreeplayState.destroyFreeplayVocals();
 		}

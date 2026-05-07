@@ -26,28 +26,28 @@ class School extends BaseStage
 		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
 		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'bf-pixel-dead';
 
-		var bgSky:FunkinSprite = FunkinSprite.create(-626, -78, 'weeb/weebSky');
+		var bgSky:FunkinSprite = new FunkinSprite(-626, -78, Paths.image('weeb/weebSky'));
 		bgSky.scrollFactor.set(0.2, 0.2);
 		stageVars.set("bgSky", bgSky);
 		add(bgSky);
 		bgSky.antialiasing = false;
 		pixelPerfectEffectArray.push(bgSky);
 
-		var backTrees:FunkinSprite = FunkinSprite.create(-842, -80, 'weeb/weebBackTrees');
+		var backTrees:FunkinSprite = new FunkinSprite(-842, -80, Paths.image('weeb/weebBackTrees'));
 		backTrees.scrollFactor.set(0.5, 0.5);
 		stageVars.set("backTrees", backTrees);
 		add(backTrees);
 		backTrees.antialiasing = false;
 		pixelPerfectEffectArray.push(backTrees);
 
-		var bgSchool:FunkinSprite = FunkinSprite.create(-816, -38, 'weeb/weebSchool');
+		var bgSchool:FunkinSprite = new FunkinSprite(-816, -38, Paths.image('weeb/weebSchool'));
 		bgSchool.scrollFactor.set(0.75, 0.75);
 		stageVars.set("bgSchool", bgSchool);
 		add(bgSchool);
 		bgSchool.antialiasing = false;
 		pixelPerfectEffectArray.push(bgSchool);
 
-		var bgStreet:FunkinSprite = FunkinSprite.create(-662, 6, 'weeb/weebStreet');
+		var bgStreet:FunkinSprite = new FunkinSprite(-662, 6, Paths.image('weeb/weebStreet'));
 		stageVars.set("bgStreet", bgStreet);
 		add(bgStreet);
 		bgStreet.antialiasing = false;
@@ -55,14 +55,14 @@ class School extends BaseStage
 
 		var widShit = Std.int(bgSky.width * PlayState.daPixelZoom);
 		if(!ClientPrefs.data.lowQuality) {
-			var fgTrees:FunkinSprite = FunkinSprite.create(-500, 6, 'weeb/weebTreesBack');
+			var fgTrees:FunkinSprite = new FunkinSprite(-500, 6, Paths.image('weeb/weebTreesBack'));
 			stageVars.set("fgTrees", fgTrees);
 			add(fgTrees);
 			fgTrees.antialiasing = false;
 			pixelPerfectEffectArray.push(fgTrees);
 		}
 
-		var bgTrees:FunkinSprite = FunkinSprite.create(-806, -1050, null);
+		var bgTrees:FunkinSprite = new FunkinSprite(-806, -1050, Paths.image('weeb/weebTrees'));
 		bgTrees.frames = Paths.getPackerAtlas('weeb/weebTrees');
 		bgTrees.animation.add('treeLoop', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 12);
 		bgTrees.animation.play('treeLoop');
@@ -73,7 +73,7 @@ class School extends BaseStage
 		pixelPerfectEffectArray.push(bgTrees);
 
 		if(!ClientPrefs.data.lowQuality) {
-			var treeLeaves:FunkinSprite = FunkinSprite.create(-20, -40, null);
+			var treeLeaves:FunkinSprite = new FunkinSprite(-20, -40, Paths.image('weeb/petals'));
 			treeLeaves.frames = Paths.getSparrowAtlas('weeb/petals');
 			treeLeaves.scrollFactor.set(0.85, 0.85);
 			treeLeaves.animation.addByPrefix('leaves', 'PETALS ALL', 24, true);
@@ -175,7 +175,7 @@ class School extends BaseStage
 		inCutscene = true;
 		
 		//var black:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
-		var black:FunkinSprite = FunkinSprite.create(-100, -100, null);
+		var black:FunkinSprite = new FunkinSprite(-100, -100, null);
 		black.makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
 		black.scrollFactor.set();
 		PlayState.instance.variables.get("stageVariables").set("black", black);

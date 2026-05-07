@@ -542,6 +542,7 @@ class PhillyStreets extends BaseStage
 				rainShaderStartIntensity = 0.2;
 				rainShaderEndIntensity = 0.4;
 		}
+
 		rainShader.intensity = rainShaderStartIntensity;
 
 		var filters = [];
@@ -552,8 +553,6 @@ class PhillyStreets extends BaseStage
 
 		filters.push(new ShaderFilter(rainShader));
 		PlayState.instance.camGame.filters = filters;
-
-		// FlxG.camera.setFilters([new ShaderFilter(rainShader)]);
 	}
 	
 	var currentNeneState:NeneState = STATE_DEFAULT;

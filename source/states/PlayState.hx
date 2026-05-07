@@ -487,6 +487,10 @@ class PlayState extends MusicBeatState
 		if(gf != null) startCharacterScripts(gf.curCharacter);
 		startCharacterScripts(dad.curCharacter);
 		startCharacterScripts(boyfriend.curCharacter);
+
+		if(gf != null) nameScriptsCharacter("characters/" + gf.curCharacter, gf.charName);
+		nameScriptsCharacter("characters/" + dad.curCharacter, dad.charName);
+		nameScriptsCharacter("characters/" + boyfriend.curCharacter, boyfriend.charName);
 		#end
 
 		uiGroup = new FlxSpriteGroup();
@@ -853,7 +857,9 @@ class PlayState extends MusicBeatState
 		//stopCharacterScripts(preloadChar.curCharacter);
 		//preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
 		add(preloadChar);
+		stopCharacterScripts(preloadChar.curCharacter);
 		remove(preloadChar);
+		preloadChar.destroy(); // cuz we don't need to use preload chars so yeah ¯\_(ツ)_/¯
 	}
 
 	public function startCharacterScripts(name:String)
@@ -1484,6 +1490,9 @@ class PlayState extends MusicBeatState
 
 				var voiceStateFinal = voiceStatePostfix.toLowerCase();
 
+				if (SONG.vocalsPostFix != null) 
+					voiceStateFinal = SONG.vocalsPostFix.toLowerCase();
+
 				var baseName = (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1)
 					? "Player"
 					: boyfriend.vocalsFile;
@@ -1507,6 +1516,7 @@ class PlayState extends MusicBeatState
 					? Paths.voices(songData.song, baseName + voiceStateFinal)
 					: Paths.voices(songData.song, baseName);
 
+				var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile + SONG.vocalsPostFix);
 				if(oppVocals != null && oppVocals.length > 0) opponentVocals.loadEmbedded(oppVocals);
 			}
 		}
@@ -2613,24 +2623,27 @@ class PlayState extends MusicBeatState
 				}
 
 			case "Change Note Skin":
-				switch(value2.toLowerCase().trim()) {
+			    var target = value2.toLowerCase().trim();
+
+				switch(target) {
 					case "opponent":
 						for (strum in opponentStrums) strum.texture = value1;
-							
 					case "player":
 						for (strum in playerStrums) strum.texture = value1;
-
 					default:
 						for (strum in opponentStrums) strum.texture = value1;
 						for (strum in playerStrums) strum.texture = value1;
-						
 				}
 
 				for (daNote in notes.members) {
-					if (daNote != null && daNote.spawned) {
-						daNote.texture = value1;
-					}
-				}
+                    if (daNote != null && daNote.spawned) {
+                        var shouldChange = (target == "opponent" && !daNote.mustPress) || (target == "player" && daNote.mustPress) || (target != "opponent" && target != "player");
+
+                        if (shouldChange) {
+                            daNote.texture = value1;
+                        }
+                    }
+                }
 
 				PlayState.SONG.arrowSkin = value1; // so the next notes spawn with the new skin
 				usedNoteSkinEvent = true;
@@ -3591,6 +3604,16 @@ class PlayState extends MusicBeatState
 
 					if(canPlay) char.playAnim(animToPlay, true);
 					char.holdTimer = 0;
+
+					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
+						var daLuaCharAnim:Character = modchartCharacters.get(value);
+
+						if ((!daLuaCharAnim.isPlayer && daLuaCharAnim.flipMode) && daLuaCharAnim.playSingAnim)
+						{
+							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
+							daLuaCharAnim.holdTimer = 0;
+						}
+					}
 				}
 			}
 		}
@@ -3654,8 +3677,17 @@ class PlayState extends MusicBeatState
 	
 					if(canPlay) char.playAnim(animToPlay, true);
 					char.holdTimer = 0;
+
+					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
+						var daLuaCharAnim:Character = modchartCharacters.get(value);
+
+						if ((daLuaCharAnim.isPlayer && !daLuaCharAnim.flipMode) && daLuaCharAnim.playSingAnim) {
+							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
+						}
+					}
+
 					for (value in modchartCharacters.keys()) {
-						var daLuaChar = modchartCharacters.get(value);
+						var daLuaChar:Character = modchartCharacters.get(value);
 						if ((daLuaChar.isPlayer && !daLuaChar.flipMode) || (!daLuaChar.isPlayer && daLuaChar.flipMode)) daLuaChar.holdTimer = 0;
 					}
 
@@ -3856,7 +3888,6 @@ class PlayState extends MusicBeatState
 		if (dad != null && beat % dad.danceEveryNumBeats == 0 && !dad.getAnimationName().startsWith('sing') && !dad.stunned)
 			dad.dance();
 
-
 		for (value in modchartCharacters.keys()) {
 			var char:Character = modchartCharacters.get(value);
 			if (char != null && beat % char.danceEveryNumBeats == 0 && !char.getAnimationName().startsWith('sing') && !char.stunned)
@@ -3956,6 +3987,56 @@ class PlayState extends MusicBeatState
 				}
 			}
 
+		}
+		return false;
+	}
+
+	public function nameScriptsCharacter(file:String, ?name:String = "")
+	{
+		nameLuaCharacter(file, name);
+		nameHScriptCharacter(file, name);
+	}
+
+	public function nameLuaCharacter(luaFile:String, ?name:String = "")
+	{
+		#if MODS_ALLOWED
+		var luaToLoad:String = Paths.modFolders(luaFile);
+		if(!FileSystem.exists(luaToLoad))
+			luaToLoad = Paths.getSharedPath(luaFile);
+
+		if(FileSystem.exists(luaToLoad))
+		#elseif sys
+		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		if(OpenFlAssets.exists(luaToLoad))
+		#end
+		{
+			for (script in luaArray) {
+				if (script.scriptName == luaToLoad) {
+					script.set("charNameScript", name);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public function nameHScriptCharacter(scriptFile:String, ?name:String = "")
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad))
+		{
+			if (Iris.instances.exists(scriptToLoad)){
+				var script:HScript = cast (Iris.instances.get(scriptToLoad), HScript);
+				script.set("charNameScript", name);
+				return true;
+			};
 		}
 		return false;
 	}
@@ -4410,7 +4491,7 @@ class PlayState extends MusicBeatState
 		return stageData;
 	}
 
-	public function removeObjects(stageData:StageFile, preload:Bool=false){
+	public function removeObjects(stageData:StageFile){
 		// if you comment out the else part, the stage loads fine but character layers and positions are messed up.
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
@@ -4429,12 +4510,12 @@ class PlayState extends MusicBeatState
 		}
 
 		// this should help for base stages
-		if (ClientPrefs.data.comboCam == "Game" && !preload) remove(comboGroup);
+		if (ClientPrefs.data.comboCam == "Game") remove(comboGroup);
 	}
 
 	public var gfOldChar:String = '';
 
-	public function addObjects(stageData:StageFile, ?preload:Bool=false){
+	public function addObjects(stageData:StageFile){
 		if(stageData.objects != null && stageData.objects.length > 0)
 		{
 			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, !stageData.hide_girlfriend ? gf : null, dad, boyfriend, this);
@@ -4462,8 +4543,21 @@ class PlayState extends MusicBeatState
 			boyfriend.pixelPerfectRender = stageData.isPixelStage;
 		}
 
-		if(!preload && ClientPrefs.data.comboCam == "Game") add(comboGroup);
+		if(ClientPrefs.data.comboCam == "Game") add(comboGroup);
 	}
+
+	/*
+	function callGlobal(tag:String)
+	{
+		if (tag == 'characterChange') {
+			stagesFunc(function(stage:BaseStage) stage.characterChange(value1, value2));
+		} else if (tag == 'characterChangePost') {
+			stagesFunc(function(stage:BaseStage) stage.characterChangePost(value1, value2));
+		}
+
+		callOnScripts('onCharacterChangePost', [value1, value2]);
+	}
+	*/
 
 	public var hardCodedStage:BaseStage;
 	//public var hardCodedStagePreload:BaseStage;
@@ -4471,7 +4565,7 @@ class PlayState extends MusicBeatState
 	public var addedStagesHScript:Array<String> = [];
 
 	public function removeStage(?preload:Bool=false) {
-		removeObjects(stageData, preload);
+		removeObjects(stageData);
 
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
@@ -4503,6 +4597,8 @@ class PlayState extends MusicBeatState
 			stageVars.clear();
 		}
 	}
+
+	public var isCreatePost:Bool = true;
 
 	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) {
 		if(!preload) {

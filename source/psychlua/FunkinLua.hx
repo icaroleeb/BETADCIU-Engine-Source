@@ -9,12 +9,13 @@ import backend.Song;
 import openfl.Lib;
 import openfl.utils.Assets;
 import openfl.display.BitmapData;
-import flixel.FlxBasic;
+import flixel.FlxSprite;
 import flixel.FlxObject;
 import flixel.FlxState;
 import flixel.math.FlxRect;
 
 import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxTiledSprite;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
@@ -43,6 +44,8 @@ import psychlua.HScript;
 import psychlua.DebugLuaText;
 import psychlua.ModchartSprite;
 import psychlua.ModchartAnimateSprite;
+import objects.FunkinSprite;
+import extensions.flixel.FlxCameraEx;
 
 import shaders.*; // prob moving the ColorSwap functions to the ShaderFunctions.hx file later
 
@@ -54,8 +57,8 @@ import haxe.Json;
 import funkin.vis.dsp.SpectralAnalyzer;
 import funkin.vis.audioclip.frontends.LimeAudioClip;
 
-import options.ModpackMakerState;
-import options.ModpackMakerState.ModpackAssetRegistry;
+import states.editors.ModpackMakerState;
+import states.editors.ModpackMakerState.ModpackAssetRegistry;
 
 class FunkinLua {
 	public var lua:State = null;
@@ -71,6 +74,8 @@ class FunkinLua {
 
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	public var charName:String = ""; // only used for character scripts
 
 	public function new(scriptName:String, ?scriptType:String = "") {
 		lua = LuaL.newstate();
@@ -107,7 +112,8 @@ class FunkinLua {
 
 		set('betadciuVersion', MainMenuState.betadciuEngineVersion.trim());
 		set('psychVersion', MainMenuState.psychEngineVersion.trim());
-		
+
+		set('scriptType', this.scriptType);
 		set('modFolder', this.modFolder);
 
 		// Song/Week shit
@@ -179,7 +185,7 @@ class FunkinLua {
 				set('gfName', game.gf != null ? game.gf.curCharacter : PlayState.SONG.gfVersion);
 			}
 
-		
+			set("charNameScript", this.charName); // exclusive for character scripts
 			set("songPos", 0); // kade scrips part 2
 			set('curBeat', game.curBeat);
 			set('curStep', game.curStep);
@@ -282,11 +288,18 @@ class FunkinLua {
 		});
 
 		//stole from Wii Funkin' Matt V3
-		Lua_helper.add_callback(lua, "initAnalyzer", function(tag:String, barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+		Lua_helper.add_callback(lua, "initLuaAnalyzerAudio", function(tag:String, barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30, audio:String) {
 			tag = tag.replace('.', '');
+
+			var audioSource = FlxG.sound.music;
+
+			if ((audio.toLowerCase() == "vocals" || audio.toLowerCase() == "vocal" || audio.toLowerCase() == "vocal-player") && PlayState.instance.vocals != null)
+				audioSource = PlayState.instance.vocals;
+			else if ((audio.toLowerCase() == "vocalsopp" || audio.toLowerCase() == "vocal-Opponent" || audio.toLowerCase() == "vocal-opponent") && PlayState.instance.opponentVocals != null)
+				audioSource = PlayState.instance.opponentVocals;
 			
 			@:privateAccess
-			var audioAnalyzer:SpectralAnalyzer = new SpectralAnalyzer(FlxG.sound.music._channel.__audioSource, barCount, maxDelta, peakHold);
+			var audioAnalyzer:SpectralAnalyzer = new SpectralAnalyzer(audioSource._channel.__audioSource, barCount, maxDelta, peakHold);
 
 			#if desktop
 			audioAnalyzer.fftN = 256;
@@ -295,7 +308,7 @@ class FunkinLua {
 			MusicBeatState.getVariables().set(tag, audioAnalyzer);
 		});
 
-		Lua_helper.add_callback(lua, "getAudioLevels", function(tag:String) {
+		Lua_helper.add_callback(lua, "getLuaAnalyzerLevels", function(tag:String) {
 			var analyzer:SpectralAnalyzer = PlayState.instance.getLuaObject(tag);
 			var levels = analyzer.getLevels();
 
@@ -700,7 +713,7 @@ class FunkinLua {
 		//shitass stuff for epic coders like me B)  *image of obama giving himself a medal*
 		Lua_helper.add_callback(lua, "getObjectOrder", function(obj:String, ?group:String = null) {
 			var killMe:Array<String> = obj.split('.');
-			var leObj:FlxBasic = LuaUtils.getObjectDirectly(killMe[0]);
+			var leObj:FlxSprite = LuaUtils.getObjectDirectly(killMe[0]);
 			if(killMe.length > 1) {
 				leObj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
 			}
@@ -733,7 +746,7 @@ class FunkinLua {
 			return -1;
 		});
 		Lua_helper.add_callback(lua, "setObjectOrder", function(obj:String, position:Int, ?group:String = null) {
-			var leObj:FlxBasic = LuaUtils.getObjectDirectly(obj);
+			var leObj:FlxSprite = LuaUtils.getObjectDirectly(obj);
 			if(leObj != null)
 			{
 				if(group != null)
@@ -1251,7 +1264,83 @@ class FunkinLua {
 
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
-			var leSprite:ModchartSprite = new ModchartSprite(x, y);
+			// var leSprite:ModchartSprite = new ModchartSprite(x, y);
+			var leSprite:FunkinSprite = new FunkinSprite(x, y, null);
+			if(image != null && image.length > 0)
+			{
+				leSprite.loadGraphic(Paths.image(image));
+			}
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leSprite);
+
+			switch(this.scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+		
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leSprite);
+				case "stagecamera":
+					if (!variables.exists("stageCameraVariables")){
+						variables.set("stageCameraVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageCameraVariables");
+					stageVars.set(tag, leSprite);
+			}
+
+			leSprite.antialiasing = ClientPrefs.data.antialiasing;
+			leSprite.active = true;
+		});
+		Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?spriteType:String = 'auto') {
+			if (this.scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+				ModpackAssetRegistry.instance.addAsset("images", image);
+				return;
+			}
+			
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+			// var leSprite:ModchartSprite = new ModchartSprite(x, y);
+			var leSprite:FunkinSprite = new FunkinSprite(x, y, null);
+
+			if(image != null && image.length > 0)
+			{
+				LuaUtils.loadFrames(leSprite, image, spriteType);
+			}
+
+			var variables = MusicBeatState.getVariables();
+			variables.set(tag, leSprite);
+
+			switch(this.scriptType.toLowerCase()){
+				case "stage":
+					if (!variables.exists("stageVariables")){
+						variables.set("stageVariables", new Map<String, FlxSprite>());
+					}
+		
+					var stageVars = variables.get("stageVariables");
+					stageVars.set(tag, leSprite);
+				case "stagecamera":
+					if (!variables.exists("stageCameraVariables")){
+						variables.set("stageCameraVariables", new Map<String, FlxSprite>());
+					}
+
+					var stageVars = variables.get("stageCameraVariables");
+					stageVars.set(tag, leSprite);
+			}
+
+			leSprite.antialiasing = ClientPrefs.data.antialiasing;
+		});
+		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, ?image:String = null, ?spacingX:Float = 0, ?spacingY:Float = 0, ?axes:String = "XY") {
+			if (this.scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+				ModpackAssetRegistry.instance.addAsset("images", image);
+				return;
+			}
+			
+			tag = tag.replace('.', '');
+			LuaUtils.destroyObject(tag);
+			var leSprite:FlxBackdrop = new FlxBackdrop("", FlxAxes.fromString(axes), Std.int(spacingX), Std.int(spacingY));
 			if(image != null && image.length > 0)
 			{
 				leSprite.loadGraphic(Paths.image(image));
@@ -1279,59 +1368,28 @@ class FunkinLua {
 
 			leSprite.active = true;
 		});
-		Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?spriteType:String = 'auto') {
-			if (this.scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
+		// still doesn't work yet so yeah.
+		Lua_helper.add_callback(lua, "makeLuaTiledSprite", function(tag:String, ?image:String = null, ?width:Float = 0, ?height:Float = 0, ?repeatX:Bool = true, ?repeatY:Bool = true) {
+			if (scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
 				ModpackAssetRegistry.instance.addAsset("images", image);
 				return;
 			}
 			
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
-			var leSprite:ModchartSprite = new ModchartSprite(x, y);
+
+			var daImage:Dynamic = null;
 
 			if(image != null && image.length > 0)
 			{
-				LuaUtils.loadFrames(leSprite, image, spriteType);
+				daImage = Paths.image(image);
 			}
 
+			var leSprite:FlxTiledSprite = new FlxTiledSprite(daImage, width, height, repeatX, repeatY);
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leSprite);
 
-			switch(this.scriptType.toLowerCase()){
-				case "stage":
-					if (!variables.exists("stageVariables")){
-						variables.set("stageVariables", new Map<String, FlxSprite>());
-					}
-		
-					var stageVars = variables.get("stageVariables");
-					stageVars.set(tag, leSprite);
-				case "stagecamera":
-					if (!variables.exists("stageCameraVariables")){
-						variables.set("stageCameraVariables", new Map<String, FlxSprite>());
-					}
-
-					var stageVars = variables.get("stageCameraVariables");
-					stageVars.set(tag, leSprite);
-			}
-		});
-		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, ?image:String = null, ?spacingX:Float = 0, ?spacingY:Float = 0, ?axes:String = "XY") {
-			if (this.scriptType.toLowerCase() == "modpack" && image != null && image.length > 0){
-				ModpackAssetRegistry.instance.addAsset("images", image);
-				return;
-			}
-			
-			tag = tag.replace('.', '');
-			LuaUtils.destroyObject(tag);
-			var leSprite:FlxBackdrop = new FlxBackdrop("", FlxAxes.fromString(axes), Std.int(spacingX), Std.int(spacingY));
-			if(image != null && image.length > 0)
-			{
-				leSprite.loadGraphic(Paths.image(image));
-			}
-
-			var variables = MusicBeatState.getVariables();
-			variables.set(tag, leSprite);
-
-			switch(this.scriptType.toLowerCase()){
+			switch(scriptType.toLowerCase()){
 				case "stage":
 					if (!variables.exists("stageVariables")){
 						variables.set("stageVariables", new Map<String, FlxSprite>());
@@ -1456,7 +1514,7 @@ class FunkinLua {
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 
-			var leCamera:FlxCamera = new FlxCamera(x, y, resX, resY, zoom);
+			var leCamera:FlxCameraEx = new FlxCameraEx(x, y, resX, resY, zoom);
 			leCamera.bgColor = 0x00000000; // transparent bg for the camera
 
 			var variables = MusicBeatState.getVariables();
@@ -1892,7 +1950,15 @@ class FunkinLua {
 
 		Lua_helper.add_callback(lua, "luaSpriteExists", function(tag:String) {
 			var obj:FlxSprite = MusicBeatState.getVariables().get(tag);
-			return (obj != null && (Std.isOfType(obj, ModchartSprite) || Std.isOfType(obj, FlxBackdrop)));
+			return (obj != null && (Std.isOfType(obj, FunkinSprite) || Std.isOfType(obj, FlxBackdrop) || Std.isOfType(obj, FlxTiledSprite)));
+		});
+		Lua_helper.add_callback(lua, "luaBackdropExists", function(tag:String) {
+			var obj:FlxSprite = MusicBeatState.getVariables().get(tag);
+			return (obj != null && (Std.isOfType(obj, FlxBackdrop)));
+		});
+		Lua_helper.add_callback(lua, "luaTiledSpriteExists", function(tag:String) {
+			var obj:FlxSprite = MusicBeatState.getVariables().get(tag);
+			return (obj != null && (Std.isOfType(obj, FlxTiledSprite)));
 		});
 		Lua_helper.add_callback(lua, "luaCharacterExists", function(tag:String) {
 			return (game.modchartCharacters.exists(tag));
@@ -1970,7 +2036,7 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "setObjectCamera", function(obj:String, camera:Dynamic = 'game') {
 			if (game != null){
-				var real:FlxBasic = game.getLuaObject(obj);
+				var real:FlxSprite = game.getLuaObject(obj);
 				var realCam:Dynamic = camera;
 
 				if (Std.isOfType(realCam, String)){
@@ -1983,7 +2049,7 @@ class FunkinLua {
 				}
 
 				var split:Array<String> = obj.split('.');
-				var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
+				var object:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
 				if(split.length > 1) {
 					object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
 				}
@@ -2047,10 +2113,10 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "objectsOverlap", function(obj1:String, obj2:String) {
 			var namesArray:Array<String> = [obj1, obj2];
-			var objectsArray:Array<FlxBasic> = [];
+			var objectsArray:Array<FlxSprite> = [];
 			for (i in 0...namesArray.length)
 			{
-				var real:FlxBasic = game.getLuaObject(namesArray[i]);
+				var real:FlxSprite = game.getLuaObject(namesArray[i]);
 				if(real != null)
 					objectsArray.push(real);
 				else
@@ -2071,14 +2137,14 @@ class FunkinLua {
 
 		// Returns the actual object itself. I modified setObjectCamera to accept the actual camera object too.
 		Lua_helper.add_callback(lua, "getObjectCamera", function(obj:String) {
-			var real:FlxBasic = game.getLuaObject(obj);
+			var real:FlxSprite = game.getLuaObject(obj);
 			
 			if(real != null) {
 				return real.camera;
 			}
 
 			var split:Array<String> = obj.split('.');
-			var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
+			var object:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
 			if(split.length > 1) {
 				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
 			}
@@ -2837,8 +2903,11 @@ class FunkinLua {
 		tag = tag.replace('.', '');
 		LuaUtils.destroyObject(tag);
 		var leSprite:HealthIcon = new HealthIcon(character, isPlayer);
-		PlayState.instance.variables.set(tag, leSprite); //yes
-		var shit:HealthIcon = PlayState.instance.variables.get(tag);
+
+		var variables = MusicBeatState.getVariables();
+		variables.set(tag, leSprite);
+
+		var shit:HealthIcon = variables.get(tag);
 		shit.cameras = [PlayState.instance.camHUD];
 		LuaUtils.getTargetInstance().add(shit);
 	}
@@ -2896,6 +2965,10 @@ class FunkinLua {
 
 		PlayState.instance.startCharacterScripts(daChar.curCharacter);
 		PlayState.instance.setOnHScript(tag, daChar);
+
+    	PlayState.instance.nameScriptsCharacter("characters/" + daChar.curCharacter, tag);
+		PlayState.instance.callLuaFile("characters/" + daChar.curCharacter + '.lua', 'onCreatePost');
+		PlayState.instance.callHScriptFile("characters/" + daChar.curCharacter + '.hx', 'onCreatePost');
 		daChar.charName = tag;
 	}
 
@@ -2968,7 +3041,7 @@ class FunkinLua {
 		charObj.x = posX;
 		charObj.y = posY;
 
-		if (target != "gf")
+		if (target != "gf" || PlayState.instance.defaultBar)
 			PlayState.instance.reloadHealthBarColors();
 
 		if (charObj.animOffsets.exists(animationName))

@@ -524,29 +524,28 @@ class HScript extends IrisEx implements IFlxDestroyable
 		set('this', this);
 		set('ModchartState', FunkinLua); // lazy ass fix for some scripts ported from betadciu engine
 
-		// you don't need to add stageVars anymore.
+		// you don't need to add stageVars anymore. -- but isn't compatible with "game.add(sprite);" & "PlayState.instance.add(sprite);"
 		set('add', function(tag:FlxBasic){
-			checkStageVar(tag);
+			// checkStageVar(tag);
 			FlxG.state.add(tag);
 		});
-
 		set('insert', function(position:Int, tag:FlxBasic){ 
-			checkStageVar(tag);
+			// checkStageVar(tag);
 			FlxG.state.insert(position, tag);
 		});
-
 		set('addBehindGF', function(tag:FlxBasic){
-			checkStageVar(tag);
+			// checkStageVar(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
 		});
 		set('addBehindBF', function(tag:FlxBasic){
-			checkStageVar(tag);
+			// checkStageVar(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
 		});
 		set('addBehindDad', function(tag:FlxBasic){
-			checkStageVar(tag);
+			// checkStageVar(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
 		});
+		//
 
 		set('getColorFromHex', function(color:String):Int {
 			if (color == null) return 0xFFFFFFFF;
@@ -598,6 +597,7 @@ class HScript extends IrisEx implements IFlxDestroyable
 				stageVars.set(Std.string(obj), obj);
 		}
 
+		trace('Added ' + Std.string(obj) + ' to stage variables');
 	}
 
 	#if LUA_ALLOWED

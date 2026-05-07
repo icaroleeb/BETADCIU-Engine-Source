@@ -22,6 +22,7 @@ class StrumNote extends FunkinSprite
 	private var noteData:Int = 0;
 	public var direction:Float = 90;
 	public var downScroll:Bool = false;
+	public var daStyle = "style";
 	public var sustainReduce:Bool = true;
 	private var player:Int;
 

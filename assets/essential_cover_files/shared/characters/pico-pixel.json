@@ -112,7 +112,7 @@
 	"vocals_file": "",
 	"no_antialiasing": true,
 	"image": "characters/picoPixel/picoPixel",
-	"position": [240, 490],
+	"position": [10, 490],
 	"player_camera_position": [370, -80],
 	"is_player_char": true,
 	"healthicon": "pico-pixel",

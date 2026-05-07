@@ -4,11 +4,6 @@ import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 
 class FunkinSprite extends FlxAnimate
 {
-    public static function create(x:Float = 0.0, y:Float = 0.0, key:String)
-    {
-        return new FunkinSprite(x, y, Paths.image(key));
-    }
-
     /**
      * Returns the screen position of this object.
      *

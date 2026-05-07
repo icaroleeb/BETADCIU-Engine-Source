@@ -62,6 +62,7 @@
     <setenv name="HAXEPATH" value="./"/>
 
 	<set name="BUILD_DIR" value="export/debug" if="debug" />
+	<set name="BUILD_DIR" value="export/officialBetadciuBuild" if="officialBetadciuBuild" />
 	<set name="BUILD_DIR" value="export/release" unless="debug" />
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
 

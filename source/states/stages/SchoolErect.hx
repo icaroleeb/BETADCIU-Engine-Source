@@ -24,28 +24,28 @@ class SchoolErect extends BaseStage
 		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
 		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'bf-pixel-dead';
 
-		var bgSky:FunkinSprite = FunkinSprite.create(-626, -78, 'weeb/erect/weebSky');
+		var bgSky:FunkinSprite = new FunkinSprite(-626, -78, Paths.image('weeb/erect/weebSky'));
 		bgSky.scrollFactor.set(0.2, 0.2);
 		stageVars.set("bgSky", bgSky);
 		add(bgSky);
 		bgSky.antialiasing = false;
 		pixelPerfectEffectArray.push(bgSky);
 
-		var backTrees:FunkinSprite = FunkinSprite.create(-842, -80, 'weeb/erect/weebBackTrees');
+		var backTrees:FunkinSprite = new FunkinSprite(-842, -80, Paths.image('weeb/erect/weebBackTrees'));
 		backTrees.scrollFactor.set(0.5, 0.5);
 		stageVars.set("backTrees", backTrees);
 		add(backTrees);
 		backTrees.antialiasing = false;
 		pixelPerfectEffectArray.push(backTrees);
 
-		var bgSchool:FunkinSprite = FunkinSprite.create(-816, -38, 'weeb/erect/weebSchool');
+		var bgSchool:FunkinSprite = new FunkinSprite(-816, -38, Paths.image('weeb/erect/weebSchool'));
 		bgSchool.scrollFactor.set(0.75, 0.75);
 		stageVars.set("bgSchool", bgSchool);
 		add(bgSchool);
 		bgSchool.antialiasing = false;
 		pixelPerfectEffectArray.push(bgSchool);
 
-		var bgStreet:FunkinSprite = FunkinSprite.create(-662, 6, 'weeb/erect/weebStreet');
+		var bgStreet:FunkinSprite = new FunkinSprite(-662, 6, Paths.image('weeb/erect/weebStreet'));
 		stageVars.set("bgStreet", bgStreet);
 		add(bgStreet);
 		bgStreet.antialiasing = false;
@@ -53,14 +53,14 @@ class SchoolErect extends BaseStage
 
 		var widShit = Std.int(bgSky.width * PlayState.daPixelZoom);
 		if(!ClientPrefs.data.lowQuality) {
-			var fgTrees:FunkinSprite = FunkinSprite.create(-500, 6, 'weeb/erect/weebTreesBack');
+			var fgTrees:FunkinSprite = new FunkinSprite(-500, 6, Paths.image('weeb/erect/weebTreesBack'));
 			stageVars.set("fgTrees", fgTrees);
 			add(fgTrees);
 			fgTrees.antialiasing = false;
 			pixelPerfectEffectArray.push(fgTrees);
 		}
 
-		var bgTrees:FunkinSprite = FunkinSprite.create(-806, -1050, null);
+		var bgTrees:FunkinSprite = new FunkinSprite(-806, -1050, Paths.image('weeb/erect/weebTrees'));
 		bgTrees.frames = Paths.getPackerAtlas('weeb/erect/weebTrees');
 		bgTrees.animation.add('treeLoop', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 12);
 		bgTrees.animation.play('treeLoop');
@@ -71,7 +71,7 @@ class SchoolErect extends BaseStage
 		pixelPerfectEffectArray.push(bgTrees);
 
 		if(!ClientPrefs.data.lowQuality) {
-			var treeLeaves:FunkinSprite = FunkinSprite.create(-20, -40, null);
+			var treeLeaves:FunkinSprite = new FunkinSprite(-20, -40, Paths.image('weeb/erect/petals'));
 			treeLeaves.frames = Paths.getSparrowAtlas('weeb/erect/petals');
 			treeLeaves.scrollFactor.set(0.85, 0.85);
 			treeLeaves.animation.addByPrefix('leaves', 'PETALS ALL', 24, true);
@@ -116,11 +116,17 @@ class SchoolErect extends BaseStage
 
 	override function createPost()
 	{
-		if (ClientPrefs.data.shaders) 
+		if (ClientPrefs.data.shaders)
 		{
 			applyCharacterShader("dad");
-			applyCharacterShader("gf");
+			if (gf != null) applyCharacterShader("gf");
 			applyCharacterShader("boyfriend");
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				// var daLuaChars:Character = modchartCharacters.get(value);
+				applyCharacterShader(value);
+			}
 		}
 	}
 
@@ -180,7 +186,17 @@ class SchoolErect extends BaseStage
 	// For events
 
 	override function characterChangePost(charExist:String, charName:String) {
-		if (ClientPrefs.data.shaders) applyCharacterShader(charExist);
+		if (ClientPrefs.data.shaders)
+		{
+			if (charExist == "bf") 
+				charExist = "boyfriend";
+			else if (charExist == "girlfriend")
+				charExist = "gf";
+			else if (charExist == "opponent")
+				charExist = "dad";
+
+			applyCharacterShader(charExist);
+		}
 	}
 
 	var doof:DialogueBox = null;
@@ -219,7 +235,7 @@ class SchoolErect extends BaseStage
 		inCutscene = true;
 		
 		//var black:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
-		var black:FunkinSprite = FunkinSprite.create(-100, -100, null);
+		var black:FunkinSprite = new FunkinSprite(-100, -100, null);
 		black.makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
 		black.scrollFactor.set();
 		PlayState.instance.variables.get("stageVariables").set("black", black);
@@ -241,5 +257,24 @@ class SchoolErect extends BaseStage
 			}
 			else tmr.reset(0.3);
 		});
+	}
+
+	override public function destroy():Void
+	{
+		if (ClientPrefs.data.shaders)
+		{
+			for (defaultChars in [boyfriend, dad, gf])
+			{
+				if (defaultChars.shader != null) defaultChars.shader = null;
+			}
+
+			for (value in modchartCharacters.keys()) 
+			{
+				var luaChars = modchartCharacters.get(value);
+				if (luaChars.shader != null) luaChars.shader = null;
+			}
+		}
+
+		super.destroy();
 	}
 }

@@ -14,7 +14,9 @@ import openfl.filters.ShaderFilter;
 import shaders.ErrorHandledShader;
 import sys.io.File;
 
-import options.ModpackMakerState.ModpackAssetRegistry;
+import extensions.flixel.FlxCameraEx;
+
+import states.editors.ModpackMakerState.ModpackAssetRegistry;
 
 class ShaderFunctions
 {
@@ -241,6 +243,20 @@ class ShaderFunctions
 
 			if (leObj != null) {
 				removeCameraShader(leObj, shader);
+			}
+			return false;
+		});
+
+		Lua_helper.add_callback(lua, "cleanCameraShader", function(obj:String, ?shader:String = "") {
+			var split:Array<String> = obj.split('.');
+			var leObj:Dynamic = LuaUtils.getObjectDirectly(split[0]);
+			if (split.length > 1) {
+				leObj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
+			}
+
+			if (leObj != null) {
+				leObj.filters = [];
+				return true;
 			}
 			return false;
 		});
@@ -610,5 +626,6 @@ class ShaderFunctions
 		
 		leObj.filters = newCamEffects;
 	}
+
 	#end
 }
