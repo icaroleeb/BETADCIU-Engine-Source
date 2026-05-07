@@ -62,7 +62,6 @@ class Character extends Bopper
 
 	public var isPlayer:Bool = false;
 	public var isSpeakerChar:Bool = false;
-	public var flipMode:Bool = false;
 	public var charName:String = DEFAULT_CHARACTER; // believe me... this is useful asf
 	public var curCharacter:String = DEFAULT_CHARACTER;
 	public var pastCharacter:String = DEFAULT_CHARACTER;
@@ -166,7 +165,7 @@ class Character extends Bopper
 		missingCharacter = false;
 		if (missingText != null) missingText.kill();
 		
-		for (i in ['flipMode', 'stopIdle', 'skipDance', 'specialAnim', 'stunned', "flippedAnims"])
+		for (i in ['stopIdle', 'skipDance', 'specialAnim', 'stunned', "flippedAnims"])
 			Reflect.setProperty(this, i, false);
 		
 		idleSuffix = '';
@@ -258,7 +257,7 @@ class Character extends Bopper
 			trace('Error loading character file of "$character": $e');
 		}
 
-		for (i in ['flipMode', 'stopIdle', 'skipDance', 'specialAnim', 'stunned']){
+		for (i in ['stopIdle', 'skipDance', 'specialAnim', 'stunned']){
 			Reflect.setProperty(this, i, false);		
 		}
 

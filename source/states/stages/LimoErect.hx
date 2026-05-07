@@ -202,6 +202,18 @@ class LimoErect extends BaseStage
 		// 	grpLimoDancers.destroy();
 		// 	grpLimoDancers = null;
 		// }
+
+		if (ClientPrefs.data.shaders){
+			boyfriend.shader = null;
+			dad.shader = null;
+			if (gf != null) gf.shader = null;
+
+			for (value in modchartCharacters.keys()) // apply for the lua characters too
+			{
+				var daLuaChars = modchartCharacters.get(value);
+				daLuaChars.shader = null;
+			}
+		}
 		super.destroy();
 	}
 

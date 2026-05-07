@@ -1490,8 +1490,8 @@ class PlayState extends MusicBeatState
 
 				var voiceStateFinal = voiceStatePostfix.toLowerCase();
 
-				if (SONG.vocalsPostFix != null) 
-					voiceStateFinal = SONG.vocalsPostFix.toLowerCase();
+				if (SONG.vocalsPostfix != null) 
+					voiceStateFinal = SONG.vocalsPostfix.toLowerCase();
 
 				var baseName = (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1)
 					? "Player"
@@ -1516,7 +1516,6 @@ class PlayState extends MusicBeatState
 					? Paths.voices(songData.song, baseName + voiceStateFinal)
 					: Paths.voices(songData.song, baseName);
 
-				var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile + SONG.vocalsPostFix);
 				if(oppVocals != null && oppVocals.length > 0) opponentVocals.loadEmbedded(oppVocals);
 			}
 		}
@@ -2663,7 +2662,7 @@ class PlayState extends MusicBeatState
 					{
 						var char = modchartCharacters.get(value1);	
 						if (char != null){
-							FunkinLua.makeLuaCharacter(value1, value2, char.isPlayer, false);
+							FunkinLua.makeLuaCharacter(value1, value2, char.isPlayer);
 						}
 					}
 				}
@@ -3608,7 +3607,7 @@ class PlayState extends MusicBeatState
 					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
 						var daLuaCharAnim:Character = modchartCharacters.get(value);
 
-						if ((!daLuaCharAnim.isPlayer && daLuaCharAnim.flipMode) && daLuaCharAnim.playSingAnim)
+						if ((!daLuaCharAnim.isPlayer) && daLuaCharAnim.playSingAnim)
 						{
 							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
 							daLuaCharAnim.holdTimer = 0;
@@ -3681,14 +3680,14 @@ class PlayState extends MusicBeatState
 					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
 						var daLuaCharAnim:Character = modchartCharacters.get(value);
 
-						if ((daLuaCharAnim.isPlayer && !daLuaCharAnim.flipMode) && daLuaCharAnim.playSingAnim) {
+						if ((daLuaCharAnim.isPlayer) && daLuaCharAnim.playSingAnim) {
 							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
 						}
 					}
 
 					for (value in modchartCharacters.keys()) {
 						var daLuaChar:Character = modchartCharacters.get(value);
-						if ((daLuaChar.isPlayer && !daLuaChar.flipMode) || (!daLuaChar.isPlayer && daLuaChar.flipMode)) daLuaChar.holdTimer = 0;
+						if (daLuaChar.isPlayer) daLuaChar.holdTimer = 0;
 					}
 
 					if(note.noteType == 'Hey!')

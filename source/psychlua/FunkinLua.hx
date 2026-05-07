@@ -1774,24 +1774,20 @@ class FunkinLua {
 					GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), mySprite);
 			}
 		});
-		Lua_helper.add_callback(lua, "changeCharacter", function(tag:String, character:String, ?flipped:Bool = false) {
+		Lua_helper.add_callback(lua, "changeCharacter", function(tag:String, character:String) {
 			//game.stagesFunc(function(stage:BaseStage) stage.characterChange(tag, character)); // putting this beacuse of the function lua
 			//game.callOnScripts('onCharacterChange', [tag, character]);
 
 			switch(tag.toLowerCase().trim()) {
 				case 'gf' | 'girlfriend' | "2":
-					if (flipped == null) flipped = game.gf.flipMode;
-					changeCharacterAuto("gf", character, flipped);
+					changeCharacterAuto("gf", character);
 				case 'dad' | "opponent" | "1":
-					if (flipped == null) flipped = game.dad.flipMode;
-					changeCharacterAuto("dad", character, flipped);
+					changeCharacterAuto("dad", character);
 				case 'boyfriend' | 'bf' | 'player' | "0":
-					if (flipped == null) flipped = game.boyfriend.flipMode;
-					changeCharacterAuto("boyfriend", character, flipped);	
+					changeCharacterAuto("boyfriend", character);	
 				default: 
 					var shit:Character = game.modchartCharacters.get(tag);
-					if (flipped == null && shit != null) shit.flipMode = flipped;
-					if(shit != null) makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
+					if(shit != null) makeLuaCharacter(tag, character, shit.isPlayer);
 					else luaTrace("changeCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);
 					
 			}
@@ -1799,11 +1795,11 @@ class FunkinLua {
 			//game.stagesFunc(function(stage:BaseStage) stage.characterChangePost(tag, character)); // putting this beacuse of the characters shaders including the function lua
 			//game.callOnScripts('onCharacterChangePost', [tag, character]);
 		});
-		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
+		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false) {
 			// if(this.scriptType.toLowerCase() == "stage" || this.scriptType.toLowerCase() == "stagecamera") 
 			// 	luaTrace("The makeLuaCharacter can't be added in script stages!", false, false, FlxColor.RED);
 			// else
-				makeLuaCharacter(tag, character, isPlayer, flipped);
+				makeLuaCharacter(tag, character, isPlayer);
 		});
 		Lua_helper.add_callback(lua, "flipCharacterAnim", function(character:String) {
 			switch(character.toLowerCase()) {
@@ -2912,7 +2908,7 @@ class FunkinLua {
 		LuaUtils.getTargetInstance().add(shit);
 	}
 	
-	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false) {
+	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false) {
 		tag = tag.replace('.', '');
 
 		var animationName:String = "no way anyone have an anim name this big";
@@ -2973,7 +2969,7 @@ class FunkinLua {
 	}
 
 	// Combined them all into one function
-	public static function changeCharacterAuto(target:String, id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) {
+	public static function changeCharacterAuto(target:String, id:String, ?dontDestroy:Bool = false) {
 		var charObj:Character;
 		var posX:Float = 0;
 		var posY:Float = 0;
@@ -3015,8 +3011,7 @@ class FunkinLua {
 		// charObj.destroy();
 		
 		// charObj = new Character(0, 0, id, (target == "boyfriend" ? !flipped : flipped));
-		charObj.resetCharacter(0, 0, id, (target == "boyfriend" ? !flipped : flipped)); // trying to not remove them
-		charObj.flipMode = flipped;
+		charObj.resetCharacter(0, 0, id, (target == "boyfriend" ? true : false)); // trying to not remove them
 
 		switch(target) {
 			case "boyfriend":

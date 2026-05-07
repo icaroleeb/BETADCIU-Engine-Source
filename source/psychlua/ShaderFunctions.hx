@@ -19,47 +19,7 @@ import extensions.flixel.FlxCameraEx;
 import states.editors.ModpackMakerState.ModpackAssetRegistry;
 
 class ShaderFunctions
-{
-	// Found these in FlxGraphicsShader for some reason???
-	@:glFragmentHeader("varying float openfl_Alphav;
-		varying vec4 openfl_ColorMultiplierv;
-		varying vec4 openfl_ColorOffsetv;
-		varying vec2 openfl_TextureCoordv;
-
-		uniform bool openfl_HasColorTransform;
-		uniform vec2 openfl_TextureSize;
-		uniform sampler2D bitmap;
-
-		uniform bool hasTransform;  // TODO: Is this still needed? Apparently, yes!
-		uniform bool hasColorTransform;
-		vec4 flixel_texture2D(sampler2D bitmap, vec2 coord)
-		{
-			vec4 color = texture2D(bitmap, coord);
-			if (!(hasTransform || openfl_HasColorTransform))
-				return color;
-			
-			if (color.a == 0.0)
-				return vec4(0.0, 0.0, 0.0, 0.0);
-			
-			if (openfl_HasColorTransform || hasColorTransform)
-			{
-				color = vec4 (color.rgb / color.a, color.a);
-				vec4 mult = vec4 (openfl_ColorMultiplierv.rgb, 1.0);
-				color = clamp (openfl_ColorOffsetv + (color * mult), 0.0, 1.0);
-				
-				if (color.a == 0.0)
-					return vec4 (0.0, 0.0, 0.0, 0.0);
-				
-				return vec4 (color.rgb * color.a * openfl_Alphav, color.a * openfl_Alphav);
-			}
-			
-			return color * openfl_Alphav;
-		}
-	", true)
-	@:glFragmentBody("
-		gl_FragColor = flixel_texture2D(bitmap, openfl_TextureCoordv);
-	", true)
-	
+{	
 	public function new() {
 		
 	}
@@ -464,30 +424,6 @@ class ShaderFunctions
 		});
 	}
 
-	public static function processFragmentSource(value:String):String
-	{
-		if (value == null) return value;
-
-		@:privateAccess
-		final header = 
-			#if (flixel < "6.0.0")
-				FlxRuntimeShader.BASE_FRAGMENT_HEADER;
-			#else
-				FlxRuntimeShaderMacro.retrieveMetadata("glFragmentHeader");
-			#end
-
-		@:privateAccess
-		final body = 
-			#if (flixel < "6.0.0")
-				FlxRuntimeShader.BASE_FRAGMENT_BODY;
-			#else
-				FlxRuntimeShaderMacro.retrieveMetadata("glFragmentBody");
-			#end
-
-		value = value.replace("#pragma header", header).replace("#pragma body", body);
-		return value;
-	}
-
 	#if (!flash && sys)
 	public static function initLuaShader(name:String, ?glslVersion:Int = 120)
 	{
@@ -577,9 +513,15 @@ class ShaderFunctions
 				for (i in 0...daFilters.length) {
 					var filter:ShaderFilter = daFilters[i];
 
-					if (filter.shader.glFragmentSource.replace("\r", "").trim() == processFragmentSource(arr[0]).replace("\r", "").trim()) {
-						shader = filter.shader;
-						break;
+					if (Std.isOfType(filter.shader, ErrorHandledRuntimeShader))
+					{
+						var sh:ErrorHandledRuntimeShader = cast filter.shader;
+
+						if (sh.shaderName == shaderName)
+						{
+							shader = sh;
+							break;
+						}
 					}
 				}
 			} else {
@@ -615,9 +557,15 @@ class ShaderFunctions
 			for (i in 0...daFilters.length){	
 				var filter:ShaderFilter = daFilters[i];
 
-				if (filter.shader.glFragmentSource.replace("\r", "").trim() == processFragmentSource(arr[0]).replace("\r", "").trim()){
-					swagFilters.remove(filter);
-					break;
+				if (Std.isOfType(filter.shader, ErrorHandledRuntimeShader))
+				{
+					var sh:ErrorHandledRuntimeShader = cast filter.shader;
+
+					if (sh.shaderName == shaderName)
+					{
+						swagFilters.remove(filter);
+						break;
+					}
 				}
 			}
 			

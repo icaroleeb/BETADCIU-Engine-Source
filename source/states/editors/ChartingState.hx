@@ -688,7 +688,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		// SONG TAB
 		songNameInputText.text = PlayState.SONG.song;
-		vocalsSuffixInputText.text = PlayState.SONG.vocalsPostFix;
+		vocalsPostfixInputText.text = PlayState.SONG.vocalsPostfix;
 		allowVocalsCheckBox.checked = (PlayState.SONG.needsVoices != false); //If the song for some reason does not have this value, it will be set to true
 
 		bpmStepper.value = PlayState.SONG.bpm;
@@ -1905,16 +1905,20 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		@:privateAccess opponentVocals.cleanup(true);
 		if (PlayState.SONG.needsVoices)
 		{
+			if (PlayState.SONG.vocalsPostfix == null){
+				PlayState.SONG.vocalsPostfix = "";
+			}
+
 			try
 			{
-				var playerVocals:Sound = Paths.voices(PlayState.SONG.song, (characterData.vocalsP1 == null || characterData.vocalsP1.length < 1) ? 'Player' : characterData.vocalsP1);
+				var playerVocals:Sound = Paths.voices(PlayState.SONG.song, ((characterData.vocalsP1 == null || characterData.vocalsP1.length < 1) ? 'Player' : characterData.vocalsP1) + PlayState.SONG.vocalsPostfix);
 				vocals.loadEmbedded(playerVocals != null ? playerVocals : Paths.voices(PlayState.SONG.song));
 				vocals.volume = 0;
 				vocals.play();
 				vocals.pause();
 				vocals.time = time;
 				
-				var oppVocals:Sound = Paths.voices(PlayState.SONG.song, (characterData.vocalsP2 == null || characterData.vocalsP2.length < 1) ? 'Opponent' : characterData.vocalsP2);
+				var oppVocals:Sound = Paths.voices(PlayState.SONG.song, ((characterData.vocalsP2 == null || characterData.vocalsP2.length < 1) ? 'Opponent' : characterData.vocalsP2) + PlayState.SONG.vocalsPostfix);
 				if(oppVocals != null && oppVocals.length > 0)
 				{
 					opponentVocals.loadEmbedded(oppVocals);
@@ -3298,7 +3302,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	}
 
 	var songNameInputText:PsychUIInputText;
-	var vocalsSuffixInputText:PsychUIInputText;
+	var vocalsPostfixInputText:PsychUIInputText;
 	var allowVocalsCheckBox:PsychUICheckBox;
 
 	var bpmStepper:PsychUINumericStepper;
@@ -3320,8 +3324,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		songNameInputText = new PsychUIInputText(objX, objY, 100, 'None', 8);
 		songNameInputText.onChange = function(old:String, cur:String) PlayState.SONG.song = cur;
 
-		vocalsSuffixInputText  = new PsychUIInputText(objX + 105, objY, 100, 'None', 8);
-		vocalsSuffixInputText.onChange = function(old:String, cur:String) PlayState.SONG.vocalsPostFix = cur;
+		vocalsPostfixInputText  = new PsychUIInputText(objX + 105, objY, 100, 'None', 8);
+		vocalsPostfixInputText.onChange = function(old:String, cur:String) PlayState.SONG.vocalsPostfix = cur;
 
 		allowVocalsCheckBox = new PsychUICheckBox(objX, objY + 20, 'Allow Vocals', 80, function()
 		{
@@ -3385,9 +3389,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		};
 
 		tab_group.add(new FlxText(songNameInputText.x, songNameInputText.y - 15, 80, 'Song Name:'));
-		tab_group.add(new FlxText(vocalsSuffixInputText.x, vocalsSuffixInputText.y - 15, 80, 'Vocals Suffix:'));
+		tab_group.add(new FlxText(vocalsPostfixInputText.x, vocalsPostfixInputText.y - 15, 80, 'Vocals Suffix:'));
 		tab_group.add(songNameInputText);
-		tab_group.add(vocalsSuffixInputText);
+		tab_group.add(vocalsPostfixInputText);
 		tab_group.add(allowVocalsCheckBox);
 		tab_group.add(reloadAudioButton);
 		#if mac

@@ -28,7 +28,7 @@ typedef SwagSong =
 	
 	@:optional var disableNoteRGB:Bool;
 
-	@:optional var vocalsPostFix:String;
+	@:optional var vocalsPostfix:String;
 	@:optional var arrowSkin:String;
 	@:optional var noteStyle:String;
 	@:optional var splashSkin:String;
@@ -63,7 +63,7 @@ class Song
 	public var disableNoteRGB:Bool = false;
 	public var speed:Float = 1;
 	public var stage:String;
-	public var vocalsPostFix:String;
+	public var vocalsPostfix:String;
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
 	public var gfVersion:String = 'gf';

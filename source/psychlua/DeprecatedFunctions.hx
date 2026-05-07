@@ -231,41 +231,41 @@ class DeprecatedFunctions
 			Reflect.getProperty(LuaUtils.getTargetInstance(), group)[index].updateHitbox();
 			FunkinLua.luaTrace('updateHitboxFromGroup is deprecated! Use updateHitbox instead.', false, true);
 		});
-		Lua_helper.add_callback(lua,"changeBFAuto", function(?id:String="bf", ?flipped:Bool=false) {
+		Lua_helper.add_callback(lua,"changeBFAuto", function(?id:String="bf") {
 			//PlayState.instance.stagesFunc(function(stage:BaseStage) stage.characterChange("boyfriend", id)); // putting this beacuse of the function lua
 			//PlayState.instance.callOnScripts('onCharacterChange', ["boyfriend", character]);
 
-			FunkinLua.changeCharacterAuto("boyfriend", id, flipped);
+			FunkinLua.changeCharacterAuto("boyfriend", id);
 			FunkinLua.luaTrace('changeBFAuto is deprecated! Use changeCharacter instead.', false, true);
 
 			//PlayState.instance.stagesFunc(function(stage:BaseStage) stage.characterChangePost("boyfriend", character)); // putting this beacuse of the characters shaders including the function lua
 			//PlayState.instance.callOnScripts('onCharacterChangePost', ["boyfriend", character]);
 		});
-		Lua_helper.add_callback(lua,"changeBoyfriendAuto", function(?id:String="bf", ?flipped:Bool=false) {
+		Lua_helper.add_callback(lua,"changeBoyfriendAuto", function(?id:String="bf") {
 			//PlayState.instance.stagesFunc(function(stage:BaseStage) stage.characterChange("boyfriend", id)); // putting this beacuse of the function lua
 			//PlayState.instance.callOnScripts('onCharacterChange', ["boyfriend", character]);
 
-			FunkinLua.changeCharacterAuto("boyfriend", id, flipped);
+			FunkinLua.changeCharacterAuto("boyfriend", id);
 			FunkinLua.luaTrace('changeBoyfriendAuto is deprecated! Use changeCharacter instead.', false, true);
 
 			//PlayState.instance.stagesFunc(function(stage:BaseStage) stage.characterChangePost("boyfriend", character)); // putting this beacuse of the characters shaders including the function lua
 			//PlayState.instance.callOnScripts('onCharacterChangePost', ["boyfriend", character]);
 		});
-		Lua_helper.add_callback(lua,"changeDadAuto", function(?id:String="bf", ?flipped:Bool=false) {
+		Lua_helper.add_callback(lua,"changeDadAuto", function(?id:String="bf") {
 			//PlayState.instance.stagesFunc(function(stage:BaseStage) stage.characterChange("dad", id)); // putting this beacuse of the function lua
 			//PlayState.instance.callOnScripts('onCharacterChange', ["dad", character]);
 
-			FunkinLua.changeCharacterAuto("dad", id, flipped);
+			FunkinLua.changeCharacterAuto("dad", id);
 			FunkinLua.luaTrace('changeDadAuto is deprecated! Use changeCharacter instead.', false, true);
 
 			//PlayState.instance.stagesFunc(function(stage:BaseStage) stage.characterChangePost("dad", character)); // putting this beacuse of the characters shaders including the function lua
 			//PlayState.instance.callOnScripts('onCharacterChangePost', ["dad", character]);
 		});
-		Lua_helper.add_callback(lua,"changeGFAuto", function(?id:String="bf", ?flipped:Bool=false) {
+		Lua_helper.add_callback(lua,"changeGFAuto", function(?id:String="bf") {
 			//PlayState.instance.stagesFunc(function(stage:BaseStage) stage.characterChange("gf", id)); // putting this beacuse of the function lua
 			//PlayState.instance.callOnScripts('onCharacterChange', ["gf", character]);
 
-			FunkinLua.changeCharacterAuto("gf", id, flipped);
+			FunkinLua.changeCharacterAuto("gf", id);
 			FunkinLua.luaTrace('changeGFAuto is deprecated! Use changeCharacter instead.', false, true);
 
 			//PlayState.instance.stagesFunc(function(stage:BaseStage) stage.characterChangePost("gf", character)); // putting this beacuse of the characters shaders including the function lua
@@ -273,7 +273,7 @@ class DeprecatedFunctions
 		});		
 		Lua_helper.add_callback(lua, "changeLuaCharacter", function(tag:String, character:String){
 			var shit:Character = PlayState.instance.modchartCharacters.get(tag);
-			if(shit != null) FunkinLua.makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
+			if(shit != null) FunkinLua.makeLuaCharacter(tag, character, shit.isPlayer);
 			else FunkinLua.luaTrace("changeLuaCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			FunkinLua.luaTrace('changeLuaCharacter is deprecated! Use changeCharacter instead.', false, true);
 		});
