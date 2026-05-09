@@ -318,6 +318,7 @@ class Paths
 			localTrackedAssets.push(key);
 			return currentTrackedAssets.get(key);
 		}
+
 		return cacheBitmap(key, parentFolder, bitmap, allowGPU);
 	}
 
@@ -548,24 +549,37 @@ class Paths
 		#end
 	}
 
-	public static function getAnimateAtlas(key:String, ?folder:String, ?settings:FlxAnimateSettings):FlxAnimateFrames
+	public static function getAnimateAtlas(key:String, ?folder:String, ?settings:FlxAnimateSettings):FlxAnimateFrames // my attempt to make the preloading work automatically
 	{
+		var framesFound:Array<FlxAtlasFrames> = [];
 		var graphicKey = getPath('images/$key', TEXT, folder, true);
+		if (!FileSystem.exists('${graphicKey}/Animation.json')) throw 'No Animation.json file exists at the specified path (${graphicKey})';
 
-		var validatedSettings:FlxAnimateSettings =
-			{
+		var validatedSettings:FlxAnimateSettings = {
 			swfMode: settings?.swfMode ?? false,
-			cacheOnLoad: settings?.cacheOnLoad ?? false,
+			cacheOnLoad: settings?.cacheOnLoad ?? true,
 			filterQuality: settings?.filterQuality ?? MEDIUM,
 			onSymbolCreate: settings?.onSymbolCreate ?? null,
-			};
-		// Validate asset path.
-		if (!FileSystem.exists('${graphicKey}/Animation.json'))
-		{
-			throw 'No Animation.json file exists at the specified path (${graphicKey})';
-		}
+		};
 
-		return FlxAnimateFrames.fromAnimate(graphicKey);
+		// var t = haxe.Timer.stamp();
+		var atlas = FlxAnimateFrames.fromAnimate(graphicKey, null, null, null, false, validatedSettings);
+		if (atlas != null) {
+			if (ClientPrefs.data.cacheOnGPU && atlas.parent.bitmap != null) atlas.parent.bitmap.disposeImage();
+			framesFound.push(atlas);
+
+			for (collection in framesFound) {
+				@:privateAccess {
+					var path = collection.parent.key;
+				}
+
+				collection.parent.persist = true; // trusting the internal flixel-animate cache for this :pray::pray:
+				collection.parent.destroyOnNoUse = false; // trusting the internal flixel-animate cache for this :pray::pray:			
+			}
+		}
+		// trace('fromAnimate "$key" took: ' + (haxe.Timer.stamp() - t) + 's');
+
+		return atlas;
 	}
 
 	inline static public function formatToSongPath(path:String) {

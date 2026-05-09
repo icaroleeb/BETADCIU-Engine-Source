@@ -1,9 +1,20 @@
 package objects;
 
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
+import flixel.system.FlxAssets.FlxGraphicAsset;
 
 class FunkinSprite extends FlxAnimate
 {
+    public static function create(x:Float = 0.0, y:Float = 0.0, key:String)
+    {
+        return new FunkinSprite(x, y, Paths.image(key));
+    }
+
+    public override function new(x:Float = 0, y:Float = 0, ?SimpleGraphic:FlxGraphicAsset) {
+        super(x, y, SimpleGraphic);
+        antialiasing = ClientPrefs.data.antialiasing;
+    }
+
     /**
      * Returns the screen position of this object.
      *

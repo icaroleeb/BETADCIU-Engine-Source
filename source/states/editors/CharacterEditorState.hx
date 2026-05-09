@@ -637,6 +637,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	var healthColorStepperR:PsychUINumericStepper;
 	var healthColorStepperG:PsychUINumericStepper;
 	var healthColorStepperB:PsychUINumericStepper;
+
+	var scalableOffsetsCheckBox:PsychUICheckBox;
+	var vSliceSusCheckBox:PsychUICheckBox;
 	function addCharacterUI()
 	{
 		var tab_group = UI_characterbox.getTab('Character').menu;
@@ -687,16 +690,15 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			character.noAntialiasing = noAntialiasingCheckBox.checked;
 		};
 
-		playerSpriteSheetCheckBox = new PsychUICheckBox(flipXCheckBox.x, noAntialiasingCheckBox.y + 40, "Player Spritesheet", 80);
+		playerSpriteSheetCheckBox = new PsychUICheckBox(flipXCheckBox.x, noAntialiasingCheckBox.y + 40, "Don't Player Offsets?", 80);
 		playerSpriteSheetCheckBox.checked = character.isPsychPlayer;
 		playerSpriteSheetCheckBox.onClick = function() {
 			character.isPsychPlayer = playerSpriteSheetCheckBox.checked;
-			trace('Psych Player: ' + character.isPsychPlayer + ' | isPlayer: ' + character.isPlayer + ' | flippedAnims: ' + character.flippedAnims);
 
 			if (character.isPlayer && (character.flippedAnims && character.isPsychPlayer || !character.isPsychPlayer && !character.flippedAnims)) 
 				character.flipAnims();
 			else if (!character.isPlayer && !character.isPsychPlayer && character.flippedAnims)
-			character.flipAnims();
+				character.flipAnims();
 
 			playAnim(character.getAnimationName(), true);
 		};
@@ -722,6 +724,14 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		healthColorStepperR = new PsychUINumericStepper(singDurationStepper.x, saveCharacterButton.y, 20, character.healthColorArray[0], 0, 255, 0);
 		healthColorStepperG = new PsychUINumericStepper(singDurationStepper.x + 65, saveCharacterButton.y, 20, character.healthColorArray[1], 0, 255, 0);
 		healthColorStepperB = new PsychUINumericStepper(singDurationStepper.x + 130, saveCharacterButton.y, 20, character.healthColorArray[2], 0, 255, 0);
+
+		scalableOffsetsCheckBox = new PsychUICheckBox(singDurationStepper.x, saveCharacterButton.y + 25, "Scalable Offsets", 80);
+		scalableOffsetsCheckBox.checked = character.scalableOffsets;
+		scalableOffsetsCheckBox.onClick = function() { character.scalableOffsets = scalableOffsetsCheckBox.checked; };
+
+		vSliceSusCheckBox = new PsychUICheckBox(scalableOffsetsCheckBox.x + scalableOffsetsCheckBox.width + 10, saveCharacterButton.y + 25, "vSliceSustains", 80);
+		vSliceSusCheckBox.checked = character.vSliceSustains;
+		vSliceSusCheckBox.onClick = function() { character.vSliceSustains = vSliceSusCheckBox.checked; };
 
 		tab_group.add(new FlxText(15, imageInputText.y - 18, 100, 'Image file name:'));
 		tab_group.add(new FlxText(15, healthIconInputText.y - 18, 100, 'Health icon name:'));
@@ -755,6 +765,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		tab_group.add(healthColorStepperG);
 		tab_group.add(healthColorStepperB);
 		tab_group.add(saveCharacterButton);
+		tab_group.add(scalableOffsetsCheckBox);
+		tab_group.add(vSliceSusCheckBox);
 	}
 
 	public function UIEvent(id:String, sender:Dynamic) {
@@ -1452,7 +1464,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			"vocals_file": character.vocalsFile,
 			"is_player_char": character.isPsychPlayer,
 			"note_skin": character.noteSkin,
-			"_editor_isPlayer": character.isPlayer
+			"_editor_isPlayer": character.isPlayer,
+
+			"vSliceSustains": character.vSliceSustains,
+			"scalableOffsets": character.scalableOffsets
 		};
 
 		var data:String = PsychJsonPrinter.print(json, ['offsets', 'position', 'healthbar_colors', 'camera_position', 'indices', 'player_position', 'player_camera_position', 'playerOffsets']);

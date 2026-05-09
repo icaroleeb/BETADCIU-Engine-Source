@@ -1,116 +1,60 @@
 {
 	"animations": {
-		"blue2": {
-			"prefix": "note splash blue 2",
-			"fps": [
-				22,
-				26
-			],
-			"offsets": [
-				-52,
-				-48
-			],
-			"indices": [],
-			"name": "blue2",
-			"noteData": 5
-		},
 		"purple": {
-			"prefix": "note splash purple 1",
-			"fps": [
-				22,
-				26
-			],
+			"noteData": 0,
 			"offsets": [
-				-58,
-				-55
+				-36,
+				-20
 			],
-			"indices": [],
+			"fps": [
+				24,
+				24
+			],
+			"prefix": "vanilla splash purple 1",
 			"name": "purple",
-			"noteData": 0
+			"indices": []
 		},
 		"red": {
-			"prefix": "note splash red 1",
-			"fps": [
-				22,
-				26
-			],
+			"noteData": 3,
 			"offsets": [
-				-58,
-				-55
+				-36,
+				-20
 			],
-			"indices": [],
+			"fps": [
+				24,
+				24
+			],
+			"prefix": "vanilla splash red 1",
 			"name": "red",
-			"noteData": 3
-		},
-		"red2": {
-			"prefix": "note splash red 2",
-			"fps": [
-				22,
-				26
-			],
-			"offsets": [
-				-52,
-				-48
-			],
-			"indices": [],
-			"name": "red2",
-			"noteData": 7
+			"indices": []
 		},
 		"blue": {
-			"prefix": "note splash blue 1",
-			"fps": [
-				22,
-				26
-			],
+			"noteData": 1,
 			"offsets": [
-				-58,
-				-55
+				-36,
+				-20
 			],
-			"indices": [],
+			"fps": [
+				24,
+				24
+			],
+			"prefix": "vanilla splash blue 1",
 			"name": "blue",
-			"noteData": 1
-		},
-		"purple2": {
-			"prefix": "note splash purple 2",
-			"fps": [
-				22,
-				26
-			],
-			"offsets": [
-				-52,
-				-48
-			],
-			"indices": [],
-			"name": "purple2",
-			"noteData": 4
+			"indices": []
 		},
 		"green": {
-			"prefix": "note splash green 1",
-			"fps": [
-				22,
-				26
-			],
+			"noteData": 2,
 			"offsets": [
-				-58,
-				-55
+				-36,
+				-20
 			],
-			"indices": [],
+			"fps": [
+				24,
+				24
+			],
+			"prefix": "vanilla splash green 1",
 			"name": "green",
-			"noteData": 2
-		},
-		"green2": {
-			"prefix": "note splash green 2",
-			"fps": [
-				22,
-				26
-			],
-			"offsets": [
-				-52,
-				-48
-			],
-			"indices": [],
-			"name": "green2",
-			"noteData": 6
+			"indices": []
 		}
 	},
 	"allowRGB": true,

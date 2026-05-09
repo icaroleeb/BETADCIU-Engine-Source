@@ -258,7 +258,7 @@ class FunkinLua {
 		set('noteSkin', ClientPrefs.data.noteSkin);
 		set('noteSkinPostfix', Note.getNoteSkinPostfix());
 		set('splashSkin', ClientPrefs.data.splashSkin);
-		set('splashSkinPostfix', NoteSplash.getSplashSkinPostfix());
+		set('splashSkinPostfix', "");
 		set('splashAlpha', ClientPrefs.data.splashAlpha);
 
 		// build target (windows, mac, linux, etc.)

@@ -193,9 +193,13 @@ class PlayState extends MusicBeatState
 	public var vocals:FlxSound;
 	public var opponentVocals:FlxSound;
 
-	public var dad:Character = null;
-	public var gf:Character = null;
-	public var boyfriend:Character = null;
+	// public var dad:Character = null;
+	// public var gf:Character = null;
+	// public var boyfriend:Character = null;
+
+	public var boyfriend(default, set):Character = null;
+	public var dad(default, set):Character = null;
+	public var gf(default, set):Character = null;
 
 	public var notes:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<Note> = [];
@@ -330,13 +334,9 @@ class PlayState extends MusicBeatState
 	public var canControlPauseMenu:Bool = true; // becasue set/getPropertyFromClass don't work?!
 	public static var restarted:Bool = false;
 
-	var ogNoteSkin:String = "NOTE_assets";
-
 	override public function create()
 	{
 		FlxG.sound.music.volume = 0;
-		if (PlayState.SONG != null && PlayState.SONG.noteStyle != null) ogNoteSkin = PlayState.SONG.noteStyle;
-		else if (PlayState.SONG != null && PlayState.SONG.arrowSkin != null) ogNoteSkin = PlayState.SONG.arrowSkin;
 		
 		//trace('Playback Rate: ' + playbackRate);
 		_lastLoadedModDirectory = Mods.currentModDirectory;
@@ -854,12 +854,10 @@ class PlayState extends MusicBeatState
 	public function addCharacterToList(newCharacter:String, type:Int) {
 		var preloadChar = new Character(0, 0, newCharacter);
 		startCharacterScripts(preloadChar.curCharacter);
-		//stopCharacterScripts(preloadChar.curCharacter);
-		//preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
-		add(preloadChar);
 		stopCharacterScripts(preloadChar.curCharacter);
+		add(preloadChar);
 		remove(preloadChar);
-		preloadChar.destroy(); // cuz we don't need to use preload chars so yeah ¯\_(ツ)_/¯
+		preloadChar = null;
 	}
 
 	public function startCharacterScripts(name:String)
@@ -1250,17 +1248,29 @@ class PlayState extends MusicBeatState
 		return spr;
 	}
 
+	public var calledBy:HScript = null; // so i "game.add..." adds to the script variables too -- its public but i don't recommend to mess with this on scripts...
+
 	// why was this commented?
-	public function addBehindGF(obj:FlxBasic)
+	override public function add(obj:FlxBasic):FlxBasic
 	{
+		if (calledBy != null) calledBy.scriptObjects.push(obj);
+		return super.add(obj);
+	}
+	override public function insert(index:Int, obj:FlxBasic):FlxBasic
+	{
+		if (calledBy != null) calledBy.scriptObjects.push(obj);
+		return super.insert(index, obj);
+	}
+	public function addBehindGF(obj:FlxBasic) {
+		if (calledBy != null) calledBy.scriptObjects.push(obj);
 		insert(members.indexOf(gf), obj);
 	}
-	public function addBehindBF(obj:FlxBasic)
-	{
+	public function addBehindBF(obj:FlxBasic) {
+		if (calledBy != null) calledBy.scriptObjects.push(obj);
 		insert(members.indexOf(boyfriend), obj);
 	}
-	public function addBehindDad(obj:FlxBasic)
-	{
+	public function addBehindDad(obj:FlxBasic) {
+		if (calledBy != null) calledBy.scriptObjects.push(obj);
 		insert(members.indexOf(dad), obj);
 	}
 
@@ -1774,7 +1784,7 @@ class PlayState extends MusicBeatState
 				while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 				{
 					final dunceNote:Note = unspawnNotes.shift();
-					if (usedNoteSkinEvent) dunceNote.texture = PlayState.SONG.arrowSkin;
+					if (usedNoteSkinEvent) dunceNote.texture = (dunceNote.mustPress ? playerNoteSkin : opponentNoteSkin);
 					notes.insert(0, dunceNote);
 					dunceNote.spawned = true;
 
@@ -2165,7 +2175,7 @@ class PlayState extends MusicBeatState
 			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 			{
 				var dunceNote:Note = unspawnNotes[0];
-				if (usedNoteSkinEvent) dunceNote.texture = PlayState.SONG.arrowSkin;
+				if (usedNoteSkinEvent) dunceNote.texture = (dunceNote.mustPress ? playerNoteSkin : opponentNoteSkin);
 				notes.insert(0, dunceNote);
 				dunceNote.spawned = true;
 
@@ -2495,6 +2505,8 @@ class PlayState extends MusicBeatState
 	}
 
 	public var usedNoteSkinEvent:Bool = false;
+	public var opponentNoteSkin:String = "NOTE_assets";
+	public var playerNoteSkin:String = "NOTE_assets";
 
 	public function triggerEvent(eventName:String, value1:String, value2:String, value3:String, strumTime:Float) {
 		var flValue1:Null<Float> = Std.parseFloat(value1);
@@ -2622,16 +2634,21 @@ class PlayState extends MusicBeatState
 				}
 
 			case "Change Note Skin":
-			    var target = value2.toLowerCase().trim();
-
-				switch(target) {
+				var target:String = "both";
+				switch(value2.toLowerCase().trim()) {
 					case "opponent":
 						for (strum in opponentStrums) strum.texture = value1;
+						opponentNoteSkin = value1;
+						target = "opponent";
 					case "player":
 						for (strum in playerStrums) strum.texture = value1;
+						playerNoteSkin = value1;
+						target = "player";
 					default:
 						for (strum in opponentStrums) strum.texture = value1;
 						for (strum in playerStrums) strum.texture = value1;
+						playerNoteSkin = opponentNoteSkin = value1;
+						
 				}
 
 				for (daNote in notes.members) {
@@ -2643,8 +2660,6 @@ class PlayState extends MusicBeatState
                         }
                     }
                 }
-
-				PlayState.SONG.arrowSkin = value1; // so the next notes spawn with the new skin
 				usedNoteSkinEvent = true;
 			case 'Change Character':
 				stagesFunc(function(stage:BaseStage) stage.characterChange(value1, value2)); // putting this beacuse of the function lua
@@ -3578,40 +3593,53 @@ class PlayState extends MusicBeatState
 		if (songName != 'tutorial')
 			camZooming = true;
 
-		if (playDad) {
-			if(note.noteType == 'Hey!' && dad.hasAnimation('hey'))
+		if (!note.noAnimation && playDad) {
+			var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, note.noteData)))] + note.animSuffix;
+			var charsToProcess:Array<{char:Character, animCheck:String}> = [];
+			var mainChar:Character = note.gfNote ? gf : dad;
+			var mainAnimCheck:String = note.gfNote ? 'cheer' : 'hey';
+
+			charsToProcess.push({char: mainChar, animCheck: mainAnimCheck});
+
+			for (key in modchartCharacters.keys())
 			{
-				dad.playAnim('hey', true);
-				dad.specialAnim = true;
-				dad.heyTimer = 0.6;
+				var modChar:Character = modchartCharacters.get(key);
+				if (modChar != null && !modChar.isPlayer)
+					charsToProcess.push({char: modChar, animCheck: 'hey'});
 			}
-			else if(!note.noAnimation)
+
+			for (entry in charsToProcess)
 			{
-				var char:Character = dad;
-				var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, note.noteData)))] + note.animSuffix;
-				if(note.gfNote) char = gf;
+				var char:Character = entry.char;
 
-				if(char != null)
+				if (char == null || !char.playSingAnim) continue;
+
+				var canPlay:Bool = true;
+
+				if (note.isSustainNote)
 				{
-					var canPlay:Bool = true; //char.specialAnim;
-					if(note.isSustainNote)
+					var holdAnim:String = animToPlay + '-hold';
+
+					if (char.animation.exists(holdAnim))
+						animToPlay = holdAnim;
+
+					var currentAnim:String = char.animation.curAnim != null ? char.animation.curAnim.name : '';
+					if (currentAnim == holdAnim || currentAnim == holdAnim + '-loop')
+						canPlay = false;
+				}
+
+				if (!(char.vSliceSustains && note.isSustainNote) && canPlay)
+					char.playAnim(animToPlay, true);
+
+				char.holdTimer = 0;
+
+				if (note.noteType == 'Hey!' && char.hasAnimation('hey'))
+				{
+					if (char.animation.exists(entry.animCheck))
 					{
-						var holdAnim:String = animToPlay + '-hold';
-						if(char.animation.exists(holdAnim)) animToPlay = holdAnim;
-						if(char.getAnimationName() == holdAnim || char.getAnimationName() == holdAnim + '-loop') canPlay = false;
-					}
-
-					if(canPlay) char.playAnim(animToPlay, true);
-					char.holdTimer = 0;
-
-					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
-						var daLuaCharAnim:Character = modchartCharacters.get(value);
-
-						if ((!daLuaCharAnim.isPlayer) && daLuaCharAnim.playSingAnim)
-						{
-							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
-							daLuaCharAnim.holdTimer = 0;
-						}
+						char.playAnim(entry.animCheck, true);
+						char.specialAnim = true;
+						char.heyTimer = 0.6;
 					}
 				}
 			}
@@ -3654,58 +3682,62 @@ class PlayState extends MusicBeatState
 		{
 			if(!note.noAnimation && playBF)
 			{
-				var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, note.noteData)))] + note.animSuffix;
+				var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length - 1, note.noteData)))] + note.animSuffix;
+				var charsToProcess:Array<{char:Character, animCheck:String}> = [];
+				var mainChar:Character = note.gfNote ? gf : boyfriend;
+				var mainAnimCheck:String = note.gfNote ? 'cheer' : 'hey';
 
-				var char:Character = boyfriend;
-				var animCheck:String = 'hey';
-				if(note.gfNote)
+				charsToProcess.push({char: mainChar, animCheck: mainAnimCheck});
+
+				for (key in modchartCharacters.keys())
 				{
-					char = gf;
-					animCheck = 'cheer';
+					var modChar:Character = modchartCharacters.get(key);
+					if (modChar != null && modChar.isPlayer)
+						charsToProcess.push({char: modChar, animCheck: 'hey'});
 				}
 
-				if(char != null)
+				for (entry in charsToProcess)
 				{
+					var char:Character = entry.char;
+
+					if (char == null || !char.playSingAnim) continue;
+
 					var canPlay:Bool = true;
-					if(note.isSustainNote)
+
+					if (note.isSustainNote)
 					{
 						var holdAnim:String = animToPlay + '-hold';
-						if(char.animation.exists(holdAnim)) animToPlay = holdAnim;
-						if(char.getAnimationName() == holdAnim || char.getAnimationName() == holdAnim + '-loop') canPlay = false;
+
+						if (char.animation.exists(holdAnim))
+							animToPlay = holdAnim;
+
+						var currentAnim:String = char.animation.curAnim != null ? char.animation.curAnim.name : '';
+						if (currentAnim == holdAnim || currentAnim == holdAnim + '-loop')
+							canPlay = false;
 					}
-	
-					if(canPlay) char.playAnim(animToPlay, true);
+
+					if (!(char.vSliceSustains && note.isSustainNote) && canPlay)
+						char.playAnim(animToPlay, true);
+
 					char.holdTimer = 0;
 
-					for (value in modchartCharacters.keys()) { // this one for lua Characters sing Animations
-						var daLuaCharAnim:Character = modchartCharacters.get(value);
-
-						if ((daLuaCharAnim.isPlayer) && daLuaCharAnim.playSingAnim) {
-							if(canPlay) daLuaCharAnim.playAnim(animToPlay, true);
-						}
-					}
-
-					for (value in modchartCharacters.keys()) {
-						var daLuaChar:Character = modchartCharacters.get(value);
-						if (daLuaChar.isPlayer) daLuaChar.holdTimer = 0;
-					}
-
-					if(note.noteType == 'Hey!')
+					if (note.noteType == 'Hey!' && char.hasAnimation('hey'))
 					{
-						if(char.hasAnimation(animCheck))
+						if (char.animation.exists(entry.animCheck))
 						{
-							char.playAnim(animCheck, true);
+							char.playAnim(entry.animCheck, true);
 							char.specialAnim = true;
 							char.heyTimer = 0.6;
 						}
 					}
 				}
+
 			}
 
 			if(!cpuControlled)
 			{
 				var spr = playerStrums.members[note.noteData];
-				if(spr != null) spr.playAnim('confirm', true);
+				if(spr != null && (spr.animation != null && spr.animation.curAnim.name != 'confirm')) spr.playAnim('confirm', true);
 			}
 			else strumPlayAnim(false, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 			vocals.volume = 1;
@@ -3770,7 +3802,6 @@ class PlayState extends MusicBeatState
 	}
 
 	override function destroy() {
-		PlayState.SONG.arrowSkin = ogNoteSkin;
 		if (psychlua.CustomSubstate.instance != null)
 		{
 			closeSubState();
@@ -4281,7 +4312,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if(spr != null) {
-			spr.playAnim('confirm', true);
+			if (spr.animation != null && spr.animation.curAnim.name != 'confirm') spr.playAnim('confirm', true);
 			spr.resetAnim = time;
 		}
 	}
@@ -4655,5 +4686,21 @@ class PlayState extends MusicBeatState
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost', "stage");
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost', "stage");
 		}
+	}
+
+	// just testing
+	function set_boyfriend(value:Character):Character {
+		if (value != null) value.playSingAnim = true;
+		return boyfriend = value;
+	}
+
+	function set_dad(value:Character):Character {
+		if (value != null) value.playSingAnim = true;
+		return dad = value;
+	}
+
+	function set_gf(value:Character):Character {
+		if (value != null) value.playSingAnim = true;
+		return gf = value;
 	}
 }

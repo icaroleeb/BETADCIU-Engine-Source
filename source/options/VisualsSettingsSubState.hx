@@ -22,10 +22,9 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		for (i in 0...Note.colArray.length)
 		{
 			var note:StrumNote = new StrumNote(370 + (560 / Note.colArray.length) * i, -200, i, 0);
-			changeNoteSkin(note);
 			notes.add(note);
 			
-			var splash:NoteSplash = new NoteSplash(0, 0, NoteSplash.defaultNoteSplash + NoteSplash.getSplashSkinPostfix());
+			var splash:NoteSplash = new NoteSplash(0, 0, NoteSplash.defaultNoteSplash);
 			splash.inEditor = true;
 			splash.babyArrow = note;
 			splash.ID = i;
@@ -34,39 +33,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		}
 
 		// options
-		/*var noteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt'); // doesn't really work in the current version
-		if(noteSkins.length > 0)
-		{
-			if(!noteSkins.contains(ClientPrefs.data.noteSkin))
-				ClientPrefs.data.noteSkin = ClientPrefs.defaultData.noteSkin; //Reset to default if saved noteskin couldnt be found
-
-			noteSkins.insert(0, ClientPrefs.defaultData.noteSkin); //Default skin always comes first
-			var option:Option = new Option('Note Skins:',
-				"Select your preferred Note skin.",
-				'noteSkin',
-				STRING,
-				noteSkins);
-			addOption(option);
-			option.onChange = onChangeNoteSkin;
-			noteOptionID = optionsArray.length - 1;
-		}*/
-		
-		var noteSplashes:Array<String> = Mods.mergeAllTextsNamed('images/noteSplashes/list.txt');
-		if(noteSplashes.length > 0)
-		{
-			if(!noteSplashes.contains(ClientPrefs.data.splashSkin))
-				ClientPrefs.data.splashSkin = ClientPrefs.defaultData.splashSkin; //Reset to default if saved splashskin couldnt be found
-
-			noteSplashes.insert(0, ClientPrefs.defaultData.splashSkin); //Default skin always comes first
-			var option:Option = new Option('Note Splashes:',
-				"Select your prefered Note Splash variation.",
-				'splashSkin',
-				STRING,
-				noteSplashes);
-			addOption(option);
-			option.onChange = onChangeSplashSkin;
-		}
-
 		var option:Option = new Option('Note Splash Opacity',
 			'How much transparent should the Note Splashes be.',
 			'splashAlpha',
@@ -239,35 +205,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)));
 
 		changedMusic = true;
-	}
-
-	function onChangeNoteSkin()
-	{
-		notes.forEachAlive(function(note:StrumNote) {
-			changeNoteSkin(note);
-			note.centerOffsets();
-			note.centerOrigin();
-		});
-	}
-
-	function changeNoteSkin(note:StrumNote)
-	{
-		var skin:String = Note.defaultNoteSkin;
-		var customSkin:String = skin + Note.getNoteSkinPostfix();
-		if(Paths.fileExists('images/$customSkin.png', IMAGE)) skin = customSkin;
-
-		note.texture = skin; //Load texture and anims
-		note.reloadNote();
-		note.playAnim('static');
-	}
-
-	function onChangeSplashSkin()
-	{
-		var skin:String = NoteSplash.defaultNoteSplash + NoteSplash.getSplashSkinPostfix();
-		for (splash in splashes)
-			splash.loadSplash(skin);
-
-		playNoteSplashes();
 	}
 
 	function playNoteSplashes()
