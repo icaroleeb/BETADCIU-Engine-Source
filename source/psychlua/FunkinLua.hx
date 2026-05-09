@@ -75,7 +75,7 @@ class FunkinLua {
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
 
-	public var charName:String = ""; // only used for character scripts
+	public var parentChar:String = ""; // only used for character scripts
 
 	public function new(scriptName:String, ?scriptType:String = "") {
 		lua = LuaL.newstate();
@@ -185,7 +185,7 @@ class FunkinLua {
 				set('gfName', game.gf != null ? game.gf.curCharacter : PlayState.SONG.gfVersion);
 			}
 
-			set("charNameScript", this.charName); // exclusive for character scripts
+			set("parentCharScript", this.parentChar); // exclusive for character scripts
 			set("songPos", 0); // kade scrips part 2
 			set('curBeat', game.curBeat);
 			set('curStep', game.curStep);
