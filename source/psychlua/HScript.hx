@@ -733,14 +733,16 @@ class HScript extends IrisEx implements IFlxDestroyable
 		origin = null;
 		#if LUA_ALLOWED parentLua = null; #end
 
-		if (scriptObjects != null) {
-			for (obj in scriptObjects) {
-				if (obj != null) {
-					FlxG.state.remove(obj, true);
-					obj.destroy();
+		if (this.scriptType == "stage"){
+			if (scriptObjects != null) {
+				for (obj in scriptObjects) {
+					if (obj != null) {
+						FlxG.state.remove(obj, true);
+						obj.destroy();
+					}
 				}
+				scriptObjects = [];
 			}
-			scriptObjects = [];
 		}
 
 		super.destroy();

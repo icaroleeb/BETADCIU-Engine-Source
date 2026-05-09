@@ -4040,7 +4040,7 @@ class PlayState extends MusicBeatState
 		return false;
 	}
 
-	public function callLuaFile(luaFile:String, ?callLua:String = "")
+	public function callLuaFile(luaFile:String, ?callLua:String = "", ?luaType:String = "")
 	{
 		#if MODS_ALLOWED
 		var luaToLoad:String = Paths.modFolders(luaFile);
@@ -4056,7 +4056,9 @@ class PlayState extends MusicBeatState
 			for (script in luaArray) {
 				if (script.scriptName == luaToLoad) {
 					// Custom function call
+					if (luaType != null && luaType.length > 0) script.scriptType = luaType; // wanna make this work for types too...
 					script.call(callLua, []);
+					if (luaType != null && luaType.length > 0) script.scriptType = "";
 					return true;
 				}
 			}
@@ -4110,7 +4112,7 @@ class PlayState extends MusicBeatState
 			return false;
 		}
 
-	public function callHScriptFile(scriptFile:String, ?callHScript:String = "")
+	public function callHScriptFile(scriptFile:String, ?callHScript:String = "", hscriptType:String = "")
 	{
 		#if MODS_ALLOWED
 		var scriptToLoad:String = Paths.modFolders(scriptFile);
@@ -4650,8 +4652,8 @@ class PlayState extends MusicBeatState
 
 		if(!preload){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
-			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
-			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');
+			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost', "stage");
+			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost', "stage");
 		}
 	}
 }
