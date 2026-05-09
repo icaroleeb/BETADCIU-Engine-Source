@@ -4,6 +4,8 @@ import objects.Note;
 import shaders.RGBPalette;
 import flixel.util.FlxDestroyUtil;
 
+import objects.notes.NoteAnimationLoader;
+
 class MetaNote extends Note
 {
 	public static var noteTypeTexts:Map<Int, FlxText> = [];
@@ -28,10 +30,8 @@ class MetaNote extends Note
 		this.noteData = v % ChartingState.GRID_COLUMNS_PER_PLAYER;
 		this.mustPress = (v < ChartingState.GRID_COLUMNS_PER_PLAYER);
 		
-		if(!PlayState.isPixelStage)
-			loadNoteAnims();
-		else
-			loadPixelNoteAnims();
+		this.isPixelNote = PlayState.isPixelStage;
+		NoteAnimationLoader.loadAnims(this);
 
 		if(Note.globalRgbShaders.contains(rgbShader.parent)) //Is using a default shader
 			rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(noteData));

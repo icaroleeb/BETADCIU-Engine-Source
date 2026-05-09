@@ -73,9 +73,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 	override function create()
 	{
-		Paths.clearStoredMemory();
+		Paths.freeGraphicsFromMemory();
 		Paths.clearUnusedMemory();
-
+		Paths.clearStoredMemory();
+	
 		FlxG.sound.music.stop();
 		#if !web // me and my lazyness to made this a mp3
 		FlxG.sound.playMusic(Paths.music('kawaruslow'), 0.7);

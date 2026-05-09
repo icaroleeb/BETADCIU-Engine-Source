@@ -2574,7 +2574,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					for (note in notes)
 					{
 						if(note == null) continue;
-						note.reloadNote(skin);
+						note.texture = skin;
 
 						var strumNote:StrumNote = strumLineNotes.members[note.songData[1]];
 						if(strumNote != null && vortexEnabled)
@@ -2712,7 +2712,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			genericEventButton(function(event:EventMetaNote)
 			{
-				event.events.push([eventsList[Std.int(Math.max(eventDropDown.selectedIndex, 0))][0], value1InputText.text, value2InputText.text, value3InputText.text]);
+				event.events.insert(curEventSelected + 1, [eventsList[Std.int(Math.max(eventDropDown.selectedIndex, 0))][0], value1InputText.text, value2InputText.text, value3InputText.text]);
 				event.updateEventText();
 				curEventSelected++;
 			});
