@@ -1621,9 +1621,14 @@ class PlayState extends MusicBeatState
 		var player:String   = "";
 
 		if (arrowSwitches == null || arrowSwitches.length == 0) {
-			var skin:String = (PlayState.SONG != null && PlayState.SONG.noteStyle != null) ? PlayState.SONG.noteStyle : (PlayState.SONG != null && PlayState.SONG.arrowSkin != null ? PlayState.SONG.arrowSkin : null);
+			var skin:String = "";
+
+			if (PlayState.SONG != null){
+				skin = (PlayState.SONG.noteStyle != null ? PlayState.SONG.noteStyle : (PlayState.SONG.arrowSkin != null ? PlayState.SONG.arrowSkin : ""));
+			}
+			
 			opponent = (skin != null && skin != "") ? skin : 'normal';
-			player   = opponent;
+			player = opponent;
 		} else {
 			for (skin in arrowSwitches)
 			{
