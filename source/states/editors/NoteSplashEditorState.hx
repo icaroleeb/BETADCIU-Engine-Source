@@ -41,7 +41,7 @@ class NoteSplashEditorState extends MusicBeatState
     override function create()
     {
         if (imageSkin == null)
-            imageSkin =  NoteSplash.defaultNoteSplash + NoteSplash.getSplashSkinPostfix();
+            imageSkin =  NoteSplash.defaultNoteSplash;
 
         FlxG.mouse.visible = true;
 

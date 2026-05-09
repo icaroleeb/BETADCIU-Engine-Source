@@ -44,7 +44,7 @@ class NoteSplashEditorState extends UIState // MUST EXTEND UI STATE needed for a
     override function create()
     {
         if (imageSkin == null)
-            imageSkin =  NoteSplash.defaultNoteSplash + NoteSplash.getSplashSkinPostfix();
+            imageSkin =  NoteSplash.defaultNoteSplash;
 
         FlxG.mouse.visible = true;
 

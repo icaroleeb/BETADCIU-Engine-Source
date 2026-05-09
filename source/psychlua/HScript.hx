@@ -357,29 +357,6 @@ class HScript extends IrisEx implements IFlxDestroyable
 			}
 			return false;
 		});
-		set('setStageVar', function(name:String, value:Dynamic) {
-			if (!MusicBeatState.getVariables().exists("stageVariables")) MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxSprite>());
-
-			MusicBeatState.getVariables().get("stageVariables").set(name, value);
-			return value;
-		});
-		set('getStageVar', function(name:String) {
-			if (!MusicBeatState.getVariables().exists("stageVariables")) MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxSprite>());
-
-			var result:Dynamic = null;
-			if(MusicBeatState.getVariables().get("stageVariables").exists(name)) result = MusicBeatState.getVariables().get("stageVariables").get(name);
-			return result;
-		});
-		set('removeStageVar', function(name:String)
-		{
-			if (!MusicBeatState.getVariables().exists("stageVariables")) MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxSprite>());
-
-			if(MusicBeatState.getVariables().get("stageVariables").exists(name)) {
-				MusicBeatState.getVariables().get("stageVariables").remove(name);
-				return true;
-			}
-			return false;
-		});
 		set('debugPrint', function(text:String, ?color:FlxColor = null) {
 			if(color == null) color = FlxColor.WHITE;
 			PlayState.instance.addTextToDebug(text, color);
@@ -527,26 +504,33 @@ class HScript extends IrisEx implements IFlxDestroyable
 		set('this', this);
 		set('ModchartState', FunkinLua); // lazy ass fix for some scripts ported from betadciu engine
 
-		// you don't need to add stageVars anymore. -- but isn't compatible with "game.add(sprite);" & "PlayState.instance.add(sprite);"
-		set('add', function(tag:FlxBasic){
+		// you don't need to add stageVars anymore.
+		set('add', function(tag:FlxBasic, ?name:String = null){
 			scriptObjects.push(tag);
 			FlxG.state.add(tag);
+			if (name != null && !MusicBeatState.getVariables().exists(name)) MusicBeatState.getVariables().set(name, tag);
 		});
-		set('insert', function(position:Int, tag:FlxBasic){ 
+
+		set('insert', function(position:Int, tag:FlxBasic, ?name:String = null){ 
 			scriptObjects.push(tag);
 			FlxG.state.insert(position, tag);
+			if (name != null && !MusicBeatState.getVariables().exists(name)) MusicBeatState.getVariables().set(name, tag);
 		});
-		set('addBehindGF', function(tag:FlxBasic){
+
+		set('addBehindGF', function(tag:FlxBasic, ?name:String = null){
 			scriptObjects.push(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
+			if (name != null && !MusicBeatState.getVariables().exists(name)) MusicBeatState.getVariables().set(name, tag);
 		});
-		set('addBehindBF', function(tag:FlxBasic){
+		set('addBehindBF', function(tag:FlxBasic, ?name:String = null){
 			scriptObjects.push(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
+			if (name != null && !MusicBeatState.getVariables().exists(name)) MusicBeatState.getVariables().set(name, tag);
 		});
-		set('addBehindDad', function(tag:FlxBasic){
+		set('addBehindDad', function(tag:FlxBasic, ?name:String = null){
 			scriptObjects.push(tag);
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
+			if (name != null && !MusicBeatState.getVariables().exists(name)) MusicBeatState.getVariables().set(name, tag);
 		});
 		//
 
@@ -582,25 +566,6 @@ class HScript extends IrisEx implements IFlxDestroyable
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
 
-	}
-
-	public function checkStageVar(obj:FlxBasic) {
-		switch(this.scriptType.toLowerCase()){
-			case "stage":
-				if (!MusicBeatState.getVariables().exists("stageVariables"))
-					MusicBeatState.getVariables().set("stageVariables", new Map<String, FlxBasic>());
-
-				var stageVars = MusicBeatState.getVariables().get("stageVariables");
-				stageVars.set(Std.string(obj), obj);
-			case "stagecamera":
-				if (!MusicBeatState.getVariables().exists("stageCameraVariables"))
-					MusicBeatState.getVariables().set("stageCameraVariables", new Map<String, FlxBasic>());
-
-				var stageVars = MusicBeatState.getVariables().get("stageCameraVariables");
-				stageVars.set(Std.string(obj), obj);
-		}
-
-		trace('Added ' + Std.string(obj) + ' to stage variables');
 	}
 
 	#if LUA_ALLOWED
@@ -698,10 +663,13 @@ class HScript extends IrisEx implements IFlxDestroyable
 
 		try {
 			var func:Dynamic = interp.variables.get(funcToRun); // function signature
+			if (PlayState.instance != null) PlayState.instance.calledBy = this;
 			final ret = Reflect.callMethod(null, func, args ?? []);
+			if (PlayState.instance != null) PlayState.instance.calledBy = null;
 			return {funName: funcToRun, signature: func, returnValue: ret};
 		}
 		catch(e:IrisError) {
+			if (PlayState.instance != null) PlayState.instance.calledBy = null;
 			var pos:HScriptInfos = cast this.interp.posInfos();
 			pos.funcName = funcToRun;
 			#if LUA_ALLOWED
@@ -714,6 +682,7 @@ class HScript extends IrisEx implements IFlxDestroyable
 			Iris.error(Printer.errorToString(e, false), pos);
 		}
 		catch (e:ValueException) {
+			if (PlayState.instance != null) PlayState.instance.calledBy = null;
 			var pos:HScriptInfos = cast this.interp.posInfos();
 			pos.funcName = funcToRun;
 			#if LUA_ALLOWED

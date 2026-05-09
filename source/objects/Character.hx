@@ -38,6 +38,10 @@ typedef CharacterFile = {
 	@:optional var isCharSpeaker:Bool;
 	
 	@:optional var _editor_isPlayer:Null<Bool>;
+
+	// stuff from nmv
+	@:optional var scalableOffsets:Null<Bool>;
+	@:optional var vSliceSustains:Null<Bool>;
 }
 
 typedef AnimArray = {
@@ -60,61 +64,113 @@ class Character extends Bopper
 	public var debugMode:Bool = false;
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
+	/**
+	 * is the player character
+	 * 
+	 * changes some things like flipping them
+	**/
 	public var isPlayer:Bool = false;
+	public var isPsychPlayer:Null<Bool>;
+
+	/**
+	 * is the speaker character
+	 * 
+	 * makes the character act like a "gf" character
+	**/
 	public var isSpeakerChar:Bool = false;
-	public var charName:String = DEFAULT_CHARACTER; // believe me... this is useful asf
+
+	/**
+	 * Character's json name
+	**/
 	public var curCharacter:String = DEFAULT_CHARACTER;
 	public var pastCharacter:String = DEFAULT_CHARACTER;
 
-	public var daZoom(default, set):Float = 1;
-
-	function set_daZoom(value:Float):Float
-	{
-		daZoom = value;
-		var daValue:Float = value * jsonScale;
-		this.scale.set(daValue, daValue);
-
-		// trace("fucked with");
-
-		return value;
-	}
-
+	public var charName:String = DEFAULT_CHARACTER; // believe me... this is useful asf
 	public var holdTimer:Float = 0;
 	public var heyTimer:Float = 0;
+	
 	public var specialAnim:Bool = false;
-	public var animationNotes:Array<Dynamic> = [];
 	public var stunned:Bool = false;
-	public var singDuration:Float = 4; //Multiplier of how long a character holds the sing pose
-	public var danceIdle:Bool = false; //Character use "danceLeft" and "danceRight" instead of "idle"
-	public var stopIdle:Bool = false;
-	public var skipDance:Bool = false;
-	public var playSingAnim:Bool = false;
 
+	/**
+	 * Multiplier of how long a character holds the sing pose
+	**/
+	public var singDuration:Float = 4;
+
+	/**
+	 * if true, character uses `danceLeft` and `danceRight` instead of `idle`
+	**/
+	public var danceIdle:Bool = false;
+
+	public var skipDance:Bool = false; // prevents a character from "dancing"
+
+	public var stopIdle:Bool = false; // prevents a character from "dancing" -- legacy variable, prefer to use skipDance
+
+	/**
+	 *  Makes the character sing (if the character is on PlayState's modchartCharacters map)
+	**/
+	public var playSingAnim:Bool = false; 
+
+	/**
+	 * The characters health icon
+	**/
 	public var healthIcon:String = 'face';
-	public var isPsychPlayer:Null<Bool>;
-	public var noteSkin:String;
-	public var animationsArray:Array<AnimArray> = [];
 
+	public var animationsArray:Array<AnimArray> = [];
+	public var animationNotes:Array<Dynamic> = [];
+
+	/**
+	 * Character offsets defined by the json
+	**/
 	public var positionArray:Array<Float> = [0, 0];
 	public var playerPositionArray:Array<Float> = [0, 0];
+
+	/**
+	 * Camera offsets defined by the json
+	**/
 	public var cameraPosition:Array<Float> = [0, 0];
 	public var playerCameraPosition:Array<Float> = [0, 0];
-	public var healthColorArray:Array<Int> = [255, 0, 0];
-	public var iconColor:String;
 
-	public var curColor:FlxColor = 0xFFFFFFFF; // i was thinking about using this but nvm
-
-	public var missingCharacter:Bool = false;
-	public var missingText:FlxText;
-	public var hasMissAnimations:Bool = false;
-	public var vocalsFile:String = '';
-
-	//Used on Character Editor
+	// Used on Character Editor
+	public var flippedAnims:Bool = false;
 	public var imageFile:String = '';
 	public var jsonScale:Float = 1;
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var editorIsPlayer:Null<Bool> = null;
+
+	/**
+	 * The Characters health bar colours stored as `[r,g,b]`
+	**/
+	public var healthColorArray:Array<Int> = [255, 0, 0];
+	public var iconColor:String;
+
+	/**
+	 *	If enabled, the character's singing animation will stop at the last frame while holding a sustain note
+	**/
+	public var vSliceSustains = false;
+
+	/**
+	 *	missing character
+	**/
+	public var missingCharacter:Bool = false;
+	public var missingText:FlxText;
+
+	/**
+	 *	Misses for characters that doesn't have miss in their sprites 
+	**/
+	public var hasMissAnimations:Bool = false;
+	public var curColor:FlxColor = 0xFFFFFFFF;
+
+	/**
+	 * 	Vocals file suffix to be loaded in PlayState
+	**/
+	public var vocalsFile:String = '';
+
+	/**
+	 *  ugh...
+	**/
+	public var noteSkin:String = '';
 
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
@@ -165,10 +221,9 @@ class Character extends Bopper
 		missingCharacter = false;
 		if (missingText != null) missingText.kill();
 		
-		for (i in ['stopIdle', 'skipDance', 'specialAnim', 'stunned', "flippedAnims"])
-			Reflect.setProperty(this, i, false);
+		stopIdle = skipDance = specialAnim = stunned = flippedAnims = scalableOffsets = vSliceSustains = false;
 		
-		idleSuffix = '';
+		this.idleSuffix = '';
 
 		setZoom(1);
 		
@@ -203,15 +258,12 @@ class Character extends Bopper
 
 		this.scrollFactor.set(1, 1);
 
-		if (this.animation != null)
-		{
+		if (this.animation != null) {
 			this.animation.stop();
 			this.animation.curAnim = null;
 		}
 
 		this.clipRect = null;
-
-		this.updateHitbox();
 
 		this.moves = true;
 		this.immovable = false;
@@ -219,8 +271,8 @@ class Character extends Bopper
 
 	public function changeCharacter(character:String) {
 		animationsArray = [];
-		animOffsets = [];
-		animPlayerOffsets = [];
+		animOffsets.clear();
+		animPlayerOffsets.clear();
 		curCharacter = character;
 		pastCharacter = character;
 		isPsychPlayer = false;
@@ -257,9 +309,7 @@ class Character extends Bopper
 			trace('Error loading character file of "$character": $e');
 		}
 
-		for (i in ['stopIdle', 'skipDance', 'specialAnim', 'stunned']){
-			Reflect.setProperty(this, i, false);		
-		}
+		stopIdle = skipDance = specialAnim = stunned = false;
 
 		hasMissAnimations = hasAnimation('singLEFTmiss') || hasAnimation('singDOWNmiss') || hasAnimation('singUPmiss') || hasAnimation('singRIGHTmiss');
 		recalculateDanceIdle();
@@ -285,7 +335,7 @@ class Character extends Bopper
 
 		var rawJson:Dynamic;
 
-		(FileSystem.exists(path) ? rawJson = File.getContent(path) : rawJson = Assets.getText(path));
+		rawJson = FileSystem.exists(path) ? File.getContent(path) : Assets.getText(path);
 		
 		var json:CharacterFile = cast Json.parse(rawJson);
 
@@ -296,15 +346,14 @@ class Character extends Bopper
 	{
 		isAnimateAtlas = false;
 
-		if (json.isPlayerChar || json.is_player_char){
-			isPsychPlayer = json.isPlayerChar || json.is_player_char;
-		}
+		isPsychPlayer = json.is_player_char ?? json.isPlayerChar ?? false;
+		isSpeakerChar = json.isCharSpeaker ?? false;
 
-		if (json.isCharSpeaker) isSpeakerChar = json.isCharSpeaker;
+		vSliceSustains = json.vSliceSustains ?? false;
+		scalableOffsets = json.scalableOffsets ?? false;
 
 		var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
-		if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind))
-			isAnimateAtlas = true;
+		isAnimateAtlas = (Paths.exists(animToFind));
 
 		scale.set(1, 1);
 		updateHitbox();
@@ -327,20 +376,19 @@ class Character extends Bopper
 		}
 
 		imageFile = json.image;
-		jsonScale = json.scale;
-		if (json.scale < 0) jsonScale = 1; // context: https://prnt.sc/4ulDTwEzHh20
-		if(json.scale != 1) {
+		jsonScale = json.scale > 0 ? json.scale : 1; // context: https://prnt.sc/4ulDTwEzHh20
+		if (jsonScale != 1) {
 			scale.set(jsonScale, jsonScale);
 			updateHitbox();
 		}
 
 		// positioning
-		var playerPosition:Array<Float> = CharacterFileUtil.getPlayerPosition(json);
+		var playerPosition = json.player_position ?? json.playerposition ?? null;
 
 		positionArray = ((!debugMode && isPlayer && playerPosition != null) ? playerPosition : json.position);
-		playerPositionArray = (playerPosition != null ?  playerPosition : json.position);
+		playerPositionArray = playerPosition ?? json.position;
 		cameraPosition = (isPlayer && json.player_camera_position != null ? json.player_camera_position : json.camera_position);
-		playerCameraPosition = (json.player_camera_position != null ? json.player_camera_position : json.camera_position);
+		playerCameraPosition = json.player_camera_position ?? json.camera_position;
 
 		// data
 		healthIcon = json.healthicon;
@@ -348,21 +396,18 @@ class Character extends Bopper
 		//flipX = (json.flip_x != isPlayer);
 		flipX = !!json.flip_x;
 		healthColorArray = (json.healthbar_colors != null && json.healthbar_colors.length > 2) ? json.healthbar_colors : [161, 161, 161];
-		vocalsFile = json.vocals_file != null ? json.vocals_file : '';
-		noteSkin = json.noteSkin != null ? json.noteSkin : '';
+		vocalsFile = json.vocals_file ?? '';
+		noteSkin = json.noteSkin ?? '';
 		originalFlipX = (json.flip_x == true);
 		editorIsPlayer = json._editor_isPlayer;
 
-		var colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
-		var colorPreCut = colorPreString.toHexString();
-		iconColor = colorPreCut.substring(2);
+		iconColor = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]).toHexString().substring(2);
 
 		// antialiasing
 		noAntialiasing = (json.no_antialiasing == true);
 		antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing : false;
 
 		// animations
-		var itHasPlayerOfs:Bool = false;
 		animationsArray = json.animations;
 		if(animationsArray != null && animationsArray.length > 0) {
 			for (a in animationsArray) {
@@ -388,18 +433,12 @@ class Character extends Bopper
 
 				}
 
-				var offsets:Array<Float> = a.offsets;
-				var playerOffsets:Array<Float> = a.playerOffsets;
-				var swagOffsets:Array<Float> = offsets;
-				
-				if (playerOffsets == null) {
-					playerOffsets = a.offsets;
-					isPsychPlayer = true;
-				} else if (isPlayer && playerOffsets != null) {
-					itHasPlayerOfs = true;
-					swagOffsets = playerOffsets;
-				}
+				var offsets = a.offsets ?? [0, 0];
+				var playerOffsets = a.playerOffsets ?? offsets;
+				var swagOffsets = (isPlayer && a.playerOffsets != null) ? playerOffsets : offsets;
 
+				if (a.playerOffsets == null) isPsychPlayer = true; // i tried to set this out of the loop but it didn't worked
+				
 				if(swagOffsets != null && a.offsets.length > 1) addOffset(a.anim, swagOffsets[0], swagOffsets[1]);
 				else addOffset(a.anim, 0, 0);
 
@@ -449,19 +488,17 @@ class Character extends Bopper
 			finishAnimation();
 		}
 
-		switch(curCharacter)
-		{
-			case 'pico-speaker':
-				if(animationNotes.length > 0 && Conductor.songPosition > animationNotes[0][0])
-				{
-					var noteData:Int = 1;
-					if(animationNotes[0][1] > 2) noteData = 3;
+		if (curCharacter == 'pico-speaker') { // aw come on, a switch with only one case is an if disguised
+			if(animationNotes.length > 0 && Conductor.songPosition > animationNotes[0][0])
+			{
+				var noteData:Int = 1;
+				if(animationNotes[0][1] > 2) noteData = 3;
 
-					noteData += FlxG.random.int(0, 1);
-					playAnim('shoot' + noteData, true);
-					animationNotes.shift();
-				}
-				if(isAnimationFinished()) playAnim(getAnimationName(), false, false, animation.curAnim.frames.length - 3);
+				noteData += FlxG.random.int(0, 1);
+				playAnim('shoot' + noteData, true);
+				animationNotes.shift();
+			}
+			if(isAnimationFinished()) playAnim(getAnimationName(), false, false, animation.curAnim.frames.length - 3);
 		}
 
 		if (getAnimationName().startsWith('sing')) holdTimer += elapsed;
@@ -499,19 +536,15 @@ class Character extends Bopper
 	}
 
 	public function hasAnimation(id:String):Bool
-	{
-		var animationList:Array<String> = this.animation?.getNameList() ?? [];
-		if (animationList.contains(id))
-		{
+{
+		if (animation.exists(id))
 			return true;
-		}
-		else if (this.isAnimate && !animationList.contains(id))
-		{
+
+		if (isAnimate)
 			return addAnimationIfMissing(id);
-		}
 
 		return false;
-	}
+}
 
 	public function listAnimations():Array<String>
 	{
@@ -691,10 +724,9 @@ class Character extends Bopper
 
 	public function setZoom(Zoom:Float)
 	{
-		set_daZoom(Zoom);
+		this.scale.set(Zoom, Zoom);
+		scalableOffsets = true;
 	}
-
-	public var flippedAnims:Bool = false; // mainly for the character editor
 
 	public function flipAnims() {
 		//rewrote it
@@ -751,8 +783,6 @@ class Character extends Bopper
 		return super.set_color(Color);
 	}
 
-	// Atlas support
-	// special thanks ne_eo for the references, you're the goat!!
 	@:allow(states.editors.CharacterEditorState, states.editors.CharacterEditorStateWIP)
 	public var isAnimateAtlas(default, null):Bool = false;
 	public override function draw()
@@ -765,23 +795,6 @@ class Character extends Bopper
 			color = FlxColor.BLACK;
 		}
 
-		// if(isAnimateAtlas)
-		// {
-		// 	if(atlas.anim.curInstance != null)
-		// 	{
-		// 		copyAtlasValues();
-		// 		atlas.draw();
-		// 		alpha = lastAlpha;
-		// 		color = lastColor;
-		// 		if(missingCharacter && visible)
-		// 		{
-		// 			missingText.x = getMidpoint().x - 150;
-		// 			missingText.y = getMidpoint().y - 10;
-		// 			missingText.draw();
-		// 		}
-		// 	}
-		// 	return;
-		// }
 		super.draw();
 		if(missingCharacter && visible)
 		{
@@ -794,40 +807,11 @@ class Character extends Bopper
 		}
 	}
 
-	// public function copyAtlasValues()
-	// {
-	// 	@:privateAccess
-	// 	{
-	// 		atlas.cameras = cameras;
-	// 		atlas.scrollFactor = scrollFactor;
-	// 		atlas.scale = scale;
-	// 		atlas.offset = offset;
-	// 		atlas.origin = origin;
-	// 		atlas.x = x;
-	// 		atlas.y = y;
-	// 		atlas.angle = angle;
-	// 		atlas.alpha = alpha;
-	// 		atlas.visible = visible;
-	// 		atlas.flipX = flipX;
-	// 		atlas.flipY = flipY;
-	// 		atlas.shader = shader;
-	// 		atlas.antialiasing = antialiasing;
-	// 		atlas.colorTransform = colorTransform;
-	// 		atlas.color = color;
-	// 	}
-	// }
-
 	public override function destroy()
 	{
 		if (missingText != null) missingText.visible = false; // this should fix some weird bugs when a character is missing
 		super.destroy();
 	}
-
-	// public function destroyAtlas()
-	// {
-	// 	if (atlas != null)
-	// 		atlas = FlxDestroyUtil.destroy(atlas);
-	// }	
 
 	// Character Perfect Pixel Effect
 
@@ -838,77 +822,58 @@ class Character extends Bopper
    * @param   camera  The desired "screen" coordinate space. If `null`, `FlxG.camera` is used.
    * @return  The screen position of this object.
    */
-  public override function getScreenPosition(?result:FlxPoint, ?camera:FlxCamera):FlxPoint
-  {
-    if (result == null) result = FlxPoint.get();
+	public override function getScreenPosition(?result:FlxPoint, ?camera:FlxCamera):FlxPoint
+	{
+		if (result == null) result = FlxPoint.get();
+		if (camera == null) camera = FlxG.camera;
 
-    if (camera == null) camera = FlxG.camera;
+		result.set(x, y);
 
-    result.set(x, y);
-    if (pixelPerfectPosition)
-    {
-      _rect.width = _rect.width / this.scale.x;
-      _rect.height = _rect.height / this.scale.y;
-      _rect.x = _rect.x / this.scale.x;
-      _rect.y = _rect.y / this.scale.y;
-      _rect.round();
-      _rect.x = _rect.x * this.scale.x;
-      _rect.y = _rect.y * this.scale.y;
-      _rect.width = _rect.width * this.scale.x;
-      _rect.height = _rect.height * this.scale.y;
-    }
+		if (pixelPerfectPosition)
+		{
+			result.x = Math.round(result.x / scale.x) * scale.x;
+			result.y = Math.round(result.y / scale.y) * scale.y;
+		}
 
-    return result.subtract(camera.scroll.x * scrollFactor.x, camera.scroll.y * scrollFactor.y);
-  }
+		return result.subtract(camera.scroll.x * scrollFactor.x, camera.scroll.y * scrollFactor.y);
+	}
 
-  override function drawSimple(camera:FlxCamera):Void
-  {
-    getScreenPosition(_point, camera).subtractPoint(offset);
-    if (isPixelPerfectRender(camera))
-    {
-      _point.x = _point.x / this.scale.x;
-      _point.y = _point.y / this.scale.y;
-      _point.round();
+	override function drawSimple(camera:FlxCamera):Void
+	{
+		getScreenPosition(_point, camera).subtractPoint(offset);
 
-      _point.x = _point.x * this.scale.x;
-      _point.y = _point.y * this.scale.y;
-    }
+		if (isPixelPerfectRender(camera))
+		{
+			_point.x = Math.round(_point.x / scale.x) * scale.x;
+			_point.y = Math.round(_point.y / scale.y) * scale.y;
+		}
 
-    _point.copyToFlash(_flashPoint);
-    camera.copyPixels(_frame, framePixels, _flashRect, _flashPoint, colorTransform, blend, antialiasing);
-  }
+		_point.copyToFlash(_flashPoint);
+		camera.copyPixels(_frame, framePixels, _flashRect, _flashPoint, colorTransform, blend, antialiasing);
+	}
 
-  override function drawComplex(camera:FlxCamera):Void
-  {
-    _frame.prepareMatrix(_matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
-    _matrix.translate(-origin.x, -origin.y);
-    _matrix.scale(scale.x, scale.y);
+	override function drawComplex(camera:FlxCamera):Void
+	{
+		_frame.prepareMatrix(_matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
+		_matrix.translate(-origin.x, -origin.y);
+		_matrix.scale(scale.x, scale.y);
 
-    if (bakedRotationAngle <= 0)
-    {
-      updateTrig();
+		if (bakedRotationAngle <= 0)
+		{
+			updateTrig();
+			if (angle != 0) _matrix.rotateWithTrig(_cosAngle, _sinAngle);
+		}
 
-      if (angle != 0) _matrix.rotateWithTrig(_cosAngle, _sinAngle);
-    }
+		getScreenPosition(_point, camera).subtractPoint(offset);
+		_point.add(origin.x, origin.y);
+		_matrix.translate(_point.x, _point.y);
 
-    getScreenPosition(_point, camera).subtractPoint(offset);
-    _point.add(origin.x, origin.y);
-    _matrix.translate(_point.x, _point.y);
+		if (isPixelPerfectRender(camera))
+		{
+			_matrix.tx = Math.round(_matrix.tx / scale.x) * scale.x;
+			_matrix.ty = Math.round(_matrix.ty / scale.y) * scale.y;
+		}
 
-    if (isPixelPerfectRender(camera))
-    {
-      _matrix.tx = Math.round(_matrix.tx / this.scale.x) * this.scale.x;
-      _matrix.ty = Math.round(_matrix.ty / this.scale.y) * this.scale.y;
-    }
-
-    camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
-  }
-}
-
-// Why does the old naming convention use camelCase or have no underline :(
-
-class CharacterFileUtil {
-	public static function getPlayerPosition(charData:CharacterFile):Array<Float> {
-		return charData.player_position != null ? charData.player_position : charData.playerposition;
+		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
 	}
 }

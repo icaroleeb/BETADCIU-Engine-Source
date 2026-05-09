@@ -16,10 +16,15 @@ class PreloadUtil
     public static var soundsToLoad:Array<String> = [];
 
     public static function preload(?chars:Array<String>, ?images:Array<String>, ?stages:Array<String>, ?sounds:Array<String>) {
-        if (chars != null) charactersToLoad = CoolUtil.removeDupe(charactersToLoad.concat(chars));
-        if (images != null) imagesToLoad = CoolUtil.removeDupe(imagesToLoad.concat(images));
-        if (stages != null) stagesToLoad = CoolUtil.removeDupe(stagesToLoad.concat(stages));
-        if (sounds != null) soundsToLoad = CoolUtil.removeDupe(soundsToLoad.concat(sounds));
+        if (chars != null) charactersToLoad = charactersToLoad.concat(chars);
+        if (images != null) imagesToLoad = imagesToLoad.concat(images);
+        if (stages != null) stagesToLoad = stagesToLoad.concat(stages);
+        if (sounds != null) soundsToLoad = soundsToLoad.concat(sounds);
+
+        charactersToLoad = CoolUtil.removeDupe(charactersToLoad);
+        imagesToLoad = CoolUtil.removeDupe(imagesToLoad);
+        stagesToLoad = CoolUtil.removeDupe(stagesToLoad);
+        soundsToLoad = CoolUtil.removeDupe(soundsToLoad);
 
         if (charactersToLoad.length > 0) {
             var dummyChar:Character = null;
@@ -40,7 +45,7 @@ class PreloadUtil
         if ((FlxG.state is PlayState) && stagesToLoad.length > 0) {
             var ogStage = PlayState.instance.curStage;
             for (stage in stagesToLoad) {
-                PlayState.instance.changeStage(stage);
+                PlayState.instance.changeStage(stage, true);
                 trace('Stage Loaded: $stage');
             }
             stagesToLoad = [];

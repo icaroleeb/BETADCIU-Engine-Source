@@ -65,12 +65,12 @@ class NoteSplash extends FunkinSprite
 		maxAnims = 0;
 		if(splash == null)
 		{
-			splash = defaultNoteSplash + getSplashSkinPostfix();
+			splash = defaultNoteSplash;
 			if (PlayState.SONG != null && PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) splash = PlayState.SONG.splashSkin;
 		}
 
 		if (Type.getClassName(Type.getClass(FlxG.state)) == "states.PlayState") {
-			if (splash == 'noteSkins/NOTE_assets') splash = defaultNoteSplash + getSplashSkinPostfix(); // lets avoid some problems with the default stuff.
+			if (splash == 'noteSkins/NOTE_assets') splash = defaultNoteSplash; // lets avoid some problems with the default stuff.
 			texture = splash;
 			var splashPaths:Array<String> = [
 				'notes/noteSplashes-$texture',
@@ -87,7 +87,7 @@ class NoteSplash extends FunkinSprite
 					isLegacyNoteSkin = (path == 'notes/noteSplashes-$splash');
 					break;
 				} else {
-					texture = "noteSplashes/noteSplashes-vanilla"; // default if couldn't find anything
+					texture = "noteSplashes/noteSplashes"; // default if couldn't find anything
 				}
 			}
 		} else
@@ -102,7 +102,7 @@ class NoteSplash extends FunkinSprite
 		// trace(texture);
 		if (frames == null)
 		{
-			texture = defaultNoteSplash + getSplashSkinPostfix();
+			texture = defaultNoteSplash;
 			frames = Paths.getSparrowAtlas(texture);
 			if (frames == null)
 			{
@@ -237,7 +237,7 @@ class NoteSplash extends FunkinSprite
 
 		if (!inEditor)
 		{
-			var loadedTexture:String = defaultNoteSplash + getSplashSkinPostfix();
+			var loadedTexture:String = defaultNoteSplash;
 			if (note != null && note.noteSplashData.texture != null) {
 				loadedTexture = note.noteSplashData.texture;
 			}
@@ -408,14 +408,6 @@ class NoteSplash extends FunkinSprite
 				y = babyArrow.y - Note.swagWidth;
 		}
 		super.update(elapsed);
-	}
-
-	public static function getSplashSkinPostfix()
-	{
-		var skin:String = '';
-		if (ClientPrefs.data.splashSkin != ClientPrefs.defaultData.splashSkin)
-			skin = '-' + ClientPrefs.data.splashSkin.trim().toLowerCase().replace(' ', '-');
-		return skin;
 	}
 
 	public static function createConfig():NoteSplashConfig
