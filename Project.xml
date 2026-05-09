@@ -57,6 +57,7 @@
 	<!-- _____________________________ Path Settings ____________________________ -->
 
 	<classpath name="source" />
+	<source path="source" />
 	
 	<!--Fixes hxvlc using global rather than local. you will need to use hmm/hxpkg to compile this project though. Thanks Nightmare Vision!-->
     <setenv name="HAXEPATH" value="./"/>

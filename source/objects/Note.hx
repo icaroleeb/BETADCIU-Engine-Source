@@ -10,6 +10,10 @@ import objects.StrumNote;
 
 import flixel.math.FlxRect;
 
+// Split these to reduce the number of lines
+import objects.notes.NoteTypeHelper;
+import objects.notes.NoteSkinLoader;
+
 using StringTools;
 
 typedef EventNote = {
@@ -156,8 +160,8 @@ class Note extends FunkinSprite
 	public var distance:Float = 2000; //plan on doing scroll directions soon -bb
 
 	//Weekend notes implementation... kinda
-	var separateSheets:Bool = false;
-	var separateXMLExists:Bool = false;
+	public var separateSheets:Bool = false;
+	public var separateXMLExists:Bool = false;
 	public var noteAnimSuffixes:Array<String> = ["0", " hold piece", " hold end"]; // To accommodate for other namings
 
 	// I don't like using isPixelStage;
@@ -177,7 +181,9 @@ class Note extends FunkinSprite
 	}
 	public var hitsound:String = 'hitsound';
 
-	static var _cachedCustomNoteSkins:Array<String> = null;
+	public static var _cachedCustomNoteSkins:Array<String> = null;
+
+	public var sustainHeightScale:Float = 1; // I still don't get why Weekend notes only scaled up the hold pieces
 
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
@@ -195,9 +201,11 @@ class Note extends FunkinSprite
 		}
 	}
 
-	private function set_texture(value:String):String {
-		if(texture != value){
-			value = reloadNote(value); // Value could be updated inside reloadNote
+	private function set_texture(value:String):String
+	{
+		if(texture != value)
+		{
+			value = NoteSkinLoader.reload(this, value);
 		}
 
 		texture = value;
@@ -228,37 +236,7 @@ class Note extends FunkinSprite
 		defaultRGB();
 
 		if(noteData > -1 && noteType != value) {
-			switch(value) {
-				case 'Hurt Note':
-					ignoreNote = mustPress;
-					//reloadNote('HURTNOTE_assets');
-					//this used to change the note texture to HURTNOTE_assets.png,
-					//but i've changed it to something more optimized with the implementation of RGBPalette:
-
-					// note colors
-					rgbShader.r = 0xFF101010;
-					rgbShader.g = 0xFFFF0000;
-					rgbShader.b = 0xFF990022;
-
-					// splash data and colors
-					noteSplashData.r = 0xFFFF0000;
-					noteSplashData.g = 0xFF101010;
-					noteSplashData.texture = 'noteSplashes/noteSplashes-electric';
-
-					// gameplay data
-					lowPriority = true;
-					missHealth = isSustainNote ? 0.25 : 0.1;
-					hitCausesMiss = true;
-					hitsound = 'cancelMenu';
-					hitsoundChartEditor = false;
-				case 'Alt Animation':
-					animSuffix = '-alt';
-				case 'No Animation':
-					noAnimation = true;
-					noMissAnimation = true;
-				case 'GF Sing':
-					gfNote = true;
-			}
+			NoteTypeHelper.apply(this, value);
 			if (value != null && value.length > 1) NoteTypesConfig.applyNoteTypeData(this, value);
 			if (hitsound != 'hitsound' && hitsoundVolume > 0) Paths.sound(hitsound); //precache new sound for being idiot-proof
 			noteType = value;
@@ -326,20 +304,26 @@ class Note extends FunkinSprite
 			offsetX -= width / 2;
 
 			if (isPixelNote || separateSheets)
-				offsetX += 30;
+				offsetX += 28;
 
 			if (prevNote.isSustainNote)
 			{
 				prevNote.playAnim(colArray[prevNote.noteData % colArray.length] + 'hold');
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05 * (1 / PlayState.holdSubdivisions);
-				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
 
-				if(isPixelNote) {
-					prevNote.scale.y *= 1.19;
-					prevNote.scale.y *= (6 / height); //Auto adjust note size
-				}
-				prevNote.updateHitbox();
-				// prevNote.setGraphicSize();
+					var sustainScale:Float = Conductor.stepCrochet / 100 * 1.05 * (1 / PlayState.holdSubdivisions);
+
+					if(createdFrom != null && createdFrom.songSpeed != null)
+						sustainScale *= createdFrom.songSpeed;
+
+					if(isPixelNote){
+						sustainScale *= 1.19;
+					}
+
+					sustainScale *= prevNote.sustainHeightScale;
+
+					prevNote.scale.y = sustainScale;
+
+					prevNote.updateHitbox();
 			}
 
 			if(isPixelNote)
@@ -382,157 +366,12 @@ class Note extends FunkinSprite
 		return globalRgbShaders[noteData];
 	}
 
-	var _lastNoteOffX:Float = 0;
-	static var _lastValidChecked:String; //optimization
+	public var _lastNoteOffX:Float = 0;
+	public static var _lastValidChecked:String; //optimization
 	public var originalHeight:Float = 6;
 	public var correctionOffset:Float = 0; //dont mess with this
 
 	public var isLegacyNoteSkin:Bool = false;
-
-	public function reloadNote(texture:String = '', postfix:String = '') {
-		rgbShader.enabled = true;
-
-		if(texture == null) texture = "";
-		if(postfix == null) postfix = '';
-
-		if(texture.length < 1) {
-			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null) texture = PlayState.SONG.noteStyle;
-			else texture = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
-
-			if(texture == null || texture.length < 1) texture = defaultNoteSkin + postfix;
-		}
-
-		separateSheets = false;
-		separateXMLExists = false;
-		isLegacyNoteSkin = false;
-
-		var skin:String = texture + postfix;
-		if (texture == 'pixel') {
-			rgbShader.enabled = true;
-			texture = "NOTE_assets-pixel";
-			skin = texture + postfix;
-		} else if (texture == 'normal') {
-			rgbShader.enabled = true;
-			texture = "NOTE_assets";
-			skin = texture + postfix;
-		}
-
-		var isCustomNoteSkin:Bool = _cachedCustomNoteSkins.contains(skin);
-
-		var animName:String = animation.curAnim != null ? animation.curAnim.name : null;
-
-		var wasPixelNote:Bool = isPixelNote;
-		isPixelNote = false;
-		var lastScaleY:Float = scale.y;
-		var skinPostfix:String = getNoteSkinPostfix();
-		var customSkin:String = skin + skinPostfix;
-		var path:String = isPixelNote ? 'pixelUI/' : '';
-		if(customSkin == _lastValidChecked || Paths.fileExists('images/' + path + customSkin + '.png', IMAGE))
-		{
-			skin = customSkin;
-			_lastValidChecked = customSkin;
-		}
-		else skinPostfix = '';
-
-		var pathSplit:Array<String> = skin.split('/');
-		var curSkin = skin;
-
-		for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/Notes/"]) {
-			final fullPath = '$noteDirectory$skin';
-			final weekendPath = '$fullPath/notes';
-			var jsonPath = fullPath;
-
-			if (Paths.fileExists('images/$weekendPath.png', IMAGE)) {
-				separateSheets = true;
-				final jsonName = pathSplit[pathSplit.length - 1];
-				jsonPath = '$noteDirectory$skin/$jsonName';
-				skin = weekendPath;
-			} else if (Paths.fileExists('images/$fullPath.png', IMAGE)) {
-				skin = fullPath;
-			}
-
-			if (Paths.fileExists('images/$jsonPath.json', TEXT)) {
-				final json = getNoteConfig('images/$jsonPath');
-				rgbShader.enabled = json.rgbEnabled != null ? json.rgbEnabled : false;
-
-				if (json.noteAnimations != null) {
-					for (anim in json.noteAnimations) {
-						addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-					}
-				}
-			}
-
-			if (curSkin != skin) {
-				isLegacyNoteSkin = (noteDirectory == "notes/");
-				if (noteDirectory.startsWith("pixelUI/") || StringTools.contains(skin, "-pixel"))
-					isPixelNote = true;
-				break;
-			}
-		}
-		
-		if (noteType != 'Hurt Note') defaultRGB(isPixelNote);
-		if (isLegacyNoteSkin && !isCustomNoteSkin) rgbShader.enabled = false;
-		
-		if(isPixelNote) {
-			if(isSustainNote) {
-				var graphic = Paths.image(skin + 'ENDS' + skinPostfix);
-				try {
-					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-				} catch(e) {
-					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixelENDS' + skinPostfix);
-					graphic = fallbackShit;
-					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-				}
-				originalHeight = graphic.height / 2;
-			} else {
-				var graphic = Paths.image(skin + skinPostfix);
-				try {
-					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
-				} catch(e) {
-					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixel' + skinPostfix);
-					graphic = fallbackShit;
-					loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
-				}
-			}
-			// setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-			scale.set(6, 6);
-			loadPixelNoteAnims();
-			antialiasing = false;
-
-			if(isSustainNote) {
-				offsetX += _lastNoteOffX;
-				_lastNoteOffX = (width - 7) * (PlayState.daPixelZoom / 2);
-				offsetX -= _lastNoteOffX;
-			}
-		} else {
-			loadNoteFrames(skin, separateSheets);
-			loadNoteAnims();
-			if(!isSustainNote) {
-				centerOffsets();
-				centerOrigin();
-			}
-		}
-
-		if(isSustainNote) {
-			scale.y = lastScaleY;
-			if (wasPixelNote && !isPixelNote) {
-				// if (!ClientPrefs.data.streamedNotes) offsetX += 30;
-				scale.y = scale.y / 6;
-			}
-			if (isPixelNote && !wasPixelNote) offsetX -= 5;
-		}
-
-		updateHitbox();
-		if(animName != null) playAnim(animName, true);
-
-		if(isPixelNote && isSustainNote) {
-			scale.y *= PlayState.daPixelZoom;
-			scale.y *= 1.222;
-			updateHitbox();
-		}
-
-		return texture;
-	}
 
 	public static function getNoteSkinPostfix()
 	{
@@ -540,83 +379,6 @@ class Note extends FunkinSprite
 		if(ClientPrefs.data.noteSkin != ClientPrefs.defaultData.noteSkin)
 			skin = '-' + ClientPrefs.data.noteSkin.trim().toLowerCase().replace(' ', '_');
 		return skin;
-	}
-
-	function loadNoteFrames(skin:String, ?separateSheets:Bool = false) {
-		if (separateSheets && isSustainNote) {
-			if (Paths.fileExists("images/" + skin + "_hold.xml", IMAGE)) {
-				frames = Paths.getSparrowAtlas(skin + "_hold");
-				separateXMLExists = true;
-			} else {
-				var rawPic:Dynamic = Paths.image(skin + "_hold");
-				loadGraphic(rawPic, true, 52, 87);
-			}
-		} else {
-			try {
-				frames = Paths.getSparrowAtlas(skin);
-			} catch(e) {
-				texture = Note.defaultNoteSkin;
-			}
-		}
-	}
-
-	function loadNoteAnims() {
-		if (colArray[noteData] == null)
-			return;
-
-		if (separateSheets) {
-			if (isSustainNote) {
-				if (separateXMLExists) {
-					animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + noteAnimSuffixes[2], 24, true);
-					animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + noteAnimSuffixes[1], 24, true);
-				} else {
-					animation.add(colArray[noteData] + 'holdend', [noteData * 2 + 1]);
-					animation.add(colArray[noteData] + 'hold', [noteData * 2]);
-				}
-			} else {
-				var dirScroll:Array<String> = ["Left", "Down", "Up", "Right"];
-				animation.addByPrefix(colArray[noteData] + "Scroll", "note" + dirScroll[noteData]);
-			}
-		} else {
-			if (isSustainNote) {
-				attemptToAddAnimationByPrefix('purpleholdend', 'pruple end hold', 24, true); // this fixes some retarded typo from the original note .FLA
-				animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end', 24, true);
-				animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece', 24, true);
-			} else {
-				animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
-			}
-		}
-		
-		// setGraphicSize(Std.int(width * 0.7));
-		scale.set(0.7, 0.7);
-		updateHitbox();
-	}
-
-	function loadPixelNoteAnims() {
-		if (colArray[noteData] == null)
-			return;
-
-		if(isSustainNote) {
-			animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
-			animation.add(colArray[noteData] + 'hold', [noteData], 24, true);
-		} else {
-			animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
-		}
-	}
-
-	function attemptToAddAnimationByPrefix(name:String, prefix:String, framerate:Float = 24, doLoop:Bool = true)
-	{
-		if (frames == null) {
-			// trace('Warning: Frames are null. Cannot add animation "$name" with prefix "$prefix".');
-			return;
-		}
-		
-		var animFrames = [];
-		@:privateAccess
-		animation.findByPrefix(animFrames, prefix); // adds valid frames to animFrames
-		if(animFrames.length < 1) return;
-
-		animation.addByPrefix(name, prefix, framerate, doLoop);
 	}
 
 	override function update(elapsed:Float)
