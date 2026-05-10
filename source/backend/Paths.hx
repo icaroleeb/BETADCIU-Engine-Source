@@ -124,26 +124,33 @@ class Paths
 		// clear anything not in the tracked assets list
 		trace ('uncaching ' + key);
 
-		if (type == 'sound') {
-			openfl.Assets.cache.clear(key);
+		switch (type){
+			case "sound":
+				openfl.Assets.cache.clear(key);
 
-			if(currentTrackedSounds.exists(key)) {
-				currentTrackedSounds.remove(key);
-				trace('uncached sound: $key');
-			}
-		} else {
-			@:privateAccess
-			var obj = FlxG.bitmap._cache.get(key);
-			if (obj != null) {
-				openfl.Assets.cache.removeBitmapData(key);
+				if(currentTrackedSounds.exists(key)) {
+					currentTrackedSounds.remove(key);
+					trace('uncached sound: $key');
+				}
+			case "text":
+				openfl.Assets.cache.clear(key);
+				if (currentTrackedTexts.exists(key)){
+					currentTrackedTexts.remove(key);
+				}
+				trace('uncached text: $key');
+			default:
 				@:privateAccess
-				FlxG.bitmap._cache.remove(key);
-				obj.destroy();
+				var obj = FlxG.bitmap._cache.get(key);
+				if (obj != null) {
+					openfl.Assets.cache.removeBitmapData(key);
+					@:privateAccess
+					FlxG.bitmap._cache.remove(key);
+					obj.destroy();
 
-				if(currentTrackedAssets.exists(key)) currentTrackedAssets.remove(key);
-				
-				trace ('uncached image: $key');
-			}
+					if(currentTrackedAssets.exists(key)) currentTrackedAssets.remove(key);
+					
+					trace ('uncached image: $key');
+				}
 		}
 		
 		System.gc();

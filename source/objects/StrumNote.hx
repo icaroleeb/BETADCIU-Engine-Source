@@ -8,12 +8,11 @@ import shaders.RGBPalette.RGBShaderReference;
 import haxe.Json;
 import haxe.format.JsonParser;
 
-using StringTools;
+import objects.notes.NoteSkinConfig;
+import objects.notes.NoteSkinConfig.NoteSkinConfigData;
+import objects.notes.NoteAnimationLoader;
 
-typedef StrumNoteConfig = {
-	var strumAnimations:Array<Note.NoteAnimArray>;
-	var strumOffset:Array<Float>;
-}
+using StringTools;
 
 class StrumNote extends FunkinSprite
 {
@@ -28,6 +27,8 @@ class StrumNote extends FunkinSprite
 
 	// Weekend Note Implementation
 	public var separateSheets:Bool = false;
+
+	public var skinConfig:NoteSkinConfigData;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -91,6 +92,9 @@ class StrumNote extends FunkinSprite
 
 	public function reloadNote()
 	{
+		skinConfig = null;
+		var skin:String = texture;
+
 		separateSheets = false;
 		isLegacyNoteSkin = false;
 		useRGBShader = true;
@@ -99,47 +103,54 @@ class StrumNote extends FunkinSprite
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
 
-		if (texture == 'pixel') texture = "NOTE_assets-pixel";
-		if (texture == 'normal') texture = "NOTE_assets";
+		switch (texture)
+		{
+			case "pixel":
+				texture = "NOTE_assets-pixel";
+			case "normal":
+				texture = "NOTE_assets";
+		}
 
-		var pathSplit:Array<String> = texture.split('/');
-		var notePath:String = texture;
+		var configPath = NoteSkinConfig.getConfigPath(texture);
 
-		var curNotePath = notePath;
-		isPixelNote = false;
+		if (configPath != null){
+			final json = NoteSkinConfig.get('images/$configPath');
+			skinConfig = json;
 
-		for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/notes/"]) {
-			final fullPath = '$noteDirectory$notePath';
-			final weekendPath = '$fullPath/notes_strumline';
-			var jsonPath = fullPath;
-		
-			if (Paths.fileExists('images/$weekendPath.png', IMAGE)) {
-				separateSheets = true;
-				final jsonName = pathSplit[pathSplit.length - 1];
+			rgbShader.enabled = json.inGameColoring;
+			isPixelNote = json.isPixel;
 
-				jsonPath = '$noteDirectory$notePath/$jsonName';
-				notePath = weekendPath;
-			} else if (Paths.fileExists('images/$fullPath.png', IMAGE)) {
-				notePath = fullPath;
-			}
+			skin = json.strumTexture;
+		}else{
+			var pathSplit:Array<String> = texture.split('/');
+			var notePath:String = texture;
 
-			if (Paths.fileExists('images/$jsonPath.json', TEXT)) {
-				final json = Note.getNoteConfig('images/$jsonPath');
+			var curNotePath = notePath;
+			isPixelNote = false;
 
-				if (json.strumAnimations != null) {
-					for (anim in json.strumAnimations) {
-						addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-					}
+			for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/notes/"]) {
+				final fullPath = '$noteDirectory$notePath';
+				final weekendPath = '$fullPath/notes_strumline';
+				var jsonPath = fullPath;
+			
+				if (Paths.fileExists('images/$weekendPath.png', IMAGE)) {
+					separateSheets = true;
+					final jsonName = pathSplit[pathSplit.length - 1];
+
+					jsonPath = '$noteDirectory$notePath/$jsonName';
+					notePath = weekendPath;
+				} else if (Paths.fileExists('images/$fullPath.png', IMAGE)) {
+					notePath = fullPath;
 				}
+			
+				if (curNotePath != notePath) {
+					isLegacyNoteSkin = (noteDirectory == "notes/");
+					isPixelNote = (noteDirectory.startsWith("pixelUI/") || StringTools.contains(notePath, "-pixel"));
+					break;
+				}
+			}
 
-				useRGBShader = json.rgbEnabled;
-			}
-		
-			if (curNotePath != notePath) {
-				isLegacyNoteSkin = (noteDirectory == "notes/");
-				isPixelNote = (noteDirectory.startsWith("pixelUI/") || StringTools.contains(notePath, "-pixel"));
-				break;
-			}
+			skin = notePath;
 		}
 
 		var isCustomNoteSkin:Bool = false;
@@ -151,13 +162,13 @@ class StrumNote extends FunkinSprite
 		defaultRGB(isPixelNote);
 
 		if(isPixelNote) {
-			loadGraphic(Paths.image(notePath));
+			loadGraphic(Paths.image(skin));
 			width = width / 4;
 			height = height / 5;
-			loadGraphic(Paths.image(notePath), true, Math.floor(width), Math.floor(height));
+			loadGraphic(Paths.image(skin), true, Math.floor(width), Math.floor(height));
 		}
 		else{
-			frames = Paths.getSparrowAtlas(notePath);
+			frames = Paths.getSparrowAtlas(skin);
 		}
 
 		loadNoteAnims(isPixelNote);
@@ -168,8 +179,7 @@ class StrumNote extends FunkinSprite
 			texture = Note.defaultNoteSkin;
 		} 
 			
-		if(lastAnim != null)
-		{
+		if(lastAnim != null){
 			playAnim(lastAnim, true);
 		}
 	}
@@ -231,7 +241,19 @@ class StrumNote extends FunkinSprite
 		else if (isLegacyNoteSkin) rgbShader.enabled = false;
 	}
 
-	public function loadNoteAnims(isPixelNote:Bool = false){
+	public function loadNoteAnims(isPixelNote:Bool = false)
+	{
+		if (skinConfig != null && skinConfig.receptorAnimations != null)
+		{
+			NoteAnimationLoader.loadNoteAnimsFromConfig(this, true);
+			scale.set(0.7, 0.7);
+			return;
+		}
+
+		loadLegacy(isPixelNote);
+	}
+
+	public function loadLegacy(isPixelNote:Bool = false){
 		if (isPixelNote){
 			antialiasing = false;
 			// setGraphicSize(Std.int(width * PlayState.daPixelZoom));
