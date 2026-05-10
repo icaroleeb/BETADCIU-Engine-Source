@@ -2,8 +2,11 @@ package objects.notes;
 
 import backend.Paths;
 import objects.Note;
-import objects.notes.NoteAnimationLoader;
 import states.PlayState;
+
+import objects.notes.NoteAnimationLoader;
+import objects.notes.NoteSkinConfig;
+import objects.notes.NoteSkinConfig.NoteSkinConfigData;
 
 using StringTools;
 
@@ -12,47 +15,48 @@ class NoteSkinLoader
 	public static function reload(note:Note, texture:String = '', postfix:String = ''):String
 	{
 		note.rgbShader.enabled = true;
+		note.skinConfig = null;
 
-		if (texture == null)
+		if (texture == null){
 			texture = "";
-		if (postfix == null)
+		}
+			
+		if (postfix == null){
 			postfix = '';
+		}
 
 		if (texture.length < 1)
 		{
-			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null)
+			if (PlayState.SONG != null && PlayState.SONG.noteStyle != null){
 				texture = PlayState.SONG.noteStyle;
-			else
+			}
+			else{
 				texture = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
-
-			if (texture == null || texture.length < 1)
+			}
+				
+			if (texture == null || texture.length < 1){
 				texture = Note.defaultNoteSkin + postfix;
+			}
 		}
 
-		note.separateSheets = false;
-		note.separateXMLExists = false;
-		note.isLegacyNoteSkin = false;
+		switch (texture)
+		{
+			case "pixel":
+				texture = "NOTE_assets-pixel";
+			case "normal":
+				texture = "NOTE_assets";
+		}
 
 		var skin:String = texture + postfix;
-		if (texture == 'pixel')
-		{
-			note.rgbShader.enabled = true;
-			texture = "NOTE_assets-pixel";
-			skin = texture + postfix;
-		}
-		else if (texture == 'normal')
-		{
-			note.rgbShader.enabled = true;
-			texture = "NOTE_assets";
-			skin = texture + postfix;
-		}
 
-		var isCustomNoteSkin:Bool = Note._cachedCustomNoteSkins.contains(skin);
-
-		var animName:String = note.animation.curAnim != null ? note.animation.curAnim.name : null;
+		var animName:String = note.animation.curAnim != null
+			? note.animation.curAnim.name
+			: null;
 
 		var wasPixelNote:Bool = note.isPixelNote;
 		note.isPixelNote = false;
+
+		var isCustomNoteSkin:Bool = Note._cachedCustomNoteSkins.contains(skin);
 
 		var skinPostfix:String = Note.getNoteSkinPostfix();
 		var customSkin:String = skin + skinPostfix;
@@ -63,55 +67,65 @@ class NoteSkinLoader
 			skin = customSkin;
 			Note._lastValidChecked = customSkin;
 		}
-		else
+		else{
 			skinPostfix = '';
+		}
 
-		var pathSplit:Array<String> = skin.split('/');
-		var curSkin = skin;
+		var configPath:String = NoteSkinConfig.getConfigPath(skin);
+		final flatConfig = 'noteSkins/$skin';
 
-		for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/Notes/"])
-		{
-			final fullPath = '$noteDirectory$skin';
-			final weekendPath = '$fullPath/notes';
-			var jsonPath = fullPath;
+		if (configPath != null){
+			final json = NoteSkinConfig.get('images/$configPath');
 
-			if (Paths.fileExists('images/$weekendPath.png', IMAGE))
+			note.skinConfig = json;
+
+			note.rgbShader.enabled = json.inGameColoring;
+			note.isPixelNote = json.isPixel;
+
+			skin = note.isSustainNote ? json.holdTexture : json.noteTexture;
+		}
+		else{
+			// I didn't wanna bother trying to rewrite this to fit the NMV JSON. Maybe later.
+
+			var pathSplit:Array<String> = skin.split('/');
+			var curSkin = skin;
+
+			for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/notes/"])
 			{
-				note.separateSheets = true;
+				final fullPath = '$noteDirectory$skin';
+				final weekendPath = '$fullPath/notes';
+				var jsonPath = fullPath;
 
-				final jsonName = pathSplit[pathSplit.length - 1];
-				jsonPath = '$noteDirectory$skin/$jsonName';
-
-				skin = weekendPath;
-			}
-			else if (Paths.fileExists('images/$fullPath.png', IMAGE))
-			{
-				skin = fullPath;
-			}
-
-			if (Paths.fileExists('images/$jsonPath.json', TEXT))
-			{
-				final json = Note.getNoteConfig('images/$jsonPath');
-
-				note.rgbShader.enabled = json.rgbEnabled != null ? json.rgbEnabled : false;
-
-				if (json.noteAnimations != null)
+				if (Paths.fileExists('images/$weekendPath.png', IMAGE))
 				{
-					for (anim in json.noteAnimations)
-					{
-						note.addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-					}
+					note.separateSheets = true;
+
+					final jsonName = pathSplit[pathSplit.length - 1];
+					jsonPath = '$noteDirectory$skin/$jsonName';
+
+					skin = weekendPath;
 				}
-			}
+				else if (Paths.fileExists('images/$fullPath.png', IMAGE))
+				{
+					skin = fullPath;
+				}
 
-			if (curSkin != skin)
-			{
-				note.isLegacyNoteSkin = (noteDirectory == "notes/");
+				if (Paths.fileExists('images/$jsonPath.json', TEXT))
+				{
+					final json:NoteSkinConfigData = NoteSkinConfig.get('images/$jsonPath');
+					note.skinConfig = json;
+					note.rgbShader.enabled = json.inGameColoring != null ? json.inGameColoring : false;
+				}
 
-				if (noteDirectory.startsWith("pixelUI/") || StringTools.contains(skin, "-pixel"))
-					note.isPixelNote = true;
+				if (curSkin != skin)
+				{
+					note.isLegacyNoteSkin = (noteDirectory == "notes/");
 
-				break;
+					if (noteDirectory.startsWith("pixelUI/") || StringTools.contains(skin, "-pixel"))
+						note.isPixelNote = true;
+
+					break;
+				}
 			}
 		}
 
@@ -171,24 +185,34 @@ class NoteSkinLoader
 				note.offsetX -= note._lastNoteOffX;
 			}
 		}
-		else
-		{
+		else{
 			NoteAnimationLoader.load(note, skin, note.separateSheets);
+			note.scale.set(0.7, 0.7);
 		}
 
-		if (note.isSustainNote)
+		if (animName != null)
+			note.playAnim(animName, true);
+
+		if (
+			note.isSustainNote &&
+			note.animation != null &&
+			note.animation.curAnim != null &&
+			note.animation.curAnim.name != null &&
+			!note.animation.curAnim.name.contains("end")
+		)
 		{
 			note.sustainHeightScale = Note.SUSTAIN_SIZE / note.frameHeight;
 
 			if (note.isPixelNote && !wasPixelNote){
 				note.offsetX -= 5;
 			}
+
+			note.applySustainScale();
 		}
 
 		note.updateHitbox();
-
-		if (animName != null)
-			note.playAnim(animName, true);
+		note.centerOffsets();
+		note.centerOrigin();
 
 		if (note.isPixelNote && note.isSustainNote)
 		{
@@ -200,4 +224,5 @@ class NoteSkinLoader
 
 		return texture;
 	}
+	
 }

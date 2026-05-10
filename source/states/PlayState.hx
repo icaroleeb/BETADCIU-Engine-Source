@@ -76,6 +76,8 @@ import objects.FunkinSprite;
 import backend.EaseUtil;
 import backend.tools.PreloadUtil;
 
+import objects.notes.NoteSkinConfig;
+
 typedef PreloadResult = {
 	var thread:Thread;
 	var asset:String;
@@ -3852,7 +3854,7 @@ class PlayState extends MusicBeatState
 		FlxG.animationTimeScale = 1;
 
 		Note.globalRgbShaders = [];
-		Note.configs.clear();
+		NoteSkinConfig.clear();
 
 		backend.NoteTypesConfig.clearNoteTypesData();
 

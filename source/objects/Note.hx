@@ -13,6 +13,8 @@ import flixel.math.FlxRect;
 // Split these to reduce the number of lines
 import objects.notes.NoteTypeHelper;
 import objects.notes.NoteSkinLoader;
+import objects.notes.NoteSkinConfig;
+import objects.notes.NoteSkinConfig.NoteSkinConfigData;
 
 using StringTools;
 
@@ -36,22 +38,6 @@ typedef NoteSplashData = {
 	a:Float
 }
 
-typedef NoteAnimArray = {
-    var anim:String;
-    var offsets:Array<Int>;
-
-    @:optional var name:String;
-    @:optional var fps:Int;
-    @:optional var loop:Bool;
-    @:optional var indices:Array<Int>;
-}
-
-typedef NoteConfig = {
-	@:optional var strumAnimations:Array<NoteAnimArray>;
-	@:optional var noteAnimations:Array<NoteAnimArray>;
-	@:optional var rgbEnabled:Bool;
-}
-
 /**
  * The note object used as a data structure to spawn and manage notes during gameplay.
  * 
@@ -72,9 +58,6 @@ class Note extends FunkinSprite
 
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
-	// Implemented here so I can add offsets to the notes. Particularly the tail
-	public static var configs:Map<String, NoteConfig> = new Map();
-
 	public var strumTime:Float = 0;
 	public var noteData:Int = 0;
 
@@ -94,7 +77,7 @@ class Note extends FunkinSprite
 	public var spawned:Bool = false;
 
 	public var tail:Array<Note> = []; // for sustains
-	public var parent:Note;
+	public var parent(default, set):Note =  null;
 	
 	public var blockHit:Bool = false; // only works for player
 
@@ -183,7 +166,9 @@ class Note extends FunkinSprite
 
 	public static var _cachedCustomNoteSkins:Array<String> = null;
 
+	public var skinConfig:NoteSkinConfigData;
 	public var sustainHeightScale:Float = 1; // I still don't get why Weekend notes only scaled up the hold pieces
+	public var createdFrom:Dynamic;
 
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
@@ -244,6 +229,16 @@ class Note extends FunkinSprite
 		return value;
 	}
 
+	private function set_parent(value:Note):Note
+	{
+		parent = value;
+
+		if (parent != null)
+			applyInitialSetup();
+
+		return value;
+	}
+
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?createdFrom:Dynamic = null)
 	{
 		super();
@@ -254,6 +249,8 @@ class Note extends FunkinSprite
 
 		antialiasing = ClientPrefs.data.antialiasing;
 		if(createdFrom == null) createdFrom = PlayState.instance;
+
+		this.createdFrom = createdFrom;
 
 		if (prevNote == null)
 			prevNote = this;
@@ -278,7 +275,7 @@ class Note extends FunkinSprite
 
 			x += swagWidth * (noteData);
 			if(!isSustainNote && noteData < colArray.length) { //Doing this 'if' check to fix the warnings on Senpai songs
-				playAnim(colArray[noteData % colArray.length] + 'Scroll');
+				playAnim('scroll');
 			}
 		}
 
@@ -287,58 +284,7 @@ class Note extends FunkinSprite
 		if(prevNote != null)
 			prevNote.nextNote = this;
 
-		if (isSustainNote && prevNote != null)
-		{
-			// alpha = 0.6;
-			// multAlpha = 0.6;
-			hitsoundDisabled = true;
-			if(ClientPrefs.data.downScroll) flipY = true;
-
-			offsetX += width / 2;
-			copyAngle = false;
-
-			playAnim(colArray[noteData % colArray.length] + 'holdend');
-
-			updateHitbox();
-
-			offsetX -= width / 2;
-
-			if (isPixelNote || separateSheets)
-				offsetX += 28;
-
-			if (prevNote.isSustainNote)
-			{
-				prevNote.playAnim(colArray[prevNote.noteData % colArray.length] + 'hold');
-
-					var sustainScale:Float = Conductor.stepCrochet / 100 * 1.05 * (1 / PlayState.holdSubdivisions);
-
-					if(createdFrom != null && createdFrom.songSpeed != null)
-						sustainScale *= createdFrom.songSpeed;
-
-					if(isPixelNote){
-						sustainScale *= 1.19;
-					}
-
-					sustainScale *= prevNote.sustainHeightScale;
-
-					prevNote.scale.y = sustainScale;
-
-					prevNote.updateHitbox();
-			}
-
-			if(isPixelNote)
-			{
-				scale.y *= PlayState.daPixelZoom;
-				updateHitbox();
-			}
-			earlyHitMult = 0;
-		}
-		else if(!isSustainNote)
-		{
-			centerOffsets();
-			centerOrigin();
-		}
-		x += offsetX;
+		applyInitialSetup();
 	}
 
 	public static function initializeGlobalRGBShader(noteData:Int)
@@ -475,13 +421,19 @@ class Note extends FunkinSprite
 	}
 
 	public function playAnim(anim:String, ?force:Bool = false) {
+		if (animation == null){
+			return; // I don't know how this happened but okay
+		}
+
 		animation.play(anim, force);
 
 		var daOffsets = getAnimOffset(anim);
-		
+
 		var scaleMult:Float = isPixelNote ? PlayState.daPixelZoom : 0.7;
 		offset.x += daOffsets[0] * (scaleMult / scale.x);
 		offset.y += daOffsets[1] * (scaleMult / scale.y);
+
+		updateHitbox();
 		
 		// if(useRGBShader && !isLegacyNoteSkin) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
 		// else if (isLegacyNoteSkin) rgbShader.enabled = false;
@@ -498,26 +450,80 @@ class Note extends FunkinSprite
 		return rect;
 	}
 
-	public static function dummy():NoteConfig
+	public function getLaneName():String
 	{
-		return {
-			strumAnimations: [
-				{ offsets: [0, 0], anim: "confirm" },
-				{ offsets: [0, 0], anim: "pressed" },
-				{ offsets: [0, 0], anim: "static" }
-			],
-			rgbEnabled: true
+		return switch(noteData)
+		{
+			case 0: "left";
+			case 1: "down";
+			case 2: "up";
+			case 3: "right";
+			default: "left";
 		};
 	}
 
-	public static function getNoteConfig(jsonPath:String) {
-		try
+	public function applySustainScale()
+	{
+		if (!isSustainNote) return;
+
+		var sustainScale:Float =
+			Conductor.stepCrochet / 100 * 1.05 * (1 / PlayState.holdSubdivisions);
+
+		if (createdFrom != null && createdFrom.songSpeed != null)
+			sustainScale *= createdFrom.songSpeed;
+
+		if (isPixelNote)
+			sustainScale *= 1.19;
+
+		sustainScale *= sustainHeightScale;
+
+		scale.y = sustainScale;
+		updateHitbox();
+	}
+
+	public function applyInitialSetup(){
+		// I saw that pixel notes adjusts something with offsetX so this might break it
+		offsetX = 0;
+
+		if (isSustainNote && prevNote != null)
 		{
-			if (!configs.exists(jsonPath))
-				configs.set(jsonPath, cast tjson.TJSON.parse(Paths.getTextFromFile('$jsonPath.json')));
+			// alpha = 0.6;
+			// multAlpha = 0.6;
+			hitsoundDisabled = true;
+			if(ClientPrefs.data.downScroll) flipY = true;
+
+			var swagWidth = parent != null ? parent.width : width;
+
+			offsetX += swagWidth / 2;
+			copyAngle = false;
+
+			playAnim('holdend');
+			updateHitbox();
+
+			offsetX -= width / 2;
+
+			if (isPixelNote || separateSheets)
+				offsetX += 28;
 			
-			return configs.get(jsonPath);
+
+			if (prevNote.isSustainNote)
+			{
+				prevNote.playAnim('hold');
+				prevNote.applySustainScale();
+			}
+
+			if(isPixelNote)
+			{
+				scale.y *= PlayState.daPixelZoom;
+				updateHitbox();
+			}
+			earlyHitMult = 0;
 		}
-		return dummy();
+		else if(!isSustainNote)
+		{
+			centerOffsets();
+			centerOrigin();
+		}
+		// x += offsetX;
 	}
 }
