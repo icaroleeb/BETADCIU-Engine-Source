@@ -319,6 +319,8 @@ class Note extends FunkinSprite
 
 	public var isLegacyNoteSkin:Bool = false;
 
+	var jsonConfig:Bool = false;
+
 	public static function getNoteSkinPostfix()
 	{
 		var skin:String = '';
@@ -362,6 +364,8 @@ class Note extends FunkinSprite
 
 	public function followStrumNote(myStrum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
 	{
+		var daOffsets:Array<Float> = [];
+		if (animation != null && jsonConfig) daOffsets = getAnimOffset(animation.curAnim.name);
 		var strumX:Float = myStrum.x;
 		var strumY:Float = myStrum.y;
 		var strumAngle:Float = myStrum.angle;
@@ -379,11 +383,11 @@ class Note extends FunkinSprite
 			alpha = strumAlpha * multAlpha;
 
 		if(copyX)
-			x = strumX + offsetX + Math.cos(angleDir) * distance;
+			x = strumX + offsetX + daOffsets[0] + Math.cos(angleDir) * distance;
 
 		if(copyY)
 		{
-			y = strumY + offsetY + correctionOffset + Math.sin(angleDir) * distance;
+			y = strumY + offsetY + daOffsets[1] + correctionOffset + Math.sin(angleDir) * distance;
 			if(myStrum.downScroll && isSustainNote)
 			{
 				if(isPixelNote)
