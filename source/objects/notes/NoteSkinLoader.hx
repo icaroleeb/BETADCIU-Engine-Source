@@ -76,6 +76,7 @@ class NoteSkinLoader
 
 		if (configPath != null){
 			final json = NoteSkinConfig.get('images/$configPath');
+			@:privateAccess {note.jsonConfig = true;}
 
 			note.skinConfig = json;
 
