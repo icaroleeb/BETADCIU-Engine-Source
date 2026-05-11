@@ -364,8 +364,6 @@ class Note extends FunkinSprite
 
 	public function followStrumNote(myStrum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
 	{
-		var daOffsets:Array<Float> = [];
-		if (animation != null && jsonConfig) daOffsets = getAnimOffset(animation.curAnim.name);
 		var strumX:Float = myStrum.x;
 		var strumY:Float = myStrum.y;
 		var strumAngle:Float = myStrum.angle;
@@ -383,11 +381,11 @@ class Note extends FunkinSprite
 			alpha = strumAlpha * multAlpha;
 
 		if(copyX)
-			x = strumX + offsetX + daOffsets[0] + Math.cos(angleDir) * distance;
+			x = strumX + offsetX + Math.cos(angleDir) * distance;
 
 		if(copyY)
 		{
-			y = strumY + offsetY + daOffsets[1] + correctionOffset + Math.sin(angleDir) * distance;
+			y = strumY + offsetY + correctionOffset + Math.sin(angleDir) * distance;
 			if(myStrum.downScroll && isSustainNote)
 			{
 				if(isPixelNote)
@@ -436,8 +434,6 @@ class Note extends FunkinSprite
 		var scaleMult:Float = isPixelNote ? PlayState.daPixelZoom : 0.7;
 		offset.x += daOffsets[0] * (scaleMult / scale.x);
 		offset.y += daOffsets[1] * (scaleMult / scale.y);
-
-		updateHitbox();
 		
 		// if(useRGBShader && !isLegacyNoteSkin) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
 		// else if (isLegacyNoteSkin) rgbShader.enabled = false;

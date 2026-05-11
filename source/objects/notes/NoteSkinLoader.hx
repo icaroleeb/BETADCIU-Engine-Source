@@ -111,13 +111,6 @@ class NoteSkinLoader
 					skin = fullPath;
 				}
 
-				if (Paths.fileExists('images/$jsonPath.json', TEXT))
-				{
-					final json:NoteSkinConfigData = NoteSkinConfig.get('images/$jsonPath');
-					note.skinConfig = json;
-					note.rgbShader.enabled = json.inGameColoring != null ? json.inGameColoring : false;
-				}
-
 				if (curSkin != skin)
 				{
 					note.isLegacyNoteSkin = (noteDirectory == "notes/");
@@ -191,9 +184,10 @@ class NoteSkinLoader
 			note.scale.set(0.7, 0.7);
 		}
 
-		if (animName != null)
-			note.playAnim(animName, true);
-
+		if (animName != null){
+			note.playAnim(animName, true); // This one is to get the right anim
+		}
+			
 		if (
 			note.isSustainNote &&
 			note.animation != null &&
@@ -223,6 +217,10 @@ class NoteSkinLoader
 			note.updateHitbox();
 		}
 
+		if (animName != null){
+			note.playAnim(animName); // This one is for the offsets.
+		}
+		
 		return texture;
 	}
 	
