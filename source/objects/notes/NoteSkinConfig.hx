@@ -61,7 +61,7 @@ class NoteSkinConfig
 	public static function getConfigPath(skin:String):String
 	{
 		final flat = 'noteSkins/$skin';
-		final folder = 'noteSkins/${haxe.io.Path.directory(skin)}/config';
+		final folder = 'noteSkins/$skin/config';
 
 		if (Paths.fileExists('images/$flat.json', TEXT))
 			return flat;

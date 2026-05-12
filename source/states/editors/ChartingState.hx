@@ -36,6 +36,9 @@ import objects.StrumNote;
 import sys.FileSystem;
 import sys.FileStat;
 
+import objects.notes.NoteSkinConfig;
+import objects.notes.NoteSkinConfig.NoteSkinConfigData;
+
 using DateTools;
 
 typedef UndoStruct = {
@@ -2562,11 +2565,17 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			{
 				var notePath:String = '${noteTextureInputText.text}';
 				var skin:String = '${noteTextureInputText.text}'; // so this one doesn't get changed
+				var config:NoteSkinConfigData = NoteSkinConfig.get('images/' + NoteSkinConfig.getConfigPath(skin));
 
-				for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/Notes/"]) {
-					final fullPath = '$noteDirectory${noteTextureInputText.text}';
-					if (Paths.fileExists('images/$fullPath.png', IMAGE)) notePath = fullPath;
+				if(config != null){
+					notePath = config.noteTexture;
+				}else{
+					for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/Notes/"]) {
+						final fullPath = '$noteDirectory${noteTextureInputText.text}';
+						if (Paths.fileExists('images/$fullPath.png', IMAGE)) notePath = fullPath;
+					}
 				}
+			
 
 				var textureLoad:String = 'images/${notePath}.png';
 				if(Paths.fileExists(textureLoad, IMAGE) || noteTextureInputText.text.trim() == '')
