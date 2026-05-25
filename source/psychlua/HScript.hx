@@ -235,6 +235,8 @@ class HScript extends IrisEx implements IFlxDestroyable
 		set('FlxAxes', backend.MacroUtil.buildAbstract(flixel.util.FlxAxes));
 		set("FlxKey", backend.MacroUtil.buildAbstract(flixel.input.keyboard.FlxKey));
 		set('BlendMode', backend.MacroUtil.buildAbstract(openfl.display.BlendMode));
+		
+		//set('getVarToString', (varName:Dynamic) -> CoolUtil.getVarName(varName)); // still not working tho I hope this works some day
 
 		set("keyToString", (key:Int) -> { return flixel.input.keyboard.FlxKey.toStringMap.get(key); });
 		set("keyFromString", (str:String) -> { return flixel.input.keyboard.FlxKey.fromStringMap.get(str); });
@@ -245,6 +247,7 @@ class HScript extends IrisEx implements IFlxDestroyable
 		set("Conductor", backend.Conductor);
 		set('ClientPrefs', ClientPrefs);
 		set("CoolUtil", backend.CoolUtil);
+		set("MacroUtil", backend.MacroUtil);
 		// set('WindowUtil', backend.WindowUtil);
 		set("StageData", backend.StageData);
 		set('PlayState', PlayState);

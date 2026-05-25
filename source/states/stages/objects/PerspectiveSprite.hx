@@ -107,7 +107,7 @@ class PerspectiveSprite extends FlxTypedSpriteGroup<FlxSprite>
     }
 
     /*
-    override public function isOnScreen(camera:FlxCamera):Bool
+    override function isOnScreen(camera:FlxCamera):Bool
     {
         // Turns out skewing an image like crazy fucks up its rendering... oops!
         return true;

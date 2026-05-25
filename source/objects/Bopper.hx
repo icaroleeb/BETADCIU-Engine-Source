@@ -222,6 +222,8 @@ class Bopper extends FunkinSprite
 	public function recalculateDanceIdle():Void
 	{
 		alternatingDance = hasAnim('danceLeft' + idleSuffix) && hasAnim('danceRight' + idleSuffix);
+
+		danceEveryNumBeats = alternatingDance ? 1 : 2;
 	}
 	
 	public function onBeatHit(beat:Int)

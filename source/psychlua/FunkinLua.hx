@@ -1775,8 +1775,7 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "changeCharacter", function(tag:String, character:String) {
-			//game.stagesFunc(function(stage:BaseStage) stage.characterChange(tag, character)); // putting this beacuse of the function lua
-			//game.callOnScripts('onCharacterChange', [tag, character]);
+			PlayState.instance.callOnCharacterChange("characterChange", tag, character);
 
 			switch(tag.toLowerCase().trim()) {
 				case 'gf' | 'girlfriend' | "2":
@@ -1792,8 +1791,7 @@ class FunkinLua {
 					
 			}
 
-			//game.stagesFunc(function(stage:BaseStage) stage.characterChangePost(tag, character)); // putting this beacuse of the characters shaders including the function lua
-			//game.callOnScripts('onCharacterChangePost', [tag, character]);
+			PlayState.instance.callOnCharacterChange("characterChangePost", tag, character);
 		});
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false) {
 			// if(this.scriptType.toLowerCase() == "stage" || this.scriptType.toLowerCase() == "stagecamera") 

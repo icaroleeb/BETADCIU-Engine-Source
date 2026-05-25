@@ -228,6 +228,16 @@ class PlayState extends MusicBeatState
 	private var curSong:String = "";
 
 	public var gfSpeed:Int = 1;
+
+	function set_gfSpeed(value:Int)
+	{
+		if (gfGroup == null || gf == null) return gfSpeed = value;
+		
+		gf.danceEveryNumBeats *= value;
+		
+		return gfSpeed = value;
+	}
+
 	public var speedBaseMod:Int = 1;
 	public var health(default, set):Float = 1;
 	public var combo:Int = 0;
@@ -2669,8 +2679,7 @@ class PlayState extends MusicBeatState
                 }
 				usedNoteSkinEvent = true;
 			case 'Change Character':
-				stagesFunc(function(stage:BaseStage) stage.characterChange(value1, value2)); // putting this beacuse of the function lua
-				callOnScripts('onCharacterChange', [value1, value2]);
+				callOnCharacterChange("characterChange", value1, value2);
 
 				//var charType:Int = 0;
 				switch(value1.toLowerCase().trim()) {
@@ -2690,8 +2699,7 @@ class PlayState extends MusicBeatState
 				}
 				reloadHealthBarColors();
 
-				stagesFunc(function(stage:BaseStage) stage.characterChangePost(value1, value2)); // putting this beacuse of the characters shaders including the function lua
-				callOnScripts('onCharacterChangePost', [value1, value2]);
+				callOnCharacterChange("characterChangePost", value1, value2);
 			case 'Change Scroll Speed':
 				if (songSpeedType != "constant")
 				{
@@ -3032,7 +3040,12 @@ class PlayState extends MusicBeatState
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.data.ratingOffset);
 		vocals.volume = 1;
 
-		if (!ClientPrefs.data.comboStacking && comboGroup.members.length > 0)
+		var daComboStacking = !ClientPrefs.data.comboStacking; // hate this bug man...
+
+		if (NVScoreTween)
+			daComboStacking = ClientPrefs.data.comboStacking;
+
+		if (daComboStacking && comboGroup.members.length > 0)
 		{
 			for (spr in comboGroup)
 			{
@@ -3116,9 +3129,13 @@ class PlayState extends MusicBeatState
 		rating.screenCenter();
 		rating.x = placement - 40;
 		rating.y -= 60;
-		rating.acceleration.y = 550 * playbackRate * playbackRate;
-		rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
-		rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
+
+		if (!NVScoreTween) {
+			rating.acceleration.y = 550 * playbackRate * playbackRate;
+			rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
+			rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
+		}
+
 		rating.visible = (!ClientPrefs.data.hideHud && showRating);
 		rating.x += ClientPrefs.data.comboOffset[0];
 		rating.y -= ClientPrefs.data.comboOffset[1];
@@ -3213,6 +3230,11 @@ class PlayState extends MusicBeatState
 				numScore.y = 450 + (30 + offsetY);
 			}
 
+			var numScoreSize = 0.5;
+
+			if (NVScoreTween)
+				numScoreSize = 0.65;
+
 			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
 				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
 
@@ -3222,13 +3244,18 @@ class PlayState extends MusicBeatState
 				}
 			}
 			else 
-				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
+				numScore.setGraphicSize(Std.int(numScore.width * numScoreSize));
 
 			numScore.updateHitbox();
 
-			numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
-			numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
-			numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
+			if (!NVScoreTween) {
+				numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
+				numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
+				numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
+			}else{
+				FlxTween.tween(numScore.scale, {x: 0.5, y: 0.5}, 0.5, {ease: fadeEase});
+			}
+
 			numScore.visible = !ClientPrefs.data.hideHud;
 			numScore.antialiasing = antialias;
 			numScore.alpha = ratingsAlpha;
@@ -3237,13 +3264,18 @@ class PlayState extends MusicBeatState
 			if(showComboNum)
 				comboGroup.add(numScore);
 
+			var fadeScore = 0.002;
+
+			if (NVScoreTween)
+				fadeScore = 0.001;
+
 			FlxTween.tween(numScore, {alpha: 0}, 0.2 / playbackRate, {
 				onComplete: function(tween:FlxTween)
 				{
 					numScore.destroy();
 				},
 				ease: customFade,
-				startDelay: Conductor.crochet * 0.002 / playbackRate
+				startDelay: Conductor.crochet * fadeScore / playbackRate
 			});
 
 			daLoop++;
@@ -3836,6 +3868,12 @@ class PlayState extends MusicBeatState
 		hscriptArray = null;
 		#end
 		stagesFunc(function(stage:BaseStage) stage.destroy());
+
+		if (hardCodedStage != null){
+			hardCodedStage.destroy();
+			hardCodedStage = null;
+		}
+
 
 		#if VIDEOS_ALLOWED
 		if(videoCutscene != null)
@@ -4585,18 +4623,16 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.data.comboCam == "Game") add(comboGroup);
 	}
 
-	/*
-	function callGlobal(tag:String)
+	public function callOnCharacterChange(call:String, charObj:String, charName:String)
 	{
-		if (tag == 'characterChange') {
-			stagesFunc(function(stage:BaseStage) stage.characterChange(value1, value2));
-		} else if (tag == 'characterChangePost') {
-			stagesFunc(function(stage:BaseStage) stage.characterChangePost(value1, value2));
+		if (call == 'characterChange') {
+			stagesFunc(function(stage:BaseStage) stage.characterChange(charObj, charName));
+			callOnScripts('onCharacterChange', [charObj, charName]);
+		} else if (call == 'characterChangePost') {
+			stagesFunc(function(stage:BaseStage) stage.characterChangePost(charObj, charName));
+			callOnScripts('onCharacterChangePost', [charObj, charName]);
 		}
-
-		callOnScripts('onCharacterChangePost', [value1, value2]);
 	}
-	*/
 
 	public var hardCodedStage:BaseStage;
 	//public var hardCodedStagePreload:BaseStage;

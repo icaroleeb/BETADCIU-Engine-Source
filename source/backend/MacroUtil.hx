@@ -86,4 +86,8 @@ class MacroUtil
 		return macro $v{ret};
 		#end
 	}
+
+	public static macro function nameOf(el:Expr) {
+		return macro $v{haxe.macro.ExprTools.toString(el)};
+	}
 }

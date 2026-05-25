@@ -12,7 +12,7 @@ class Sserafim extends BaseStage
     var baseVisible:Array<Bool> = [true, false, false, false, false, false];
     var baseSinging:Array<Bool> = [false, false, false, false, false, false];
 
-    var perspectiveFloor:PerspectiveSprite = null;
+    var perspectiveFloor:PerspectiveSprite;
 
     var truckDoor:BGSprite;
     var backLightColor:BGSprite;
@@ -191,7 +191,7 @@ class Sserafim extends BaseStage
 
     override function update(elapsed:Float)
     {
-        if(perspectiveFloor != null) perspectiveFloor.updateSkew(game.camGame);
+        if(perspectiveFloor != null) perspectiveFloor.updateSkew(PlayState.instance.camGame);
     }
 
     override function beatHit()

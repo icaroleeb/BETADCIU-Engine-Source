@@ -5,8 +5,10 @@ import lime.utils.Assets as LimeAssets;
 import lime.media.AudioBuffer;
 import haxe.io.Bytes;
 
-import haxe.macro.Expr;
+#if macro
 import haxe.macro.Context;
+import haxe.macro.Expr;
+#end
 
 class CoolUtil
 {
