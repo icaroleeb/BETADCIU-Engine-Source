@@ -409,17 +409,22 @@ class PlayState extends MusicBeatState
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		storyDifficultyText = Difficulty.getString();
 
-		if (isStoryMode)
-			detailsText = "Story Mode: " + WeekData.getCurrentWeek().weekName;
-		else if (isBETADCIU)
-			detailsText =  SONG.song + " But Every Turn A Different Cover is Used";
-		else if (isBonus) // adding one for bonus songs too because i want
-			detailsText =  "Bonus Song";
+		if (WeekData.getCurrentWeek().noDiscordRPC)
+			detailsText = "???"; // best way not leaking the song on discord :3
 		else
-			detailsText = "Freeplay";
+		{
+			if (isStoryMode)
+				detailsText = "Story Mode: " + WeekData.getCurrentWeek().weekName;
+			else if (isBETADCIU)
+				detailsText =  SONG.song + " But Every Turn A Different Cover is Used";
+			else if (isBonus) // adding one for bonus songs too because i want
+				detailsText =  "Bonus Song";
+			else
+				detailsText = "Freeplay";
 
-		// String for when the game is paused
-		detailsPausedText = "Paused - " + detailsText;
+			// String for when the game is paused
+			detailsPausedText = "Paused - " + detailsText;
+		}
 		#end
 
 		GameOverSubstate.resetVariables();
@@ -1186,19 +1191,29 @@ class PlayState extends MusicBeatState
 					{
 						case 0:
 							countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
-							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro3' + introSoundsSuffix), 0.6);
+							if (introSoundsSuffix != "-silent") 
+								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro3' + introSoundsSuffix, true), 0.6);
 							tick = THREE;
 						case 1:
 							countdownReady = createCountdownSprite(introAlts[0], antialias, isCustomCountdown);
-							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro2' + introSoundsSuffix), 0.6);
+
+							if (introSoundsSuffix != "-silent") 
+								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro2' + introSoundsSuffix, true), 0.6);
+
 							tick = TWO;
 						case 2:
 							countdownSet = createCountdownSprite(introAlts[1], antialias, isCustomCountdown);
-							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro1' + introSoundsSuffix), 0.6);
+
+							if (introSoundsSuffix != "-silent") 
+								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro1' + introSoundsSuffix, true), 0.6);
+							
 							tick = ONE;
 						case 3:
 							countdownGo = createCountdownSprite(introAlts[2], antialias, isCustomCountdown);
-							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'introGo' + introSoundsSuffix), 0.6);
+
+							if (introSoundsSuffix != "-silent")
+								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'introGo' + introSoundsSuffix, true), 0.6);
+
 							tick = GO;
 						case 4:
 							tick = START;
@@ -1457,13 +1472,20 @@ class PlayState extends MusicBeatState
 		FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
+		var daSong;
+
+		if (WeekData.getCurrentWeek().noDiscordRPC)
+			daSong = "???"
+		else
+			daSong = SONG.song;
+
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
 		if(autoUpdateRPC) 
 			if (isBETADCIU) {
 				DiscordClient.changePresence(detailsText, " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
 			} else {
-				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
+				DiscordClient.changePresence(detailsText, daSong + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
 			}
 
 		#end
@@ -3140,7 +3162,6 @@ class PlayState extends MusicBeatState
 		rating.x += ClientPrefs.data.comboOffset[0];
 		rating.y -= ClientPrefs.data.comboOffset[1];
 		rating.antialiasing = antialias;
-
 		if (ClientPrefs.data.comboCam == "Game") {
 			rating.x = -40 + offsetX;
 			rating.y = 300 + (30 + offsetY);
@@ -3152,7 +3173,8 @@ class PlayState extends MusicBeatState
 
 		var comboSpr:FunkinSprite = new FunkinSprite();
 		
-		if (showCombo) comboSpr.loadGraphic(Paths.image(uiFolder + 'combo' + uiPostfix)); // don't render if we don't need it	
+		if (showCombo) comboSpr.loadGraphic(Paths.image(uiFolder + 'combo' + uiPostfix));
+		// don't render if we don't need it	
 		comboSpr.screenCenter();
 		comboSpr.x = placement;
 		comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
@@ -3163,8 +3185,14 @@ class PlayState extends MusicBeatState
 		comboSpr.antialiasing = antialias;
 		comboSpr.y += 60;
 		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
-		comboGroup.add(rating);
+		
+		// FIX: Align combo sprite if using the Game Camera
+		if (ClientPrefs.data.comboCam == "Game") {
+			comboSpr.x = offsetX - 40; 
+			comboSpr.y = rating.y + rating.height + 10; // Places it cleanly right below the rating
+		}
 
+		comboGroup.add(rating);
 		if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
@@ -3209,7 +3237,6 @@ class PlayState extends MusicBeatState
 		var xThing:Float = 0;
 		if (showCombo)
 			comboGroup.add(comboSpr);
-
 		var customFade = FlxEase.linear;
 
 		if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
@@ -3224,16 +3251,12 @@ class PlayState extends MusicBeatState
 			numScore.screenCenter();
 			numScore.x = placement + (43 * daLoop) - 90 + ClientPrefs.data.comboOffset[2];
 			numScore.y += 80 - ClientPrefs.data.comboOffset[3];
-
+			
 			if (ClientPrefs.data.comboCam == "Game") {
-				numScore.x = (43 * daLoop) - 90 + offsetX;
-				numScore.y = 450 + (30 + offsetY);
+				// FIX: Centered the numbers relative to the rating width and adjusted Y so it isn't completely detached
+				numScore.x = offsetX + (43 * daLoop) - 55;
+				numScore.y = rating.y + rating.height - 10; 
 			}
-
-			var numScoreSize = 0.5;
-
-			if (NVScoreTween)
-				numScoreSize = 0.65;
 
 			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
 				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
@@ -3243,16 +3266,21 @@ class PlayState extends MusicBeatState
 					numScore.pixelPerfectRender = true;
 				}
 			}
-			else 
-				numScore.setGraphicSize(Std.int(numScore.width * numScoreSize));
-
-			numScore.updateHitbox();
+			else {
+				if (!NVScoreTween)
+				{
+					numScore.setGraphicSize(Std.int(numScore.width * 0.5));
+					numScore.updateHitbox();
+				}
+			}
 
 			if (!NVScoreTween) {
 				numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
 				numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
 				numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
 			}else{
+				numScore.scale.set(0.6, 0.6);
+				FlxTween.cancelTweensOf(numScore, ['scale.x', 'scale.y']);
 				FlxTween.tween(numScore.scale, {x: 0.5, y: 0.5}, 0.5, {ease: fadeEase});
 			}
 
@@ -3272,14 +3300,14 @@ class PlayState extends MusicBeatState
 			FlxTween.tween(numScore, {alpha: 0}, 0.2 / playbackRate, {
 				onComplete: function(tween:FlxTween)
 				{
-					numScore.destroy();
+					if (!NVScoreTween) numScore.destroy();
 				},
 				ease: customFade,
 				startDelay: Conductor.crochet * fadeScore / playbackRate
 			});
 
 			daLoop++;
-			if(numScore.x > xThing) xThing = numScore.x;
+			if(!NVScoreTween && numScore.x > xThing) xThing = numScore.x;
 		}
 		comboSpr.x = xThing + 50;
 		FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {

@@ -2077,6 +2077,9 @@ class FunkinLua {
 			luaTrace("setBlendMode: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
+		Lua_helper.add_callback(lua, "getBlendModeFromString", function(blend:String = '') {
+			return LuaUtils.blendModeFromString(blend);
+		});
 		Lua_helper.add_callback(lua, "screenCenter", function(obj:String, ?pos:String = 'xy') {
 			var spr:FlxObject = game.getLuaObject(obj);
 

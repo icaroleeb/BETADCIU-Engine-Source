@@ -1934,8 +1934,15 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			catch (e:Dynamic) {}
 		}
 
+		var daSongName;
+
+		if (backend.WeekData.getCurrentWeek().noDiscordRPC)
+			daSongName = "???"; // best way not leaking the song on discord :3
+		else
+			daSongName = PlayState.SONG.song;
+
 		#if DISCORD_ALLOWED
-		DiscordClient.changePresence('Chart Editor', 'Song: ' + PlayState.SONG.song);
+		DiscordClient.changePresence('Chart Editor', 'Song: ' + daSongName);
 		#end
 
 		updateAudioVolume();

@@ -68,6 +68,7 @@ class ReflectionFunctions
 				LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowInstances ? parseInstances(value) : value, allowMaps);
 				return value;
 			}
+
 			LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, allowInstances ? parseInstances(value) : value, allowMaps);
 
 			if (funk.scriptType == "modpack") {

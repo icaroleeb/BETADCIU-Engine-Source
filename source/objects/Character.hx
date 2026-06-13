@@ -449,9 +449,8 @@ class Character extends Bopper
 			if (isPlayer) {
 				flipX = !flipX;
 				if (!isPsychPlayer) flipAnims(); //did i just fix all that flipping bug by just using a check that actually makes sense?? -- future me here: yeah, i did.
-			} /*else
-				if (isPsychPlayer) flipAnims(); // i dont feel like to restore this
-			*/
+			} else
+				if (isPsychPlayer) flipAnims();
 		}
 		//trace('Loaded file to character ' + curCharacter);
 	}
