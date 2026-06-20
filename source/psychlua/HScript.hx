@@ -28,6 +28,8 @@ import crowplexus.hscript.Printer;
 
 import haxe.ValueException;
 
+import haxe.macro.Context;
+
 typedef HScriptInfos = {
 	> haxe.PosInfos,
 	var ?funcName:String;
@@ -236,7 +238,12 @@ class HScript extends IrisEx implements IFlxDestroyable
 		set("FlxKey", backend.MacroUtil.buildAbstract(flixel.input.keyboard.FlxKey));
 		set('BlendMode', backend.MacroUtil.buildAbstract(openfl.display.BlendMode));
 		
-		//set('getVarToString', (varName:Dynamic) -> CoolUtil.getVarName(varName)); // still not working tho I hope this works some day
+		/*
+		set('getVarToString', function(varName:Dynamic) // still not working tho I hope this works some day
+		{
+			return macro $v{haxe.macro.ExprTools.toString(varName)};
+		});
+		*/
 
 		set("keyToString", (key:Int) -> { return flixel.input.keyboard.FlxKey.toStringMap.get(key); });
 		set("keyFromString", (str:String) -> { return flixel.input.keyboard.FlxKey.fromStringMap.get(str); });
@@ -705,7 +712,7 @@ class HScript extends IrisEx implements IFlxDestroyable
 		origin = null;
 		#if LUA_ALLOWED parentLua = null; #end
 
-		if (this.scriptType == "stage"){
+		if (this.scriptType == "stage" || this.scriptType == "destroyablesprite"){
 			if (scriptObjects != null) {
 				for (obj in scriptObjects) {
 					if (obj != null) {

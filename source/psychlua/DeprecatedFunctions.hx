@@ -232,46 +232,46 @@ class DeprecatedFunctions
 			FunkinLua.luaTrace('updateHitboxFromGroup is deprecated! Use updateHitbox instead.', false, true);
 		});
 		Lua_helper.add_callback(lua,"changeBFAuto", function(?id:String="bf") {
-			PlayState.instance.callOnCharacterChange("characterChange", "boyfriend", id);
+			PlayState.instance.callOnChange("characterChange", "boyfriend", id);
 
 			FunkinLua.changeCharacterAuto("boyfriend", id);
 			FunkinLua.luaTrace('changeBFAuto is deprecated! Use changeCharacter instead.', false, true);
 
-			PlayState.instance.callOnCharacterChange("characterChangePost", "boyfriend", id);
+			PlayState.instance.callOnChange("characterChangePost", "boyfriend", id);
 		});
 		Lua_helper.add_callback(lua,"changeBoyfriendAuto", function(?id:String="bf") {
-			PlayState.instance.callOnCharacterChange("characterChange", "boyfriend", id);
+			PlayState.instance.callOnChange("characterChange", "boyfriend", id);
 
 			FunkinLua.changeCharacterAuto("boyfriend", id);
 			FunkinLua.luaTrace('changeBoyfriendAuto is deprecated! Use changeCharacter instead.', false, true);
 
-			PlayState.instance.callOnCharacterChange("characterChangePost", "boyfriend", id);
+			PlayState.instance.callOnChange("characterChangePost", "boyfriend", id);
 		});
 		Lua_helper.add_callback(lua,"changeDadAuto", function(?id:String="bf") {
-			PlayState.instance.callOnCharacterChange("characterChange", "dad", id);
+			PlayState.instance.callOnChange("characterChange", "dad", id);
 
 			FunkinLua.changeCharacterAuto("dad", id);
 			FunkinLua.luaTrace('changeDadAuto is deprecated! Use changeCharacter instead.', false, true);
 
-			PlayState.instance.callOnCharacterChange("characterChangePost", "dad", id);
+			PlayState.instance.callOnChange("characterChangePost", "dad", id);
 		});
 		Lua_helper.add_callback(lua,"changeGFAuto", function(?id:String="bf") {
-			PlayState.instance.callOnCharacterChange("characterChange", "gf", id);
+			PlayState.instance.callOnChange("characterChange", "gf", id);
 
 			FunkinLua.changeCharacterAuto("gf", id);
 			FunkinLua.luaTrace('changeGFAuto is deprecated! Use changeCharacter instead.', false, true);
 
-			PlayState.instance.callOnCharacterChange("characterChangePost", "gf", id);
+			PlayState.instance.callOnChange("characterChangePost", "gf", id);
 		});		
 		Lua_helper.add_callback(lua, "changeLuaCharacter", function(tag:String, character:String){
-			PlayState.instance.callOnCharacterChange("characterChange", tag, character);
+			PlayState.instance.callOnChange("characterChange", tag, character);
 
 			var shit:Character = PlayState.instance.modchartCharacters.get(tag);
 			if(shit != null) FunkinLua.makeLuaCharacter(tag, character, shit.isPlayer);
 			else FunkinLua.luaTrace("changeLuaCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			FunkinLua.luaTrace('changeLuaCharacter is deprecated! Use changeCharacter instead.', false, true);
 
-			PlayState.instance.callOnCharacterChange("characterChangePost", tag, character);
+			PlayState.instance.callOnChange("characterChangePost", tag, character);
 		});
 		Lua_helper.add_callback(lua,"setCamFollow", function(?x:Float, ?y:Float) {
 			var trueX = x;

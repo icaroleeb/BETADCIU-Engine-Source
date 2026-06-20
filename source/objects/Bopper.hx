@@ -75,6 +75,8 @@ class Bopper extends FunkinSprite
 	 * If true, offsets will be scaled to match the current scale.
 	 */
 	public var scalableOffsets:Bool = false;
+
+	public var autoOffset:Bool = true;
 	
 	//-----
 	
@@ -156,7 +158,7 @@ class Bopper extends FunkinSprite
 		
 		if (animationOffsets != null)
 		{
-			offset.set(animationOffsets[0], animationOffsets[1]);
+			offset.set((autoOffset && this.flipX) ? (frameWidth - width - animationOffsets[0]) : animationOffsets[0], (autoOffset && this.flipY) ? (frameHeight - height - animationOffsets[1]) : animationOffsets[1]);
 			
 			if (scalableOffsets)
 			{

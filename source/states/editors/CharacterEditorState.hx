@@ -641,6 +641,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 	var scalableOffsetsCheckBox:PsychUICheckBox;
 	var vSliceSusCheckBox:PsychUICheckBox;
+	var autoOffsetCheckBox:PsychUICheckBox;
+
 	function addCharacterUI()
 	{
 		var tab_group = UI_characterbox.getTab('Character').menu;
@@ -733,6 +735,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		vSliceSusCheckBox = new PsychUICheckBox(scalableOffsetsCheckBox.x + scalableOffsetsCheckBox.width + 10, saveCharacterButton.y + 25, "vSliceSustains", 80);
 		vSliceSusCheckBox.checked = character.vSliceSustains;
 		vSliceSusCheckBox.onClick = function() { character.vSliceSustains = vSliceSusCheckBox.checked; };
+
+		autoOffsetCheckBox = new PsychUICheckBox(scalableOffsetsCheckBox.x + scalableOffsetsCheckBox.width + 20, saveCharacterButton.y + 25, "autoOffset", 80);
+		autoOffsetCheckBox.checked = character.autoOffset;
+		autoOffsetCheckBox.onClick = function() { character.autoOffset = vSliceSusCheckBox.checked; };
 
 		tab_group.add(new FlxText(15, imageInputText.y - 18, 100, 'Image file name:'));
 		tab_group.add(new FlxText(15, healthIconInputText.y - 18, 100, 'Health icon name:'));
@@ -1067,6 +1073,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		{
 			character.offset.x -= FlxG.mouse.deltaScreenX;
 			character.offset.y -= FlxG.mouse.deltaScreenY;
+
+			character.addOffset(anims[curAnim].anim, character.offset.x, character.offset.y);
+			updateText();
+
 			changedOffset = true;
 		}
 
@@ -1100,7 +1110,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		}
 
 		var anim = anims[curAnim];
-		if(changedOffset && anim != null && anim.offsets != null && !character.isPlayer)
+		if(changedOffset && anim != null && anim.offsets != null && !character.isPlayer && !character.flipX)
 		{
 			anim.offsets[0] = character.offset.x;
 			anim.offsets[1] = character.offset.y;
@@ -1109,7 +1119,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			updateText();
 		}
 
-		if(changedOffset && anim != null && anim.playerOffsets != null && character.isPlayer)
+		if(changedOffset && anim != null && anim.playerOffsets != null && character.isPlayer && character.flipX)
 		{
 			anim.playerOffsets[0] = character.offset.x;
 			anim.playerOffsets[1] = character.offset.y;
@@ -1468,7 +1478,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			"_editor_isPlayer": character.isPlayer,
 
 			"vSliceSustains": character.vSliceSustains,
-			"scalableOffsets": character.scalableOffsets
+			"scalableOffsets": character.scalableOffsets,
+			"autoOffset": character.autoOffset,
 		};
 
 		var data:String = PsychJsonPrinter.print(json, ['offsets', 'position', 'healthbar_colors', 'camera_position', 'indices', 'player_position', 'player_camera_position', 'playerOffsets']);

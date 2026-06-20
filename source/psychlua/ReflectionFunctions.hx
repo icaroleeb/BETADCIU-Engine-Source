@@ -89,6 +89,9 @@ class ReflectionFunctions
 		});
 		Lua_helper.add_callback(lua, "getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false) {
 			classVar = checkForOldClassVars(classVar);
+			if (classVar == "flixel.FlxG" && variable == "save.data.botplay") { // still not fully working
+				return ClientPrefs.getGameplaySetting('botplay');
+			}
 			var myClass:Dynamic = Type.resolveClass(classVar);
 			if(myClass == null)
 			{

@@ -560,7 +560,7 @@ class FunkinLua {
 
 				PlayState.instance.initHScript(scriptPath, type);
 
-				if (type == "stage") {
+				if (type == "stage" || type == "destroyablesprite") {
 					game.addedStagesHScript.push(scriptFile);
 					// trace('pushing $scriptFile');
 				}
@@ -1775,7 +1775,7 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "changeCharacter", function(tag:String, character:String) {
-			PlayState.instance.callOnCharacterChange("characterChange", tag, character);
+			PlayState.instance.callOnChange("characterChange", tag, character);
 
 			switch(tag.toLowerCase().trim()) {
 				case 'gf' | 'girlfriend' | "2":
@@ -1791,7 +1791,7 @@ class FunkinLua {
 					
 			}
 
-			PlayState.instance.callOnCharacterChange("characterChangePost", tag, character);
+			PlayState.instance.callOnChange("characterChangePost", tag, character);
 		});
 		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false) {
 			// if(this.scriptType.toLowerCase() == "stage" || this.scriptType.toLowerCase() == "stagecamera") 

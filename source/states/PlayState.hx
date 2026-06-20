@@ -2701,7 +2701,7 @@ class PlayState extends MusicBeatState
                 }
 				usedNoteSkinEvent = true;
 			case 'Change Character':
-				callOnCharacterChange("characterChange", value1, value2);
+				callOnChange("characterChange", value1, value2);
 
 				//var charType:Int = 0;
 				switch(value1.toLowerCase().trim()) {
@@ -2721,7 +2721,7 @@ class PlayState extends MusicBeatState
 				}
 				reloadHealthBarColors();
 
-				callOnCharacterChange("characterChangePost", value1, value2);
+				callOnChange("characterChangePost", value1, value2);
 			case 'Change Scroll Speed':
 				if (songSpeedType != "constant")
 				{
@@ -4651,14 +4651,20 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.data.comboCam == "Game") add(comboGroup);
 	}
 
-	public function callOnCharacterChange(call:String, charObj:String, charName:String)
+	public function callOnChange(call:String, nameOne:String, nameTwo:String)
 	{
-		if (call == 'characterChange') {
-			stagesFunc(function(stage:BaseStage) stage.characterChange(charObj, charName));
-			callOnScripts('onCharacterChange', [charObj, charName]);
-		} else if (call == 'characterChangePost') {
-			stagesFunc(function(stage:BaseStage) stage.characterChangePost(charObj, charName));
-			callOnScripts('onCharacterChangePost', [charObj, charName]);
+		if (call.toLowerCase().trim() == 'characterchange') {
+			stagesFunc(function(stage:BaseStage) stage.characterChange(nameOne, nameTwo));
+			callOnScripts('onCharacterChange', [nameOne, nameTwo]);
+		} else if (call.toLowerCase().trim() == 'characterchangepost') {
+			stagesFunc(function(stage:BaseStage) stage.characterChangePost(nameOne, nameTwo));
+			callOnScripts('onCharacterChangePost', [nameOne, nameTwo]);
+		} else if (call.toLowerCase().trim() == 'stagechange') {
+			// stagesFunc(function(stage:BaseStage) stage.stageChange(nameOne));
+			callOnScripts('onStageChange', [nameOne]);
+		} else if (call.toLowerCase().trim() == 'stagechangepost') {
+			// stagesFunc(function(stage:BaseStage) stage.stageChangePost(nameOne));
+			callOnScripts('onStageChangePost', [nameOne]);
 		}
 	}
 
@@ -4700,8 +4706,6 @@ class PlayState extends MusicBeatState
 			stageVars.clear();
 		}
 	}
-
-	public var isCreatePost:Bool = true;
 
 	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) {
 		if(!preload) {
@@ -4754,9 +4758,10 @@ class PlayState extends MusicBeatState
 
 		if(!preload){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
-			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost', "stage");
-			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost', "stage");
 		}
+
+		callLuaFile('stages/' + curStage + '.lua', "onCreatePost", "stage");
+		callHScriptFile('stages/' + curStage + '.hx', "onCreatePost", "stage");
 	}
 
 	// just testing

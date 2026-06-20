@@ -82,6 +82,14 @@ class Controls
 	private function get_PAUSE() return justPressed('pause');
 	private function get_RESET() return justPressed('reset');
 
+	// Extra key stuff
+	public var SPACE(get, never):Bool;
+	private function get_SPACE() return FlxG.keys.pressed.SPACE;
+	public var SPACE_P(get, never):Bool;
+	private function get_SPACE_P() return FlxG.keys.justPressed.SPACE;
+	public var SPACE_R(get, never):Bool;
+	private function get_SPACE_R() return FlxG.keys.justReleased.SPACE;
+
 	//Gamepad & Keyboard stuff
 	public var keyboardBinds:Map<String, Array<FlxKey>>;
 	public var gamepadBinds:Map<String, Array<FlxGamepadInputID>>;
