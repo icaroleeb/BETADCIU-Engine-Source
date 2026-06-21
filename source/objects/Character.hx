@@ -444,7 +444,7 @@ class Character extends Bopper
 
 				if (a.playerOffsets == null) 
 				{
-					isPsychPlayer = true; // i tried to set this out of the loop but it didn't worked
+					// isPsychPlayer = true; // i tried to set this out of the loop but it didn't worked
 					autoOffset = true;
 				}else{
 					autoOffset = false;
@@ -469,6 +469,11 @@ class Character extends Bopper
 			if (!isPlayer)
 				if (isPsychPlayer) 
 					flipAnims();
+
+			/*
+			if (autoOffset && !isPsychPlayer)
+				flipAnims();
+			*/
 		}
 		//trace('Loaded file to character ' + curCharacter);
 	}
@@ -692,7 +697,7 @@ class Character extends Bopper
 
 		if (isPlayer) {
 			if (playerOff != null) {
-				offset.set(playerOff[0], playerOff[1]);
+				if (!autoOffset) offset.set(playerOff[0], playerOff[1]);
 				if (scalableOffsets) {
 					offset.x *= scale.x;
 					offset.y *= scale.y;
