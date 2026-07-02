@@ -312,7 +312,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					spr.alpha = ghostAlpha;
 
 					spr.scale.set(character.scale.x, character.scale.y);
-					spr.updateHitbox();
+					if(!spr.isAnimateAtlas) spr.updateHitbox();
 
 					spr.offset.set(character.offset.x, character.offset.y);
 					spr.visible = true;
@@ -1110,7 +1110,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		}
 
 		var anim = anims[curAnim];
-		if(changedOffset && anim != null && anim.offsets != null && !character.isPlayer && !character.flipX)
+		if(changedOffset && anim != null && anim.offsets != null && !character.isPlayer)
 		{
 			anim.offsets[0] = character.offset.x;
 			anim.offsets[1] = character.offset.y;
@@ -1119,7 +1119,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			updateText();
 		}
 
-		if(changedOffset && anim != null && anim.playerOffsets != null && character.isPlayer && character.flipX)
+		if(changedOffset && anim != null && anim.playerOffsets != null && character.isPlayer)
 		{
 			anim.playerOffsets[0] = character.offset.x;
 			anim.playerOffsets[1] = character.offset.y;
@@ -1482,7 +1482,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			"autoOffset": character.autoOffset,
 		};
 
-		var data:String = PsychJsonPrinter.print(json, ['offsets', 'position', 'healthbar_colors', 'camera_position', 'indices', 'player_position', 'player_camera_position', 'playerOffsets']);
+		var data:String = PsychJsonPrinter.print(json, character.autoOffset ? ['offsets', 'position', 'healthbar_colors', 'camera_position', 'indices', 'player_position', 'player_camera_position'] : 
+		['offsets', 'position', 'healthbar_colors', 'camera_position', 'indices', 'player_position', 'player_camera_position', 'playerOffsets']);
 
 		if (data.length > 0)
 		{

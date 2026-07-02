@@ -59,7 +59,7 @@
             {
                 "name": "flixel-animate",
                 "link": "https://github.com/MaybeMaru/flixel-animate",
-                "branch": "4fb307acac9379966dfa0b7619b37036fcd39b32"
+                "branch": "75870e160677ca4d310df94d775e7fad43c767ae"
             },
             {
                 "name": "haxeui-flixel",
