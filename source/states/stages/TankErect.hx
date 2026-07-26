@@ -2,6 +2,7 @@ package states.stages;
 
 import states.stages.objects.*;
 import shaders.DropShadowShader;
+import openfl.utils.Assets;
 
 class TankErect extends BaseStage
 {
@@ -45,19 +46,19 @@ class TankErect extends BaseStage
 		tankBricks.setPosition(445, 774);
 
 		if (ClientPrefs.data.shaders) {
-			applyCharacterShader("boyfriend");
-			if (gf != null) applyCharacterShader("gf");
-			applyCharacterShader("dad");
+			applyCharacterShader("boyfriend", 0);
+			if (gf != null) applyCharacterShader("gf", 1);
+			applyCharacterShader("dad", 2);
 
 			for (value in modchartCharacters.keys()) // apply for the lua characters too
 			{
-				// var daLuaChars:Character = modchartCharacters.get(value);
-				applyCharacterShader(value);
+				var daLuaChars = modchartCharacters.get(value);
+				applyCharacterShader(value, daLuaChars.isPlayer ? 0 : 2);
 			}
 		}
 	}
 
-	function applyCharacterShader(char:String)
+	function applyCharacterShader(char:String, ?type:Int = 0)
 	{
 		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
 
@@ -67,16 +68,16 @@ class TankErect extends BaseStage
 		character.shader = charRim;
 		charRim.attachedSprite = character;
 
-		if (character.isPlayer)
+		if (type == 0) // bf type
 		{
 			charRim.angle = 90;
 		}
-		else if (character.isSpeakerChar)
+		else if (type == 1) // gf type
 		{
 			charRim.angle = 90;
 			charRim.maskThreshold = 0.4;
 		}
-		else
+		else if (type == 2) // dad type
 		{
 			if (character.curCharacter == "tankman")
 				charRim.angle = 135;
@@ -86,16 +87,11 @@ class TankErect extends BaseStage
 			charRim.threshold = 0.3;
 		}
 
-		var altMaskPath:Dynamic = Paths.image('erect/masks/' + character.curCharacter + '_mask', "week7");
-
-		#if MODS_ALLOWED
-		if (FileSystem.exists(altMaskPath))
-		#else
-		if (OpenFlAssets.exists(altMaskPath))
-		#end
+		if(Paths.fileExists("images/erect/masks/" + character.curCharacter + "_mask.png", IMAGE))
 		{
-			charRim.loadAltMask(altMaskPath);
+			charRim.loadAltMask(Paths.getPath("images/erect/masks/" + character.curCharacter + "_mask.png", IMAGE));
 			charRim.useAltMask = true;
+			trace("mask is active for " + character.curCharacter);
 		}
 
 		character.animation.callback = function(animName:String, frameNumber:Int, frameIndex:Int)
@@ -141,14 +137,15 @@ class TankErect extends BaseStage
 	override function characterChangePost(charExist:String, charNew:String) {
 		if (ClientPrefs.data.shaders)
 		{
-			if (charExist == "bf") 
-				charExist = "boyfriend";
-			else if (charExist == "girlfriend")
-				charExist = "gf";
-			else if (charExist == "opponent")
-				charExist = "dad";
+			if (charExist == "boyfriend" || charExist == "bf") 
+				applyCharacterShader(charExist, 0);
+			else if (charExist == "gf" || charExist == "girlfriend")
+				applyCharacterShader(charExist, 1);
+			else if (charExist == "dad" || charExist == "opponent")
+				applyCharacterShader(charExist, 2);
+			else
+				applyCharacterShader(charExist, PlayState.instance.modchartCharacters.get(charExist).isPlayer ? 0 : 2);
 
-			applyCharacterShader(charExist);
 		}
 	}
 

@@ -10,6 +10,7 @@ import sys.FileSystem;
 
 class PreloadUtil
 {
+    public static var isPreloading:Bool = false;
     public static var stagesToLoad:Array<String> = [];
     public static var charactersToLoad:Array<String> = [];
     public static var imagesToLoad:Array<String> = [];
@@ -61,6 +62,8 @@ class PreloadUtil
             Paths.sound(sound);
         }
         soundsToLoad = [];
+
+        isPreloading = false;
     }
 
     public static function grabStuffToPreload() {
@@ -70,6 +73,7 @@ class PreloadUtil
             if (FileSystem.exists(path)) {
                 var items = CoolUtil.coolTextFile(path);
                 for (item in items) list.push(item.split(' ')[0]);
+                isPreloading = true;
             }
         };
 
@@ -87,6 +91,7 @@ class PreloadUtil
                 if (data.stages != null) stagesToLoad = stagesToLoad.concat(cast data.stages);
                 if (data.images != null) imagesToLoad = imagesToLoad.concat(cast data.images);
                 if (data.sounds != null) soundsToLoad = soundsToLoad.concat(cast data.sounds);
+                isPreloading = true;
             } catch (e:Dynamic) {
                 trace("Error parsing JSON: " + e);
             }

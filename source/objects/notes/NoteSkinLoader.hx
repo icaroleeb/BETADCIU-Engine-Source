@@ -115,7 +115,7 @@ class NoteSkinLoader
 				{
 					note.isLegacyNoteSkin = (noteDirectory == "notes/");
 
-					if (noteDirectory.startsWith("pixelUI/") || StringTools.contains(skin, "-pixel"))
+					if (noteDirectory.startsWith("pixelUI/") || skin.contains("-pixel"))
 						note.isPixelNote = true;
 
 					break;
@@ -198,9 +198,11 @@ class NoteSkinLoader
 		{
 			note.sustainHeightScale = Note.SUSTAIN_SIZE / note.frameHeight;
 
+			/*
 			if (note.isPixelNote && !wasPixelNote){
 				note.offsetX -= 5;
 			}
+			*/
 
 			note.applySustainScale();
 		}
@@ -209,6 +211,7 @@ class NoteSkinLoader
 		note.centerOffsets();
 		note.centerOrigin();
 
+		/*
 		if (note.isPixelNote && note.isSustainNote)
 		{
 			note.scale.y *= PlayState.daPixelZoom;
@@ -216,6 +219,7 @@ class NoteSkinLoader
 
 			note.updateHitbox();
 		}
+		*/
 
 		if (animName != null){
 			note.playAnim(animName); // This one is for the offsets.

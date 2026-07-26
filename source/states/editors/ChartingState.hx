@@ -92,7 +92,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		['Change Stage', "Changes the Stage\nValue 1: Stage's Name\nValue 2:Free value for use with onEvent"],
 		['Change Scroll Speed', "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."],
 		['Set Property', "Value 1: Variable name\nValue 2: New value"],
-		['Play Sound', "Value 1: Sound file name\nValue 2: Volume (Default: 1), ranges from 0 to 1"]
+		['Play Sound', "Value 1: Sound file name\nValue 2: Volume (Default: 1), ranges from 0 to 1"],
+		['FocusCamera', "beta"]
 	];
 	
 	public static var keysArray:Array<FlxKey> = [ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT]; //Used for Vortex Editor
@@ -513,7 +514,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		updateGridVisibility();
 
 		// CHARACTERS FOR THE DROP DOWNS
-		var gameOverCharacters:Array<String> = loadFileList('characters/', 'data/characterList.txt', null, maxListItems);
+		var gameOverCharacters:Array<String> = loadFileList('characters/', 'data/characterList.txt', null, maxListItems, true);
 		var characterList:Array<String> = gameOverCharacters.filter((name:String) -> (!name.endsWith('-dead') && !name.endsWith('-death')));
 		playerDropDown.list = characterList;
 		opponentDropDown.list = characterList;
@@ -527,7 +528,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		});
 		gameOverCharDropDown.list = gameOverCharacters;
 
-		stageDropDown.list = loadFileList('stages/', 'data/stageList.txt', null, maxListItems);
+		stageDropDown.list = loadFileList('stages/', 'data/stageList.txt', null, maxListItems, true);
 		onChartLoaded();
 
 		var tipText:FlxText = new FlxText(FlxG.width - 210, FlxG.height - 30, 200, 'Press F1 for Help', 20);
@@ -1455,7 +1456,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 							trace('Added event at time: $strumTime');
 							var didAdd:Bool = false;
 
-							var eventAdded:EventMetaNote = createEvent([strumTime, [[eventsList[Std.int(Math.max(eventDropDown.selectedIndex, 0))][0], value1InputText.text, value2InputText.text, value3InputText.text]]]);
+							var eventAdded:EventMetaNote = createEvent([strumTime, [[eventsList[Std.int(Math.max(eventDropDown.selectedIndex, 0))][0], value1InputText.text, value2InputText.text, value3InputText.text, value4InputText.text]]]);
 							for (num in sectionFirstEventID...events.length)
 							{
 								var event = events[num];
@@ -1781,6 +1782,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			value1InputText.text = '';
 			value2InputText.text = '';
 			value3InputText.text = '';
+			value4InputText.text = '';
 		}
 		forceDataUpdate = true;
 	}
@@ -1809,6 +1811,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				value1InputText.text = (myEvent[1] != null) ? myEvent[1] : '';
 				value2InputText.text = (myEvent[2] != null) ? myEvent[2] : '';
 				value3InputText.text = (myEvent[3] != null) ? myEvent[3] : '';
+				value4InputText.text = (myEvent[4] != null) ? myEvent[4] : '';
 			}
 		}
 		else selectedEventText.visible = false;
@@ -2648,6 +2651,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var value1InputText:PsychUIInputText;
 	var value2InputText:PsychUIInputText;
 	var value3InputText:PsychUIInputText;
+	var value4InputText:PsychUIInputText;
 	var selectedEventText:FlxText;
 	var eventDescriptionText:FlxText;
 
@@ -2777,6 +2781,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		value2InputText.onChange = function(old:String, cur:String) changeEventsValue(cur, 2);
 		value3InputText = new PsychUIInputText(objX, objY + 40, 120, '', 8);
 		value3InputText.onChange = function(old:String, cur:String) changeEventsValue(cur, 3);
+		value4InputText = new PsychUIInputText(objX + 150, objY + 40, 120, '', 8);
+		value4InputText.onChange = function(old:String, cur:String) changeEventsValue(cur, 4);
 
 		objY += 40;
 		eventDescriptionText = new FlxText(objX, objY + 25, 280, defaultEvents[0][1]);
@@ -2785,6 +2791,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(new FlxText(value1InputText.x, value1InputText.y - 15, 80, 'Value 1:'));
 		tab_group.add(new FlxText(value2InputText.x, value2InputText.y - 15, 80, 'Value 2:'));
 		tab_group.add(new FlxText(value3InputText.x, value3InputText.y - 15, 80, 'Value 3:'));
+		tab_group.add(new FlxText(value4InputText.x, value4InputText.y - 15, 80, 'Value 4:'));
 
 		tab_group.add(removeButton);
 		tab_group.add(addButton);
@@ -2795,6 +2802,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(value1InputText);
 		tab_group.add(value2InputText);
 		tab_group.add(value3InputText);
+		tab_group.add(value4InputText);
 		tab_group.add(eventDescriptionText);
 		
 		tab_group.add(eventDropDown); //lowest priority to display properly
@@ -5064,13 +5072,15 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		super.destroy();
 	}
 
-	function loadFileList(mainFolder:String, ?optionalList:String = null, ?fileTypes:Array<String> = null, ?maxItems:Int = -1)
+	function loadFileList(mainFolder:String, ?optionalList:String = null, ?fileTypes:Array<String> = null, ?maxItems:Int = -1, ?force:Bool = false)
 	{
 		var cachedList = cachedLists.get(mainFolder);
 		var currentModifiedTime = getDirectoryLastModified(mainFolder);
 
+		// cachedLists.remove('characters');
+
 		// So that it only searches the directory when something new is added
-		if (cachedList != null && (currentModifiedTime.getTime() <= cachedList.lastModified.getTime())){
+		if (!force && cachedList != null && (currentModifiedTime.getTime() <= cachedList.lastModified.getTime())){
 			return cachedList.items;
 		}
 

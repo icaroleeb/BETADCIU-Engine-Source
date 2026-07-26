@@ -652,12 +652,12 @@ class PlayState extends MusicBeatState
 			for (file in FileSystem.readDirectory(folder))
 			{
 				#if LUA_ALLOWED
-				if(file.toLowerCase().endsWith('.lua'))
+				if(file.toLowerCase().endsWith('.lua') && !file.toLowerCase().endsWith(scriptSuffix + '.lua'))
 					new FunkinLua(folder + file);
 				#end
 
 				#if HSCRIPT_ALLOWED
-				if(file.toLowerCase().endsWith('.hx'))
+				if(file.toLowerCase().endsWith('.hx') && !file.toLowerCase().endsWith(scriptSuffix + '.hx'))
 					initHScript(folder + file);
 				#end
 			}
@@ -1893,11 +1893,11 @@ class PlayState extends MusicBeatState
 				PreloadUtil.stagesToLoad.push(event.value1);
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
-		callOnScripts('onEventPushedUnique', [event.event, event.value1 != null ? event.value1 : '', event.value2 != null ? event.value2 : '', event.value3 != null ? event.value3 : '', event.strumTime]);
+		callOnScripts('onEventPushedUnique', [event.event, event.value1 != null ? event.value1 : '', event.value2 != null ? event.value2 : '', event.value3 != null ? event.value3 : '', event.value4 != null ? event.value4 : '', event.strumTime]);
 	}
 
 	function eventEarlyTrigger(event:EventNote):Float {
-		var returnedValue:Null<Float> = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2, event.value3, event.strumTime], true);
+		var returnedValue:Null<Float> = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2, event.value3, event.value4, event.strumTime], true);
 		if(returnedValue != null && returnedValue != 0) {
 			return returnedValue;
 		}
@@ -1919,11 +1919,12 @@ class PlayState extends MusicBeatState
 			event: event[1][i][0],
 			value1: event[1][i][1],
 			value2: event[1][i][2],
-			value3: event[1][i][3]
+			value3: event[1][i][3],
+			value4: event[1][i][4]
 		};
 		eventNotes.push(subEvent);
 		eventPushed(subEvent);
-		callOnScripts('onEventPushed', [subEvent.event, subEvent.value1 != null ? subEvent.value1 : '', subEvent.value2 != null ? subEvent.value2 : '', subEvent.value3 != null ? subEvent.value3 : '', subEvent.strumTime]);
+		callOnScripts('onEventPushed', [subEvent.event, subEvent.value1 != null ? subEvent.value1 : '', subEvent.value2 != null ? subEvent.value2 : '', subEvent.value3 != null ? subEvent.value3 : '', subEvent.value4 != null ? subEvent.value4 : '', subEvent.strumTime]);
 	}
 
 	public var skipArrowStartTween:Bool = false; //for lua
@@ -2526,7 +2527,11 @@ class PlayState extends MusicBeatState
 			if(eventNotes[0].value3 != null)
 				value3 = eventNotes[0].value3;
 
-			triggerEvent(eventNotes[0].event, value1, value2, value3, leStrumTime);
+			var value4:String = '';
+			if(eventNotes[0].value4 != null)
+				value4 = eventNotes[0].value4;
+
+			triggerEvent(eventNotes[0].event, value1, value2, value3, value4, leStrumTime);
 			eventNotes.shift();
 		}
 	}
@@ -2547,13 +2552,15 @@ class PlayState extends MusicBeatState
 	public var opponentNoteSkin:String = "NOTE_assets";
 	public var playerNoteSkin:String = "NOTE_assets";
 
-	public function triggerEvent(eventName:String, value1:String, value2:String, value3:String, strumTime:Float) {
+	public function triggerEvent(eventName:String, value1:String, value2:String, value3:String, value4:String, strumTime:Float) {
 		var flValue1:Null<Float> = Std.parseFloat(value1);
 		var flValue2:Null<Float> = Std.parseFloat(value2);
 		var flValue3:Null<Float> = Std.parseFloat(value3);
+		var flValue4:Null<Float> = Std.parseFloat(value4);
 		if(Math.isNaN(flValue1)) flValue1 = null;
 		if(Math.isNaN(flValue2)) flValue2 = null;
 		if(Math.isNaN(flValue3)) flValue3 = null;
+		if(Math.isNaN(flValue4)) flValue4 = null;
 
 		switch(eventName) {
 			case 'Hey!':
@@ -2778,10 +2785,12 @@ class PlayState extends MusicBeatState
 					changeStage(value1);
 					callOnScripts('onStageChangePost', [value1]);
  				}
+			case "FocusCamera":
+				moveCameraVSlice(value1, value2, Std.parseFloat(value3), value4);
 		}
 
-		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, value3, flValue1, flValue2, flValue3, strumTime));
-		callOnScripts('onEvent', [eventName, value1, value2, value3, strumTime]);
+		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, value3, value4, flValue1, flValue2, flValue3, flValue4, strumTime));
+		callOnScripts('onEvent', [eventName, value1, value2, value3, value4, strumTime]);
 	}
 
 	public function moveCameraSection(?sec:Null<Int>):Void {
@@ -3279,9 +3288,9 @@ class PlayState extends MusicBeatState
 				numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
 				numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
 			}else{
-				numScore.scale.set(0.6, 0.6);
+				numScore.scale.set(0.6 * (isPixelStage ? daPixelZoom : 1), 0.6 * (isPixelStage ? daPixelZoom : 1));
 				FlxTween.cancelTweensOf(numScore, ['scale.x', 'scale.y']);
-				FlxTween.tween(numScore.scale, {x: 0.5, y: 0.5}, 0.5, {ease: fadeEase});
+				FlxTween.tween(numScore.scale, {x: 0.5 * (isPixelStage ? daPixelZoom : 1), y: 0.5 * (isPixelStage ? daPixelZoom : 1)}, 0.5, {ease: fadeEase});
 			}
 
 			numScore.visible = !ClientPrefs.data.hideHud;
@@ -4160,9 +4169,9 @@ class PlayState extends MusicBeatState
 			for (script in luaArray) {
 				if (script.scriptName == luaToLoad) {
 					// Custom function call
-					if (luaType != null && luaType.length > 0) script.scriptType = luaType; // wanna make this work for types too...
+					script.scriptType = luaType; // wanna make this work for types too...
 					script.call(callLua, []);
-					if (luaType != null && luaType.length > 0) script.scriptType = "";
+					script.scriptType = "";
 					return true;
 				}
 			}
@@ -4709,7 +4718,7 @@ class PlayState extends MusicBeatState
 
 	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) {
 		if(!preload) {
-			setStageDetails(stageData); // for some reason they don't add the chars position on them.
+			if (!PreloadUtil.isPreloading) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		} else {
 			var dir:String = stageData.directory;
 			if (dir != null) {
@@ -4758,10 +4767,9 @@ class PlayState extends MusicBeatState
 
 		if(!preload){
 			stagesFunc(function(stage:BaseStage) stage.createPost());
+			callLuaFile('stages/' + curStage + '.lua', "onCreatePost", "stage"); // yeah still dont work because of shaders :heartBreaking:
+			callHScriptFile('stages/' + curStage + '.hx', "onCreatePost", "stage");
 		}
-
-		callLuaFile('stages/' + curStage + '.lua', "onCreatePost", "stage");
-		callHScriptFile('stages/' + curStage + '.hx', "onCreatePost", "stage");
 	}
 
 	// just testing
@@ -4778,5 +4786,50 @@ class PlayState extends MusicBeatState
 	function set_gf(value:Character):Character {
 		if (value != null) value.playSingAnim = true;
 		return gf = value;
+	}
+
+	// alternative lol
+	function set_bf(value:Character):Character {
+		boyfriend = value;
+		return boyfriend;
+	}
+
+	// VSlice Events WIP as Hell
+
+	function moveCameraVSlice(value:String, camPos:String, duration:Float = 16, easeString:String = "linear")
+	{
+		isCameraOnForcedPos = true;
+
+		var cameraPos = camPos.split(",");
+		var targetCamX:Float = 0;
+		var targetCamY:Float = 0;
+
+		if (value != null)
+		{
+			switch(value)
+			{
+				case "0":
+					targetCamX = boyfriend.getMidpoint().x - 100 - boyfriend.cameraPosition[0] + cameraPos[0] != null ? Std.parseFloat(cameraPos[0].trim()) : 0;
+					targetCamY = boyfriend.getMidpoint().y - 100 + boyfriend.cameraPosition[1] + cameraPos[1] != null ? Std.parseFloat(cameraPos[1].trim()) : 0;
+				case "1":
+					targetCamX = dad.getMidpoint().x + 150 + dad.cameraPosition[0] + cameraPos[0] != null ? Std.parseFloat(cameraPos[0].trim()) : 0;
+					targetCamY = dad.getMidpoint().y - 100 + dad.cameraPosition[1] + cameraPos[1] != null ? Std.parseFloat(cameraPos[1].trim()) : 0;
+				case "2":
+					targetCamX = gf.getMidpoint().x + gf.cameraPosition[0] + cameraPos[0] != null ? Std.parseFloat(cameraPos[0].trim()) : 0;
+					targetCamY = gf.getMidpoint().y + gf.cameraPosition[1] + cameraPos[1] != null ? Std.parseFloat(cameraPos[1].trim()) : 0;
+			}
+		}
+		else
+		{
+			if(cameraPos[0] != null) targetCamX = Std.parseFloat(cameraPos[0].trim());
+			if(cameraPos[1] != null) targetCamY = Std.parseFloat(cameraPos[1].trim());
+		}
+
+		if (easeString.toLowerCase() == "classic" || easeString == "")
+			camFollow.setPosition(targetCamX, targetCamY);
+		else {
+			FlxTween.cancelTweensOf(camFollow, ["x", "y"]);
+			FlxTween.tween(camFollow, {x: targetCamX, y: targetCamY}, Conductor.stepCrochet * duration / 1000 / playbackRate, {ease: LuaUtils.getTweenEaseByString(easeString)});
+		}
 	}
 }

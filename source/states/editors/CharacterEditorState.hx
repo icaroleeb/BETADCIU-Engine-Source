@@ -312,7 +312,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					spr.alpha = ghostAlpha;
 
 					spr.scale.set(character.scale.x, character.scale.y);
-					if(!spr.isAnimateAtlas) spr.updateHitbox();
+					if (!spr.isAnimateAtlas) spr.updateHitbox();
 
 					spr.offset.set(character.offset.x, character.offset.y);
 					spr.visible = true;
@@ -736,7 +736,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		vSliceSusCheckBox.checked = character.vSliceSustains;
 		vSliceSusCheckBox.onClick = function() { character.vSliceSustains = vSliceSusCheckBox.checked; };
 
-		autoOffsetCheckBox = new PsychUICheckBox(scalableOffsetsCheckBox.x + scalableOffsetsCheckBox.width + 20, saveCharacterButton.y + 25, "autoOffset", 80);
+		autoOffsetCheckBox = new PsychUICheckBox(scalableOffsetsCheckBox.x + scalableOffsetsCheckBox.width + 120, saveCharacterButton.y + 25, "autoOffset", 80);
 		autoOffsetCheckBox.checked = character.autoOffset;
 		autoOffsetCheckBox.onClick = function() { character.autoOffset = vSliceSusCheckBox.checked; };
 
@@ -774,6 +774,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		tab_group.add(saveCharacterButton);
 		tab_group.add(scalableOffsetsCheckBox);
 		tab_group.add(vSliceSusCheckBox);
+		tab_group.add(autoOffsetCheckBox);
 	}
 
 	public function UIEvent(id:String, sender:Dynamic) {

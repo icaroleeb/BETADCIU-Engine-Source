@@ -21,6 +21,18 @@ class FlxAnimateFunctions
 				lastSprite.destroy();
 			}
 
+			if (funk.scriptType.toLowerCase() == "stage")
+			{
+				var lastSpriteStage = MusicBeatState.getVariables().get("stageVariables").get(tag);
+
+				if(lastSpriteStage != null)
+				{
+					lastSpriteStage.kill();
+					PlayState.instance.remove(lastSpriteStage);
+					lastSpriteStage.destroy();
+				}
+			}
+
 			// var mySprite:ModchartAnimateSprite = new ModchartAnimateSprite(x, y);
 			var mySprite:FunkinSprite = new FunkinSprite(x, y, null);
 
@@ -35,14 +47,14 @@ class FlxAnimateFunctions
 			switch(funk.scriptType.toLowerCase()){
 				case "stage":
 					if (!variables.exists("stageVariables")){
-						variables.set("stageVariables", new Map<String, FlxSprite>());
+						variables.set("stageVariables", new Map<String, FlxAnimate>());
 					}
 		
 					var stageVars = variables.get("stageVariables");
 					stageVars.set(tag, mySprite);
 				case "stagecamera":
 					if (!variables.exists("stageCameraVariables")){
-						variables.set("stageCameraVariables", new Map<String, FlxSprite>());
+						variables.set("stageCameraVariables", new Map<String, FlxAnimate>());
 					}
 
 					var stageVars = variables.get("stageCameraVariables");

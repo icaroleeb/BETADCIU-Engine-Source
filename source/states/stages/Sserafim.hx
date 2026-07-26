@@ -85,7 +85,7 @@ class Sserafim extends BaseStage
         add(burgerCutscene);
         spritesShader.push(burgerCutscene);
 
-        var backStools:BGSprite = new BGSprite('cutscene/back-stools', -1357, 426, 0.94, 0.94);
+        var backStools:BGSprite = new BGSprite('back-stools', -1357, 426, 0.94, 0.94);
         stageVars.set('backStools', backStools);
         add(backStools);
         spritesShader.push(backStools);
@@ -202,8 +202,7 @@ class Sserafim extends BaseStage
     }
 
     /*
-    override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
-    {
+    override function eventCalled(eventName:String, value1:String, value2:String, value3:String, value4:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, flValue4:Null<Float>, strumTime:Float)    {
         switch (eventName)
         {
             case 'sserafimGuitarVibration':

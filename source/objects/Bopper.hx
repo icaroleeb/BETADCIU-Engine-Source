@@ -154,7 +154,7 @@ class Bopper extends FunkinSprite
 		
 		animation.play(correctedAnim, isForced, isReversed, frame);
 
-		if (autoOffset && this.flipX) // I just wanna swap offset animations so bad :sob:
+		if (animToPlay.startsWith("sing") && autoOffset && this.flipX) // I just wanna swap offset animations so bad :sob:
 		{
 			var animSplit:Array<String> = correctedAnim.split(correctedAnim);
 

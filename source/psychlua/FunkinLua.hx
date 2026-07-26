@@ -615,19 +615,18 @@ class FunkinLua {
 			luaTrace("removeHScript: HScript is not supported on this platform!", false, false, FlxColor.RED);
 			#end
 		});
-		Lua_helper.add_callback(lua, "addStagetoCamera", function(?stageName:String = "", ?cameraName:String = "") {
-			// beta not finalized yet
+		Lua_helper.add_callback(lua, "addStagetoCamera", function(?stageName:String = "", ?cameraName:String = "") { // beta not finalized yet
 			switch (stageName.toLowerCase())
 			{
 				case 'stage' | 'spooky' | 'philly' | 'limo' | 'mall' | 'mallevil' | 'school' | 'schoolevil' | 'tank' | 'phillystreets' | 'phillyblazin':
 					luaTrace("Base Game Stages can't be added to camera", false, false, FlxColor.RED);
-					//return; 
+					return; 
 			}
 			
 			game.startLuasNamed('stages/' + stageName + '.lua', "stageCamera");
-			game.startHScriptsNamed('stages/' + stageName + '.hx', "stageCamera");
+			// game.startHScriptsNamed('stages/' + stageName + '.hx', "stageCamera");
 
-			var stageCameraVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageCameraVariables");
+			var stageCameraVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stage" + cameraName + "Variables");
 
 			if (stageCameraVars != null) {
 				for (key in stageCameraVars.keys()) {
@@ -635,6 +634,32 @@ class FunkinLua {
 
 					if (sprite != null) {
 						sprite.cameras = [LuaUtils.cameraFromString(cameraName)];
+					}
+				}
+
+			}
+		});
+		Lua_helper.add_callback(lua, "removeStagefromCamera", function(?stageName:String = "", ?cameraName:String = "") { // beta not finalized yet
+			// beta not finalized yet
+			switch (stageName.toLowerCase())
+			{
+				case 'stage' | 'spooky' | 'philly' | 'limo' | 'mall' | 'mallevil' | 'school' | 'schoolevil' | 'tank' | 'phillystreets' | 'phillyblazin':
+					luaTrace("Base Game Stages can't be removed from camera", false, false, FlxColor.RED);
+					return; 
+			}
+			
+			game.stopLuasNamed('stages/' + stageName + '.lua', "stageCamera");
+			// game.stopHScriptsNamed('stages/' + stageName + '.hx', "stageCamera");
+
+			var stageCameraVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stage" + cameraName + "Variables");
+
+			if (stageCameraVars != null) {
+				for (key in stageCameraVars.keys()) {
+					var sprite:FlxSprite = stageCameraVars.get(key);
+
+					if (sprite != null) {
+						sprite.kill();
+						sprite.destroy();
 					}
 				}
 				stageCameraVars.clear();
@@ -906,7 +931,7 @@ class FunkinLua {
 		});
 
 		// others
-		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '', ?value3:String = '') {
+		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, ?value1:String = '', ?value2:String = '', ?value3:String = '', ?value4:String = '') {
 			if (this.scriptType.toLowerCase() == "modpack"){
 				if (FileSystem.exists(Paths.modFolders('custom_events/$name.txt'))){
 					ModpackAssetRegistry.instance.addAsset("", 'custom_events/$name.txt');
@@ -919,7 +944,7 @@ class FunkinLua {
 				return true;
 			}
 
-			game.triggerEvent(name, value1, value2, value3, Conductor.songPosition);
+			game.triggerEvent(name, value1, value2, value3, value4, Conductor.songPosition);
 			//trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2, ', ' + value3);
 			return true;
 		});

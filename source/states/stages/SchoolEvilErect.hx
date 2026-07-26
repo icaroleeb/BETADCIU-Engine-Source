@@ -141,8 +141,7 @@ class SchoolEvilErect extends BaseStage
 
 	// Ghouls event
 	var bgGhouls:FunkinSprite;
-	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
-	{
+	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, value4:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, flValue4:Null<Float>, strumTime:Float)	{
 		switch(eventName)
 		{
 			case "Trigger BG Ghouls":
@@ -296,19 +295,19 @@ class SchoolEvilErect extends BaseStage
 	{
 		if (ClientPrefs.data.shaders)
 		{
-			applyCharacterShader("boyfriend");
-			applyCharacterShader("dad");
-			if (gf != null) applyCharacterShader("gf");
+			applyCharacterShader("boyfriend", 0);
+			applyCharacterShader("dad", 1);
+			if (gf != null) applyCharacterShader("gf", 2);
 
 			for (value in modchartCharacters.keys()) // apply for the lua characters too
 			{
-				// var daLuaChars:Character = modchartCharacters.get(value);
-				applyCharacterShader(value);
+				var daLuaChars = modchartCharacters.get(value);
+				applyCharacterShader(value, daLuaChars.isPlayer ? 0 : 2);
 			}
 		}
 	}
 
-	function applyCharacterShader(char:String):Void
+	function applyCharacterShader(char:String, ?type:Int = 0)
 	{
 		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
 		
@@ -319,32 +318,27 @@ class SchoolEvilErect extends BaseStage
 		rim.attachedSprite = character;
 		rim.distance = 5;
 
-		if (character.isPlayer)
+		if (type == 0) // bf type
 		{
 			//rim.color = 0xFF4a0523;
 			rim.angle = 180;
 		    rim.distance = 3;
 		}
-		else if (character.isSpeakerChar)
+		else if (type == 1) // gf type
 		{
 			rim.angle = 180;
 			rim.distance = 3;
 		}
-		else
+		else if (type == 2) // dad type
 		{
 			rim.angle = 90;
 		}
 
-		var altMaskPath:Dynamic = Paths.image('weeb/erect/masks/' + character.curCharacter + '_mask', "week6");
-
-		#if MODS_ALLOWED
-		if (FileSystem.exists(altMaskPath))
-		#else
-		if (OpenFlAssets.exists(altMaskPath))
-		#end
+		if(Paths.fileExists("images/erect/masks/" + character.curCharacter + "_mask.png", IMAGE))
 		{
-			rim.loadAltMask(altMaskPath);
+			rim.loadAltMask(Paths.getPath("images/erect/masks/" + character.curCharacter + "_mask.png", IMAGE));
 			rim.useAltMask = true;
+			trace("mask is active for " + character.curCharacter);
 		}
 
 		character.shader = rim;
