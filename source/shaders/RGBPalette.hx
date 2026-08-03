@@ -10,6 +10,7 @@ class RGBPalette {
 	public var b(default, set):FlxColor;
 	public var mult(default, set):Float;
 	public var amount(default, set):Float;
+	public var saturation(default, set):Float;
 	public var enabled(default, set):Bool;
 
 	public function copyValues(tempShader:RGBPalette)
@@ -23,6 +24,7 @@ class RGBPalette {
 				shader.b.value[i] = tempShader.shader.b.value[i];
 			}
 			shader.mult.value[0] = tempShader.shader.mult.value[0];
+			shader.saturation.value[0] = tempShader.shader.saturation.value[0];
 		}
 		else shader.mult.value[0] = 0.0;
 	}
@@ -63,6 +65,12 @@ class RGBPalette {
 		return enabled;
 	}
 
+	private function set_saturation(value:Float) {
+		saturation = FlxMath.bound(value, 0, 3);
+		shader.saturation.value = [saturation];
+		return saturation;
+	}
+
 	public function new()
 	{
 		r = 0xFFFF0000;
@@ -70,6 +78,7 @@ class RGBPalette {
 		b = 0xFF0000FF;
 		mult = 1.0;
 		amount = 0.0;
+		saturation = 1.0;
 	}
 }
 
@@ -81,6 +90,7 @@ class RGBShaderReference
 	public var b(default, set):FlxColor;
 	public var mult(default, set):Float;
 	public var amount(default, set):Float;
+	public var saturation(default, set):Float;
 	public var enabled(default, set):Bool = true;
 
 	public var parent:RGBPalette;
@@ -132,6 +142,11 @@ class RGBShaderReference
 		if(allowNew && value != _original.enabled) cloneOriginal();
 		return (enabled = parent.enabled = value);
 	}
+	private function set_saturation(value:Float)
+	{
+		if(allowNew && value != _original.saturation) cloneOriginal();
+		return (saturation = parent.saturation = value);
+	}
 
 	public var allowNew = true;
 	private function cloneOriginal()
@@ -154,7 +169,7 @@ class RGBShaderReference
 }
 
 class RGBPaletteShader extends FlxShader {
-	@:glFragmentHeader('
+	@:glFragmentHeader("
 		#pragma header
 		
 		uniform vec3 r;
@@ -162,8 +177,27 @@ class RGBPaletteShader extends FlxShader {
 		uniform vec3 b;
 		uniform float mult;
 		uniform float amount;
+		uniform float saturation; // why wansn't this a default thing?
 
 		uniform bool enabled;
+
+		vec3 rgb2hsv(vec3 c)
+		{
+			vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+			vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+			vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+			float d = q.x - min(q.w, q.y);
+			float e = 1.0e-10;
+			return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+		}
+
+		vec3 hsv2rgb(vec3 c)
+		{
+			vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+			vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+			return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+		}
 
 		vec4 flixel_texture2DCustom(sampler2D bitmap, vec2 coord) {
 			vec4 color = flixel_texture2D(bitmap, coord);
@@ -174,6 +208,11 @@ class RGBPaletteShader extends FlxShader {
 			if (enabled) {
 				vec4 newColor = color;
 				newColor.rgb = min(color.r * r + color.g * g + color.b * b, vec3(1.0));
+
+				vec3 hsv = rgb2hsv(newColor.rgb);
+				hsv.y = clamp(hsv.y * saturation, 0.0, 1.0);
+				newColor.rgb = hsv2rgb(hsv);
+
 				newColor.a = color.a;
 				
 				color = mix(color, newColor, mult);
@@ -183,7 +222,7 @@ class RGBPaletteShader extends FlxShader {
 				return vec4(color.rgb, color.a);
 			}
 			return vec4(0.0, 0.0, 0.0, 0.0);
-		}')
+		}")
 
 	@:glFragmentSource('
 		#pragma header

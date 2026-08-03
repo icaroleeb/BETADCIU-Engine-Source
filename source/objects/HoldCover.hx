@@ -3,36 +3,14 @@ package objects;
 import openfl.Assets;
 import flixel.FlxSprite;
 import objects.Note;
+// import objects.notes.NoteColoring; // imported on import.hx
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.util.FlxTimer;
 import states.PlayState;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
-import flixel.system.FlxAssets.FlxShader;
 import objects.FunkinSprite;
-
-typedef RGB2 = {
-	r:Null<Int>,
-	g:Null<Int>,
-	b:Null<Int>
-}
-
-typedef NoteHoldCoverAnim = {
-	name:String,
-	noteData:Int,
-	prefix:String,
-	indices:Array<Int>,
-	offsets:Array<Float>,
-	fps:Array<Int>
-}
-
-typedef NoteHoldCoverConfig = {
-	animations:Map<String, NoteHoldCoverAnim>,
-	scale:Float,
-	allowRGB:Bool,
-	allowPixel:Bool,
-	rgb:Array<Null<RGB2>>
-}
+import objects.notes.NoteSkinConfig;
 
 class CoverSprite extends FunkinSprite
 {
@@ -114,11 +92,13 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 	public var enabled:Bool = true;
 	public var isPlayer:Bool = false;
 
-	public var config(default, set):NoteHoldCoverConfig;
-	public static var configs:Map<String, NoteHoldCoverConfig> = new Map();
+	public var config(default, set):SkinAnimConfig;
+	public static var configs:Map<String, SkinAnimConfig> = new Map();
 	var noteDataMap:Map<Int, String> = new Map();
 
 	var activeCovers:Map<Int, CoverSprite> = new Map();
+
+	public var autoRGB:Bool = true; // almost forgot to make this public lol
 
 	public function new(enabled:Bool, isPlayer:Bool)
 	{
@@ -148,10 +128,11 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 		var isHoldEnd:Bool = false;
 		if (note.animation.curAnim != null) isHoldEnd = note.animation.curAnim.name.endsWith('end');
 
-		var tempConfig:NoteHoldCoverConfig = createConfig();
+		var tempConfig:SkinAnimConfig = NoteSkinConfig.createConfig();
 
+		// data is always 0-3 (Std.int(x) % 4), so the note-hit color is just Note.colArrayCapitalized[data]
 		var data:Int = Std.int(noteData) % 4;
-		var colors:Array<String> = ["Purple", "Blue", "Green", "Red", "Purple", "Blue", "Green", "Red"];
+		final colors:Array<String> = ["Purple", "Blue", "Green", "Red"];
 		var hColor:String = colors[data];
 
 		if (!note.isSustainNote) 
@@ -183,41 +164,49 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 
 			newCover.antialiasing = (ClientPrefs.data.antialiasing && !newCover.texture.contains('pixel'));
 
-			newCover.rgbShader = new RGBShaderReference(newCover, initializeGlobalRGBShader(data));
-			if (note.shader != null && note.rgbShader.enabled || !newCover.isCustomHoldCoverSkin) newCover.rgbShader.enabled = true;
-			else newCover.rgbShader.enabled == false;
+			newCover.rgbShader = new RGBShaderReference(newCover, NoteRGBShader.initializeGlobalRGBShader(data));
+			newCover.rgbShader.saturation = 1.6; // i like this -- probably making this a config on json later if people don't like it as a default thing
+
+			updateRGB(newCover, note, data);
 
 			newCover.animation.play("start" + Std.string(data), false);
 
 			activeCovers.set(data, newCover);
+
+			return;
+		} else {
+			updateRGB(existingCover, note, data);
 		}
 	}
 
-	public static var globalRgbShaders:Array<RGBPalette> = [];
-
-	public static function initializeGlobalRGBShader(noteData:Int)
+	function updateRGB(cover:CoverSprite, note:Note, data:Int):Void
 	{
-		if(globalRgbShaders[noteData] == null)
+		if (note.shader != null && note.rgbShader.enabled || !cover.isCustomHoldCoverSkin)
 		{
-			var newRGB:RGBPalette = new RGBPalette();
-			var arr:Array<FlxColor> = (!PlayState.isPixelStage) ? ClientPrefs.data.arrowRGB[noteData] : ClientPrefs.data.arrowRGBPixel[noteData];
-			
-			if (arr != null && noteData > -1 && noteData <= arr.length)
+			cover.rgbShader.enabled = true;
+
+			if (!cover.isCustomHoldCoverSkin && note.isLegacyNoteSkin && autoRGB)
 			{
-				newRGB.r = arr[0];
-				newRGB.g = arr[1];
-				newRGB.b = arr[2];
+				final tones = NoteColorExtractor.generateTones(NoteColorExtractor.getDominantColor(note));
+
+				cover.rgbShader.r = tones.highlight;
+				cover.rgbShader.g = FlxColor.WHITE;
+				cover.rgbShader.b = tones.shadow;
+				cover.rgbShader.saturation = 1; // most of the custom colors are pretty saturated already, so i'll leave the saturation boost for the default coloring
 			}
 			else
 			{
-				newRGB.r = 0xFFFF0000;
-				newRGB.g = 0xFF00FF00;
-				newRGB.b = 0xFF0000FF;
+				final defaultArr:Array<FlxColor> = (!note.isPixelNote) ? ClientPrefs.data.arrowRGB[data] : ClientPrefs.data.arrowRGBPixel[data];
+				if (defaultArr != null)
+				{
+					cover.rgbShader.r = defaultArr[0];
+					cover.rgbShader.g = defaultArr[1];
+					cover.rgbShader.b = defaultArr[2];
+					cover.rgbShader.saturation = 1.6;  // i like this -- probably making this a config on json later if people don't like it as a default thing
+				}
 			}
-			
-			globalRgbShaders[noteData] = newRGB;
 		}
-		return globalRgbShaders[noteData];
+		else cover.rgbShader.enabled = false;
 	}
 
 	public function despawnOnMiss(isReady:Bool, direction:Int, ?note:Note = null):Void
@@ -240,176 +229,35 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 
 	public function updateHold(elapsed:Float, isReady:Bool):Void
 	{
-		if (enabled && isReady)
-		{
-			for (member in members) 
-				if (member != null && !member.alive) this.remove(member, true);
+		if (!enabled || !isReady) return;
+		if (PlayState.instance == null || PlayState.instance.inCutscene) return;
+		
+		var game:PlayState = PlayState.instance;
+		if (game.strumLineNotes == null) return;
 
-			for (data => cover in activeCovers) {
-				if (cover == null || !cover.alive) {
-					activeCovers.remove(data);
-					continue;
-				}
-				if (cover.x != ni(data, "x") - 110) cover.x = ni(data, "x") - 110;
-				if (cover.y != ni(data, "y") - 100) cover.y = ni(data, "y") - 100;
-				if (cover.alpha != ni(data, "alpha")) cover.alpha = ni(data, "alpha");
+		for (member in members) 
+			if (member != null && !member.alive) this.remove(member, true);
+
+		for (data => cover in activeCovers) {
+			if (cover == null || !cover.alive) {
+				activeCovers.remove(data);
+				continue;
 			}
+
+			var strum:StrumNote = game.strumLineNotes.members[isPlayer ? data + 4 : data];
+			if (strum == null) continue;
+
+			var targetX:Float = strum.x - 110;
+			var targetY:Float = strum.y - 100;
+
+			if (cover.x != targetX) cover.x = targetX;
+			if (cover.y != targetY) cover.y = targetY;
+			if (cover.alpha != strum.alpha) cover.alpha = strum.alpha;
 		}
   	}
 
-	function ni(note, info):Float
+	function set_config(value:SkinAnimConfig):SkinAnimConfig
 	{
-		if (enabled && PlayState.instance != null && !PlayState.instance.inCutscene)
-		{
-		var game:PlayState = PlayState.instance;
-		if (game == null) return 110;
-		else
-		{
-			if (game.strumLineNotes != null)
-			{
-				if (info == "x") return game.strumLineNotes.members[isPlayer ? note + 4 : note].x;
-				else if (info == "y") return game.strumLineNotes.members[isPlayer ? note + 4 : note].y;
-				else if (info == "alpha") return game.strumLineNotes.members[isPlayer ? note + 4 : note].alpha;
-			}
-			return 0;
-		}
-		}
-		return 0;
-	}
-
-	function set_config(value:NoteHoldCoverConfig):NoteHoldCoverConfig 
-	{
-		if (value == null) value = createConfig();
-
-		@:privateAccess
-		noteDataMap.clear();
-
-		for (i in value.animations)
-		{
-			var key:String = i.name;
-			if (i.prefix.length > 0 && key != null && key.length > 0)
-			{
-				if (i.indices != null && i.indices.length > 0)
-					animation.addByIndices(key, i.prefix, i.indices, "", i.fps[1], false);
-				else
-					animation.addByPrefix(key, i.prefix, i.fps[1], false);
-
-				noteDataMap.set(i.noteData, key);
-			}
-		}
-
-		scale.set(value.scale, value.scale);
-		return config = value;
-	}
-
-	private function createConfig():NoteHoldCoverConfig
-	{
-		return {
-			animations: new Map(),
-			scale: 1,
-			allowRGB: true,
-			allowPixel: true,
-			rgb: null
-		}
-	}
-}
-
-class PixelHoldShaderRef 
-{
-	public var shader:PixelHoldShader = new PixelHoldShader();
-	public var enabled(default, set):Bool = true;
-	public var pixelAmount(default, set):Float = 1;
-
-	public function copyValues(tempShader:RGBPalette)
-	{
-		if (tempShader != null)
-		{
-			for (i in 0...3)
-			{
-				shader.r.value[i] = tempShader.shader.r.value[i];
-				shader.g.value[i] = tempShader.shader.g.value[i];
-				shader.b.value[i] = tempShader.shader.b.value[i];
-			}
-			shader.mult.value[0] = tempShader.shader.mult.value[0];
-		}
-		else enabled = false;
-	}
-
-	public function set_enabled(value:Bool)
-	{
-		enabled = value;
-		shader.mult.value = [value ? 1 : 0];
-		return value;
-	}
-
-	public function set_pixelAmount(value:Float)
-	{
-		pixelAmount = value;
-		shader.uBlocksize.value = [value, value];
-		return value;
-	}
-
-	public function reset()
-	{
-		shader.r.value = [0, 0, 0];
-		shader.g.value = [0, 0, 0];
-		shader.b.value = [0, 0, 0];
-	}
-
-	public function new()
-	{
-		reset();
-		enabled = true;
-
-		if (!PlayState.isPixelStage) pixelAmount = 1;
-		else pixelAmount = PlayState.daPixelZoom;
-		//trace('Created shader ' + Conductor.songPosition);
-	}
-}
-
-class PixelHoldShader extends FlxShader
-{
-	@:glFragmentHeader('
-		#pragma header
-
-		uniform vec3 r;
-		uniform vec3 g;
-		uniform vec3 b;
-		uniform float mult;
-		uniform vec2 uBlocksize;
-
-		vec4 flixel_texture2DCustom(sampler2D bitmap, vec2 coord) {
-			vec2 blocks = openfl_TextureSize / uBlocksize;
-			vec4 color = flixel_texture2D(bitmap, floor(coord * blocks) / blocks);
-			if (!hasTransform) {
-				return color;
-			}
-
-			if (color.a == 0.0 || mult == 0.0) {
-				return color * openfl_Alphav;
-			}
-
-			vec4 newColor = color;
-			newColor.rgb = min(color.r * r + color.g * g + color.b * b, vec3(1.0));
-			newColor.a = color.a;
-
-			color = mix(color, newColor, mult);
-
-			if (color.a > 0.0) {
-				return vec4(color.rgb, color.a);
-			}
-			return vec4(0.0, 0.0, 0.0, 0.0);
-		}')
-
-	@:glFragmentSource('
-		#pragma header
-
-		void main() {
-			gl_FragColor = flixel_texture2DCustom(bitmap, openfl_TextureCoordv);
-		}')
-
-	public function new()
-	{
-		super();
+		return config = NoteSkinConfig.applyConfig(this, animation, value, noteDataMap, false);
 	}
 }

@@ -41,12 +41,12 @@ class NoteAnimationLoader
 		{
 			if (Paths.fileExists("images/" + skin + "_hold.xml", IMAGE))
 			{
-				note.frames = Paths.getSparrowAtlas(skin + "_hold");
+				note.frames = Paths.getSparrowAtlas(skin + "_hold", null, false);
 				note.separateXMLExists = true;
 			}
 			else
 			{
-				var rawPic:Dynamic = Paths.image(skin + "_hold");
+				var rawPic:Dynamic = Paths.image(skin + "_hold", null, false);
 				note.loadGraphic(rawPic, true, 52, 87);
 			}
 		}
@@ -54,7 +54,7 @@ class NoteAnimationLoader
 		{
 			try
 			{
-				note.frames = Paths.getSparrowAtlas(skin);
+				note.frames = Paths.getSparrowAtlas(skin, null, false);
 			}
 			catch (e)
 			{
@@ -94,9 +94,12 @@ class NoteAnimationLoader
 		{
 			if (note.isSustainNote)
 			{
-				attemptToAddAnimationByPrefix(note, 'purpleholdend', 'pruple end hold', 24, true);
-
 				note.animation.addByPrefix('holdend', Note.colArray[note.noteData] + ' hold end', 24, true);
+
+				// old ass typo shit
+				if (Note.colArray[note.noteData] == 'purple' && note.animation.getByName('holdend') == null)
+					note.animation.addByPrefix('holdend', 'pruple end hold', 24, true);
+
 				note.animation.addByPrefix('hold', Note.colArray[note.noteData] + ' hold piece', 24, true);
 			}
 			else
@@ -120,22 +123,6 @@ class NoteAnimationLoader
 		{
 			note.animation.add('scroll', [note.noteData + 4], 24, true);
 		}
-	}
-
-	public static function attemptToAddAnimationByPrefix(note:Note, name:String, prefix:String, framerate:Float = 24, doLoop:Bool = true):Void
-	{
-		if (note.frames == null)
-			return;
-
-		var animFrames = [];
-
-		@:privateAccess
-		note.animation.findByPrefix(animFrames, prefix);
-
-		if (animFrames.length < 1)
-			return;
-
-		note.animation.addByPrefix(name, prefix, framerate, doLoop);
 	}
 
 	public static function loadNoteAnimsFromConfig(note:Dynamic, isStrum:Bool = false):Void

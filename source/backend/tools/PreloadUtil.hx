@@ -7,6 +7,7 @@ import haxe.Json;
 import sys.io.File;
 import sys.FileSystem;
 #end
+import flixel.graphics.FlxGraphic;
 
 class PreloadUtil
 {
@@ -21,46 +22,66 @@ class PreloadUtil
         if (stages != null) stagesToLoad = stagesToLoad.concat(stages);
         if (sounds != null) soundsToLoad = soundsToLoad.concat(sounds);
 
-        charactersToLoad = CoolUtil.removeDupe(charactersToLoad);
-        imagesToLoad = CoolUtil.removeDupe(imagesToLoad);
-        stagesToLoad = CoolUtil.removeDupe(stagesToLoad);
-        soundsToLoad = CoolUtil.removeDupe(soundsToLoad);
+        charactersToLoad = CoolUtil.removeDupe(charactersToLoad, "Preload Characters");
+        imagesToLoad = CoolUtil.removeDupe(imagesToLoad, "Preload Images");
+        stagesToLoad = CoolUtil.removeDupe(stagesToLoad, "Preload Stages");
+        soundsToLoad = CoolUtil.removeDupe(soundsToLoad, "Preload Sounds");
+
+        var loadedArray:Array<String> = []; // just to debloat the terminal a bit
 
         if (charactersToLoad.length > 0) {
-            var dummyChar:Character = null;
             for (char in charactersToLoad) {
-                if (dummyChar == null) dummyChar = new Character(0, 0, char);
-                else dummyChar.resetCharacter(0, 0, char);
+                var dummyChar:Character = new Character(0, 0, char);
                 
                 if (FlxG.state is PlayState) {
                     PlayState.instance.startCharacterScripts(char);
                     PlayState.instance.stopCharacterScripts(char);
                 }
-                trace(dummyChar.missingCharacter ? 'Failed to load character: $char' : 'Loaded character: $char');
+
+                if (dummyChar.missingCharacter) trace('Failed to load character: $char');
+                else loadedArray.push(char);
+
+                if (dummyChar != null) dummyChar.destroy();
+                dummyChar = null;
             }
-            if (dummyChar != null) dummyChar.destroy();
             charactersToLoad = [];
+
+            trace("Characters Loaded: " + loadedArray);
+            loadedArray = [];
         }
 
         if ((FlxG.state is PlayState) && stagesToLoad.length > 0) {
             var ogStage = PlayState.instance.curStage;
             for (stage in stagesToLoad) {
                 PlayState.instance.changeStage(stage, true);
-                trace('Stage Loaded: $stage');
+                loadedArray.push(stage);
             }
             stagesToLoad = [];
             PlayState.instance.changeStage(ogStage, true); 
+
+            trace("Stages Loaded: " + loadedArray);
+            loadedArray = [];
         }
 
-        for (image in imagesToLoad) {
-            Paths.image(image, ClientPrefs.data.cacheOnGPU);
-        }
-        imagesToLoad = [];
+        if (imagesToLoad.length > 0) {
+            for (image in imagesToLoad) {
+                if (Paths.image(image, null, ClientPrefs.data.cacheOnGPU) != null)
+                    loadedArray.push(image);
+                else
+                    trace("Failed to load image: " + image);
+            }
+            imagesToLoad = [];
 
-        for (sound in soundsToLoad) {
-            Paths.sound(sound);
+            trace("Images Loaded: " + loadedArray);
+            loadedArray = [];
         }
-        soundsToLoad = [];
+
+        if (soundsToLoad.length > 0) { // not adding the null check here because paths.sound already has its own null trace
+            for (sound in soundsToLoad) {
+                Paths.sound(sound);
+            }
+            soundsToLoad = [];
+        }
     }
 
     public static function grabStuffToPreload() {

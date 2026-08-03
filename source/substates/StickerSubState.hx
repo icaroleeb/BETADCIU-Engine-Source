@@ -75,7 +75,7 @@ class StickerSubState extends MusicBeatSubstate
       soundSelections.push(i);
     }
 
-    trace(soundSelections);
+    // trace(soundSelections);
 
     soundSelection = FlxG.random.getObject(soundSelections);
 
@@ -90,7 +90,7 @@ class StickerSubState extends MusicBeatSubstate
       sounds[i] = sounds[i].substring(0, sounds[i].lastIndexOf('.'));
     }
 
-    trace(sounds);
+    // trace(sounds);
 
     grpStickers = new FlxTypedGroup<StickerSprite>();
     add(grpStickers);
@@ -159,7 +159,7 @@ class StickerSubState extends MusicBeatSubstate
       grpStickers.clear();
     }
 
-    trace("Collecting stickers...");
+    // trace("Collecting stickers...");
     //trace("Current mod: "+ModsHelper.getActiveMod());
     var stickers:StickerInfo = null;
 
