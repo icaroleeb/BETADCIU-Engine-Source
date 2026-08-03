@@ -54,7 +54,7 @@ class StrumNote extends FunkinSprite
 	public function new(x:Float, y:Float, leData:Int, player:Int) {
 		animation = new PsychAnimationController(this);
 
-		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
+		rgbShader = new RGBShaderReference(this, NoteRGBShader.initializeGlobalRGBShader(leData));
 		rgbShader.enabled = false;
 		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) {
 			useRGBShader = false;

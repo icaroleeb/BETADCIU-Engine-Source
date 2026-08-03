@@ -24,6 +24,8 @@ class CoolUtil
 			url = "https://raw.githubusercontent.com/Blantados/BETADCIU-Engine-Source/Psych-Based/gitVersion.txt";
 		var version:String = states.MainMenuState.betadciuEngineVersion.trim();
 		if(ClientPrefs.data.checkForUpdates) {
+			return "1.3.0"; // locking this cuz beta version
+
 			trace('checking for updates...');
 			var http = new haxe.Http(url);
 			http.onData = function (data:String)
@@ -178,15 +180,18 @@ class CoolUtil
 		return Math.max(min, Math.min(max, value));
 	}
 
-	public static  function removeDupe(arr:Array<String>):Array<String> {
+	public static  function removeDupe(arr:Array<String>, ?arrayName:String="NOT NAMED ARRAY"):Array<String> {
 		var result:Array<String> = [];
+		var dupeCount:Int = 0;
 		for (item in arr) {
 			if (!result.contains(item)) {
 				result.push(item);
 			} else {
-				trace('heh. just removed a dupe of ${item}. no need to thank me');
+				// trace('heh. just removed a dupe of ${item}. no need to thank me');
+				dupeCount++;
 			}
 		}
+		if (dupeCount > 0) trace('heh. just removed $dupeCount dupes from $arrayName. no need to thank me'); // making this to not spam the terminal
 		return result;
 	}
 	

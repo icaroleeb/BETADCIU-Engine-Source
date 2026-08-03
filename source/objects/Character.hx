@@ -225,8 +225,6 @@ class Character extends Bopper
 		stopIdle = skipDance = specialAnim = stunned = flippedAnims = scalableOffsets = vSliceSustains = false;
 		
 		this.idleSuffix = '';
-
-		setZoom(1);
 		
 		this.cameras = [FlxG.camera];
 		this.alpha = 1;
@@ -751,7 +749,7 @@ class Character extends Bopper
 
 	public function setZoom(Zoom:Float)
 	{
-		this.scale.set(Zoom, Zoom);
+		this.scale.set(jsonScale * Zoom, jsonScale * Zoom);
 		scalableOffsets = true;
 	}
 

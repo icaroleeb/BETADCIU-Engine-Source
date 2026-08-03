@@ -1,6 +1,7 @@
 package objects.notes;
 
 import backend.Paths;
+import flixel.animation.FlxAnimationController;
 
 typedef LaneAnimations = Array<Array<AnimationData>>;
 
@@ -44,6 +45,23 @@ typedef NoteSkinConfigData =
 	@:optional var sustainSuffix:String;
 
 	@:optional var splashOffsets:Array<Float>;
+}
+
+typedef SkinAnimData = { // splashes and hold covers
+	name:String,
+	noteData:Int,
+	prefix:String,
+	indices:Array<Int>,
+	offsets:Array<Float>,
+	fps:Array<Int>
+}
+
+typedef SkinAnimConfig = { // splashes and hold covers²
+	animations:Map<String, SkinAnimData>,
+	scale:Float,
+	allowRGB:Bool,
+	allowPixel:Bool,
+	rgb:Array<Null<NoteColoring.NullableRGB>>
 }
 
 class NoteSkinConfig
@@ -133,5 +151,48 @@ class NoteSkinConfig
 			strumTexture: "noteSkins/NOTE_assets",
 			holdTexture: "noteSkins/NOTE_assets"
 		};
+	}
+
+	// old configs 
+	public static function createConfig():SkinAnimConfig
+	{
+		return {
+			animations: new Map(),
+			scale: 1,
+			allowRGB: true,
+			allowPixel: true,
+			rgb: null
+		}
+	}
+
+	public static function applyConfig(sprite:FlxSprite, animation:FlxAnimationController, config:SkinAnimConfig,
+		noteDataMap:Map<Int, String>, clearExisting:Bool = false):SkinAnimConfig
+	{
+		if (config == null) config = createConfig();
+
+		if (clearExisting)
+		{
+			@:privateAccess
+			animation.clearAnimations();
+		}
+
+		noteDataMap.clear();
+
+		for (i in config.animations)
+		{
+			var key:String = i.name;
+			if (i.prefix.length > 0 && key != null && key.length > 0)
+			{
+				if (i.indices != null && i.indices.length > 0)
+					animation.addByIndices(key, i.prefix, i.indices, "", i.fps[1], false);
+				else
+					animation.addByPrefix(key, i.prefix, i.fps[1], false);
+
+				noteDataMap.set(i.noteData, key);
+			}
+		}
+
+		sprite.scale.set(config.scale, config.scale);
+		return config;
 	}
 }

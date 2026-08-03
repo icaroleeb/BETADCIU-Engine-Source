@@ -5061,7 +5061,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	override function destroy()
 	{
-		Note.globalRgbShaders = [];
+		NoteRGBShader.globalRgbShaders = [];
 		backend.NoteTypesConfig.clearNoteTypesData();
 
 		for (num => text in MetaNote.noteTypeTexts)

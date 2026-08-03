@@ -133,7 +133,7 @@ class NoteSkinLoader
 		{
 			if (note.isSustainNote)
 			{
-				var graphic = Paths.image(skin + 'ENDS' + skinPostfix);
+				var graphic = Paths.image(skin + 'ENDS' + skinPostfix, null, false);
 
 				try
 				{
@@ -141,7 +141,7 @@ class NoteSkinLoader
 				}
 				catch (e)
 				{
-					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixelENDS' + skinPostfix);
+					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixelENDS' + skinPostfix, null, false);
 					graphic = fallbackShit;
 
 					note.loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
@@ -151,7 +151,7 @@ class NoteSkinLoader
 			}
 			else
 			{
-				var graphic = Paths.image(skin + skinPostfix);
+				var graphic = Paths.image(skin + skinPostfix, null, false);
 
 				try
 				{
@@ -159,7 +159,7 @@ class NoteSkinLoader
 				}
 				catch (e)
 				{
-					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixel' + skinPostfix);
+					var fallbackShit = Paths.image('pixelUI/' + Note.defaultNoteSkin + '-pixel' + skinPostfix, null, false);
 					graphic = fallbackShit;
 
 					note.loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
@@ -178,8 +178,7 @@ class NoteSkinLoader
 				note._lastNoteOffX = (note.width - 7) * (PlayState.daPixelZoom / 2);
 				note.offsetX -= note._lastNoteOffX;
 			}
-		}
-		else{
+		} else {
 			NoteAnimationLoader.load(note, skin, note.separateSheets);
 			note.scale.set(0.7, 0.7);
 		}
@@ -188,38 +187,16 @@ class NoteSkinLoader
 			note.playAnim(animName, true); // This one is to get the right anim
 		}
 			
-		if (
-			note.isSustainNote &&
-			note.animation != null &&
-			note.animation.curAnim != null &&
-			note.animation.curAnim.name != null &&
-			!note.animation.curAnim.name.contains("end")
-		)
+		if (note.isSustainNote && note.animation != null && note.animation.curAnim != null && note.animation.curAnim.name != null && !note.animation.curAnim.name.contains("end"))
 		{
 			note.sustainHeightScale = Note.SUSTAIN_SIZE / note.frameHeight;
-
-			/*
-			if (note.isPixelNote && !wasPixelNote){
-				note.offsetX -= 5;
-			}
-			*/
-
 			note.applySustainScale();
 		}
 
 		note.updateHitbox();
-		note.centerOffsets();
-		note.centerOrigin();
-
-		/*
-		if (note.isPixelNote && note.isSustainNote)
-		{
-			note.scale.y *= PlayState.daPixelZoom;
-			note.scale.y *= 1.222;
-
-			note.updateHitbox();
-		}
-		*/
+		// note.centerOffsets();
+		// note.centerOrigin();
+		note.applyXOffset();
 
 		if (animName != null){
 			note.playAnim(animName); // This one is for the offsets.

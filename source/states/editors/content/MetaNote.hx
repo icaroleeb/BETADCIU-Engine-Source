@@ -5,6 +5,7 @@ import shaders.RGBPalette;
 import flixel.util.FlxDestroyUtil;
 
 import objects.notes.NoteAnimationLoader;
+import objects.notes.NoteColoring;
 
 class MetaNote extends Note
 {
@@ -33,8 +34,8 @@ class MetaNote extends Note
 		this.isPixelNote = PlayState.isPixelStage;
 		NoteAnimationLoader.loadAnims(this);
 
-		if(Note.globalRgbShaders.contains(rgbShader.parent)) //Is using a default shader
-			rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(noteData));
+		if(NoteRGBShader.globalRgbShaders.contains(rgbShader.parent)) //Is using a default shader
+			rgbShader = new RGBShaderReference(this, NoteRGBShader.initializeGlobalRGBShader(noteData));
 
 		animation.play('scroll');
 		updateHitbox();

@@ -154,7 +154,7 @@ class MathUtils
     while (true);
   }
 
-    /**
+  /**
    * Exponential decay interpolation.
    *
    * Framerate-independent because the rate-of-change is proportional to the difference, so you can

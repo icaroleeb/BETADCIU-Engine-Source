@@ -18,7 +18,7 @@ import lime.utils.Assets;
 import flash.media.Sound;
 
 import haxe.Json;
-
+import backend.system.OptimizedBitmapData;
 
 #if MODS_ALLOWED
 import backend.Mods;
@@ -331,38 +331,30 @@ class Paths
 
 	public static function cacheBitmap(key:String, ?parentFolder:String = null, ?bitmap:BitmapData, ?allowGPU:Bool = true):FlxGraphic
 	{
+		final useGPU:Bool = allowGPU && ClientPrefs.data.cacheOnGPU;
+
 		if (bitmap == null)
 		{
-			var file:String = getPath(key, IMAGE, parentFolder, true);
+			final file:String = getPath(key, IMAGE, parentFolder, true);
+
 			#if MODS_ALLOWED
-			if (FileSystem.exists(file))
-				bitmap = BitmapData.fromFile(file);
-			else #end if (OpenFlAssets.exists(file, IMAGE))
-				bitmap = OpenFlAssets.getBitmapData(file);
+			if (FileSystem.exists(file)) {
+				bitmap = useGPU ? OptimizedBitmapData.fromFile(file) : BitmapData.fromFile(file);
+			} else
+			#end
+			if (OpenFlAssets.exists(file, IMAGE)) {
+				bitmap = useGPU ? OptimizedBitmapData.fromAsset(file) : OpenFlAssets.getBitmapData(file);
+			}
 
 			if (bitmap == null) {
-                var errorMessage:String = 'Bitmap not found: $file | key: $key';
-                if (errorMessage != _previousErrorMessage) {
-                    trace(errorMessage);
-                    _previousErrorMessage = errorMessage;
-                }
-                return null;
-            }
-		}
-
-		if (allowGPU && ClientPrefs.data.cacheOnGPU && bitmap.image != null)
-		{
-			bitmap.lock();
-			if (bitmap.__texture == null)
-			{
-				bitmap.image.premultiplied = true;
-				bitmap.getTexture(FlxG.stage.context3D);
+				var errorMessage:String = 'Bitmap not found: $file | key: $key';
+				if (errorMessage != _previousErrorMessage)
+				{
+					trace(errorMessage);
+					_previousErrorMessage = errorMessage;
+				}
+				return null;
 			}
-			bitmap.getSurface();
-			bitmap.disposeImage();
-			bitmap.image.data = null;
-			bitmap.image = null;
-			bitmap.readable = true;
 		}
 
 		var graph:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, key);

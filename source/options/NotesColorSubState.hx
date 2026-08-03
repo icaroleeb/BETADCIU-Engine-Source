@@ -388,8 +388,8 @@ class NotesColorSubState extends MusicBeatSubstate
 						modeBG.visible = notesBG.visible = false;
 						curSelectedNote = note.ID;
 						onModeColumn = false;
-						bigNote.rgbShader.parent = Note.globalRgbShaders[note.ID];
-						bigNote.shader = Note.globalRgbShaders[note.ID].shader;
+						bigNote.rgbShader.parent = NoteRGBShader.globalRgbShaders[note.ID];
+						bigNote.shader = NoteRGBShader.globalRgbShaders[note.ID].shader;
 						updateNotes();
 						FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
 					}
@@ -554,8 +554,8 @@ class NotesColorSubState extends MusicBeatSubstate
 		
 		modeBG.visible = false;
 		notesBG.visible = true;
-		bigNote.rgbShader.parent = Note.globalRgbShaders[curSelectedNote];
-		bigNote.shader = Note.globalRgbShaders[curSelectedNote].shader;
+		bigNote.rgbShader.parent = NoteRGBShader.globalRgbShaders[curSelectedNote];
+		bigNote.shader = NoteRGBShader.globalRgbShaders[curSelectedNote].shader;
 		updateNotes();
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
@@ -628,10 +628,10 @@ class NotesColorSubState extends MusicBeatSubstate
 			modeNotes.add(newNote);
 		}
 
-		Note.globalRgbShaders = [];
+		NoteRGBShader.globalRgbShaders = [];
 		for (i in 0...dataArray.length)
 		{
-			Note.initializeGlobalRGBShader(i);
+			NoteRGBShader.initializeGlobalRGBShader(i);
 			var newNote:StrumNote = new StrumNote(150 + (480 / dataArray.length * i), 200, i, 0);
 			newNote.useRGBShader = true;
 			
@@ -656,8 +656,8 @@ class NotesColorSubState extends MusicBeatSubstate
 
 		bigNote.setGraphicSize(250);
 		bigNote.updateHitbox();
-		bigNote.rgbShader.parent = Note.globalRgbShaders[curSelectedNote];
-		bigNote.shader = Note.globalRgbShaders[curSelectedNote].shader;
+		bigNote.rgbShader.parent = NoteRGBShader.globalRgbShaders[curSelectedNote];
+		bigNote.shader = NoteRGBShader.globalRgbShaders[curSelectedNote].shader;
 		for (i in 0...Note.colArray.length)
 		{
 			if(!onPixel) bigNote.animation.addByPrefix('note$i', Note.colArray[i] + '0', 24, true);
@@ -719,11 +719,11 @@ class NotesColorSubState extends MusicBeatSubstate
 
 	function setShaderColor(value:FlxColor) dataArray[curSelectedNote][curSelectedMode] = value;
 	function getShaderColor() return dataArray[curSelectedNote][curSelectedMode];
-	function getShader() return Note.globalRgbShaders[curSelectedNote];
+	function getShader() return NoteRGBShader.globalRgbShaders[curSelectedNote];
 
 	override function destroy()
 	{
-		Note.globalRgbShaders = [];
+		NoteRGBShader.globalRgbShaders = [];
 		super.destroy();
 	}
 }

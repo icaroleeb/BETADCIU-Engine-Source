@@ -2,6 +2,7 @@ package states.editors;
 
 import objects.Note;
 import objects.NoteSplash;
+import objects.notes.NoteSkinConfig;
 import objects.StrumNote;
 
 import openfl.net.FileFilter;
@@ -884,7 +885,7 @@ class NoteSplashEditorState extends MusicBeatState
         FlxG.sound.volumeUpKeys = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
     }
 
-    public static function parseTxt(content:String):NoteSplashConfig
+    public static function parseTxt(content:String):SkinAnimConfig
     {
         var config = NoteSplash.createConfig();
         if (content == null)

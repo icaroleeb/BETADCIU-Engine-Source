@@ -93,7 +93,6 @@ class Note extends FunkinSprite
 	public var eventVal2:String = '';
 
 	public var rgbShader:RGBShaderReference;
-	public static var globalRgbShaders:Array<RGBPalette> = [];
 	public var inEditor:Bool = false;
 
 	public var animSuffix:String = '';
@@ -270,7 +269,7 @@ class Note extends FunkinSprite
 
 		if(noteData > -1)
 		{
-			rgbShader = new RGBShaderReference(this, initializeGlobalRGBShader(noteData));
+			rgbShader = new RGBShaderReference(this, NoteRGBShader.initializeGlobalRGBShader(noteData));
 			if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) rgbShader.enabled = false;
 			texture = '';
 
@@ -286,31 +285,6 @@ class Note extends FunkinSprite
 			prevNote.nextNote = this;
 
 		applyInitialSetup();
-	}
-
-	public static function initializeGlobalRGBShader(noteData:Int)
-	{
-		if(globalRgbShaders[noteData] == null)
-		{
-			var newRGB:RGBPalette = new RGBPalette();
-			var arr:Array<FlxColor> = (!PlayState.isPixelStage) ? ClientPrefs.data.arrowRGB[noteData] : ClientPrefs.data.arrowRGBPixel[noteData];
-			
-			if (arr != null && noteData > -1 && noteData <= arr.length)
-			{
-				newRGB.r = arr[0];
-				newRGB.g = arr[1];
-				newRGB.b = arr[2];
-			}
-			else
-			{
-				newRGB.r = 0xFFFF0000;
-				newRGB.g = 0xFF00FF00;
-				newRGB.b = 0xFF0000FF;
-			}
-			
-			globalRgbShaders[noteData] = newRGB;
-		}
-		return globalRgbShaders[noteData];
 	}
 
 	public var _lastNoteOffX:Float = 0;
@@ -334,19 +308,22 @@ class Note extends FunkinSprite
 	{
 		super.update(elapsed);
 
+		final songPos:Float = Conductor.songPosition;
+		final safeZoneOfs:Float = Conductor.safeZoneOffset;
+
 		if (mustPress)
 		{
-			canBeHit = (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult) &&
-						strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult));
+			canBeHit = (strumTime > songPos - (safeZoneOfs * lateHitMult) &&
+						strumTime < songPos + (safeZoneOfs * earlyHitMult));
 
-			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
+			if (strumTime < songPos - safeZoneOfs && !wasGoodHit)
 				tooLate = true;
 		}
 		else
 		{
 			canBeHit = false;
 
-			if (!wasGoodHit && strumTime <= Conductor.songPosition)
+			if (!wasGoodHit && strumTime <= songPos)
 			{
 				if(!isSustainNote || (prevNote.wasGoodHit && !ignoreNote))
 					wasGoodHit = true;
@@ -474,10 +451,8 @@ class Note extends FunkinSprite
 		if (createdFrom != null && createdFrom.songSpeed != null)
 			sustainScale *= createdFrom.songSpeed;
 
-		/*
-		if (isPixelNote)
-			sustainScale *= 1.19;
-		*/
+		// if (isPixelNote)
+		// 	sustainScale *= 1.12;
 
 		sustainScale *= sustainHeightScale;
 
@@ -531,5 +506,18 @@ class Note extends FunkinSprite
 			centerOrigin();
 		}
 		// x += offsetX;
+	}
+
+	public function applyXOffset() { // putting this as a standalone function purely because im lazy
+		offsetX = 0;
+		if (isSustainNote && prevNote != null) {
+			offsetX += swagWidth / 2;
+			offsetX -= width / 2;
+
+			// if (isPixelNote || separateSheets) offsetX += 28;
+		} else if(!isSustainNote) {
+			centerOffsets();
+			centerOrigin();
+		}
 	}
 }

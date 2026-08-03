@@ -61,4 +61,30 @@ class OptimizedBitmapData extends BitmapData {
 		return null;
 		#end
 	}
+
+	public static function fromFile(path:String):OptimizedBitmapData
+	{
+		#if lime
+		return fromImage(Image.fromFile(path));
+		#else
+		return null;
+		#end
+	}
+
+	public static function fromAsset(id:String):OptimizedBitmapData
+	{
+		#if lime
+		return fromImage(lime.utils.Assets.getImage(id));
+		#else
+		return null;
+		#end
+	}
+
+	public static function fromImage(image:Image):OptimizedBitmapData
+	{
+		if (image == null) return null;
+		var bitmap = new OptimizedBitmapData(1, 1, true, 0);
+		@:privateAccess bitmap.__fromImage(image);
+		return bitmap;
+	}
 }

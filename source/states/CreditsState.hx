@@ -46,6 +46,7 @@ class CreditsState extends MusicBeatState
 			['Special Thanks'],
 			['101 Digi',			'digi',			    'Custom Stickers Artist',                                   'https://x.com/101_digi',		    '37544e'],
 			['Icaro Lee',			'icarolee',			'Ported legacy Main Menu, Some options and Fixed some Stuff','https://x.com/Icarofnf',		    '5F0000'],
+			['NMV Team',            'nmvteam',          'A LOT of features were taken from "Nightmare Vision" Engine.', 'https://github.com/NMVTeam/NightmareVision','4B1515'],
 			[""],
 			["Psych Engine Team"],
 			["Shadow Mario",		"shadowmario",		"Main Programmer and Head of Psych Engine",					"https://ko-fi.com/shadowmario",	"444444"],

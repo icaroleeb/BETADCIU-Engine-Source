@@ -4,6 +4,8 @@ import openfl.utils.Assets;
 import haxe.Json;
 import backend.Song;
 import psychlua.ModchartSprite;
+import states.stages.*;
+import backend.BaseStage;
 
 typedef StageFile = {
 	var directory:String;
@@ -282,5 +284,41 @@ class StageData {
 
 		return ((ClientPrefs.data.lowQuality && (filters & LOW_QUALITY) == LOW_QUALITY) ||
 			(!ClientPrefs.data.lowQuality && (filters & HIGH_QUALITY) == HIGH_QUALITY));
+	}
+
+	// just to debloat the PlayState function
+
+	static final stageMap:Map<String, Void->BaseStage> = [
+		"stage" => () -> new StageWeek1(), 						//Week 1
+		"spooky" => () -> new Spooky(), 						//Week 2
+		"philly" => () -> new Philly(), 						//Week 3
+		"limo" => () -> new Limo(), 							//Week 4
+		"mall" => () -> new Mall(), 							//Week 5
+		"mallevil" => () -> new MallEvil(), 					//Week 5 Evil
+		"school" => () -> new School(), 						//Week 6 
+		"schoolevil" => () -> new SchoolEvil(), 				//Week 6 Evil
+		"tank" => () -> new Tank(), 							//Week 7
+		"phillystreets" => () -> new PhillyStreets(), 			//Weekend 1
+		"phillyblazin" => () -> new PhillyBlazin(), 			//Weekend 1 Blazin
+		"sserafim" => () -> new Sserafim(), 					//LE SSERAFIM Collaboration
+
+		"stageerect" => () -> new StageErect(), 				//Week 1 - Alt
+		"spookyerect" => () -> new SpookyErect(), 				//Week 2 - Alt
+		"phillyerect" => () -> new PhillyErect(), 				//Week 3 - Alt
+		"limoerect" => () -> new LimoErect(), 					//Week 4 - Alt
+		"mallerect" => () -> new MallErect(), 					//Week 5 - Alt
+		"schoolerect" => () -> new SchoolErect(), 				//Week 6 - Alt
+		"schoolevilerect" => () -> new SchoolEvilErect(), 		//Week 6 - Evil Alt
+		"tankerect" => () -> new TankErect(), 					//Week 7 - Alt
+		"phillystreetserect" => () -> new PhillyStreetsErect() 	//Weekend 1 - Alt
+	];
+
+	public static function returnStage(stage:String) {
+		if (!StringTools.startsWith(Paths.getPath('stages/' + stage + '.json', TEXT), "mods/")) {
+			final stageFromMap = stageMap.get(stage.toLowerCase());
+			if (stageFromMap != null) return stageFromMap();
+		}
+
+		return null;
 	}
 }
