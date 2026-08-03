@@ -280,14 +280,15 @@ class SchoolEvilErect extends BaseStage
 	override function characterChangePost(charExist:String, charNew:String) {
 		if (ClientPrefs.data.shaders)
 		{
-			if (charExist == "bf") 
-				charExist = "boyfriend";
-			else if (charExist == "girlfriend")
-				charExist = "gf";
-			else if (charExist == "opponent")
-				charExist = "dad";
+			if (charExist == "boyfriend" || charExist == "bf") 
+				applyCharacterShader("boyfriend", 0);
+			else if (charExist == "gf" || charExist == "girlfriend")
+				applyCharacterShader("gf", 1);
+			else if (charExist == "dad" || charExist == "opponent")
+				applyCharacterShader("dad", 2);
+			else
+				applyCharacterShader(charExist, modchartCharacters.get(charExist).isPlayer ? 0 : 2);
 
-			applyCharacterShader(charExist);
 		}
 	}
 
@@ -295,14 +296,14 @@ class SchoolEvilErect extends BaseStage
 	{
 		if (ClientPrefs.data.shaders)
 		{
-			applyCharacterShader("boyfriend", 0);
-			applyCharacterShader("dad", 1);
-			if (gf != null) applyCharacterShader("gf", 2);
+			boyfriend.shader = null;
+			dad.shader = null;
+			gf.shader = null;
 
 			for (value in modchartCharacters.keys()) // apply for the lua characters too
 			{
 				var daLuaChars = modchartCharacters.get(value);
-				applyCharacterShader(value, daLuaChars.isPlayer ? 0 : 2);
+				if (daLuaChars.shader != null) daLuaChars.shader = null;
 			}
 		}
 	}
@@ -316,6 +317,7 @@ class SchoolEvilErect extends BaseStage
     	rim.color = 0xFF940226;
 		rim.antialiasAmt = 0;
 		rim.attachedSprite = character;
+		character.shader = rim;
 		rim.distance = 5;
 
 		if (type == 0) // bf type
@@ -334,14 +336,13 @@ class SchoolEvilErect extends BaseStage
 			rim.angle = 90;
 		}
 
-		if(Paths.fileExists("images/erect/masks/" + character.curCharacter + "_mask.png", IMAGE))
+		if(Paths.fileExists("images/weeb/erect/masks/" + character.curCharacter + "_mask.png", IMAGE))
 		{
-			rim.loadAltMask(Paths.getPath("images/erect/masks/" + character.curCharacter + "_mask.png", IMAGE));
+			rim.loadAltMask(Paths.getPath("images/weeb/erect/masks/" + character.curCharacter + "_mask.png", IMAGE));
 			rim.useAltMask = true;
 			trace("mask is active for " + character.curCharacter);
-		}
-
-		character.shader = rim;
+		}else
+			trace("mask not found for " + character.curCharacter);
 
 		character.animation.callback = function(animName:String, frameNumber:Int, frameIndex:Int) 
 		{

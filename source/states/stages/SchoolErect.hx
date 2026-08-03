@@ -138,13 +138,13 @@ class SchoolErect extends BaseStage
 		rim.setAdjustColor(-66, -10, 24, -23);
 		rim.color = 0xFF52351d;
 		rim.antialiasAmt = 0;
+		character.shader = rim;
 		rim.attachedSprite = character;
 		rim.distance = 5;
 
 		if (type == 0) // bf type
 		{
 			rim.angle = 90;
-
 			rim.maskThreshold = 1;
 		}
 		else if (type == 1) // gf type
@@ -163,14 +163,13 @@ class SchoolErect extends BaseStage
 			rim.maskThreshold = 1;
 		}
 
-		if(Paths.fileExists("images/erect/masks/" + character.curCharacter + "_mask.png", IMAGE))
+		if(Paths.fileExists("images/weeb/erect/masks/" + character.curCharacter + "_mask.png", IMAGE))
 		{
-			rim.loadAltMask(Paths.getPath("images/erect/masks/" + character.curCharacter + "_mask.png", IMAGE));
+			rim.loadAltMask(Paths.getPath("images/weeb/erect/masks/" + character.curCharacter + "_mask.png", IMAGE));
 			rim.useAltMask = true;
 			trace("mask is active for " + character.curCharacter);
-		}
-
-		character.shader = rim;
+		}else
+			trace("mask not found for " + character.curCharacter);
 
 		character.animation.callback = function(animName:String, frameNumber:Int, frameIndex:Int) 
 		{
@@ -183,14 +182,14 @@ class SchoolErect extends BaseStage
 	override function characterChangePost(charExist:String, charName:String) {
 		if (ClientPrefs.data.shaders)
 		{
-			if (charExist == "bf") 
-				charExist = "boyfriend";
-			else if (charExist == "girlfriend")
-				charExist = "gf";
-			else if (charExist == "opponent")
-				charExist = "dad";
-
-			applyCharacterShader(charExist);
+			if (charExist == "boyfriend" || charExist == "bf") 
+				applyCharacterShader("boyfriend", 0);
+			else if (charExist == "gf" || charExist == "girlfriend")
+				applyCharacterShader("gf", 1);
+			else if (charExist == "dad" || charExist == "opponent")
+				applyCharacterShader("dad", 2);
+			else
+				applyCharacterShader(charExist, modchartCharacters.get(charExist).isPlayer ? 0 : 2);
 		}
 	}
 

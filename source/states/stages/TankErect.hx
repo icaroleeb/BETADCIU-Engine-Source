@@ -138,13 +138,13 @@ class TankErect extends BaseStage
 		if (ClientPrefs.data.shaders)
 		{
 			if (charExist == "boyfriend" || charExist == "bf") 
-				applyCharacterShader(charExist, 0);
+				applyCharacterShader("boyfriend", 0);
 			else if (charExist == "gf" || charExist == "girlfriend")
-				applyCharacterShader(charExist, 1);
+				applyCharacterShader("gf", 1);
 			else if (charExist == "dad" || charExist == "opponent")
-				applyCharacterShader(charExist, 2);
+				applyCharacterShader("dad", 2);
 			else
-				applyCharacterShader(charExist, PlayState.instance.modchartCharacters.get(charExist).isPlayer ? 0 : 2);
+				applyCharacterShader(charExist, modchartCharacters.get(charExist).isPlayer ? 0 : 2);
 
 		}
 	}

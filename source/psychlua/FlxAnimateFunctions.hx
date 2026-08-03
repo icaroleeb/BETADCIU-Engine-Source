@@ -5,6 +5,8 @@ import psychlua.LuaUtils;
 
 import objects.FunkinSprite;
 
+import animate.FlxAnimateController;
+
 #if (LUA_ALLOWED)
 class FlxAnimateFunctions
 {
