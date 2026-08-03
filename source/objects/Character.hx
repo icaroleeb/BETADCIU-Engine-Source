@@ -41,6 +41,7 @@ typedef CharacterFile = {
 
 	// stuff from nmv
 	@:optional var scalableOffsets:Null<Bool>;
+	@:optional var autoOffset:Null<Bool>;
 	@:optional var vSliceSustains:Null<Bool>;
 }
 
@@ -265,6 +266,8 @@ class Character extends Bopper
 
 		this.moves = true;
 		this.immovable = false;
+
+		this.autoOffset = true;
 	}
 
 	public function changeCharacter(character:String) {
@@ -349,6 +352,8 @@ class Character extends Bopper
 
 		vSliceSustains = json.vSliceSustains ?? false;
 		scalableOffsets = json.scalableOffsets ?? false;
+
+		autoOffset = json.autoOffset ?? true;
 
 		var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
 		isAnimateAtlas = (Paths.exists(animToFind));
@@ -435,8 +440,16 @@ class Character extends Bopper
 				var playerOffsets = a.playerOffsets ?? offsets;
 				var swagOffsets = (isPlayer && a.playerOffsets != null) ? playerOffsets : offsets;
 
-				if (a.playerOffsets == null) isPsychPlayer = true; // i tried to set this out of the loop but it didn't worked
-				
+				if (a.playerOffsets == null) 
+				{
+					// isPsychPlayer = true; // i tried to set this out of the loop but it didn't worked
+					autoOffset = true;
+				}else{
+					autoOffset = false;
+				}
+
+				// var daFlipAuto = (autoOffset && this.flipX && !isPsychPlayer);
+
 				if(swagOffsets != null && a.offsets.length > 1) addOffset(a.anim, swagOffsets[0], swagOffsets[1]);
 				else addOffset(a.anim, 0, 0);
 
@@ -446,8 +459,19 @@ class Character extends Bopper
 
 			if (isPlayer) {
 				flipX = !flipX;
-				if (!isPsychPlayer) flipAnims(); //did i just fix all that flipping bug by just using a check that actually makes sense?? -- future me here: yeah, i did.
-			}		
+
+				if (!isPsychPlayer) 
+					flipAnims(); //did i just fix all that flipping bug by just using a check that actually makes sense?? -- future me here: yeah, i did.
+			}
+
+			if (!isPlayer)
+				if (isPsychPlayer) 
+					flipAnims();
+
+			/*
+			if (autoOffset && !isPsychPlayer)
+				flipAnims();
+			*/
 		}
 		//trace('Loaded file to character ' + curCharacter);
 	}
@@ -665,10 +689,13 @@ class Character extends Bopper
 		super.playAnim(animName, force, reversed, frame);
 
 		var playedAnim = __prevPlayedAnimation;
+
+		var regularOff = animOffsets.get(playedAnim);
+		var playerOff = animPlayerOffsets.get(playedAnim);
+
 		if (isPlayer) {
-			var playerOff = animPlayerOffsets.get(playedAnim);
 			if (playerOff != null) {
-				offset.set(playerOff[0], playerOff[1]);
+				if (!autoOffset) offset.set(playerOff[0], playerOff[1]);
 				if (scalableOffsets) {
 					offset.x *= scale.x;
 					offset.y *= scale.y;

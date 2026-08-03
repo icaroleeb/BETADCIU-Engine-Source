@@ -7,6 +7,7 @@ import flixel.graphics.frames.FlxFrame;
 import openfl.display.BitmapData;
 import flixel.FlxBasic;
 import animate.FlxAnimate;
+import openfl.utils.Assets;
 
 /**
  * A shader that aims to *mostly recreate how Adobe Animate/Flash handles drop shadows, but its main use here is for rim lighting.
@@ -199,6 +200,11 @@ class DropShadowShader extends FlxShader
     attachedSprite = spr;
     updateFrameInfo(attachedSprite.frame);
 
+    // Enable render texture for texture atlas sprites
+    // This allows the shader to work properly on them
+    if (spr.isAnimate)
+      attachedSprite.useRenderTexture = true;
+
     return spr;
   }
 
@@ -208,16 +214,18 @@ class DropShadowShader extends FlxShader
    *
    * @param path The path to the image to load
    */
-  public function loadAltMask(path:String):Void
-  {
-    #if html5
-    BitmapData.loadFromFile(path).onComplete(function(bmp:BitmapData) {
-      altMaskImage = bmp;
-    });
-    #else
-    altMaskImage = BitmapData.fromFile(path);
-    #end
-  }
+
+  public function loadAltMask(path:String)
+	{
+		#if html5
+		BitmapData.loadFromFile(path).onComplete(function(bmp:BitmapData) {
+			altMaskImage = bmp;
+		});
+		#else
+		altMaskImage = BitmapData.fromFile(path);
+		#end
+	}
+
 
   /**
    * Should be called on the animation.callback of the attached sprite.

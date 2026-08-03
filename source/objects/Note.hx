@@ -23,7 +23,8 @@ typedef EventNote = {
 	event:String,
 	value1:String,
 	value2:String,
-	value3:String
+	value3:String,
+	value4:String
 }
 
 typedef NoteSplashData = {
@@ -367,6 +368,7 @@ class Note extends FunkinSprite
 			{
 				if(isPixelNote)
 					y -= PlayState.daPixelZoom * 9.5;
+				
 				y -= (frameHeight * scale.y) - (Note.swagWidth / 2);
 			}
 		}
@@ -479,8 +481,10 @@ class Note extends FunkinSprite
 
 			offsetX -= width / 2;
 
+			/*
 			if (isPixelNote || separateSheets)
 				offsetX += 28;
+			*/
 			
 
 			if (prevNote.isSustainNote)

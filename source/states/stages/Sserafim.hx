@@ -12,7 +12,7 @@ class Sserafim extends BaseStage
     var baseVisible:Array<Bool> = [true, false, false, false, false, false];
     var baseSinging:Array<Bool> = [false, false, false, false, false, false];
 
-    var perspectiveFloor:PerspectiveSprite = null;
+    var perspectiveFloor:PerspectiveSprite;
 
     var truckDoor:BGSprite;
     var backLightColor:BGSprite;
@@ -85,7 +85,7 @@ class Sserafim extends BaseStage
         add(burgerCutscene);
         spritesShader.push(burgerCutscene);
 
-        var backStools:BGSprite = new BGSprite('cutscene/back-stools', -1357, 426, 0.94, 0.94);
+        var backStools:BGSprite = new BGSprite('back-stools', -1357, 426, 0.94, 0.94);
         stageVars.set('backStools', backStools);
         add(backStools);
         spritesShader.push(backStools);
@@ -191,7 +191,7 @@ class Sserafim extends BaseStage
 
     override function update(elapsed:Float)
     {
-        if(perspectiveFloor != null) perspectiveFloor.updateSkew(game.camGame);
+        if(perspectiveFloor != null) perspectiveFloor.updateSkew(PlayState.instance.camGame);
     }
 
     override function beatHit()
@@ -202,8 +202,7 @@ class Sserafim extends BaseStage
     }
 
     /*
-    override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
-    {
+    override function eventCalled(eventName:String, value1:String, value2:String, value3:String, value4:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, flValue4:Null<Float>, strumTime:Float)    {
         switch (eventName)
         {
             case 'sserafimGuitarVibration':
