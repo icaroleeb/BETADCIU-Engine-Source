@@ -946,8 +946,6 @@ class PlayState extends MusicBeatState
 
 	public function stopCharacterScripts(name:String)
 	{
-		// different from "startCharacterScripts" cuz kinda 
-    .
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 			#if LUA_ALLOWED stopLuasNamed('characters/' + name + '.lua'); #end
 			#if HSCRIPT_ALLOWED stopHScriptsNamed('characters/' + name + '.hx'); #end
@@ -2783,11 +2781,11 @@ class PlayState extends MusicBeatState
 					callOnScripts('onStageChangePost', [value1]);
  				}
 			case "FocusCamera":
-				moveCameraVSlice(value1, value2, Std.parseFloat(value3), value4);
+				moveCameraVSlice(value1, value2, Std.parseFloat(value3), value4); // wip
 		}
 
-		hardCodedStage?.eventCalled(eventName, value1, value2, value3, flValue1, flValue2, flValue3, strumTime);
-		callOnScripts('onEvent', [eventName, value1, value2, value3, strumTime]);
+		hardCodedStage?.eventCalled(eventName, value1, value2, value3, value4, flValue1, flValue2, flValue3, flValue4, strumTime);
+		callOnScripts('onEvent', [eventName, value1, value2, value3, value4, strumTime]);
 	}
 
 	public function moveCameraSection(?sec:Null<Int>):Void {
