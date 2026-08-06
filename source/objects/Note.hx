@@ -337,6 +337,7 @@ class Note extends FunkinSprite
 	override public function destroy()
 	{
 		super.destroy();
+		_cacheRect?.put();
 		_lastValidChecked = '';
 	}
 
@@ -374,13 +375,27 @@ class Note extends FunkinSprite
 		}
 	}
 
+	public var _cacheRect:Null<FlxRect> = null; // just for pooling
+
+	inline function getRect()
+	{
+		final rect = (clipRect ?? _cacheRect ?? (_cacheRect = FlxRect.get()));
+		
+		rect.x = 0;
+		rect.y = 0;
+		rect.width = frameWidth;
+		rect.height = frameHeight;
+		
+		return rect;
+	}
+
 	public function clipToStrumNote(myStrum:StrumNote)
 	{
-		var center:Float = myStrum.y + offsetY + Note.swagWidth / 2;
-		if((mustPress || !ignoreNote) && (wasGoodHit || (prevNote.wasGoodHit && !canBeHit)))
+		var center:Float = myStrum.y + offsetY + myStrum.height / 2; // was Note.swagWidth / 2 but swagWidth is a static so...
+
+		if((mustPress || !ignoreNote) && (wasGoodHit || (prevNote.wasGoodHit && !canBeHit)) && Conductor.songPosition >= strumTime)
 		{
-			var swagRect:FlxRect = clipRect;
-			if(swagRect == null) swagRect = new FlxRect(0, 0, frameWidth, frameHeight);
+			var swagRect:FlxRect = getRect();
 
 			if (myStrum.downScroll)
 			{
@@ -397,6 +412,7 @@ class Note extends FunkinSprite
 				swagRect.width = width / scale.x;
 				swagRect.height = (height / scale.y) - swagRect.y;
 			}
+
 			clipRect = swagRect;
 		}
 	}
@@ -511,10 +527,11 @@ class Note extends FunkinSprite
 	public function applyXOffset() { // putting this as a standalone function purely because im lazy
 		offsetX = 0;
 		if (isSustainNote && prevNote != null) {
+
+			final swagWidth = parent != null ? parent.width : width;
 			offsetX += swagWidth / 2;
 			offsetX -= width / 2;
 
-			// if (isPixelNote || separateSheets) offsetX += 28;
 		} else if(!isSustainNote) {
 			centerOffsets();
 			centerOrigin();

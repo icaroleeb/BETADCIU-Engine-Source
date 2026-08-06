@@ -110,7 +110,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 
 	function spawnNewCover(i:Int, hColor:String, noteTexture:String):CoverSprite
 	{
-		var hold:CoverSprite = new CoverSprite();
+		var hold:CoverSprite = this.recycle(CoverSprite, () -> new CoverSprite());
 		hold.initFrames(i, hColor, noteTexture != null ? noteTexture : "");
 		hold.initAnimations(i, hColor);
 		hold.visible = true;
@@ -247,8 +247,8 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 			var strum:StrumNote = game.strumLineNotes.members[isPlayer ? data + 4 : data];
 			if (strum == null) continue;
 
-			var targetX:Float = strum.x - 110;
-			var targetY:Float = strum.y - 100;
+			final targetX:Float = strum.x + (strum.width - cover.width) * 0.5 - 11;
+			final targetY:Float = strum.y + (strum.height - cover.height) * 0.5 + 50;
 
 			if (cover.x != targetX) cover.x = targetX;
 			if (cover.y != targetY) cover.y = targetY;
