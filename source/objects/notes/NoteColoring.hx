@@ -25,7 +25,13 @@ class NoteRGBShader
 
     public static function initializeGlobalRGBShader(noteData:Int, ?pixel:Bool=false)
 	{
-		var newRGB:RGBPalette = new RGBPalette();
+		var newRGB:RGBPalette = globalRgbShaders[noteData];
+		if (newRGB == null)
+		{
+			newRGB = new RGBPalette();
+			globalRgbShaders[noteData] = newRGB;
+		}
+
 		var arr:Array<FlxColor> = pixel ? ClientPrefs.data.arrowRGBPixel[noteData] : ClientPrefs.data.arrowRGB[noteData];
 			
 		if (arr != null && noteData > -1 && noteData <= arr.length) {
@@ -39,10 +45,8 @@ class NoteRGBShader
 			newRGB.b = 0xFF0000FF;
 		}
 		// trace('R: ${newRGB.r}, G: ${newRGB.g}, B: ${newRGB.b} for noteData: $noteData');
-			
-		globalRgbShaders[noteData] = newRGB;
 
-		return globalRgbShaders[noteData];
+		return newRGB;
 	}
 
     public static function applyDefaultColors(shader:RGBShaderReference, noteData:Int, pixel:Bool = false):Void

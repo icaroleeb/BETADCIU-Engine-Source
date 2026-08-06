@@ -1780,7 +1780,8 @@ class PlayState extends MusicBeatState
 				while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 				{
 					final dunceNote:Note = unspawnNotes.shift();
-					if (usedNoteSkinEvent) dunceNote.texture = (dunceNote.mustPress ? playerNoteSkin : opponentNoteSkin);
+					final conds:Bool = usedNoteSkinEvent && dunceNote.texture != (PlayState.SONG.noteStyle != null ? PlayState.SONG.noteStyle : (PlayState.SONG.arrowSkin != null ? PlayState.SONG.arrowSkin : null));
+					if (conds) dunceNote.texture = (dunceNote.mustPress ? playerNoteSkin : opponentNoteSkin);
 					notes.insert(0, dunceNote);
 					dunceNote.spawned = true;
 
@@ -2174,7 +2175,8 @@ class PlayState extends MusicBeatState
 			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 			{
 				var dunceNote:Note = unspawnNotes[0];
-				if (usedNoteSkinEvent) dunceNote.texture = (dunceNote.mustPress ? playerNoteSkin : opponentNoteSkin);
+				final conds:Bool = usedNoteSkinEvent && dunceNote.texture != (PlayState.SONG.noteStyle != null ? PlayState.SONG.noteStyle : (PlayState.SONG.arrowSkin != null ? PlayState.SONG.arrowSkin : null));
+				if (conds) dunceNote.texture = (dunceNote.mustPress ? playerNoteSkin : opponentNoteSkin);
 				notes.insert(0, dunceNote);
 				dunceNote.spawned = true;
 
