@@ -12,7 +12,8 @@ import states.TitleState;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
 	// public var showFPS:Bool = true;
-	public var debugDisplay:String = 'FPS and Memory';
+	public var debugDisplay:String = 'Disabled';
+	public var debugChartDisplay:Bool = false;
 	public var flashing:Bool = true;
 	public var autoPause:Bool = true;
 	public var antialiasing:Bool = true;
@@ -186,9 +187,12 @@ class ClientPrefs {
 			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key))
 				Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));
 		
-		if(Main.fpsVar != null){
+		// redirecting old configs to the new ones
+		if (data.debugDisplay != 'Disabled' && data.debugDisplay != 'Simple' && data.debugDisplay != 'Advanced') data.debugDisplay = (data.debugDisplay == "FPS Only" ? "Simple" : "Advanced");
+
+		if (Main.fpsVar != null) {
 			Main.fpsVar.visible = (data.debugDisplay != 'Disabled');
-			Main.fpsVar.updateDebugType(ClientPrefs.data.debugDisplay);
+			Main.fpsVar.isAdvanced = (data.debugDisplay == "Advanced");
 		}
 
 		#if (!html5 && !switch)

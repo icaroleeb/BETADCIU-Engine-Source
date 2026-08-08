@@ -5,7 +5,7 @@ import android.content.Context;
 #end
 
 // import debug.FPSCounter;
-import backend.tools.DebugDisplay as FPSCounter;
+import backend.tools.DebugDisplay.FunkinDebugDisplay as FPSCounter;
 
 import backend.ui.FullScreenScaleMode;
 import flixel.graphics.FlxGraphic;
@@ -230,10 +230,10 @@ class Main extends Sprite
 	}
 
 	public function getFPS():Float
-		return fpsVar.currentFPS;
+		return fpsVar.fps;
 
 	public static function getFPSStatic():Float
-		return fpsVar.currentFPS;
+		return fpsVar.fps;
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
 	// very cool person for real they don't get enough credit for their work
