@@ -217,12 +217,9 @@ class CharacterEditorStateWIP extends UIState
 	function addCharacter(respawn:Bool = false) {
 		final isPlayer = (respawn ? character.isPlayer : !predictCharacterIsNotPlayer(_char));
 
-		if (character == null) {
-			character = new Character(0, 0, _char, isPlayer);
-			add(character);
-		} else {
-			character.resetCharacter(0, 0, _char, isPlayer);
-		}
+		if (character != null) character = null;
+		character = new Character(0, 0, _char, isPlayer);
+		add(character);
 		
 		character.debugMode = true;
 		character.missingCharacter = false;

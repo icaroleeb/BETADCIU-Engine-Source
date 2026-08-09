@@ -1,231 +1,329 @@
 package backend.tools;
 
 import openfl.Lib;
-import openfl.display.BitmapData;
-import openfl.display.Bitmap;
+import flixel.util.FlxStringUtil;
+import backend.tools.FunkinStatsGraph;
+import openfl.display.Shape;
+import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import openfl.display.Sprite;
 
-import lime.graphics.opengl.GL;
-import lime.utils.Int32Array;
-
-import flixel.FlxG;
-
-import backend.ClientPrefs;
 import backend.Conductor;
-import backend.MusicBeatState;
-
-import states.PlayState;
 
 /**
-	The FPS class provides an easy-to-use monitor to display
-	the current frame rate of an OpenFL project
-**/
-
-// thx nightmare vision for the base for this
-
-class DebugDisplay extends Sprite
+ * A debug overlay showing useful info.
+ */
+#if cpp
+@:access(lime._internal.backend.native.NativeCFFI)
+#end
+class FunkinDebugDisplay extends Sprite
 {
-	var updating:Bool = true;
-	
-	var leftText:TextField;
-	var rightText:TextField;
-	var underlay:Bitmap;
-	var rightUnderlay:Bitmap;
-	
+	static final UPDATE_DELAY:Int = 100;
+	static final INNER_RECT_DIFF:Int = 3;
+	static final OUTER_RECT_DIMENSIONS:Array<Int> = [234, 201];
+	static final OTHERS_OFFSET:Int = 8;
+
 	/**
-		The current frame rate, expressed using frames-per-second
-	**/
-	public var currentFPS(default, null):Int;
-	
+	 * Indicates whether the debug display is in advanced mode.
+	 */
+	public var isAdvanced(default, set):Bool = false;
+
 	/**
-		The current memory usage (WARNING: this is NOT your total program memory usage, rather it shows the garbage collector memory)
-	**/
-	public var memoryMegas(get, never):Float;
-    public var memoryPeak:Float = 0;
-	
-	@:noCompletion private var times:Array<Float>;
-	
-	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
+	 * The opacity of the debug display's background.
+	 */
+	public var backgroundOpacity(default, set):Float = 0.5;
+
+	var deltaTimeout:Float;
+	var times:Array<Float>;
+	var color:Int;
+
+	public var fps:Int;
+	var fpsPeak:Int;
+
+	var gcMem:Float;
+	var gcMemPeak:Float;
+
+	var taskMem:Float;
+	var taskMemPeak:Float;
+
+	var background:Shape;
+	var chartBackground:Shape;
+
+	var fpsGraph:FunkinStatsGraph;
+	var gcMemGraph:FunkinStatsGraph;
+	var taskMemGraph:FunkinStatsGraph;
+
+	var infoDisplay:TextField;
+	var chartInfo:TextField;
+
+	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000):Void
 	{
 		super();
-		
+
 		this.x = x;
 		this.y = y;
-		
-		underlay = new Bitmap();
-		underlay.bitmapData = new BitmapData(1, 1, true, 0x6F000000);
-		addChild(underlay);
 
-		rightUnderlay = new Bitmap();
-		rightUnderlay.bitmapData = new BitmapData(1, 1, true, 0x6F000000);
-		addChild(rightUnderlay);
-		
-		leftText = new TextField();
-		addChild(leftText);
-		
-		currentFPS = 0;
-		leftText.selectable = false;
-		leftText.mouseEnabled = false;
-		leftText.defaultTextFormat = new TextFormat("Monsterrat", 14, color);
-		leftText.autoSize = LEFT;
-		leftText.multiline = true;
-		leftText.text = "FPS: ";
+		this.deltaTimeout = 0.0;
+		this.times = [];
+		this.color = color;
 
-		rightText = new TextField();
-		addChild(rightText);
+		this.fps = 0;
+		this.fpsPeak = 0;
+		this.gcMem = 0.0;
+		this.gcMemPeak = 0.0;
+		this.taskMem = 0.0;
+		this.taskMemPeak = 0.0;
 
-		rightText.selectable = false;
-		rightText.mouseEnabled = false;
-		rightText.defaultTextFormat = new TextFormat("Monsterrat", 14, color);
-		rightText.autoSize = LEFT;
-		rightText.multiline = true;
-		rightText.text = "Chart info: ";
-
-		rightText.visible = false;
-		rightUnderlay.visible = false;
-
-		times = [];
-		
-		FlxG.signals.postStateSwitch.add(() -> updateText = __updateTxt);
-
-		if (ClientPrefs.data.debugDisplay != null)
-			updateDebugType(ClientPrefs.data.debugDisplay);
+		this.backgroundOpacity = 0.6;
+		this.isAdvanced = false;
 	}
-	
-	var deltaTimeout:Float = 0.0;
-	
-	// Event Handlers
-	private override function __enterFrame(deltaTime:Float):Void
+
+	function buildDebugDisplay(advanced:Bool):Void
 	{
-		final now:Float = haxe.Timer.stamp() * 1000;
-		times.push(now);
-		while (times[0] < now - 1000)
+		removeChildren(0, numChildren);
+
+		final BG_WIDTH_MULTIPLIER:Float = 1;
+		final BG_HEIGHT_MULTIPLIER:Float = advanced ? 1 : (MemoryUtil.supportsTaskMem()) ? 0.3 : 0.2;
+
+		background = new Shape();
+		background.graphics.beginFill(0x3d3f41, 1);
+		background.graphics.drawRect(0, 0, (OUTER_RECT_DIMENSIONS[0] * BG_WIDTH_MULTIPLIER) + (INNER_RECT_DIFF * 2),
+			(OUTER_RECT_DIMENSIONS[1] * BG_HEIGHT_MULTIPLIER) + (INNER_RECT_DIFF * 2));
+		background.graphics.endFill();
+		background.graphics.beginFill(0x2c2f30, 1);
+		background.graphics.drawRect(INNER_RECT_DIFF, INNER_RECT_DIFF, OUTER_RECT_DIMENSIONS[0] * BG_WIDTH_MULTIPLIER,
+			OUTER_RECT_DIMENSIONS[1] * BG_HEIGHT_MULTIPLIER);
+		background.graphics.endFill();
+		background.alpha = backgroundOpacity;
+		addChild(background);
+
+		if (advanced)
+		{
+			createAdvancedElements();
+			updateAdvancedDisplay();
+		}
+		else
+		{
+			createSimpleElements();
+			updateSimpleDisplay();
+		}
+	}
+
+	function createAdvancedElements():Void
+	{
+		final graphsWidth:Int = OUTER_RECT_DIMENSIONS[0] + (INNER_RECT_DIFF * 2) - (OTHERS_OFFSET * 3);
+		final graphsHeight:Int = 25;
+
+		fpsGraph = new FunkinStatsGraph(OTHERS_OFFSET, OTHERS_OFFSET + 49, graphsWidth, graphsHeight, color);
+		fpsGraph.textDisplay.y = -49;
+		fpsGraph.minValue = 0;
+		addChild(fpsGraph);
+
+		gcMemGraph = new FunkinStatsGraph(OTHERS_OFFSET, Math.floor(OTHERS_OFFSET + (fpsGraph.y + fpsGraph.axisHeight) + 22), graphsWidth, graphsHeight, color);
+		gcMemGraph.minValue = 0;
+		addChild(gcMemGraph);
+
+		if (MemoryUtil.supportsTaskMem())
+		{
+			taskMemGraph = new FunkinStatsGraph(OTHERS_OFFSET, Math.floor(OTHERS_OFFSET + (gcMemGraph.y + gcMemGraph.axisHeight) + 22), graphsWidth,
+				graphsHeight, color);
+			taskMemGraph.minValue = 0;
+			addChild(taskMemGraph);
+		}
+	}
+
+	function createSimpleElements():Void
+	{
+		infoDisplay = new TextField();
+		infoDisplay.x = OTHERS_OFFSET;
+		infoDisplay.y = OTHERS_OFFSET;
+		infoDisplay.width = 500;
+		infoDisplay.selectable = false;
+		infoDisplay.mouseEnabled = false;
+		infoDisplay.defaultTextFormat = new TextFormat('Monsterrat', 12, color, JUSTIFY);
+		infoDisplay.antiAliasType = NORMAL;
+		infoDisplay.sharpness = 100;
+		infoDisplay.multiline = true;
+		addChild(infoDisplay);
+	}
+
+	function createChartStuff() {
+		final BG_WIDTH_MULTIPLIER:Float = 0.45;
+		final BG_HEIGHT_MULTIPLIER:Float = 0.45;
+
+		chartBackground = new Shape();
+		chartBackground.graphics.beginFill(0x3d3f41, 1);
+		chartBackground.graphics.drawRect(0, 0, (OUTER_RECT_DIMENSIONS[0] * BG_WIDTH_MULTIPLIER) + (INNER_RECT_DIFF * 2),
+			(OUTER_RECT_DIMENSIONS[1] * BG_HEIGHT_MULTIPLIER) + (INNER_RECT_DIFF * 2));
+		chartBackground.graphics.endFill();
+		chartBackground.graphics.beginFill(0x2c2f30, 1);
+		chartBackground.graphics.drawRect(INNER_RECT_DIFF, INNER_RECT_DIFF, OUTER_RECT_DIMENSIONS[0] * BG_WIDTH_MULTIPLIER,
+			OUTER_RECT_DIMENSIONS[1] * BG_HEIGHT_MULTIPLIER);
+		chartBackground.graphics.endFill();
+		chartBackground.alpha = backgroundOpacity;
+		addChild(chartBackground);
+
+		chartInfo = new TextField();
+		chartInfo.selectable = false;
+		chartInfo.mouseEnabled = false;
+		chartInfo.defaultTextFormat = new TextFormat('Monsterrat', 12, color, JUSTIFY);
+		chartInfo.antiAliasType = NORMAL;
+		chartInfo.sharpness = 100;
+		chartInfo.multiline = true;
+		addChild(chartInfo);
+	}
+
+	override function __enterFrame(deltaTime:Float):Void
+	{
+		if(!visible) return;
+		final currentTime:Float = haxe.Timer.stamp() * 1000;
+
+		times.push(currentTime);
+
+		while (times[0] < currentTime - 1000)
+		{
 			times.shift();
-			
-		// prevents the overlay from updating every frame, why would you need to anyways @crowplexus
-		if (deltaTimeout < 100)
+		}
+
+		if (deltaTimeout < UPDATE_DELAY)
 		{
 			deltaTimeout += deltaTime;
 			return;
 		}
-		
-		currentFPS = times.length;
-		updateText();
-		if (ClientPrefs.data.debugDisplay == "FPS Only" || ClientPrefs.data.debugDisplay == "FPS and Memory") underlay.width = leftText.width + 3;
-		else underlay.width = 370;
-		underlay.height = leftText.height;
 
-		rightUnderlay.width = rightText.width + 3;
-		rightUnderlay.height = rightText.height;
-		rightUnderlay.visible = rightText.visible;
-		
+		fps = times.length;
+
+		if (fps > fpsPeak) fpsPeak = fps;
+
+		gcMem = MemoryUtil.getGCMemory();
+
+		if (gcMem > gcMemPeak)
+			gcMemPeak = gcMem;
+
+		if (MemoryUtil.supportsTaskMem())
+		{
+			taskMem = MemoryUtil.getTaskMemory();
+
+			if (taskMem > taskMemPeak)
+				taskMemPeak = taskMem;
+		}
+
+		if (isAdvanced)
+		{
+			updateAdvancedDisplay();
+		}
+		else
+		{
+			updateSimpleDisplay();
+		}
+
+		updateChartInfo();
+
 		deltaTimeout = 0.0;
 	}
-	
-	dynamic function updateText():Void
+
+	function updateAdvancedDisplay():Void
 	{
-		__updateTxt();
-	}
-	
-	function __updateTxt()
-	{
-		if (!updating) return;
-        if (memoryMegas > memoryPeak) memoryPeak = memoryMegas;
+		updateFPSGraph();
+		updateGcMemGraph();
+		updateTaskMemGraph();
 
-		updateLeftText();
-		updateRightText();
+		final info:Array<String> = [];
+		info.push('FPS: $fps');
+		info.push('AVG FPS: ${Math.floor(fpsGraph.average())}');
+		info.push('1% LOW FPS: ${Math.floor(fpsGraph.lowest())}');
+		fpsGraph.textDisplay.text = info.join('\n');
 
-		leftText.textColor = 0xFFFFFFFF;
-		if (currentFPS < FlxG.drawFramerate * 0.5) leftText.textColor = 0xFFFF0000;
-	}
+		gcMemGraph.textDisplay.text = 'GC MEM: ${FlxStringUtil.formatBytes(gcMem).toLowerCase()} / ${FlxStringUtil.formatBytes(gcMemPeak).toLowerCase()}';
 
-	function updateLeftText() {
-        var gpuStr:String = "";
-
-        try {
-            gpuStr = 'GPU: ${GL.getString(GL.RENDERER).split("/")[0]}';
-        } catch (e) {
-            gpuStr = "";
-        }
-
-        var ramText:String = 'RAM: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)} (Peak: ${flixel.util.FlxStringUtil.formatBytes(memoryPeak)})';
-
-        var ext = GL.getString(GL.EXTENSIONS);
-        if (ext != null && ext.indexOf("GL_NVX_gpu_memory_info") != -1) {  // i don't have a AMD/Intel gpu to test this
-            ramText += ' | VRAM: ${flixel.util.FlxStringUtil.formatBytes(get_vramMegas() * 1024)}';
-        }
-
-		switch(debugType)
+		if (taskMemGraph != null)
 		{
-			case 'FPS Only':
-				leftText.text = 'FPS: $currentFPS';
-			case 'FPS and Memory':
-				leftText.text = 'FPS: $currentFPS\n${ramText}';
-			case 'Everything':
-				leftText.text = 'FPS: $currentFPS\n${ramText}\nState: ${Type.getClassName(Type.getClass(FlxG.state))}\n${gpuStr}';
+			taskMemGraph.textDisplay.text = 'TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toLowerCase()} / ${FlxStringUtil.formatBytes(taskMemPeak).toLowerCase()}';
 		}
 	}
 
-	function updateRightText() {
-		if (Std.isOfType(FlxG.state, PlayState) && PlayState.chartingMode == true) {
-			var curState = MusicBeatState.getState();
+	function updateSimpleDisplay():Void
+	{
+		if (infoDisplay != null)
+		{
+			final info:Array<String> = [];
+
+			info.push('FPS: $fps');
+
+			info.push('GC MEM: ${FlxStringUtil.formatBytes(gcMem).toLowerCase()} / ${FlxStringUtil.formatBytes(gcMemPeak).toLowerCase()}');
+
+			if (MemoryUtil.supportsTaskMem())
+				info.push('TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toLowerCase()} / ${FlxStringUtil.formatBytes(taskMemPeak).toLowerCase()}');
+
+			infoDisplay.text = info.join('\n');
+		}
+	}
+
+	function updateChartInfo() {
+		if (!ClientPrefs.data.debugChartDisplay) return;
+
+		final game:PlayState = PlayState.instance;
+
+		if (chartBackground == null && game != null && PlayState.chartingMode) createChartStuff();
+
+		if (!Std.isOfType(FlxG.state, PlayState) && chartBackground != null) {
+			removeChild(chartBackground);
+			removeChild(chartInfo);
+			
+			chartBackground = null;
+			chartInfo = null;
+		}
+
+		if (chartInfo != null && game != null) {
+			final info:Array<String> = [];
+
+			info.push("Chart Info:");
 			@:privateAccess
-			rightText.text = 'Chart info:\nStep: ${curState.curStep}\nBeat: ${curState.curBeat}\nSection: ${curState.curSection}\nBPM: ${Conductor.bpm}';
-			rightText.visible = true;
-		} else {
-			rightText.visible = false;
+			info.push('curStep: ${game.curStep}\ncurBeat: ${game.curBeat}\ncurSection: ${game.curSection}\nBPM: ${Conductor.bpm}');
+
+			chartInfo.text = info.join("\n");
+
+			chartBackground.x = Lib.current.stage.stageWidth - chartBackground.width - 20;
+			chartInfo.x = chartBackground.x + OTHERS_OFFSET;
+			chartInfo.y = chartBackground.y + OTHERS_OFFSET;
+
+			if (chartBackground.width != (chartInfo.width + (OTHERS_OFFSET * 2))) chartBackground.width = chartInfo.width + (OTHERS_OFFSET * 2);
 		}
-		rightUnderlay.x = rightText.x = Lib.current.stage.stageWidth - rightText.width - 20;
 	}
 
-    inline function get_memoryMegas():Float
+	function updateFPSGraph():Void
 	{
-		#if cpp
-		return cpp.vm.Gc.memInfo64(cpp.vm.Gc.MEM_INFO_USAGE);
-		#elseif (openfl >= "9.4.0")
-		return cast(openfl.system.System.totalMemoryNumber, UInt);
-		#else
-		return cast(openfl.system.System.totalMemory, UInt);
-		#end
+		fpsGraph.maxValue = fpsPeak;
+		fpsGraph.update(times.length);
 	}
 
-    static inline var totalVram = 0x9048;
-    static inline var curAvailableVram = 0x9049;
-
-    function get_vramMegas():Float // some times works, some times does this: https://prnt.sc/CYl54ZKOvPN5
-    {
-        try {
-            var total = new Int32Array(1);
-            var free  = new Int32Array(1);
-
-            GL.getIntegerv(totalVram, total);
-            GL.getIntegerv(curAvailableVram, free);
-
-            return (total[0] - free[0]);
-        } catch (e) {}
-
-        return -1;
-    }
-
-	var debugType:String = 'Disabled';
-
-	public function updateDebugType(type:String):Void
+	function updateGcMemGraph():Void
 	{
-		updating = true;
-		switch (type)
+		gcMemGraph.maxValue = gcMemPeak;
+		gcMemGraph.update(gcMem);
+	}
+
+	function updateTaskMemGraph():Void
+	{
+		if (taskMemGraph != null)
 		{
-			case 'FPS Only':
-				debugType = 'FPS Only';
-			case 'FPS and Memory':
-				debugType = 'FPS and Memory';
-			case 'Everything':
-				debugType = 'Everything';
-			case "Disabled":
-				updating = false;
-			default:
-				debugType = 'FPS and Memory';
+			taskMemGraph.maxValue = taskMemPeak;
+			taskMemGraph.update(taskMem);
 		}
+	}
+
+	function set_isAdvanced(value:Bool):Bool
+	{
+		buildDebugDisplay(value);
+
+		return isAdvanced = value;
+	}
+
+	function set_backgroundOpacity(value:Float):Float
+	{
+		if (background != null)
+			background.alpha = value;
+
+		return backgroundOpacity = value;
 	}
 }

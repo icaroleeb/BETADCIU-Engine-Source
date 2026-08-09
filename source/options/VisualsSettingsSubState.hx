@@ -108,12 +108,19 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		
 		#if !mobile
 		var option:Option = new Option('Debug Display:',
-			"Show some debug info on the top left corner of the screen.\nThis includes FPS, Memory usage, Chart info and more.\nNote: Chart info will only be shown if you have at least the FPS only option enabled.",
+			"Show some debug info on the top left corner of the screen.\nThis includes FPS, Memory usage",
 			'debugDisplay',
 			STRING,
-			['Disabled', 'FPS Only', 'FPS and Memory', 'Everything']);
+			['Disabled', 'Simple', 'Advanced']);
 		addOption(option);
 		option.onChange = onChangeDebugDisplay;
+
+		var option:Option = new Option('Chart info on debug display',
+			'Show some charting info in the top right corner of the screen.\nNote: Chart info will only be shown if you have the debug display enabled.',
+			'debugChartDisplay',
+			BOOL);
+		addOption(option);
+
 		#end
 		
 		var option:Option = new Option('Pause Music:',
@@ -260,10 +267,10 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 	#if !mobile
 	function onChangeDebugDisplay()
 	{
-		if(Main.fpsVar != null)
+		if (Main.fpsVar != null) {
 			Main.fpsVar.visible = (ClientPrefs.data.debugDisplay != 'Disabled');
-
-		Main.fpsVar.updateDebugType(ClientPrefs.data.debugDisplay);
+			Main.fpsVar.isAdvanced = (ClientPrefs.data.debugDisplay == "Advanced");
+		}
 	}
 	#end
 }
