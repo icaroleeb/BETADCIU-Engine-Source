@@ -2937,68 +2937,63 @@ class FunkinLua {
 	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false) {
 		tag = tag.replace('.', '');
 
+		final modCharMap = PlayState.instance.modchartCharacters;
+		
+		var charObj:Character = modCharMap.get(tag);
+		var pos:FlxPoint = FlxPoint.get(0, 0);
+		var oldChar:String = "";
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;	
-		var position:Int = -1;
-		var oldChar:String = "";
 
-		var modCharMap = PlayState.instance.modchartCharacters;
-		var daChar = modCharMap.get(tag);
+		if (charObj != null) {
+			oldChar = charObj.curCharacter;
+			var curAnim = charObj.animation.curAnim;
 
-		if (daChar != null) {
-			oldChar = daChar.curCharacter;
-			var curAnim = daChar.animation.curAnim;
-
-			if ((daChar.isAnimateAtlas && daChar.getAnimationName().startsWith('sing')) || (!daChar.isAnimateAtlas && curAnim.name.startsWith('sing'))) {
+			if ((charObj.isAnimateAtlas && charObj.getAnimationName().startsWith('sing')) || (!charObj.isAnimateAtlas && curAnim.name.startsWith('sing'))) {
 				animationName = Std.string(curAnim.name);
 				animationFrame = Std.int(curAnim.curFrame);
 			}
 		}
 
-		if (daChar == null) {
-			var newChar:Character = new Character(0, 0, character, isPlayer);
-			modCharMap.set(tag, newChar);
-			LuaUtils.getTargetInstance().add(newChar);
-			daChar = newChar;
-		} else {
-			daChar.resetCharacter(0, 0, character, isPlayer);
-		}
+		charObj?.kill();
+		charObj?.destroy();
 
-		var charX:Float;
-		var charY:Float;
+		var newChar:Character = new Character(0, 0, character, isPlayer);
+		modCharMap.set(tag, newChar);
+		LuaUtils.getTargetInstance().add(newChar);
+		
+		charObj = newChar;
 
 		if (isPlayer) {
-			charX = daChar.playerPositionArray[0];
-			charY = daChar.playerPositionArray[1];
-			daChar.x = PlayState.instance.BF_X + charX;
-			daChar.y = PlayState.instance.BF_Y + charY;
+			pos.x = PlayState.instance.BF_X + charObj.playerPositionArray[0];
+			pos.y = PlayState.instance.BF_Y + charObj.playerPositionArray[1];
 		} else {
-			charX = daChar.positionArray[0];
-			charY = daChar.positionArray[1];
-			daChar.x = PlayState.instance.DAD_X + charX;
-			daChar.y = PlayState.instance.DAD_Y + charY;
+			pos.x = PlayState.instance.DAD_X + charObj.positionArray[0];
+			pos.y = PlayState.instance.DAD_Y + charObj.positionArray[1];
 		}
 
-		if (daChar.animOffsets.exists(animationName)) 
-			daChar.playAnim(animationName, true, false, animationFrame);
+		charObj.setPosition(pos.x, pos.y);
+		pos.put();
 
-		if (oldChar != "") 
-			daChar.pastCharacter = oldChar;
+		if (charObj.animOffsets.exists(animationName)) charObj.playAnim(animationName, true, false, animationFrame);
+		if (oldChar != "") charObj.pastCharacter = oldChar;
 
-		PlayState.instance.startCharacterScripts(daChar.curCharacter);
-		PlayState.instance.setOnHScript(tag, daChar);
+		PlayState.instance.startCharacterScripts(charObj.curCharacter);
+		PlayState.instance.setOnHScript(tag, charObj);
+    	PlayState.instance.nameScriptsCharacter("characters/" + charObj.curCharacter, tag);
 
-    	PlayState.instance.nameScriptsCharacter("characters/" + daChar.curCharacter, tag);
-		PlayState.instance.callLuaFile("characters/" + daChar.curCharacter + '.lua', 'onCreatePost');
-		PlayState.instance.callHScriptFile("characters/" + daChar.curCharacter + '.hx', 'onCreatePost');
-		daChar.charName = tag;
+		if (PlayState.seenCutscene) {
+			PlayState.instance.callLuaFile("characters/" + charObj.curCharacter + '.lua', 'onCreatePost');
+			PlayState.instance.callHScriptFile("characters/" + charObj.curCharacter + '.hx', 'onCreatePost');
+		}
+
+		charObj.charName = tag;
 	}
 
 	// Combined them all into one function
 	public static function changeCharacterAuto(target:String, id:String, ?dontDestroy:Bool = false) {
 		var charObj:Character;
-		var posX:Float = 0;
-		var posY:Float = 0;
+		var pos:FlxPoint = FlxPoint.get(0, 0);
 		var oldChar:String;
 		
 		switch(target) {
@@ -3033,40 +3028,35 @@ class FunkinLua {
 		} catch (e:Dynamic) {}
 
 		PlayState.instance.stopCharacterScripts(oldChar);
-		// PlayState.instance.remove(charObj);
-		// charObj.destroy();
-		
-		// charObj = new Character(0, 0, id, (target == "boyfriend" ? !flipped : flipped));
-		charObj.resetCharacter(0, 0, id, (target == "boyfriend" ? true : false)); // trying to not remove them
+
+		charObj.kill();
+		charObj.destroy();
+		charObj = new Character(0, 0, id, (target == "boyfriend" ? true : false));
 
 		switch(target) {
 			case "boyfriend":
 				PlayState.instance.boyfriend = charObj;
-				posX = PlayState.instance.BF_X + charObj.playerPositionArray[0];
-				posY = PlayState.instance.BF_Y + charObj.playerPositionArray[1];
-				PlayState.instance.add(charObj);
+				pos.x = PlayState.instance.BF_X + charObj.playerPositionArray[0];
+				pos.y = PlayState.instance.BF_Y + charObj.playerPositionArray[1];
 				PlayState.instance.iconP1.changeIcon(charObj.healthIcon);
 			case "dad":
 				PlayState.instance.dad = charObj;
-				posX = PlayState.instance.DAD_X + charObj.positionArray[0];
-				posY = PlayState.instance.DAD_Y + charObj.positionArray[1];
-				PlayState.instance.add(charObj);
+				pos.x = PlayState.instance.DAD_X + charObj.positionArray[0];
+				pos.y = PlayState.instance.DAD_Y + charObj.positionArray[1];
 				PlayState.instance.iconP2.changeIcon(charObj.healthIcon);
 			case "gf":
 				PlayState.instance.gf = charObj;
-				posX = PlayState.instance.GF_X + charObj.positionArray[0];
-				posY = PlayState.instance.GF_Y + charObj.positionArray[1];
+				pos.x = PlayState.instance.GF_X + charObj.positionArray[0];
+				pos.y = PlayState.instance.GF_Y + charObj.positionArray[1];
 				PlayState.instance.add(charObj);
 		}
 
-		charObj.x = posX;
-		charObj.y = posY;
+		PlayState.instance.add(charObj);
+		charObj.setPosition(pos.x, pos.y);
+		pos.put();
 
-		if (target != "gf" || PlayState.instance.defaultBar)
-			PlayState.instance.reloadHealthBarColors();
-
-		if (charObj.animOffsets.exists(animationName))
-			charObj.playAnim(animationName, true, false, animationFrame);
+		if (target != "gf" || PlayState.instance.defaultBar) PlayState.instance.reloadHealthBarColors();
+		if (charObj.animOffsets.exists(animationName)) charObj.playAnim(animationName, true, false, animationFrame);
 
 		charObj.pastCharacter = oldChar;
 		charObj.charName = target; // I don't know what this is for but I ported it to my new function as well

@@ -31,18 +31,20 @@ class PreloadUtil
         var loadedArray:Array<String> = []; // just to debloat the terminal a bit
 
         if (charactersToLoad.length > 0) {
+            var dummyChar:Character;
+
             for (char in charactersToLoad) {
-                var dummyChar:Character = new Character(0, 0, char);
-                
-                if (FlxG.state is PlayState) {
-                    PlayState.instance.startCharacterScripts(char);
-                    PlayState.instance.stopCharacterScripts(char);
-                }
+                dummyChar = new Character(0, 0, char);
+
+                for (anim in dummyChar.animationsArray) dummyChar.playAnim(anim.anim, true);
+
+                PlayState.instance?.startCharacterScripts(char);
+                PlayState.instance?.stopCharacterScripts(char);
 
                 if (dummyChar.missingCharacter) trace('Failed to load character: $char');
                 else loadedArray.push(char);
 
-                if (dummyChar != null) dummyChar.destroy();
+                dummyChar.destroy();
                 dummyChar = null;
             }
             charactersToLoad = [];
