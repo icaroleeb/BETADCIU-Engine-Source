@@ -2,6 +2,7 @@ package backend;
 
 #if macro
 import haxe.macro.Expr;
+import haxe.macro.ExprTools;
 import haxe.macro.Context;
 
 using haxe.macro.Tools;
@@ -85,5 +86,9 @@ class MacroUtil
 		
 		return macro $v{ret};
 		#end
+	}
+
+	public static macro function varToString(el:Expr) {
+		return macro $v{ExprTools.toString(el)};
 	}
 }

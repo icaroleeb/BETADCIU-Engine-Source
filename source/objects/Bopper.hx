@@ -75,6 +75,8 @@ class Bopper extends FunkinSprite
 	 * If true, offsets will be scaled to match the current scale.
 	 */
 	public var scalableOffsets:Bool = false;
+
+	public var autoOffset:Bool = true;
 	
 	//-----
 	
@@ -146,17 +148,25 @@ class Bopper extends FunkinSprite
 	{
 		if (!canPlayAnimations) return;
 		
-		final correctedAnim = correctAnimationName(animToPlay);
+		var correctedAnim = correctAnimationName(animToPlay);
 		
 		if (correctedAnim == null) return;
 		
 		animation.play(correctedAnim, isForced, isReversed, frame);
+
+		if (animToPlay.startsWith("sing") && autoOffset && this.flipX) // I just wanna swap offset animations so bad :sob:
+		{
+			if (correctedAnim.contains("singLEFT"))
+				correctedAnim = "singRIGHT" + correctedAnim.substring("singLEFT".length);
+			else if (correctedAnim.contains("singRIGHT"))
+				correctedAnim = "singLEFT" + correctedAnim.substring("singRIGHT".length);
+		}
 		
 		final animationOffsets = animOffsets.get(correctedAnim);
 		
 		if (animationOffsets != null)
 		{
-			offset.set(animationOffsets[0], animationOffsets[1]);
+			offset.set(((autoOffset && this.flipX) ? (frameWidth - width - animationOffsets[0])) : animationOffsets[0], ((autoOffset && this.flipY) ? (frameHeight - height - animationOffsets[1])) : animationOffsets[1]);
 			
 			if (scalableOffsets)
 			{
@@ -222,6 +232,8 @@ class Bopper extends FunkinSprite
 	public function recalculateDanceIdle():Void
 	{
 		alternatingDance = hasAnim('danceLeft' + idleSuffix) && hasAnim('danceRight' + idleSuffix);
+
+		danceEveryNumBeats = alternatingDance ? 1 : 2;
 	}
 	
 	public function onBeatHit(beat:Int)

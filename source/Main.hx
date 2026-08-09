@@ -60,6 +60,10 @@ class Main extends Sprite
 		startFullscreen: false // if the game should start at fullscreen mode
 	};
 
+	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
+	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
+	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
+
 	public static var fpsVar:FPSCounter;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
@@ -160,7 +164,17 @@ class Main extends Sprite
 		Controls.instance = new Controls();
 		ClientPrefs.loadDefaultKeys();
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
-		var game = new FlxGame(game.width, game.height, game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen);
+
+		var stageWidth:Int = Lib.current.stage.stageWidth; // from kade I think
+		var stageHeight:Int = Lib.current.stage.stageHeight;
+
+		var ratioX:Float = stageWidth / gameWidth;
+		var ratioY:Float = stageHeight / gameHeight;
+		zoom = Math.min(ratioX, ratioY);
+		gameWidth = Math.ceil(stageWidth / zoom);
+		gameHeight = Math.ceil(stageHeight / zoom);
+
+		var game = new FlxGame(gameWidth, gameHeight, game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen);
 		
 		// FlxG.game._customSoundTray wants just the class, it calls new from
  		// create() in there, which gets called when it's added to stage

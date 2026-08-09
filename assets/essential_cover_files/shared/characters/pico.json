@@ -46,31 +46,22 @@
 			"indices": []
 		},
 		{
-			"offsets": [-68, -7],
-			"loop": false,
-			"fps": 24,
-			"anim": "singRIGHT",
-			"playerOffsets": [-48, 2],
-			"indices": [],
-			"name": "Pico NOTE LEFT0"
-		},
-		{
 			"offsets": [65, 9],
 			"loop": false,
 			"fps": 24,
 			"anim": "singLEFT",
 			"playerOffsets": [85, -10],
 			"indices": [],
-			"name": "Pico Note Right0"
+			"name": "Pico NOTE LEFT0"
 		},
 		{
-			"offsets": [-45, 50],
+			"offsets": [-68, -7],
 			"loop": false,
 			"fps": 24,
-			"anim": "singRIGHTmiss",
-			"playerOffsets": [-45, 50],
+			"anim": "singRIGHT",
+			"playerOffsets": [-48, 2],
 			"indices": [],
-			"name": "Pico NOTE LEFT miss"
+			"name": "Pico Note Right0"
 		},
 		{
 			"offsets": [83, 28],
@@ -78,6 +69,15 @@
 			"fps": 24,
 			"anim": "singLEFTmiss",
 			"playerOffsets": [83, 28],
+			"indices": [],
+			"name": "Pico NOTE LEFT miss"
+		},
+		{
+			"offsets": [-45, 50],
+			"loop": false,
+			"fps": 24,
+			"anim": "singRIGHTmiss",
+			"playerOffsets": [-45, 50],
 			"indices": [],
 			"name": "Pico Note Right Miss"
 		},
@@ -141,7 +141,7 @@
 	"image": "characters/Pico_FNF_assetss, characters/picoAnims/Pico_Intro, characters/picoAnims/Pico_Shooting",
 	"position": [0, 300],
 	"player_camera_position": [200, 40],
-	"is_player_char": false,
+	"isPlayerChar": true,
 	"healthicon": "pico",
 	"flip_x": true,
 	"healthbar_colors": [183, 216, 85],
