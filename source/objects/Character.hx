@@ -33,6 +33,7 @@ typedef CharacterFile = {
 	var healthbar_colors:Array<Int>;
 	var vocals_file:String;
 	@:optional var noteSkin:String;
+	@:optional var reverseFlip:Bool; // flipping for opponents!
 	@:optional var is_player_char:Bool; // New preferred field
 	@:optional var isPlayerChar:Bool;  // Legacy fallback
 	@:optional var isCharSpeaker:Bool;
@@ -71,6 +72,7 @@ class Character extends Bopper
 	**/
 	public var isPlayer:Bool = false;
 	public var isPsychPlayer:Null<Bool>;
+	public var reverseFlipping:Null<Bool>;
 
 	/**
 	 * is the speaker character
@@ -200,6 +202,7 @@ class Character extends Bopper
 		curCharacter = character;
 		pastCharacter = character;
 		isPsychPlayer = false;
+		reverseFlipping = false;
 
 		curColor = 0xFFFFFFFF;
 
@@ -271,6 +274,7 @@ class Character extends Bopper
 		isAnimateAtlas = false;
 
 		isPsychPlayer = json.is_player_char ?? json.isPlayerChar ?? false;
+		reverseFlipping = json.reverseFlip ?? false;
 		isSpeakerChar = json.isCharSpeaker ?? false;
 
 		vSliceSustains = json.vSliceSustains ?? false;
@@ -359,12 +363,11 @@ class Character extends Bopper
 
 				var offsets = a.offsets ?? [0, 0];
 				var playerOffsets = a.playerOffsets ?? offsets;
-				var swagOffsets = (isPlayer && a.playerOffsets != null) ? playerOffsets : offsets;
+
+				if(offsets != null && a.offsets.length > 1) addOffset(a.anim, offsets[0], offsets[1]);
+				else addOffset(a.anim, 0, 0);
 
 				if (a.playerOffsets == null) isPsychPlayer = true; // i tried to set this out of the loop but it didn't worked
-				
-				if(swagOffsets != null && a.offsets.length > 1) addOffset(a.anim, swagOffsets[0], swagOffsets[1]);
-				else addOffset(a.anim, 0, 0);
 
 				if(playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(a.anim, playerOffsets[0], playerOffsets[1]);
 				else addPlayerOffset(a.anim, 0, 0);
@@ -372,8 +375,10 @@ class Character extends Bopper
 
 			if (isPlayer) {
 				flipX = !flipX;
-				if (!isPsychPlayer) flipAnims(); //did i just fix all that flipping bug by just using a check that actually makes sense?? -- future me here: yeah, i did.
-			}		
+				if (!isPsychPlayer && !reverseFlipping) flipAnims();
+			} else {
+				if (!isPsychPlayer && reverseFlipping) flipAnims();
+			}
 		}
 		//trace('Loaded file to character ' + curCharacter);
 	}
@@ -590,15 +595,13 @@ class Character extends Bopper
 
 		super.playAnim(animName, force, reversed, frame);
 
-		var playedAnim = __prevPlayedAnimation;
+		final playedAnim = correctAnimationName(animName);
 		if (isPlayer) {
 			var playerOff = animPlayerOffsets.get(playedAnim);
 			if (playerOff != null) {
-				offset.set(playerOff[0], playerOff[1]);
-				if (scalableOffsets) {
-					offset.x *= scale.x;
-					offset.y *= scale.y;
-				}
+				final offsetX = (scalableOffsets ? playerOff[0]*scale.x : playerOff[0]);
+				final offsetY = (scalableOffsets ? playerOff[1]*scale.y : playerOff[0]);
+				offset.set(playerOff[0] , playerOff[1]);
 			}
 		}
 
@@ -692,6 +695,15 @@ class Character extends Bopper
 		}
 
 		if (foundAnim) flippedAnims = !flippedAnims;
+	}
+
+	public function flipCharacter() {
+		final flipTarget:Bool = reverseFlipping ? !isPlayer : isPlayer;
+
+		if (flipTarget && (!isPsychPlayer && !flippedAnims || isPsychPlayer && flippedAnims)) flipAnims();
+		else if (!flipTarget && !isPsychPlayer && flippedAnims) flipAnims();
+
+		playAnim(getAnimationName(), true);
 	}
 
 	inline function predictCharacterIsPlayer(name:String) { // if i remove this later, is because people didn't liked it. -Ryiuu

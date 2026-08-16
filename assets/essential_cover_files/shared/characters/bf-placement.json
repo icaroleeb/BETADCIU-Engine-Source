@@ -248,6 +248,7 @@
 		0
 	],
 	"sing_duration": 4,
-	"isPlayerChar": true,
+	"isPlayerChar": false,
+	"reverseFlip": true,
 	"scale": 1
 }
