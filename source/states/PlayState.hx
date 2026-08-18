@@ -51,6 +51,7 @@ import psychlua.*;
 import psychlua.LuaUtils;
 import psychlua.HScript;
 #end
+import extensions.hscript.Sharables;
 
 #if HSCRIPT_ALLOWED
 import psychlua.HScript.HScriptInfos;
@@ -3751,6 +3752,9 @@ class PlayState extends MusicBeatState
 		FunkinLua.customFunctions.clear();
 		#end
 
+		_sharables.clear();
+		_sharables = null;
+		
 		#if HSCRIPT_ALLOWED
 		for (script in hscriptArray)
 			if(script != null)
@@ -4096,12 +4100,14 @@ class PlayState extends MusicBeatState
 		return false;
 	}
 
+	var _sharables:Sharables = new Sharables(); // bcuz we don't have script groups **yet**
+
 	public function initHScript(file:String, ?scriptType:String = "")
 	{
 		var newScript:HScript = null;
 		try
 		{
-			newScript = new HScript(null, file, scriptType);
+			newScript = new HScript(null, file, scriptType, null, false, _sharables);
 			if (newScript.exists('onCreate')) newScript.call('onCreate');
 			trace('HScript Loaded: $file');
 			hscriptArray.push(newScript);
