@@ -78,9 +78,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		Paths.clearStoredMemory();
 	
 		FlxG.sound.music.stop();
-		#if !web // me and my lazyness to made this a mp3
 		FlxG.sound.playMusic(Paths.music('kawaruslow'), 0.7);
-		#end
 		camEditor = initPsychCamera();
 
 		camHUD = new FlxCamera();

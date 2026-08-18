@@ -24,7 +24,7 @@ import states.TitleState;
 	public var splashAlpha:Float = 0.6;
 	public var lowQuality:Bool = false;
 	public var shaders:Bool = true;
-	public var cacheOnGPU:Bool = #if !switch false #else true #end; // GPU Caching made by Raltyro
+	public var cacheOnGPU:Bool = false; // GPU Caching made by Raltyro
 	public var framerate:Int = 60;
 	public var unlimitedFps:Bool = false;
 	public var camZooms:Bool = true;
@@ -195,9 +195,7 @@ class ClientPrefs {
 			Main.fpsVar.isAdvanced = (data.debugDisplay == "Advanced");
 		}
 
-		#if (!html5 && !switch)
 		FlxG.autoPause = ClientPrefs.data.autoPause;
-		#end
 		changeFramerate();
 			
 		if(FlxG.save.data.gameplaySettings != null)
@@ -237,12 +235,10 @@ class ClientPrefs {
 	}
 
 	public static function changeFramerate() {
-		#if (!html5 && !switch)
 		if(FlxG.save.data.framerate == null) {
 			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
 			data.framerate = Std.int(FlxMath.bound(refreshRate, 60, 240));
 		}
-		#end
 
 		var maxFps = data.unlimitedFps ? 0 : data.framerate;
 

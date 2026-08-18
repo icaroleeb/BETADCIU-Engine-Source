@@ -106,7 +106,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		option.decimals = 1;
 		addOption(option);
 		
-		#if !mobile
 		var option:Option = new Option('Debug Display:',
 			"Show some debug info on the top left corner of the screen.\nThis includes FPS, Memory usage",
 			'debugDisplay',
@@ -120,8 +119,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			'debugChartDisplay',
 			BOOL);
 		addOption(option);
-
-		#end
 		
 		var option:Option = new Option('Pause Music:',
 			"What song do you prefer for the Pause Screen?",

@@ -210,13 +210,7 @@ class DropShadowShader extends FlxShader
    */
   public function loadAltMask(path:String):Void
   {
-    #if html5
-    BitmapData.loadFromFile(path).onComplete(function(bmp:BitmapData) {
-      altMaskImage = bmp;
-    });
-    #else
     altMaskImage = BitmapData.fromFile(path);
-    #end
   }
 
   /**

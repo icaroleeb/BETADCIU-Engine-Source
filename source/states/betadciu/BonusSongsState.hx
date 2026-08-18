@@ -7,7 +7,6 @@ import backend.Song;
 
 import objects.HealthIcon;
 import objects.MusicPlayer;
-import objects.MusicPlayerBonus;
 
 import options.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
@@ -19,7 +18,7 @@ import openfl.utils.Assets;
 
 import haxe.Json;
 
-class BonusSongsState extends MusicBeatState
+class BonusSongsState extends MusicBeatState implements objects.MusicPlayerProps
 {
 	public var songs:Array<SongMetadata> = [];
 
@@ -32,7 +31,7 @@ class BonusSongsState extends MusicBeatState
 	public var scoreBG:FlxSprite;
 	public var scoreText:FlxText;
 	public var diffText:FlxText;
-	public var lerpScore:Int = 0;
+	public var lerpScore:Float = 0;
 	public var lerpRating:Float = 0;
 	public var intendedScore:Int = 0;
 	public var intendedRating:Float = 0;
@@ -52,7 +51,7 @@ class BonusSongsState extends MusicBeatState
 	public var bottomText:FlxText;
 	public var bottomBG:FlxSprite;
 
-	public var playerBonus:MusicPlayerBonus;
+	public var playerBonus:MusicPlayer;
 
 	var stickerSubState:StickerSubState;
 	public function new(?stickers:StickerSubState = null)
@@ -225,7 +224,7 @@ class BonusSongsState extends MusicBeatState
 		bottomText.scrollFactor.set();
 		add(bottomText);
 		
-		playerBonus = new MusicPlayerBonus(this);
+		playerBonus = new MusicPlayer(this);
 		add(playerBonus);
 		
 		changeSelection();
@@ -271,7 +270,7 @@ class BonusSongsState extends MusicBeatState
 		if (FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * elapsed;
 
-		lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24)));
+		lerpScore = FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24));
 		lerpRating = FlxMath.lerp(intendedRating, lerpRating, Math.exp(-elapsed * 12));
 
 		if (Math.abs(lerpScore - intendedScore) <= 10)
@@ -291,7 +290,7 @@ class BonusSongsState extends MusicBeatState
 
 		if (!playerBonus.playingMusic)
 		{
-			scoreText.text = Language.getPhrase('personal_best', 'PERSONAL BEST: {1} ({2}%)', [lerpScore, ratingSplit.join('.')]);
+			scoreText.text = Language.getPhrase('personal_best', 'PERSONAL BEST: {1} ({2}%)', [Std.int(lerpScore), ratingSplit.join('.')]);
 			positionHighscore();
 			
 			if(songs.length > 1)
@@ -566,10 +565,8 @@ class BonusSongsState extends MusicBeatState
 			return;
 
 		curDifficulty = FlxMath.wrap(curDifficulty + change, 0, Difficulty.list.length-1);
-		#if !switch
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
 		intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty);
-		#end
 
 		lastDifficultyName = Difficulty.getString(curDifficulty, false);
 		var displayDiff:String = Difficulty.getString(curDifficulty);
@@ -661,8 +658,8 @@ class BonusSongsState extends MusicBeatState
 		var min:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected - _drawDistance)));
 		var max:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected + _drawDistance)));
 
-		var confirmSound:FlxSound = FlxG.sound.load(Paths.sound('confirmMenu'));
-		if (accepted) confirmSound.play();
+		var confirmSound:FlxSound = null;
+		if (accepted) confirmSound = FlxG.sound.play(Paths.sound('confirmMenu'));
 
 		for (i in min...max)
 		{

@@ -642,7 +642,7 @@ class NoteSplashEditorState extends UIState // MUST EXTEND UI STATE needed for a
         _file.addEventListener(Event.SELECT, onLoadComplete);
         _file.addEventListener(Event.CANCEL, onLoadCancel);
         _file.addEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-        _file.browse([#if !mac jsonFilter #end]);
+        _file.browse([jsonFilter]);
     }
 
     function onLoadComplete(_):Void

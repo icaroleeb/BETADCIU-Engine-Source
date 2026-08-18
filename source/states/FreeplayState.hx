@@ -18,9 +18,9 @@ import openfl.utils.Assets;
 
 import haxe.Json;
 
-class FreeplayState extends MusicBeatState
+class FreeplayState extends MusicBeatState implements objects.MusicPlayerProps
 {
-	var songs:Array<SongMetadata> = [];
+	public var songs:Array<SongMetadata> = [];
 
 	var selector:FlxText;
 	private static var curSelected:Int = 0;
@@ -28,10 +28,10 @@ class FreeplayState extends MusicBeatState
 	var curDifficulty:Int = -1;
 	private static var lastDifficultyName:String = Difficulty.getDefault();
 
-	var scoreBG:FlxSprite;
-	var scoreText:FlxText;
-	var diffText:FlxText;
-	var lerpScore:Int = 0;
+	public var scoreBG:FlxSprite;
+	public var scoreText:FlxText;
+	public var diffText:FlxText;
+	public var lerpScore:Float = 0;
 	var lerpRating:Float = 0;
 	var intendedScore:Int = 0;
 	var intendedRating:Float = 0;
@@ -47,8 +47,8 @@ class FreeplayState extends MusicBeatState
 	var missingTextBG:FlxSprite;
 	var missingText:FlxText;
 
-	var bottomString:String;
-	var bottomText:FlxText;
+	public var bottomString:String;
+	public var bottomText:FlxText;
 	var bottomBG:FlxSprite;
 
 	var player:MusicPlayer;
@@ -253,7 +253,7 @@ class FreeplayState extends MusicBeatState
 	var instPlaying:Int = -1;
 	public static var vocals:FlxSound = null;
 	public static var opponentVocals:FlxSound = null;
-	var holdTime:Float = 0;
+	public var holdTime:Float = 0;
 
 	var stopMusicPlay:Bool = false;
 	var canMove:Bool = true;
@@ -268,7 +268,7 @@ class FreeplayState extends MusicBeatState
 		if (FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * elapsed;
 
-		lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24)));
+		lerpScore = FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24));
 		lerpRating = FlxMath.lerp(intendedRating, lerpRating, Math.exp(-elapsed * 12));
 
 		if (Math.abs(lerpScore - intendedScore) <= 10)
@@ -288,7 +288,7 @@ class FreeplayState extends MusicBeatState
 
 		if (!player.playingMusic)
 		{
-			scoreText.text = Language.getPhrase('personal_best', 'PERSONAL BEST: {1} ({2}%)', [lerpScore, ratingSplit.join('.')]);
+			scoreText.text = Language.getPhrase('personal_best', 'PERSONAL BEST: {1} ({2}%)', [Std.int(lerpScore), ratingSplit.join('.')]);
 			positionHighscore();
 			
 			if(songs.length > 1)
@@ -563,10 +563,8 @@ class FreeplayState extends MusicBeatState
 			return;
 
 		curDifficulty = FlxMath.wrap(curDifficulty + change, 0, Difficulty.list.length-1);
-		#if !switch
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
 		intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty);
-		#end
 
 		lastDifficultyName = Difficulty.getString(curDifficulty, false);
 		var displayDiff:String = Difficulty.getString(curDifficulty);
@@ -631,7 +629,7 @@ class FreeplayState extends MusicBeatState
 	inline private function _updateSongLastDifficulty()
 		songs[curSelected].lastDifficulty = Difficulty.getString(curDifficulty, false);
 
-	private function positionHighscore()
+	public function positionHighscore()
 	{
 		scoreText.x = FlxG.width - scoreText.width - 6;
 		scoreBG.scale.x = FlxG.width - scoreText.x + 6;
@@ -655,8 +653,8 @@ class FreeplayState extends MusicBeatState
 		var min:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected - _drawDistance)));
 		var max:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected + _drawDistance)));
 
-		var confirmSound:FlxSound = FlxG.sound.load(Paths.sound('confirmMenu'));
-		if (accepted) confirmSound.play();
+		var confirmSound:FlxSound = null;
+		if (accepted) confirmSound = FlxG.sound.play(Paths.sound('confirmMenu'));
 
 		for (i in min...max)
 		{

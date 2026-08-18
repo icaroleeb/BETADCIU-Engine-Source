@@ -1155,7 +1155,7 @@ class ModpackAssetRegistry {
 
         addGroup("images", [".png", ".xml"]);
         addGroup("fonts", [""]);
-        addGroup("sounds", [".ogg", ".mp3"]);
+        addGroup("sounds", [".ogg"]);
         addGroup("videos", [".mp4", ".webm"]);
         addGroup("shaders", [".frag", ".vert", ".glsl"]);
         addGroup("", [""]); // For any assets located in other folders

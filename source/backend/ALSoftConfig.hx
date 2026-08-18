@@ -16,8 +16,6 @@ The config overrides a few global OpenALSoft settings with the aim of improving 
 		var configPath:String = Path.directory(Path.withoutExtension(origin));
 		#if windows
 		configPath += "/plugins/alsoft.ini";
-		#elseif mac
-		configPath = Path.directory(configPath) + "/Resources/plugins/alsoft.conf";
 		#else
 		configPath += "/plugins/alsoft.conf";
 		#end
