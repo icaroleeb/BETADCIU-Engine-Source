@@ -2,9 +2,15 @@ package objects;
 
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.math.FlxRect;
 
 class FunkinSprite extends FlxAnimate
 {
+    public var zoomFactor:Float = 1;
+    public var zoomFactorEnabled:Bool = true;
+    public var useLegacyZoomFactor:Bool = true;
+    public var forceIsOnScreen:Bool = false;
+
     public static function create(x:Float = 0.0, y:Float = 0.0, key:String)
     {
         return new FunkinSprite(x, y, Paths.image(key));
@@ -87,6 +93,41 @@ class FunkinSprite extends FlxAnimate
 
         camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
     }
+
+    // ZOOM FACTOR
+	private inline function __shouldDoZoomFactor()
+		return zoomFactorEnabled && zoomFactor != 1;
+
+	private inline function __prepareZoomFactor(?rect:FlxRect, camera:FlxCamera):FlxRect {
+		if (useLegacyZoomFactor)
+			return (rect ?? FlxRect.get()).set(
+				camera.width * 0.5,
+				camera.height * 0.5,
+				(camera.scaleX > 0 ? Math.max : Math.min)(0, FlxMath.lerp(1 / camera.scaleX, 1, zoomFactor)),
+				(camera.scaleY > 0 ? Math.max : Math.min)(0, FlxMath.lerp(1 / camera.scaleY, 1, zoomFactor))
+			);
+		else
+			return (rect ?? FlxRect.get()).set(
+				camera.width * 0.5 + camera.scroll.x * scrollFactor.x,
+				camera.height * 0.5 + camera.scroll.y * scrollFactor.y,
+				(camera.scaleX > 0 ? Math.max : Math.min)(0, FlxMath.lerp(1 / camera.scaleX, 1, zoomFactor)),
+				(camera.scaleY > 0 ? Math.max : Math.min)(0, FlxMath.lerp(1 / camera.scaleY, 1, zoomFactor))
+			);
+	}
+
+	override public function isOnScreen(?camera:FlxCamera):Bool
+	{
+		if (forceIsOnScreen)
+			return true;
+
+		if (camera == null)
+			camera = FlxG.camera;
+
+		var bounds = getScreenBounds(_rect, camera);
+		if (bounds.width == 0 && bounds.height == 0)
+			return false;
+		return camera.containsRect(bounds);
+	}
 
     // Offset Stuff
     public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();

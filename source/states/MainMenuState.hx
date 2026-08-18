@@ -70,44 +70,7 @@ class MainMenuState extends MusicBeatState
 
 		persistentUpdate = persistentDraw = true;
 
-		#if HSCRIPT_ALLOWED
-		if(Mods.currentModDirectory != null && Mods.currentModDirectory.trim().length > 0)
-		{
-			var scriptPath:String = 'mods/${Mods.currentModDirectory}/data/MainMenuState.hx'; //mods/My-Mod/data/MainMenuState.hx
-			if(FileSystem.exists(scriptPath))
-			{
-				try
-				{
-					hscript = new HScript(null, scriptPath);
-					/*
-					hscript.set('getLoaded', function() return loaded);
-					hscript.set('getLoadMax', function() return loadMax);
-					hscript.set('barBack', barBack);
-					hscript.set('bar', bar);
-					*/
-	
-					if(hscript.exists('onCreate'))
-					{
-						hscript.call('onCreate');
-						trace('initialized hscript interp successfully: $scriptPath');
-						return super.create();
-					}
-					else
-					{
-						trace('"$scriptPath" contains no \"onCreate" function, stopping script.');
-					}
-				}
-				catch(e:IrisError)
-				{
-					var pos:HScriptInfos = cast {fileName: scriptPath, showLine: false};
-					Iris.error(Printer.errorToString(e, false), pos);
-					var hscript:HScript = cast (Iris.instances.get(scriptPath), HScript);
-				}
-				if(hscript != null) hscript.destroy();
-				hscript = null;
-			}
-		}
-		#end
+		// initCustomStateScript();
 
 		var yScroll:Float = 0.10;
 		bg = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
@@ -225,14 +188,6 @@ class MainMenuState extends MusicBeatState
 	{
 		if (FlxG.sound.music.volume < 0.8)
 			FlxG.sound.music.volume = Math.min(FlxG.sound.music.volume + 0.5 * elapsed, 0.8);
-
-		#if HSCRIPT_ALLOWED
-		if(hscript != null)
-		{
-			if(hscript.exists('onUpdate')) hscript.call('onUpdate', [elapsed]);
-			return;
-		}
-		#end
 
 		if (!selectedSomethin)
 		{
@@ -523,17 +478,4 @@ class MainMenuState extends MusicBeatState
 			FlxTween.tween(magenta, {x: -115.5}, 0.4, {ease: FlxEase.sineOut});
 		}
 	}
-
-	#if HSCRIPT_ALLOWED
-	override function destroy()
-	{
-		if(hscript != null)
-		{
-			if(hscript.exists('onDestroy')) hscript.call('onDestroy');
-			hscript.destroy();
-		}
-		hscript = null;
-		super.destroy();
-	}
-	#end
 }

@@ -166,7 +166,7 @@ class Bopper extends FunkinSprite
 		
 		if (animationOffsets != null)
 		{
-			offset.set(((autoOffset && this.flipX) ? (frameWidth - width - animationOffsets[0])) : animationOffsets[0], ((autoOffset && this.flipY) ? (frameHeight - height - animationOffsets[1])) : animationOffsets[1]);
+			offset.set((autoOffset && this.flipX) ? (frameWidth - width - animationOffsets[0]) : animationOffsets[0], (autoOffset && this.flipY) ? (frameHeight - height - animationOffsets[1]) : animationOffsets[1]);
 			
 			if (scalableOffsets)
 			{

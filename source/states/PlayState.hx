@@ -346,6 +346,8 @@ class PlayState extends MusicBeatState
 	public var canControlPauseMenu:Bool = true; // becasue set/getPropertyFromClass don't work?!
 	public static var restarted:Bool = false;
 
+	public static var extraChar:CharConfig = null; // beta...
+
 	override public function create()
 	{
 		FlxG.sound.music.volume = 0;
@@ -466,6 +468,17 @@ class PlayState extends MusicBeatState
 		boyfriend = new Character(0, 0, SONG.player1, true);
 		boyfriend.charName = "boyfriend";
 		startCharacterPos(boyfriend);
+
+		var daExtraPlayer = SONG.extraPlayer;
+
+		if (daExtraPlayer != null && daExtraPlayer.length > 0) // beta...
+		{
+			for (i in 0...daExtraPlayer.length)
+			{
+				var char = daExtraPlayer[i];
+				FunkinLua.makeLuaCharacter(char.charObj, char.charNew, char.isPlayer);
+			}
+		}
 		
 		addStage(false, true);
 		
@@ -1189,26 +1202,30 @@ class PlayState extends MusicBeatState
 					switch (swagCounter)
 					{
 						case 0:
-							countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
+							if (introAlts.length > 3)
+								countdownOnYourMarks = createCountdownSprite(introAlts[0], antialias, isCustomCountdown);
+							else
+								countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
+
 							if (introSoundsSuffix != "-silent") 
 								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro3' + introSoundsSuffix, true), 0.6);
 							tick = THREE;
 						case 1:
-							countdownReady = createCountdownSprite(introAlts[0], antialias, isCustomCountdown);
+							countdownReady = createCountdownSprite(introAlts[introAlts.length - 3], antialias, isCustomCountdown);
 
 							if (introSoundsSuffix != "-silent") 
 								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro2' + introSoundsSuffix, true), 0.6);
 
 							tick = TWO;
 						case 2:
-							countdownSet = createCountdownSprite(introAlts[1], antialias, isCustomCountdown);
+							countdownSet = createCountdownSprite(introAlts[introAlts.length - 2], antialias, isCustomCountdown);
 
 							if (introSoundsSuffix != "-silent") 
 								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro1' + introSoundsSuffix, true), 0.6);
 							
 							tick = ONE;
 						case 3:
-							countdownGo = createCountdownSprite(introAlts[2], antialias, isCustomCountdown);
+							countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, isCustomCountdown);
 
 							if (introSoundsSuffix != "-silent")
 								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'introGo' + introSoundsSuffix, true), 0.6);

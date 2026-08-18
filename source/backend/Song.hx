@@ -18,6 +18,7 @@ typedef SwagSong =
 	var player1:String;
 	var player2:String;
 	var gfVersion:String;
+	@:optional var extraPlayer:Array<CharConfig>;
 	var stage:String;
 	var format:String;
 
@@ -47,6 +48,18 @@ typedef SwagSection =
 	@:optional var playerAltAnim:Bool;
 }
 
+// beta...
+typedef CharConfig =
+{
+	var charObj:String;
+	var charNew:String;
+	@:optional var x:String;
+	@:optional var y:String;
+	var isPlayer:Bool;
+	@:optional var type:Bool;
+	@:optional var behindOfChar:Bool;
+}
+
 class Song
 {
 	public var song:String;
@@ -66,6 +79,7 @@ class Song
 	public var vocalsPostfix:String;
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
+	public var extraPlayer:Array<CharConfig>;
 	public var gfVersion:String = 'gf';
 	public var format:String = 'psych_v1';
 
@@ -76,7 +90,7 @@ class Song
 			songJson.gfVersion = songJson.player3;
 			if(Reflect.hasField(songJson, 'player3')) Reflect.deleteField(songJson, 'player3');
 		}
-
+		
 		if(songJson.events == null)
 		{
 			songJson.events = [];
