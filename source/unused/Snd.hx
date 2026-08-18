@@ -1116,12 +1116,7 @@ class Snd {
 		
 		var snd : cpp.RawPointer<faxe.Faxe.FmodSound> = cast  null;
 		var sndR :  cpp.RawPointer<cpp.RawPointer<faxe.Faxe.FmodSound>> = cpp.RawPointer.addressOf(snd);
-		
-		#if switch
-		if ( !path.startsWith("rom:"))
-			path = "rom://" + path;
-		#end
-		
+				
 		var res : FmodResult = fmodSystem.createSound( 
 			Cpp.cstring(path),
 			mode,

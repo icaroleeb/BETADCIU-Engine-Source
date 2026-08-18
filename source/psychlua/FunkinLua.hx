@@ -261,7 +261,7 @@ class FunkinLua {
 		set('splashSkinPostfix', "");
 		set('splashAlpha', ClientPrefs.data.splashAlpha);
 
-		// build target (windows, mac, linux, etc.)
+		// build target (windows, linux, etc.)
 		set('buildTarget', LuaUtils.getBuildTarget());
 
 		//
@@ -2179,7 +2179,7 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "buildTarget", function() {
-			return Main.getBuildTarget();
+			return LuaUtils.getBuildTarget();
 		});
 
 		//change individual values

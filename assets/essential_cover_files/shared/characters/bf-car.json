@@ -138,7 +138,8 @@
 	"camera_position": [0, 0],
 	"player_position": [0, 350],
 	"sing_duration": 4,
-	"isPlayerChar": true,
+	"isPlayerChar": false,
+	"reverseFlip": true,
 	"scale": 1,
 	"_editor_isPlayer": true
 }

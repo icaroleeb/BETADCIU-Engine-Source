@@ -300,13 +300,8 @@ class FlxVideoSprite extends FlxSprite
 	@:noCompletion
 	private function onFocusLost():Void
 	{
-		#if !mobile
-		if (!FlxG.autoPause)
-			return;
-		#end
-
+		if (!FlxG.autoPause) return;
 		resumeOnFocus = bitmap.isPlaying;
-
 		pause();
 	}
 
