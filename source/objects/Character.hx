@@ -42,6 +42,7 @@ typedef CharacterFile = {
 
 	// stuff from nmv
 	@:optional var scalableOffsets:Null<Bool>;
+	@:optional var autoOffset:Null<Bool>;
 	@:optional var vSliceSustains:Null<Bool>;
 }
 
@@ -279,6 +280,8 @@ class Character extends Bopper
 
 		vSliceSustains = json.vSliceSustains ?? false;
 		scalableOffsets = json.scalableOffsets ?? false;
+
+		autoOffset = json.autoOffset ?? true;
 
 		var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
 		isAnimateAtlas = (Paths.exists(animToFind));
@@ -597,7 +600,6 @@ class Character extends Bopper
 
 		final playedAnim = correctAnimationName(animName);
 		if (isPlayer) {
-			var playerOff = animPlayerOffsets.get(playedAnim);
 			if (playerOff != null) {
 				final offsetX = (scalableOffsets ? playerOff[0]*scale.x : playerOff[0]);
 				final offsetY = (scalableOffsets ? playerOff[1]*scale.y : playerOff[0]);

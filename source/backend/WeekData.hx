@@ -29,6 +29,7 @@ typedef WeekFile =
 	var hideFreeplay:Bool;
 	var difficulties:String;
 	var stickers:Array<String>;
+	@:optional var noDiscordRPC:Bool;
 
 	//for guest betadcius
 	var ytInfo:Array<Dynamic>;
@@ -52,7 +53,7 @@ class WeekData {
 	public var hideStoryMode:Bool;
 	public var hideFreeplay:Bool;
 	public var difficulties:String;
-
+	public var noDiscordRPC:Bool;
 	public var fileName:String;
 
 	public var ytInfo:Array<Dynamic>;
@@ -92,6 +93,7 @@ class WeekData {
 		hideStoryMode = weekFile.hideStoryMode;
 		hideFreeplay = weekFile.hideFreeplay;
 		difficulties = weekFile.difficulties;
+		noDiscordRPC = weekFile.noDiscordRPC;
 
 		if (weekFile.stickers == null){
 			weekFile.stickers = ['stickers-set-1', 'all'];
