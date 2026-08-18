@@ -125,9 +125,6 @@ class FullScreenScaleMode extends flixel.system.scaleModes.BaseScaleMode
     updateGameSize(Width, Height);
     updateDeviceSize(Width, Height);
     updateDeviceCutout(Width, Height);
-    #if mobile
-    updateDeviceNotch(funkin.mobile.util.ScreenUtil.getNotchRect());
-    #end
     updateScaleOffset();
     updateGamePosition();
 
@@ -271,33 +268,6 @@ class FullScreenScaleMode extends flixel.system.scaleModes.BaseScaleMode
     updateOffsetY();
   }
 
-  #if mobile
-  private function updateDeviceNotch(notch:lime.math.Rectangle):Void
-  {
-    notchPosition.set(enabled ? notch.x : 0, enabled ? notch.y : 0);
-    notchSize.set(enabled ? notch.width : 0, enabled ? notch.height : 0);
-    gameNotchPosition.copyFrom(notchPosition);
-    gameNotchSize.copyFrom(notchSize);
-
-    final scale:Float = logicalSize.x / FlxG.initialWidth;
-    if (Math.ceil(logicalSize.x) > FlxG.initialWidth)
-    {
-      gameNotchPosition /= scale;
-      gameNotchSize /= scale;
-    }
-    else
-    {
-      gameNotchPosition *= scale;
-      gameNotchSize *= scale;
-    }
-
-    #if ios
-    gameNotchPosition /= 2;
-    gameNotchSize /= 2;
-    #end
-  }
-  #end
-
   public function reset():Void
   {
     cutoutSize.set(0, 0);
@@ -396,9 +366,7 @@ class FullScreenScaleMode extends flixel.system.scaleModes.BaseScaleMode
   @:noCompletion
   private static function set_enabled(Value:Bool):Bool
   {
-    if (ratioAxis == FlxAxes.X #if android
-      && (extension.androidtools.os.Build.VERSION.SDK_INT >= extension.androidtools.os.Build.VERSION_CODES.P
-        || extension.androidtools.Tools.isTablet()) #end)
+    if (ratioAxis == FlxAxes.X)
     {
       enabled = Value;
     }

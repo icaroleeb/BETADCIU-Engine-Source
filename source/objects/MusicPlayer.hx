@@ -5,14 +5,32 @@ import flixel.ui.FlxBar;
 import flixel.util.FlxStringUtil;
 
 import states.FreeplayState;
+import states.betadciu.BETADCIUState;
+import states.betadciu.BonusSongsState;
 
 /**
  * Music player used for Freeplay
  */
-@:access(states.FreeplayState)
+
+@:access(states.FreeplayState, states.betadciu.BETADCIUState, states.betadciu.BonusSongsState)
+interface MusicPlayerProps {
+	public var controls(get, never):Controls;
+    var holdTime:Float;
+    var songs:Array<SongMetadata>;
+
+    var scoreBG:FlxSprite;
+    var diffText:FlxText;
+    var scoreText:FlxText;
+    var bottomText:FlxText;
+    var bottomString:String;
+
+    public function positionHighscore():Void;
+}
+
+@:access(states.FreeplayState, states.betadciu.BETADCIUState, states.betadciu.BonusSongsState)
 class MusicPlayer extends FlxGroup 
 {
-	public var instance:FreeplayState;
+	public var instance:MusicPlayerProps;
 	public var controls:Controls;
 
 	public var playing(get, never):Bool;
@@ -33,7 +51,7 @@ class MusicPlayer extends FlxGroup
 	var holdPitchTime:Float = 0;
 	var playbackRate(default, set):Float = 1;
 
-	public function new(instance:FreeplayState)
+	public function new(instance:MusicPlayerProps)
 	{
 		super();
 
@@ -90,13 +108,13 @@ class MusicPlayer extends FlxGroup
 			return;
 		}
 
-		var songName:String = instance.songs[FreeplayState.curSelected].songName;
+		var songName:String = instance.songs[curSelected].songName;
 		if (playing && !wasPlaying)
 			songTxt.text = Language.getPhrase('musicplayer_playing', 'PLAYING: {1}', [songName]);
 		else
 			songTxt.text = Language.getPhrase('musicplayer_paused', 'PLAYING: {1} (PAUSED)', [songName]);
 
-		//if(FlxG.keys.justPressed.K) trace('Time: ${FreeplayState.vocals.time}, Playing: ${FreeplayState.vocals.playing}');
+		//if(FlxG.keys.justPressed.K) trace('Time: ${vocals.time}, Playing: ${vocals.playing}');
 
 		if (controls.UI_LEFT_P)
 		{
@@ -191,13 +209,12 @@ class MusicPlayer extends FlxGroup
 
 		if (playing)
 		{
-			if(FreeplayState.vocals != null)
-				FreeplayState.vocals.volume = (FreeplayState.vocals.length > FlxG.sound.music.time) ? 0.8 : 0;
-			if(FreeplayState.opponentVocals != null)
-				FreeplayState.opponentVocals.volume = (FreeplayState.opponentVocals.length > FlxG.sound.music.time) ? 0.8 : 0;
+			if(vocals != null) vocals.volume = (vocals.length > FlxG.sound.music.time) ? 0.8 : 0;
+			
+			if(opponentVocals != null) opponentVocals.volume = (opponentVocals.length > FlxG.sound.music.time) ? 0.8 : 0;
 
-			if((FreeplayState.vocals != null && FreeplayState.vocals.length > FlxG.sound.music.time && Math.abs(FlxG.sound.music.time - FreeplayState.vocals.time) >= 25) ||
-			(FreeplayState.opponentVocals != null && FreeplayState.opponentVocals.length > FlxG.sound.music.time && Math.abs(FlxG.sound.music.time - FreeplayState.opponentVocals.time) >= 25))
+			if((vocals != null && vocals.length > FlxG.sound.music.time && Math.abs(FlxG.sound.music.time - vocals.time) >= 25) ||
+			(opponentVocals != null && opponentVocals.length > FlxG.sound.music.time && Math.abs(FlxG.sound.music.time - opponentVocals.time) >= 25))
 			{
 				pauseOrResume();
 				setVocalsTime(FlxG.sound.music.time);
@@ -212,10 +229,10 @@ class MusicPlayer extends FlxGroup
 
 	function setVocalsTime(time:Float)
 	{
-		if (FreeplayState.vocals != null && FreeplayState.vocals.length > time)
-			FreeplayState.vocals.time = time;
-		if (FreeplayState.opponentVocals != null && FreeplayState.opponentVocals.length > time)
-			FreeplayState.opponentVocals.time = time;
+		if (vocals != null && vocals.length > time)
+			vocals.time = time;
+		if (opponentVocals != null && opponentVocals.length > time)
+			opponentVocals.time = time;
 	}
 
 	public function pauseOrResume(resume:Bool = false) 
@@ -225,19 +242,19 @@ class MusicPlayer extends FlxGroup
 			if(!FlxG.sound.music.playing)
 				FlxG.sound.music.resume();
 
-			if (FreeplayState.vocals != null && FreeplayState.vocals.length > FlxG.sound.music.time && !FreeplayState.vocals.playing)
-				FreeplayState.vocals.resume();
-			if (FreeplayState.opponentVocals != null && FreeplayState.opponentVocals.length > FlxG.sound.music.time && !FreeplayState.opponentVocals.playing)
-				FreeplayState.opponentVocals.resume();
+			if (vocals != null && vocals.length > FlxG.sound.music.time && !vocals.playing)
+				vocals.resume();
+			if (opponentVocals != null && opponentVocals.length > FlxG.sound.music.time && !opponentVocals.playing)
+				opponentVocals.resume();
 		}
 		else 
 		{
 			FlxG.sound.music.pause();
 
-			if (FreeplayState.vocals != null)
-				FreeplayState.vocals.pause();
-			if (FreeplayState.opponentVocals != null)
-				FreeplayState.opponentVocals.pause();
+			if (vocals != null)
+				vocals.pause();
+			if (opponentVocals != null)
+				opponentVocals.pause();
 		}
 	}
 
@@ -298,7 +315,7 @@ class MusicPlayer extends FlxGroup
 
 	function positionSong() 
 	{
-		var length:Int = instance.songs[FreeplayState.curSelected].songName.length;
+		var length:Int = instance.songs[curSelected].songName.length;
 		var shortName:Bool = length < 5; // Fix for song names like Ugh, Guns
 		songTxt.x = FlxG.width - songTxt.width - 6;
 		if (shortName)
@@ -350,10 +367,10 @@ class MusicPlayer extends FlxGroup
 	function setPlaybackRate() 
 	{
 		FlxG.sound.music.pitch = playbackRate;
-		if (FreeplayState.vocals != null)
-			FreeplayState.vocals.pitch = playbackRate;
-		if (FreeplayState.opponentVocals != null)
-			FreeplayState.opponentVocals.pitch = playbackRate;
+		if (vocals != null)
+			vocals.pitch = playbackRate;
+		if (opponentVocals != null)
+			opponentVocals.pitch = playbackRate;
 	}
 
 	function get_playing():Bool 
@@ -368,4 +385,31 @@ class MusicPlayer extends FlxGroup
 		else if (value <= 0.25) value = 0.25;
 		return playbackRate = value;
 	}
+
+    var vocals(get, never):FlxSound;
+    function get_vocals():FlxSound
+    {
+        if (Std.isOfType(instance, FreeplayState)) return FreeplayState.vocals;
+        if (Std.isOfType(instance, BETADCIUState)) return BETADCIUState.vocals;
+        if (Std.isOfType(instance, BonusSongsState)) return BonusSongsState.vocals;
+        return null;
+    }
+
+    var opponentVocals(get, never):FlxSound;
+    function get_opponentVocals():FlxSound
+    {
+        if (Std.isOfType(instance, FreeplayState)) return FreeplayState.opponentVocals;
+        if (Std.isOfType(instance, BETADCIUState)) return BETADCIUState.opponentVocals;
+        if (Std.isOfType(instance, BonusSongsState)) return BonusSongsState.opponentVocals;
+        return null;
+    }
+
+    var curSelected(get, never):Int;
+    function get_curSelected():Int
+    {
+        if (Std.isOfType(instance, FreeplayState)) return FreeplayState.curSelected;
+        if (Std.isOfType(instance, BETADCIUState)) return BETADCIUState.curSelected;
+        if (Std.isOfType(instance, BonusSongsState)) return BonusSongsState.curSelected;
+        return 0;
+    }
 }

@@ -115,15 +115,15 @@ class MainMenuState extends MusicBeatState
 			rightItem.x -= rightItem.width;
 		}
 
-		var psychVer:FlxText = new FlxText(12, FlxG.height - 64, 0, "Psych Engine v" + psychEngineVersion + " Custom Build", 12);
+		var psychVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "Psych Engine v" + psychEngineVersion + " Custom Build", 12);
 		psychVer.scrollFactor.set();
 		psychVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(psychVer);
-		var fnfVer:FlxText = new FlxText(12, FlxG.height - 44, 0, "Friday Night Funkin' v" + Application.current.meta.get('version'), 12);
+		var fnfVer:FlxText = new FlxText(12, FlxG.height - 64, 0, "Friday Night Funkin' v" + Application.current.meta.get('version'), 12);
 		fnfVer.scrollFactor.set();
 		fnfVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(fnfVer);
-		var betadciuVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "BETADCIU Engine Reworked v" + betadciuEngineVersion + " BETA " + Main.getBuildTarget() + " Build", 12); // Reworked sounds better than "Reboot"
+		var betadciuVer:FlxText = new FlxText(12, FlxG.height - 44, 0, "BETADCIU Engine Reworked v" + betadciuEngineVersion + " BETA", 12); // Reworked sounds better than "Reboot"
 		betadciuVer.scrollFactor.set();
 		betadciuVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(betadciuVer);

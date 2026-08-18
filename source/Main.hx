@@ -1,9 +1,5 @@
 package;
 
-#if android
-import android.content.Context;
-#end
-
 // import debug.FPSCounter;
 import backend.tools.DebugDisplay.FunkinDebugDisplay as FPSCounter;
 
@@ -25,7 +21,7 @@ import crowplexus.iris.Iris;
 import psychlua.HScript.HScriptInfos;
 #end
 
-#if (linux || mac)
+#if linux
 import lime.graphics.Image;
 #end
 
@@ -85,12 +81,6 @@ class Main extends Sprite
 
 		initHaxeUI();
 
-		// Credits to MAJigsaw77 (he's the og author for this code)
-		#if android
-		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));
-		#elseif ios
-		Sys.setCwd(lime.system.System.applicationStorageDirectory);
-		#end
 		#if VIDEOS_ALLOWED
 		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
 		#end
@@ -184,30 +174,19 @@ class Main extends Sprite
 
 		addChild(game);
 
-		#if !html5
 		game.addEventListener(Event.ADDED_TO_STAGE, function(_) {
 			if (!ClientPrefs.data.oldWindowScaling) FlxG.scaleMode = new FullScreenScaleMode();
 		});
-		#end
 
-		#if !mobile
 		fpsVar = new FPSCounter(10, 10, 0xFFFFFF);
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		if(fpsVar != null) {
-			fpsVar.visible = (ClientPrefs.data.debugDisplay != 'Disabled');
-		}
-		#end
+		if(fpsVar != null) fpsVar.visible = (ClientPrefs.data.debugDisplay != 'Disabled');
 
-		#if (linux || mac) // fix the app icon not showing up on the Linux Panel / Mac Dock
+		#if linux // fix the app icon not showing up on the Linux Panel
 		var icon = Image.fromFile("icon.png");
 		Lib.current.stage.window.setIcon(icon);
-		#end
-
-		#if html5
-		FlxG.autoPause = false;
-		FlxG.mouse.visible = false;
 		#end
 
 		FlxG.fixedTimestep = false;
@@ -298,26 +277,6 @@ class Main extends Sprite
 		Sys.exit(1);
 	}
 	#end
-
-	public static function getBuildTarget():String {
-		#if html5
-			return "HTML5";
-		#elseif android
-			return "Android";
-		#elseif windows
-			return "Windows";
-		#elseif mac
-			return "macOS";
-		#elseif linux
-			return "Linux";
-		#elseif neko
-			return "Neko";
-		#elseif flash
-			return "Flash";
-		#else
-			return "Unknown";
-		#end
-	}
 
 	function initHaxeUI():Void
 	{

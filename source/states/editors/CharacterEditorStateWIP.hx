@@ -92,9 +92,7 @@ class CharacterEditorStateWIP extends UIState
 
 		super.create();
 		FlxG.sound.music.stop();
-		#if !web // me and my lazyness to made this a mp3
 		FlxG.sound.playMusic(Paths.music('kawaruslow'), 0.7);
-		#end
 
 		FlxG.cameras.reset();
 		FlxG.cameras.add(camHUD = new FlxCamera(), false);

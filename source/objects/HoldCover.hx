@@ -99,6 +99,8 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 	var activeCovers:Map<Int, CoverSprite> = new Map();
 
 	public var autoRGB:Bool = true; // almost forgot to make this public lol
+	public var offsetX:Float = 0;
+	public var offsetY:Float = 0;
 
 	public function new(enabled:Bool, isPlayer:Bool)
 	{
@@ -247,8 +249,8 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 			var strum:StrumNote = game.strumLineNotes.members[isPlayer ? data + 4 : data];
 			if (strum == null) continue;
 
-			final targetX:Float = strum.x + (strum.width - cover.width) * 0.5 - 11;
-			final targetY:Float = strum.y + (strum.height - cover.height) * 0.5 + 50;
+			final targetX:Float = strum.x + (strum.width - cover.width) * 0.5 - 11 + offsetX;
+			final targetY:Float = strum.y + (strum.height - cover.height) * 0.5 + 50 + offsetY;
 
 			if (cover.x != targetX) cover.x = targetX;
 			if (cover.y != targetY) cover.y = targetY;

@@ -963,38 +963,10 @@ class FlxText extends FlxSprite
 	 */
 	function drawTextFieldTo(graphic:BitmapData):Void
 	{
-		#if flash
-		if (alignment == FlxTextAlign.CENTER && isTextBlurry())
-		{
-			var h:Int = 0;
-			var tx:Float = _matrix.tx;
-			for (i in 0...textField.numLines)
-			{
-				var lineMetrics = textField.getLineMetrics(i);
-
-				// Workaround for blurry lines caused by non-integer x positions on flash
-				var diff:Float = lineMetrics.x - Std.int(lineMetrics.x);
-				if (diff != 0)
-				{
-					_matrix.tx = tx + diff;
-				}
-				_textFieldRect.setTo(0, h, textField.width, lineMetrics.height + lineMetrics.descent);
-
-				graphic.draw(textField, _matrix, null, null, _textFieldRect, false);
-
-				_matrix.tx = tx;
-				h += Std.int(lineMetrics.height);
-			}
-
-			return;
-		}
-		#elseif !web
-		// Fix to render desktop and mobile text in the same visual location as web
 		_matrix.translate(-1, -1); // left and up
 		graphic.draw(textField, _matrix);
 		_matrix.translate(1, 1); // return to center
 		return;
-		#end
 
 		graphic.draw(textField, _matrix);
 	}

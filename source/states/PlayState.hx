@@ -37,7 +37,6 @@ import openfl.filters.ShaderFilter;
 
 import shaders.ErrorHandledShader;
 
-import objects.VideoSprite;
 import objects.Note.EventNote;
 import objects.HoldCover.CoverSprite;
 import objects.*;
@@ -2265,10 +2264,10 @@ class PlayState extends MusicBeatState
 							if(daNote.mustPress)
 							{
 								if(cpuControlled && !daNote.blockHit && daNote.canBeHit && (daNote.isSustainNote || daNote.strumTime <= Conductor.songPosition))
-									goodNoteHit(daNote);
+									noteHit(daNote, false);
 							}
 							else if (daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
-								opponentNoteHit(daNote);
+									noteHit(daNote, true);
 
 							if(daNote.isSustainNote && strum.sustainReduce) daNote.clipToStrumNote(strum);
 
@@ -2955,11 +2954,9 @@ class PlayState extends MusicBeatState
 		var ret:Dynamic = callOnScripts('onEndSong', null, true);
 		if(ret != LuaUtils.Function_Stop && !transitioning)
 		{
-			#if !switch
 			var percent:Float = ratingPercent;
 			if(Math.isNaN(percent)) percent = 0;
 			Highscore.saveScore(Song.loadedSongName, songScore, storyDifficulty, percent);
-			#end
 			playbackRate = 1;
 
 			if (chartingMode)
@@ -3676,187 +3673,108 @@ class PlayState extends MusicBeatState
 		vocals.volume = 0;
 	}
 
-	function opponentNoteHit(note:Note):Void
-	{
-		var result:Dynamic = callOnLuas('opponentNoteHitPre', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote, note.dType]);
-		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) result = callOnHScript('opponentNoteHitPre', [note]);
+	// just to avoid errors on scripts
+	public function goodNoteHit(note:Note):Void { noteHit(note, false); }
+	public function opponentNoteHit(note:Note):Void { noteHit(note, true); }
 
-		playDad = searchLuaVar('playDadSing', 'bool', false);
-
-		if(result == LuaUtils.Function_Stop) return;
-
-		if (songName != 'tutorial')
-			camZooming = true;
-
-		if (!note.noAnimation && playDad) {
-			var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, note.noteData)))] + note.animSuffix;
-			var charsToProcess:Array<{char:Character, animCheck:String}> = [];
-			var mainChar:Character = note.gfNote ? gf : dad;
-			var mainAnimCheck:String = note.gfNote ? 'cheer' : 'hey';
-
-			charsToProcess.push({char: mainChar, animCheck: mainAnimCheck});
-
-			for (key in modchartCharacters.keys())
-			{
-				var modChar:Character = modchartCharacters.get(key);
-				if (modChar != null && !modChar.isPlayer)
-					charsToProcess.push({char: modChar, animCheck: 'hey'});
-			}
-
-			for (entry in charsToProcess)
-			{
-				var char:Character = entry.char;
-
-				if (char == null || !char.playSingAnim) continue;
-
-				var canPlay:Bool = true;
-
-				if (note.isSustainNote)
-				{
-					var holdAnim:String = animToPlay + '-hold';
-
-					if (char.animation.exists(holdAnim))
-						animToPlay = holdAnim;
-
-					var currentAnim:String = char.animation.curAnim != null ? char.animation.curAnim.name : '';
-					if (currentAnim == holdAnim || currentAnim == holdAnim + '-loop')
-						canPlay = false;
-				}
-
-				if (!(char.vSliceSustains && note.isSustainNote) && canPlay)
-					char.playAnim(animToPlay, true);
-
-				char.holdTimer = 0;
-
-				if (note.noteType == 'Hey!' && char.hasAnimation('hey'))
-				{
-					if (char.animation.exists(entry.animCheck))
-					{
-						char.playAnim(entry.animCheck, true);
-						char.specialAnim = true;
-						char.heyTimer = 0.6;
-					}
-				}
-			}
+	public function noteHit(note:Note, opponentHit:Bool):Void { // unified it
+		if (!opponentHit) {
+			if (note.wasGoodHit) return;
+			if (cpuControlled && note.ignoreNote) return;
 		}
 
-		if(opponentVocals.length <= 0) vocals.volume = 1;
-		strumPlayAnim(true, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
-		note.hitByOpponent = true;
+		final isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
+		final leData:Int = Math.round(Math.abs(note.noteData));
+		final leType:String = note.noteType;
+		final causesMiss:Bool = !opponentHit && note.hitCausesMiss;
 
-		if (enabledHolds) opponentHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
+		var result:Dynamic = callOnLuas(opponentHit ? "opponentNoteHitPre" : "goodNoteHitPre", [notes.members.indexOf(note), leData, leType, isSus, note.dType]);
+		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll)
+			result = callOnHScript(opponentHit ? "opponentNoteHitPre" : "goodNoteHitPre", [note]);
 
-		hardCodedStage?.opponentNoteHit(note);
-		var result:Dynamic = callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote, note.dType]);
-		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('opponentNoteHit', [note]);
+		if (opponentHit) playDad = searchLuaVar('playDadSing', 'bool', false);
+		else playBF = searchLuaVar('playBFSing', 'bool', false);
 
-		if (!note.isSustainNote) invalidateNote(note);
-	}
+		if (result == LuaUtils.Function_Stop) return;
 
-	public function goodNoteHit(note:Note):Void
-	{
-		if(note.wasGoodHit) return;
-		if(cpuControlled && note.ignoreNote) return;
+		if (opponentHit) {
+			if (songName != 'tutorial') camZooming = true;
+		} else {
+			note.wasGoodHit = true;
+			if (note.hitsoundVolume > 0 && !note.hitsoundDisabled) FlxG.sound.play(Paths.sound(note.hitsound), note.hitsoundVolume);
+		}
 
-		var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
-		var leData:Int = Math.round(Math.abs(note.noteData));
-		var leType:String = note.noteType;
+		if (!causesMiss) {
+			var shouldAnimate:Bool = opponentHit ? (!note.noAnimation && playDad) : (!note.noAnimation && playBF);
 
-		var result:Dynamic = callOnLuas('goodNoteHitPre', [notes.members.indexOf(note), leData, leType, isSus, note.dType]);
-		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) result = callOnHScript('goodNoteHitPre', [note]);
-
-		if(result == LuaUtils.Function_Stop) return;
-
-		note.wasGoodHit = true;
-		playBF = searchLuaVar('playBFSing', 'bool', false);
-
-		if (note.hitsoundVolume > 0 && !note.hitsoundDisabled)
-			FlxG.sound.play(Paths.sound(note.hitsound), note.hitsoundVolume);
-
-		if(!note.hitCausesMiss) //Common notes
-		{
-			if(!note.noAnimation && playBF)
-			{
+			if (shouldAnimate) {
 				var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length - 1, note.noteData)))] + note.animSuffix;
 				var charsToProcess:Array<{char:Character, animCheck:String}> = [];
-				var mainChar:Character = note.gfNote ? gf : boyfriend;
+				var mainChar:Character = note.gfNote ? gf : (opponentHit ? dad : boyfriend);
 				var mainAnimCheck:String = note.gfNote ? 'cheer' : 'hey';
 
 				charsToProcess.push({char: mainChar, animCheck: mainAnimCheck});
 
-				for (key in modchartCharacters.keys())
-				{
+				for (key in modchartCharacters.keys()) {
 					var modChar:Character = modchartCharacters.get(key);
-					if (modChar != null && modChar.isPlayer)
-						charsToProcess.push({char: modChar, animCheck: 'hey'});
+					if (modChar != null && (opponentHit ? !modChar.isPlayer : modChar.isPlayer)) charsToProcess.push({char: modChar, animCheck: 'hey'});
 				}
 
-				for (entry in charsToProcess)
-				{
+				for (entry in charsToProcess) {
 					var char:Character = entry.char;
-
 					if (char == null || !char.playSingAnim) continue;
 
 					var canPlay:Bool = true;
 
-					if (note.isSustainNote)
-					{
+					if (note.isSustainNote) {
 						var holdAnim:String = animToPlay + '-hold';
-
-						if (char.animation.exists(holdAnim))
-							animToPlay = holdAnim;
+						if (char.animation.exists(holdAnim)) animToPlay = holdAnim;
 
 						var currentAnim:String = char.animation.curAnim != null ? char.animation.curAnim.name : '';
-						if (currentAnim == holdAnim || currentAnim == holdAnim + '-loop')
-							canPlay = false;
+						if (currentAnim == holdAnim || currentAnim == holdAnim + '-loop') canPlay = false;
 					}
 
-					if (!(char.vSliceSustains && note.isSustainNote) && canPlay)
-						char.playAnim(animToPlay, true);
+					if (!(char.vSliceSustains && note.isSustainNote) && canPlay) char.playAnim(animToPlay, true);
 
 					char.holdTimer = 0;
 
-					if (note.noteType == 'Hey!' && char.hasAnimation('hey'))
-					{
-						if (char.animation.exists(entry.animCheck))
-						{
+					if (note.noteType == 'Hey!' && char.hasAnimation('hey')) {
+						if (char.animation.exists(entry.animCheck)) {
 							char.playAnim(entry.animCheck, true);
 							char.specialAnim = true;
 							char.heyTimer = 0.6;
 						}
 					}
 				}
-
 			}
 
-			if(!cpuControlled)
-			{
-				var spr = playerStrums.members[note.noteData];
-				if(spr != null && (spr.animation != null && spr.animation.curAnim.name != 'confirm')) spr.playAnim('confirm', true);
-			}
-			else strumPlayAnim(false, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
-			vocals.volume = 1;
+			if (opponentHit) {
+				if (opponentVocals.length <= 0) vocals.volume = 1;
+				strumPlayAnim(true, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
+				note.hitByOpponent = true;
+			} else {
+				if (!cpuControlled) {
+					var spr = playerStrums.members[note.noteData];
+					if (spr != null && (spr.animation != null && spr.animation.curAnim.name != 'confirm')) spr.playAnim('confirm', true);
+				}
+				else strumPlayAnim(false, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
+				vocals.volume = 1;
 
-			if (!note.isSustainNote)
-			{
-				combo++;
-				if(combo > 9999) combo = 9999;
-				popUpScore(note);
-			}
-			var gainHealth:Bool = true; // prevent health gain, *if* sustains are treated as a singular note
-			if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
-			if (gainHealth) health += note.hitHealth * healthGain;
+				if (!note.isSustainNote) {
+					combo++;
+					if (combo > 9999) combo = 9999;
+					popUpScore(note);
+				}
 
-		}
-		else //Notes that count as a miss if you hit them (Hurt notes for example)
-		{
-			if(!note.noMissAnimation && playBF)
-			{
-				switch(note.noteType)
-				{
+				var gainHealth:Bool = true;
+				if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
+				if (gainHealth) health += note.hitHealth * healthGain;
+			}
+		} else {
+			if (!note.noMissAnimation && playBF) {
+				switch (note.noteType) {
 					case 'Hurt Note':
-						if(boyfriend.hasAnimation('hurt'))
-						{
+						if (boyfriend.hasAnimation('hurt')) {
 							boyfriend.playAnim('hurt', true);
 							boyfriend.specialAnim = true;
 						}
@@ -3864,15 +3782,22 @@ class PlayState extends MusicBeatState
 			}
 
 			noteMiss(note);
-			if(!note.noteSplashData.disabled && !note.isSustainNote) spawnNoteSplashOnNote(note);
+			if (!note.noteSplashData.disabled && !note.isSustainNote) spawnNoteSplashOnNote(note);
 		}
 
-		if (enabledHolds) playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
+		if (enabledHolds) {
+			final holdCover = opponentHit ? opponentHoldCovers : playerHoldCovers;
+			holdCover.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
+		}
 
-		hardCodedStage?.goodNoteHit(note);
-		var result:Dynamic = callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.dType]);
-		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('goodNoteHit', [note]);
-		if(!note.isSustainNote) invalidateNote(note);
+		if (opponentHit) hardCodedStage?.opponentNoteHit(note);
+		else hardCodedStage?.goodNoteHit(note);
+
+		var result:Dynamic = callOnLuas(opponentHit ? "opponentNoteHit" : "goodNoteHit", [notes.members.indexOf(note), leData, leType, isSus, note.dType]);
+		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll)
+			callOnHScript(opponentHit ? "opponentNoteHit" : "goodNoteHit", [note]);
+
+		if (!note.isSustainNote) invalidateNote(note);
 	}
 
 	public function invalidateNote(note:Note):Void {
