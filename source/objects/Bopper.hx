@@ -77,6 +77,7 @@ class Bopper extends FunkinSprite
 	public var scalableOffsets:Bool = false;
 
 	public var autoOffset:Bool = true;
+	public var correctFlippedOffsets:Bool = true;
 	
 	//-----
 	
@@ -154,7 +155,7 @@ class Bopper extends FunkinSprite
 		
 		animation.play(correctedAnim, isForced, isReversed, frame);
 
-		if (animToPlay.startsWith("sing") && autoOffset && this.flipX) // I just wanna swap offset animations so bad :sob:
+		if (animToPlay.startsWith("sing") && correctFlippedOffsets && this.flipX) // I just wanna swap offset animations so bad :sob:
 		{
 			if (correctedAnim.contains("singLEFT"))
 				correctedAnim = "singRIGHT" + correctedAnim.substring("singLEFT".length);
@@ -165,15 +166,7 @@ class Bopper extends FunkinSprite
 		final animationOffsets = animOffsets.get(correctedAnim);
 		
 		if (animationOffsets != null)
-		{
-			offset.set((autoOffset && this.flipX) ? (frameWidth - width - animationOffsets[0]) : animationOffsets[0], (autoOffset && this.flipY) ? (frameHeight - height - animationOffsets[1]) : animationOffsets[1]);
-			
-			if (scalableOffsets)
-			{
-				offset.x *= scale.x;
-				offset.y *= scale.y;
-			}
-		}
+			applyAnimOffset(animationOffsets[0], animationOffsets[1]);
 		
 		__prevPlayedAnimation = animToPlay;
 	}
@@ -225,6 +218,59 @@ class Bopper extends FunkinSprite
 			playAnim('idle$idleSuffix', forced);
 		}
 	}
+
+	/**
+	 * Applies a stored (authored) animation offset to the live `offset`, scaling
+	 * it by the ratio to the authored `jsonScale` and mirroring it only when the
+	 * live flip differs from the load-time flip (baseFlipX/Y). Offsets stay as
+	 * authored for a normally-loaded character (flipped-by-design ones like Pico
+	 * included); the mirror only applies once flipX/flipY is changed after load,
+	 * so a flipped duplicate or a setProperty('flipX', ...) reuses the same JSON
+	 * without re-tuning. Atlas characters position through copyAtlasValues, so
+	 * flip mirroring (frameWidth/width based) is skipped.
+	 */
+	public function applyAnimOffset(rawX:Float, rawY:Float) {
+		var ox:Float = rawX;
+		var oy:Float = rawY;
+
+		if (scalableOffsets) {
+			ox *= scale.x;
+			oy *= scale.y;
+		}
+
+		if (correctFlippedOffsets) {
+			if (flipX != false)
+				ox = (frameWidth - width) - ox;
+			if (flipY != false)
+				oy = (frameHeight - height) - oy;
+		}
+
+		offset.set(ox, oy);
+	}
+
+	/**
+	 * Inverse of `applyAnimOffset`: converts the current live `offset` (e.g. one
+	 * dragged in the character editor while flipped/scaled) back into the
+	 * authored value that belongs in the JSON. Returns `[x, y]`.
+	 */
+	public function getAuthoredOffset():Array<Float> {
+		var ox:Float = offset.x;
+		var oy:Float = offset.y;
+
+		if (correctFlippedOffsets) {
+			if (flipX != false)
+				ox = (frameWidth - width) - ox;
+			if (flipY != false)
+				oy = (frameHeight - height) - oy;
+		}
+
+		if (scalableOffsets) {
+			ox /= scale.x;
+			oy /= scale.y;
+		}
+
+		return [ox, oy];
+	}
 	
 	/**
 	 * Updates if the current character has a alternating `left/right` dance
@@ -232,8 +278,6 @@ class Bopper extends FunkinSprite
 	public function recalculateDanceIdle():Void
 	{
 		alternatingDance = hasAnim('danceLeft' + idleSuffix) && hasAnim('danceRight' + idleSuffix);
-
-		danceEveryNumBeats = alternatingDance ? 1 : 2;
 	}
 	
 	public function onBeatHit(beat:Int)

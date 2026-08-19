@@ -737,7 +737,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			character.flipCharacter();
 		};
 
-    autoOffsetCheckBox = new PsychUICheckBox(scalableOffsetsCheckBox.x + scalableOffsetsCheckBox.width + 120, saveCharacterButton.y + 25, "autoOffset", 80);
+    	autoOffsetCheckBox = new PsychUICheckBox(scalableOffsetsCheckBox.x + scalableOffsetsCheckBox.width + 120, saveCharacterButton.y + 25, "autoOffset", 80);
 		autoOffsetCheckBox.checked = character.autoOffset;
 		autoOffsetCheckBox.onClick = function() { character.autoOffset = vSliceSusCheckBox.checked; };
 

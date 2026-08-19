@@ -42,7 +42,6 @@ typedef CharacterFile = {
 
 	// stuff from nmv
 	@:optional var scalableOffsets:Null<Bool>;
-	@:optional var autoOffset:Null<Bool>;
 	@:optional var vSliceSustains:Null<Bool>;
 }
 
@@ -281,8 +280,6 @@ class Character extends Bopper
 		vSliceSustains = json.vSliceSustains ?? false;
 		scalableOffsets = json.scalableOffsets ?? false;
 
-		autoOffset = json.autoOffset ?? true;
-
 		var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
 		isAnimateAtlas = (Paths.exists(animToFind));
 
@@ -370,7 +367,10 @@ class Character extends Bopper
 				if(offsets != null && a.offsets.length > 1) addOffset(a.anim, offsets[0], offsets[1]);
 				else addOffset(a.anim, 0, 0);
 
-				if (a.playerOffsets == null) isPsychPlayer = true; // i tried to set this out of the loop but it didn't worked
+				if (a.playerOffsets == null) 
+					correctFlippedOffsets = true;
+				else
+					correctFlippedOffsets = false;
 
 				if(playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(a.anim, playerOffsets[0], playerOffsets[1]);
 				else addPlayerOffset(a.anim, 0, 0);
@@ -380,7 +380,7 @@ class Character extends Bopper
 				flipX = !flipX;
 				if (!isPsychPlayer && !reverseFlipping) flipAnims();
 			} else {
-				if (!isPsychPlayer && reverseFlipping) flipAnims();
+				if (!correctFlippedOffsets && !isPsychPlayer && reverseFlipping) flipAnims();
 			}
 		}
 		//trace('Loaded file to character ' + curCharacter);
@@ -600,10 +600,11 @@ class Character extends Bopper
 
 		final playedAnim = correctAnimationName(animName);
 		if (isPlayer) {
+			var playerOff = animPlayerOffsets.get(playedAnim);
 			if (playerOff != null) {
 				final offsetX = (scalableOffsets ? playerOff[0]*scale.x : playerOff[0]);
 				final offsetY = (scalableOffsets ? playerOff[1]*scale.y : playerOff[0]);
-				offset.set(playerOff[0] , playerOff[1]);
+				if (!correctFlippedOffsets) offset.set(playerOff[0] , playerOff[1]);
 			}
 		}
 
