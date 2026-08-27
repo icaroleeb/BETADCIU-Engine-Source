@@ -246,7 +246,14 @@ class Paths
 			if (OpenFlAssets.exists(levelPath, type))
 				return levelPath;
 		}
-		return getSharedPath(file);
+
+        var sharedPath:String = getSharedPath(file);
+        if (OpenFlAssets.exists(sharedPath, type)) return sharedPath;
+
+        var preloadPath:String = getPreloadPath(file);
+        if (OpenFlAssets.exists(preloadPath, type)) return preloadPath;
+
+		return getSharedPath(file); // idk if returning the getPreloadPath as a default thing would conflict with anything, so i'll keep returning this
 	}
 
 	inline public static function getPreloadPath(file:String = "")
@@ -316,9 +323,9 @@ class Paths
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	public static var currentTrackedFrames:Map<String, FlxAtlasFrames> = [];
 	
-	static public function image(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxGraphic
+	static public function image(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true, ?folder:String="images/"):FlxGraphic
 	{
-		key = Language.getFileTranslation('images/$key') + '.png';
+		key = Language.getFileTranslation(folder + key) + '.png';
 		var bitmap:BitmapData = null;
 		if (currentTrackedAssets.exists(key))
 		{
@@ -356,7 +363,6 @@ class Paths
 				return null;
 			}
 		}
-
 		var graph:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, key);
 		graph.persist = true;
 		graph.destroyOnNoUse = false;
@@ -436,8 +442,11 @@ class Paths
 		var exists:Bool = false;
 		
 		#if (MODS_ALLOWED || ASSET_REDIRECT)
-		if (FileSystem.exists(path)) exists = true;
-		else
+		if(FileSystem.exists(path)) exists = true;
+		else {
+			path = Paths.getSharedPath(path);
+			if(FileSystem.exists(path)) exists = true;
+		}
 		#end
 		if (Assets.exists(path, cast type)) exists = true;
 		
@@ -454,12 +463,12 @@ class Paths
 		return getPath('shaders/$key.vert', null, checkMods);
 	}
 
-	static public function getAtlas(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
+	static public function getAtlas(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true, ?folder:String="images/"):FlxAtlasFrames
 	{
 		var useMod = false;
-		var imageLoaded:FlxGraphic = image(key, parentFolder, allowGPU);
+		var imageLoaded:FlxGraphic = image(key, parentFolder, allowGPU, folder);
 
-		var myXml:Dynamic = getPath('images/$key.xml', TEXT, parentFolder, true);
+		var myXml:Dynamic = getPath(folder + '$key.xml', TEXT, parentFolder, true);
 		if(OpenFlAssets.exists(myXml) #if MODS_ALLOWED || (FileSystem.exists(myXml) && (useMod = true)) #end )
 		{
 			#if MODS_ALLOWED
@@ -470,7 +479,7 @@ class Paths
 		}
 		else
 		{
-			var myJson:Dynamic = getPath('images/$key.json', TEXT, parentFolder, true);
+			var myJson:Dynamic = getPath(folder + '$key.json', TEXT, parentFolder, true);
 			if(OpenFlAssets.exists(myJson) #if MODS_ALLOWED || (FileSystem.exists(myJson) && (useMod = true)) #end )
 			{
 				#if MODS_ALLOWED
@@ -502,56 +511,56 @@ class Paths
 		return parentFrames;
 	}
 
-	inline static public function getSparrowAtlas(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
+	inline static public function getSparrowAtlas(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true, ?folder:String="images/"):FlxAtlasFrames
 	{
 		if(key.contains('psychic')) trace(key, parentFolder, allowGPU);
-		var imageLoaded:FlxGraphic = image(key, parentFolder, allowGPU);
+		var imageLoaded:FlxGraphic = image(key, parentFolder, allowGPU, folder);
 		#if MODS_ALLOWED
 		var xmlExists:Bool = false;
 
 		var xml:String = modsXml(key);
 		if(FileSystem.exists(xml)) xmlExists = true;
 
-		return FlxAtlasFrames.fromSparrow(imageLoaded, (xmlExists ? File.getContent(xml) : getPath(Language.getFileTranslation('images/$key') + '.xml', TEXT, parentFolder)));
+		return FlxAtlasFrames.fromSparrow(imageLoaded, (xmlExists ? File.getContent(xml) : getPath(Language.getFileTranslation(folder + key) + '.xml', TEXT, parentFolder)));
 		#else
-		return FlxAtlasFrames.fromSparrow(imageLoaded, getPath(Language.getFileTranslation('images/$key') + '.xml', TEXT, parentFolder));
+		return FlxAtlasFrames.fromSparrow(imageLoaded, getPath(Language.getFileTranslation(folder + key) + '.xml', TEXT, parentFolder));
 		#end
 	}
 
-	inline static public function getPackerAtlas(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
+	inline static public function getPackerAtlas(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true, ?folder:String="images/"):FlxAtlasFrames
 	{
-		var imageLoaded:FlxGraphic = image(key, parentFolder, allowGPU);
+		var imageLoaded:FlxGraphic = image(key, parentFolder, allowGPU, folder);
 		#if MODS_ALLOWED
 		var txtExists:Bool = false;
 		
 		var txt:String = modsTxt(key);
 		if(FileSystem.exists(txt)) txtExists = true;
 
-		return FlxAtlasFrames.fromSpriteSheetPacker(imageLoaded, (txtExists ? File.getContent(txt) : getPath(Language.getFileTranslation('images/$key') + '.txt', TEXT, parentFolder)));
+		return FlxAtlasFrames.fromSpriteSheetPacker(imageLoaded, (txtExists ? File.getContent(txt) : getPath(Language.getFileTranslation(folder + key) + '.txt', TEXT, parentFolder)));
 		#else
-		return FlxAtlasFrames.fromSpriteSheetPacker(imageLoaded, getPath(Language.getFileTranslation('images/$key') + '.txt', TEXT, parentFolder));
+		return FlxAtlasFrames.fromSpriteSheetPacker(imageLoaded, getPath(Language.getFileTranslation(folder + key) + '.txt', TEXT, parentFolder));
 		#end
 	}
 
-	inline static public function getAsepriteAtlas(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
+	inline static public function getAsepriteAtlas(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true, ?folder:String="images/"):FlxAtlasFrames
 	{
-		var imageLoaded:FlxGraphic = image(key, parentFolder, allowGPU);
+		var imageLoaded:FlxGraphic = image(key, parentFolder, allowGPU, folder);
 		#if MODS_ALLOWED
 		var jsonExists:Bool = false;
 
 		var json:String = modsImagesJson(key);
 		if(FileSystem.exists(json)) jsonExists = true;
 
-		return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, (jsonExists ? File.getContent(json) : getPath(Language.getFileTranslation('images/$key') + '.json', TEXT, parentFolder)));
+		return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, (jsonExists ? File.getContent(json) : getPath(Language.getFileTranslation(folder + key) + '.json', TEXT, parentFolder)));
 		#else
-		return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, getPath(Language.getFileTranslation('images/$key') + '.json', TEXT, parentFolder));
+		return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, getPath(Language.getFileTranslation(folder + key) + '.json', TEXT, parentFolder));
 		#end
 	}
 
-	public static function getAnimateAtlas(key:String, ?folder:String, ?settings:FlxAnimateSettings):FlxAnimateFrames // my attempt to make the preloading work automatically
+	public static function getAnimateAtlas(key:String, ?parentFolder:String, ?settings:FlxAnimateSettings, ?folder:String="images/"):FlxAnimateFrames // my attempt to make the preloading work automatically
 	{
 		var framesFound:Array<FlxAtlasFrames> = [];
-		var graphicKey = getPath('images/$key', TEXT, folder, true);
+		var graphicKey = getPath(folder + key, TEXT, parentFolder, true);
 		if (!FileSystem.exists('${graphicKey}/Animation.json')) throw 'No Animation.json file exists at the specified path (${graphicKey})';
 
 		var validatedSettings:FlxAnimateSettings = {

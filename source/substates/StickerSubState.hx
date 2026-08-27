@@ -154,11 +154,7 @@ class StickerSubState extends MusicBeatSubstate
 
   function regenStickers():Void
   {
-    if (grpStickers.members.length > 0)
-    {
-      grpStickers.clear();
-    }
-
+    if (grpStickers.members.length > 0) grpStickers.clear();
     // trace("Collecting stickers...");
     //trace("Current mod: "+ModsHelper.getActiveMod());
     var stickers:StickerInfo = null;
@@ -167,32 +163,27 @@ class StickerSubState extends MusicBeatSubstate
     // globalMods.pushUnique("mods/"+Mods.currentModDirectory);
     // globalMods.push("assets/shared"); // base stickers
 
-    if (WeekData.getCurrentWeek().stickers[0] == null)
-      WeekData.getCurrentWeek().stickers = ['stickers-set-1', 'all'];
-
-      #if sys
-      #if !LEGACY_PSYCH
+    #if sys
+    if (WeekData.getCurrentWeek().stickers[0] == null) WeekData.getCurrentWeek().stickers = ['stickers-set-1', 'all'];
       var modStickerDir = Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0],TEXT,null,true);
-      #else
-      //var modStickerDir = Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0],TEXT,null);
-      #end
       if(!FileSystem.exists(modStickerDir)){
         var modStickerDir = Paths.getPath('images/transitionSwag/stickers-set-1',TEXT,null,true);
-        //UserErrorSubstate.makeMessage("Missing sticker_set",'Couldn\'t find sticker set "$STICKER_SET"\n\nin $modStickerDir');
+        //trace("Missing sticker_set",'Couldn\'t find sticker set "$STICKER_SET"\n\nin $modStickerDir');
       }
+
       else if(!FileSystem.exists('$modStickerDir/stickers.json')){
         var modStickerDir = Paths.getPath('images/transitionSwag/stickers-set-1',TEXT,null,true);
-        //UserErrorSubstate.makeMessage("Missing manifest",'Sticker set $STICKER_SET doesn\'t contain a "stickers.json" file\n\nin $modStickerDir/stickers.json');
+        //trace("Missing manifest",'Sticker set $STICKER_SET doesn\'t contain a "stickers.json" file\n\nin $modStickerDir/stickers.json');
       }
       else{
 
         try{
           var infoObj = new StickerInfo(WeekData.getCurrentWeek().stickers[0]);
           stickers = infoObj;
-          //if(infoObj.getPack(STICKER_PACK) == null) UserErrorSubstate.makeMessage('Missing pack','Sticker set ${infoObj.name} doesn\'t contain "$STICKER_PACK" pack.\n\nAll available stickers will be loaded instead.');
+        //   if(infoObj.getPack(STICKER_PACK) == null) trace('Missing pack','Sticker set ${infoObj.name} doesn\'t contain "$STICKER_PACK" pack.\n\nAll available stickers will be loaded instead.');
         }
         catch(x){
-          //UserErrorSubstate.makeMessage('Couldn\'t make $STICKER_PACK','In "$modStickerDir":\n\n${x.message}');
+        //   trace('Couldn\'t make $STICKER_PACK','In "$modStickerDir":\n\n${x.message}');
         }
 
       }
@@ -249,33 +240,6 @@ class StickerSubState extends MusicBeatSubstate
     }
 
     FlxG.random.shuffle(grpStickers.members);
-
-    // var stickerCount:Int = 0;
-
-    // for (w in 0...6)
-    // {
-    //   var xPos:Float = FlxG.width * (w / 6);
-    //   for (h in 0...6)
-    //   {
-    //     var yPos:Float = FlxG.height * (h / 6);
-    //     var sticker = grpStickers.members[stickerCount];
-    //     xPos -= sticker.width / 2;
-    //     yPos -= sticker.height * 0.9;
-    //     sticker.x = xPos;
-    //     sticker.y = yPos;
-
-    //     stickerCount++;
-    //   }
-    // }
-
-    // for (ind => sticker in grpStickers.members)
-    // {
-    //   sticker.x = (ind % 8) * sticker.width;
-    //   var yShit:Int = Math.floor(ind / 8);
-    //   sticker.y += yShit * sticker.height;
-    //   // scales it juuuust a smidge
-    //   sticker.y += 20 * yShit;
-    // }
 
     // another damn for loop... apologies!!!
     for (ind => sticker in grpStickers.members)
@@ -368,7 +332,7 @@ class StickerSubState extends MusicBeatSubstate
   override public function close():Void
   {
     if (switchingState) return;
-    Paths.clearUnusedMemory();
+    // Paths.clearUnusedMemory(); // this fucks up the new freeplay so i'm commenting this as a lazy fix until i don't find a actual fix
     super.close();
   }
 
@@ -393,6 +357,7 @@ class StickerSprite extends FlxSprite
   public function new(x:Float, y:Float, stickerSet:String, stickerName:String):Void
   {
     super(x, y);
+    // trace(stickerSet, stickerName);
     stickerPath = stickerSet == null ? stickerName : 'transitionSwag/$stickerSet/$stickerName';
     antialiasing = ClientPrefs.data.antialiasing;
     loadSticker();

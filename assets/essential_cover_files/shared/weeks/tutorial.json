@@ -1,18 +1,16 @@
 {
 	"songs": [
-		["Tutorial", "gf", [165, 0, 77]]
+		["Tutorial", "gf", [165, 0, 77], "volume1", [0, 0, 1], 100],
+		["Tutorial-Remix", "gf", [165, 0, 77], "volume1", [1, 1, 2], 120]
 	],
 
-	"weekCharacters": [
-		"",
-		"bf",
-		"gf"
-	],
+	"weekCharacters": ["", "bf", "gf"],
 	"weekBackground": "stage",
 
 	"storyName": "",
 	"weekBefore": "tutorial",
 	"weekName": "Tutorial",
+	"albumOSTName": "OFFICIAL OST",
 	"startUnlocked": true,
 
 	"hideStoryMode": false,
