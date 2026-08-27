@@ -180,7 +180,7 @@ class CoolUtil
 		return Math.max(min, Math.min(max, value));
 	}
 
-	public static  function removeDupe(arr:Array<String>, ?arrayName:String="NOT NAMED ARRAY"):Array<String> {
+	public static  function removeDupe(arr:Array<String>, ?arrayName:String="NOT NAMED ARRAY", ?silent:Bool=false):Array<String> {
 		var result:Array<String> = [];
 		var dupeCount:Int = 0;
 		for (item in arr) {
@@ -191,7 +191,7 @@ class CoolUtil
 				dupeCount++;
 			}
 		}
-		if (dupeCount > 0) trace('heh. just removed $dupeCount dupes from $arrayName. no need to thank me'); // making this to not spam the terminal
+		if (dupeCount > 0 && !silent) trace('heh. just removed $dupeCount dupes from $arrayName. no need to thank me'); // making this to not spam the terminal
 		return result;
 	}
 	

@@ -6,9 +6,6 @@ import lime.app.Application;
 import states.editors.MasterEditorMenu;
 import options.OptionsState;
 
-import states.betadciu.BETADCIUState;
-import states.betadciu.BonusSongsState;
-
 enum MainMenuColumn {
 	LEFT;
 	CENTER;
@@ -32,10 +29,8 @@ class MainMenuState extends MusicBeatState
 
 	//Centered/Text options
 	var optionShit:Array<String> = [
-		'betadciu',
-		'bonus_songs',
-		'story_mode',
 		'freeplay',
+		'story_mode',
 		#if MODS_ALLOWED 'mods', #end
 		'credits'
 	];
@@ -346,10 +341,6 @@ class MainMenuState extends MusicBeatState
 				{
 					switch (option)
 					{
-						case 'betadciu':
-							MusicBeatState.switchState(new BETADCIUState());
-						case 'bonus_songs':
-							MusicBeatState.switchState(new BonusSongsState());
 						case 'story_mode':
 							MusicBeatState.switchState(new StoryMenuState());
 						case 'freeplay':

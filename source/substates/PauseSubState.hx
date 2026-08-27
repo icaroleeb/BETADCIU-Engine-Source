@@ -325,17 +325,14 @@ class PauseSubState extends MusicBeatSubstate
 
 					PlayState.instance.canResync = false;
 					Mods.loadTopMod();
-					
-					if (PlayState.isBETADCIU)
-						if (PlayState.instance.canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new states.betadciu.BETADCIUState(sticker)));
-						else MusicBeatState.switchState(new states.betadciu.BETADCIUState());
-					else if (PlayState.isBonus)
-						if (PlayState.instance.canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new states.betadciu.BonusSongsState(sticker)));
-						else MusicBeatState.switchState(new states.betadciu.BonusSongsState());
-					else
+
+					if (PlayState.isStoryMode)
+						MusicBeatState.switchState(new StoryMenuState()); // how much time was this missing???
+					else {
 						if (PlayState.instance.canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new FreeplayState(sticker)));
 						else MusicBeatState.switchState(new FreeplayState());
-
+					}
+					
 					// FlxG.sound.playMusic(Paths.music('freakyMenu'));
 					PlayState.changedDifficulty = false;
 					PlayState.chartingMode = false;

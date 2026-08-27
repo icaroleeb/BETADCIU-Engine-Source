@@ -3021,15 +3021,8 @@ class PlayState extends MusicBeatState
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
 				canResync = false;
-				if (isBETADCIU)
-					if (canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new states.betadciu.BETADCIUState(sticker)));
-					else MusicBeatState.switchState(new states.betadciu.BETADCIUState());
-				else if (isBonus)
-					if (canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new states.betadciu.BonusSongsState(sticker)));
-					else MusicBeatState.switchState(new states.betadciu.BonusSongsState());
-				else
-					if (canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new FreeplayState(sticker)));
-					else MusicBeatState.switchState(new FreeplayState());
+				if (canDoSticker) openSubState(new substates.StickerSubState(null, (sticker) -> new FreeplayState(sticker)));
+				else MusicBeatState.switchState(new FreeplayState());
 				// FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				changedDifficulty = false;
 			}
