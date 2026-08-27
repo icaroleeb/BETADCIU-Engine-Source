@@ -1207,29 +1207,20 @@ class PlayState extends MusicBeatState
 							else
 								countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
 
-							if (introSoundsSuffix != "-silent") 
-								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro3' + introSoundsSuffix, true), 0.6);
+							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro3' + introSoundsSuffix, true, false), 0.6);
 							tick = THREE;
 						case 1:
 							countdownReady = createCountdownSprite(introAlts[introAlts.length - 3], antialias, isCustomCountdown);
-
-							if (introSoundsSuffix != "-silent") 
-								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro2' + introSoundsSuffix, true), 0.6);
+							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro2' + introSoundsSuffix, true, false), 0.6);
 
 							tick = TWO;
 						case 2:
 							countdownSet = createCountdownSprite(introAlts[introAlts.length - 2], antialias, isCustomCountdown);
-
-							if (introSoundsSuffix != "-silent") 
-								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro1' + introSoundsSuffix, true), 0.6);
-							
+							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro1' + introSoundsSuffix, true, false), 0.6);
 							tick = ONE;
 						case 3:
 							countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, isCustomCountdown);
-
-							if (introSoundsSuffix != "-silent")
-								FlxG.sound.play(Paths.sound(introSoundsPrefix + 'introGo' + introSoundsSuffix, true), 0.6);
-
+							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'introGo' + introSoundsSuffix, true, false), 0.6);
 							tick = GO;
 						case 4:
 							tick = START;
@@ -1376,7 +1367,7 @@ class PlayState extends MusicBeatState
 		}
 
 		var tempScore:String;
-		var formattedScore:String = FlxStringUtil.formatMoney(songScore, false);
+		var formattedScore:String = FlxStringUtil.formatMoney(songScore, false, true);
 		if(!instakillOnMiss) tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [formattedScore, songMisses, str]);
 		else tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [formattedScore, str]);
 		scoreTxt.text = tempScore;
@@ -4716,6 +4707,12 @@ class PlayState extends MusicBeatState
 		boyfriend = value;
 		return boyfriend;
 	}
+
+	function get_bf(value:Character):Character {
+		boyfriend = value;
+		return boyfriend;
+	}
+
 
 	// VSlice Events WIP as Hell
 

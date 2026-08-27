@@ -380,7 +380,7 @@ class Character extends Bopper
 				flipX = !flipX;
 				if (!isPsychPlayer && !reverseFlipping) flipAnims();
 			} else {
-				if (!correctFlippedOffsets && !isPsychPlayer && reverseFlipping) flipAnims();
+				if (!isPsychPlayer && reverseFlipping) flipAnims();
 			}
 		}
 		//trace('Loaded file to character ' + curCharacter);
