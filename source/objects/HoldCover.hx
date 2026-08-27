@@ -74,7 +74,7 @@ class CoverSprite extends FunkinSprite
 	public function initAnimations(i:Int, hColor:String)
 	{
 		this.animation.addByPrefix("start" + Std.string(i), 'holdCoverStart'+hColor+'0', 24, false);
-		this.animation.addByPrefix("loop" + Std.string(i), 'holdCover'+hColor+'0', 22, true);
+		this.animation.addByPrefix("loop" + Std.string(i), 'holdCover'+hColor+'0', 24, true); // made it 24 to match the v-slice framerate
 		this.animation.addByPrefix("end" + Std.string(i), 'holdCoverEnd'+hColor+'0', 24, false);
 
 		this.animation.onFinish.add((anim) -> {

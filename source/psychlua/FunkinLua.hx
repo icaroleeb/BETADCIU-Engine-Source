@@ -948,10 +948,6 @@ class FunkinLua {
 
 			if(PlayState.isStoryMode)
 				MusicBeatState.switchState(new StoryMenuState());
-			else if (PlayState.isBETADCIU)
-				MusicBeatState.switchState(new states.betadciu.BETADCIUState());
-			else if (PlayState.isBonus)
-				MusicBeatState.switchState(new states.betadciu.BonusSongsState());
 			else
 				MusicBeatState.switchState(new FreeplayState());
 

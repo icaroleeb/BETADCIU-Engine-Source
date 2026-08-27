@@ -48,6 +48,11 @@ class StoryMenuState extends MusicBeatState
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 
+		if (!FlxG.sound.music.playing || !MainMenuState.mainMusic) {
+			FlxG.sound.playMusic(Paths.music('newMenu'));
+			MainMenuState.mainMusic = true;
+		}
+
 		persistentUpdate = persistentDraw = true;
 		PlayState.isStoryMode = true;
 		WeekData.reloadWeekFiles(true);

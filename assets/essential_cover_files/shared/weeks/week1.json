@@ -1,20 +1,17 @@
 {
 	"songs": [
-		["Bopeebo", "dad", [146, 113, 253]],
-		["Fresh", "dad", [146, 113, 253]],
-		["DadBattle", "dad", [146, 113, 253]]
+		["Bopeebo", "dad", [146, 113, 253], "volume1", [1, 1, 2], 100],
+		["Fresh", "dad", [146, 113, 253], "volume1", [1, 1, 2], 120],
+		["DadBattle", "dad", [146, 113, 253], "volume1", [1, 2, 3], 180]
 	],
 
-	"weekCharacters": [
-		"dad",
-		"bf",
-		"gf"
-	],
+	"weekCharacters": ["dad", "bf", "gf"],
 	"weekBackground": "stage",
 
 	"storyName": "Daddy Dearest",
 	"weekBefore": "tutorial",
 	"weekName": "Week 1",
+	"albumOSTName": "OFFICIAL OST",
 	"startUnlocked": true,
 
 	"hideStoryMode": false,
