@@ -2,6 +2,7 @@ package objects;
 
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.math.FlxRect;
 
 typedef AtlasSpriteSettings =
 {

@@ -82,6 +82,7 @@ class LoadingState extends MusicBeatState
 	#if HSCRIPT_ALLOWED
 	var hscript:HScript;
 	#end
+	
 	override function create()
 	{
 		persistentUpdate = true;
