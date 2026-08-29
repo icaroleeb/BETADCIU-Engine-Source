@@ -1,0 +1,120 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "idle",
+			"fps": 24,
+			"name": "Pico Idle Dance",
+			"indices": [],
+			"playerOffsets": [0, 0]
+		},
+		{
+			"loop": false,
+			"offsets": [-1, 3],
+			"anim": "singUP",
+			"fps": 24,
+			"name": "pico Up note0",
+			"indices": [],
+			"playerOffsets": [56, 3]
+		},
+		{
+			"loop": false,
+			"offsets": [-24, -70],
+			"anim": "singDOWN",
+			"fps": 24,
+			"name": "Pico Down Note0",
+			"indices": [],
+			"playerOffsets": [93, -70]
+		},
+		{
+			"offsets": [-48, -16],
+			"loop": false,
+			"fps": 24,
+			"anim": "singRIGHT",
+			"indices": [],
+			"name": "Pico Note Right0",
+			"playerOffsets": [-48, -20]
+		},
+		{
+			"offsets": [65, -20],
+			"loop": false,
+			"fps": 24,
+			"anim": "singLEFT",
+			"indices": [],
+			"name": "Pico NOTE LEFT0",
+			"playerOffsets": [27, -16]
+		},
+		{
+			"offsets": [5, 2],
+			"loop": false,
+			"fps": 24,
+			"anim": "singUPmiss",
+			"indices": [],
+			"name": "note miss up piconene0",
+			"playerOffsets": [60, 2]
+		},
+		{
+			"offsets": [65, -20],
+			"loop": false,
+			"fps": 24,
+			"anim": "singLEFTmiss",
+			"indices": [],
+			"name": "note miss left pico nene0",
+			"playerOffsets": [28, -11]
+		},
+		{
+			"offsets": [-48, -12],
+			"loop": false,
+			"fps": 24,
+			"anim": "singRIGHTmiss",
+			"indices": [],
+			"name": "note miss right pico nene0",
+			"playerOffsets": [-45, -19]
+		},
+		{
+			"offsets": [-24, -70],
+			"loop": false,
+			"fps": 24,
+			"anim": "singDOWNmiss",
+			"indices": [],
+			"name": "note miss down pico nene0",
+			"playerOffsets": [95, -74]
+		},
+		{
+			"offsets": [221, 26],
+			"loop": false,
+			"fps": 24,
+			"anim": "knifeToss",
+			"indices": [],
+			"name": "pico nene knife toss0",
+			"playerOffsets": [14, 26]
+		},
+		{
+			"offsets": [11, 6],
+			"loop": false,
+			"fps": 24,
+			"anim": "laughEnd",
+			"indices": [],
+			"name": "pico nene laughing full0",
+			"playerOffsets": [0, 0]
+		}
+	],
+	"vocals_file": "",
+	"no_antialiasing": false,
+	"note_skin": "",
+	"image": "characters/picoAndNene",
+	"position": [-170, 240],
+	"player_camera_position": [50, 40],
+	"is_player_char": true,
+	"scalableOffsets": false,
+	"healthicon": "pico",
+	"vSliceSustains": false,
+	"flip_x": true,
+	"healthbar_colors": [183, 216, 85],
+	"camera_position": [50, 40],
+	"player_position": [10, 250],
+	"sing_duration": 4,
+	"scale": 1,
+	"_editor_isPlayer": true
+}

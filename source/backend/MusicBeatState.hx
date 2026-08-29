@@ -3,6 +3,19 @@ package backend;
 import flixel.FlxState;
 import backend.PsychCamera;
 
+#if HSCRIPT_ALLOWED
+import psychlua.HScript;
+import crowplexus.iris.Iris;
+import crowplexus.hscript.Expr.Error as IrisError;
+import crowplexus.hscript.Printer;
+#end
+
+#if cpp
+@:headerCode('
+#include <iostream>
+#include <thread>
+')
+#end
 class MusicBeatState extends FlxState
 {
 	private var curSection:Int = 0;
@@ -79,6 +92,14 @@ class MusicBeatState extends FlxState
 		for (stage in stages) stage?.update(elapsed);
 
 		super.update(elapsed);
+
+		#if HSCRIPT_ALLOWED
+		if(hscriptState != null)
+		{
+			if(hscriptState.exists('onUpdate')) hscriptState.call('onUpdate', [elapsed]);
+			return;
+		}
+		#end
 	}
 
 	private function updateSection():Void
@@ -210,4 +231,57 @@ class MusicBeatState extends FlxState
 		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
 	}
+
+	public var hscriptState:HScript;
+
+	public function initCustomStateScript():Void // uhhhh beta
+	{
+		#if HSCRIPT_ALLOWED
+		if(Mods.currentModDirectory != null && Mods.currentModDirectory.trim().length > 0)
+		{
+			final stateName = Type.getClassName(Type.getClass(this)).split('.').pop();
+
+			var scriptPath:String = 'mods/${Mods.currentModDirectory}/data/$stateName.hx';
+			if(FileSystem.exists(scriptPath))
+			{
+				try
+				{
+					hscriptState = new HScript(null, scriptPath);
+	
+					if(hscriptState.exists('onCreate'))
+					{
+						hscriptState.call('onCreate');
+						trace('initialized hscript interp successfully: $scriptPath');
+						return super.create();
+					}
+					else
+					{
+						trace('"$scriptPath" contains no \"onCreate" function, stopping script.');
+					}
+				}
+				catch(e:IrisError)
+				{
+					var pos:HScriptInfos = cast {fileName: scriptPath, showLine: false};
+					Iris.error(Printer.errorToString(e, false), pos);
+					var hscriptState:HScript = cast (Iris.instances.get(scriptPath), HScript);
+				}
+				if(hscriptState != null) hscriptState.destroy();
+				hscriptState = null;
+			}
+		}
+		#end
+	}
+
+	#if HSCRIPT_ALLOWED
+	override function destroy()
+	{
+		if(hscriptState != null)
+		{
+			if(hscriptState.exists('onDestroy')) hscriptState.call('onDestroy');
+			hscriptState.destroy();
+		}
+		hscriptState = null;
+		super.destroy();
+	}
+	#end
 }

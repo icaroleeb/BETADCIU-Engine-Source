@@ -297,8 +297,8 @@ class Paths
 		return 'assets/videos/$key.$VIDEO_EXT';
 	}
 
-	inline static public function sound(key:String, ?modsAllowed:Bool = true):Sound
-		return returnSound('sounds/$key', modsAllowed);
+	inline static public function sound(key:String, ?modsAllowed:Bool = true, isBeepNull:Bool = true):Sound
+		return returnSound('sounds/$key', modsAllowed, isBeepNull);
 
 	inline static public function song(key:String, ?modsAllowed:Bool = true):Sound
 		return returnSound('songs/$key', modsAllowed);
@@ -612,7 +612,7 @@ class Paths
 			if(OpenFlAssets.exists(file, SOUND))
 				currentTrackedSounds.set(file, OpenFlAssets.getSound(file));
 			#end
-			else if(beepOnNull)
+			else
 			{
 				var errorMessage:String = 'SOUND NOT FOUND: $key, PATH: $path';
 				if (errorMessage != _previousErrorMessage) {
@@ -620,7 +620,13 @@ class Paths
 					FlxG.log.error(errorMessage);
 					_previousErrorMessage = errorMessage;
 				}
-				return FlxAssets.getSound('flixel/sounds/beep');
+
+				var beepNull = FlxAssets.getSound('flixel/sounds/beep');
+
+				if (!beepOnNull)
+					beepNull = null;
+
+				return beepNull;
 			}
 		}
 		localTrackedAssets.push(file);

@@ -99,16 +99,17 @@ class HapticUtil
 
     if (amplitudeTween != null) amplitudeTween.cancel();
 
-    amplitudeTween = FlxTween.num(startAmplitude, targetAmplitude, tweenDuration,
+    amplitudeTween = FlxTween.num(startAmplitude, targetAmplitude, tweenDuration, {
+      onComplete: function(_)
       {
-        onComplete: function(_) {
-          final finalAmplitude:Float = targetAmplitude * 2;
+        final finalAmplitude:Float = targetAmplitude * 2;
 
-          vibrate(CoolUtil.DEFAULT_VIBRATION_PERIOD, CoolUtil.DEFAULT_VIBRATION_DURATION, finalAmplitude);
-        }
-      }, function(currentAmplitude:Float) {
-        vibrate(0, CoolUtil.DEFAULT_VIBRATION_DURATION / 10, currentAmplitude);
-      });
+        vibrate(CoolUtil.DEFAULT_VIBRATION_PERIOD, CoolUtil.DEFAULT_VIBRATION_DURATION, finalAmplitude);
+      }
+    }, function(currentAmplitude:Float)
+    {
+      vibrate(0, CoolUtil.DEFAULT_VIBRATION_DURATION / 10, currentAmplitude);
+    });
   }
 
   static function get_defaultVibrationPreset():VibrationPreset

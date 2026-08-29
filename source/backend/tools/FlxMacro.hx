@@ -152,11 +152,11 @@ class FlxMacro
 						args: [{name: 'shader', type: (macro :flixel.graphics.tile.FlxGraphicsShader)}],
 						expr: macro
 						{
-							if (shader == null) return;
-							
-							var filter = new openfl.filters.ShaderFilter(shader);
-							filters ??= [];
-							filters.push(filter);
+							var filter:openfl.filters.ShaderFilter = null;
+							if (filters == null) filters = [];
+							filters.remove(filter = new openfl.filters.ShaderFilter(shader));
+							filters.push(filter = new openfl.filters.ShaderFilter(shader));
+							return filter;
 						}
 					}),
 				pos: Context.currentPos()
@@ -171,21 +171,16 @@ class FlxMacro
 						args: [{name: 'shader', type: (macro :flixel.graphics.tile.FlxGraphicsShader)}],
 						expr: macro
 						{
-							if (filters == null) return false;
-							
-							for (filter in filters)
-							{
-								if (filter is openfl.filters.ShaderFilter)
-								{
-									var fl:openfl.filters.ShaderFilter = cast filter;
-									if (fl.shader == shader)
-									{
-										filters.remove(filter);
+							if (filters == null) filters = [];
+							for (f in filters) {
+								if (f is openfl.filters.ShaderFilter) {
+									var sf = cast(f, openfl.filters.ShaderFilter);
+									if (sf.shader == shader) {
+										filters.remove(f);
 										return true;
 									}
 								}
 							}
-							
 							return false;
 						}
 					}),

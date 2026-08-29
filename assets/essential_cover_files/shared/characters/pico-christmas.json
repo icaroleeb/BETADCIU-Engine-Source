@@ -1,0 +1,102 @@
+{
+	"animations": [
+		{
+			"offsets": [0, 0],
+			"loop": false,
+			"fps": 24,
+			"anim": "idle",
+			"indices": [],
+			"name": "Pico Idle Dance xmas",
+			"playerOffsets": [0, 0]
+		},
+		{
+			"offsets": [-29, 27],
+			"loop": false,
+			"fps": 24,
+			"anim": "singUP",
+			"indices": [],
+			"name": "pico Up note xmas",
+			"playerOffsets": [21, 23]
+		},
+		{
+			"offsets": [199, -80],
+			"loop": false,
+			"fps": 24,
+			"anim": "singDOWN",
+			"indices": [],
+			"name": "Pico Down Note xmas",
+			"playerOffsets": [53, -86]
+		},
+		{
+			"offsets": [200, -38],
+			"loop": false,
+			"fps": 24,
+			"anim": "singDOWNmiss",
+			"indices": [],
+			"name": "Pico Down Note MISS xmas",
+			"playerOffsets": [80, -38]
+		},
+		{
+			"offsets": [28, 67],
+			"loop": false,
+			"fps": 24,
+			"anim": "singUPmiss",
+			"indices": [],
+			"name": "pico Up note miss xmas",
+			"playerOffsets": [28, 67]
+		},
+		{
+			"loop": false,
+			"offsets": [65, 9],
+			"anim": "singLEFT",
+			"fps": 24,
+			"name": "Pico NOTE LEFT xmas",
+			"indices": [],
+			"playerOffsets": [62, -15]
+		},
+		{
+			"loop": false,
+			"offsets": [-68, -7],
+			"anim": "singRIGHT",
+			"fps": 24,
+			"name": "Pico Note Right xmas",
+			"indices": [],
+			"playerOffsets": [-93, -3]
+		},
+		{
+			"loop": false,
+			"offsets": [83, 28],
+			"anim": "singLEFTmiss",
+			"fps": 24,
+			"name": "Pico NOTE LEFT miss xmas",
+			"indices": [],
+			"playerOffsets": [83, 28]
+		},
+		{
+			"loop": false,
+			"offsets": [-45, 50],
+			"anim": "singRIGHTmiss",
+			"fps": 24,
+			"name": "Pico Note Right Miss xmas",
+			"indices": [],
+			"playerOffsets": [-45, 50]
+		}
+	],
+	"vocals_file": "",
+	"no_antialiasing": false,
+	"note_skin": "",
+	"image": "characters/picoChristmas/picoChristmas",
+	"position": [-40, 290],
+	"player_camera_position": [200, 40],
+	"is_player_char": true,
+	"scalableOffsets": false,
+	"healthicon": "pico",
+	"vSliceSustains": false,
+	"flip_x": true,
+	"healthbar_colors": [183, 216, 85],
+	"camera_position": [200, 40],
+	"player_position": [-40, 290],
+	"sing_duration": 4,
+	"scale": 1,
+	"_editor_isPlayer": true
+}

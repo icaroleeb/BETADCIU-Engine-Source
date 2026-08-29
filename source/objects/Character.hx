@@ -367,7 +367,10 @@ class Character extends Bopper
 				if(offsets != null && a.offsets.length > 1) addOffset(a.anim, offsets[0], offsets[1]);
 				else addOffset(a.anim, 0, 0);
 
-				if (a.playerOffsets == null) isPsychPlayer = true; // i tried to set this out of the loop but it didn't worked
+				if (a.playerOffsets == null) 
+					correctFlippedOffsets = true;
+				else
+					correctFlippedOffsets = false;
 
 				if(playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(a.anim, playerOffsets[0], playerOffsets[1]);
 				else addPlayerOffset(a.anim, 0, 0);
@@ -601,7 +604,7 @@ class Character extends Bopper
 			if (playerOff != null) {
 				final offsetX = (scalableOffsets ? playerOff[0]*scale.x : playerOff[0]);
 				final offsetY = (scalableOffsets ? playerOff[1]*scale.y : playerOff[0]);
-				offset.set(playerOff[0] , playerOff[1]);
+				if (!correctFlippedOffsets) offset.set(playerOff[0] , playerOff[1]);
 			}
 		}
 
