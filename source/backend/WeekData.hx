@@ -26,6 +26,7 @@ typedef WeekFile =
 	var startUnlocked:Bool;
 	var hiddenUntilUnlocked:Bool;
 	var hideStoryMode:Bool;
+	var noDiscordRPC:Bool;
 	var hideFreeplay:Bool;
 	var betadciu:Null<Bool>;
 	var bonus:Null<Bool>;
@@ -47,6 +48,7 @@ class WeekData {
 	public var weekName:String;
 	public var albumOSTName:String;
 	public var startUnlocked:Bool;
+	public var noDiscordRPC:Bool;
 	public var hiddenUntilUnlocked:Bool;
 	public var hideStoryMode:Bool;
 	public var hideFreeplay:Bool;
@@ -65,6 +67,7 @@ class WeekData {
 				["DadBattle", "dad", [146, 113, 253], "volume1", [1, 2, 3], 180]
 			],
 			weekCharacters: ['dad', 'bf', 'gf'],
+			noDiscordRPC: false,
 			weekBackground: 'stage',
 			weekBefore: 'tutorial',
 			storyName: 'Your New Week',

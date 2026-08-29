@@ -3,6 +3,8 @@ package objects;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.math.FlxRect;
+import flixel.math.FlxMatrix;
+import flixel.math.FlxAngle;
 
 typedef AtlasSpriteSettings =
 {
@@ -228,6 +230,91 @@ class FunkinSprite extends FlxAnimate
         useRenderTexture: false
         };
     }
+
+    public var useLegacyZoomFactor:Bool = false;
+    public var forceIsOnScreen:Bool = true;
+    public var zoomFactor:Float = 1;
+    public var zoomFactorEnabled:Bool = true;
+    public var angleFactorEnabled:Bool = true;
+    public var angleFactor:Float = 1;
+
+    override function isSimpleRender(?camera:FlxCamera):Bool 
+    {
+        if ((zoomFactorEnabled && zoomFactor != 1) || (angleFactorEnabled && angleFactor != 1))
+            return false;
+        
+        return super.isSimpleRender(camera);
+    }
+
+    override function drawComplex(camera:FlxCamera):Void
+    {
+        _frame.prepareMatrix(_matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
+        _matrix.translate(-origin.x, -origin.y);
+        _matrix.scale(scale.x, scale.y);
+
+        if (bakedRotationAngle <= 0)
+        {
+            updateTrig();
+            if (angle != 0) _matrix.rotateWithTrig(_cosAngle, _sinAngle);
+        }
+
+        getScreenPosition(_point, camera).subtractPoint(offset);
+        _point.add(origin.x, origin.y);
+        _matrix.translate(_point.x, _point.y);
+
+        if (isPixelPerfectRender(camera))
+        {
+            _matrix.tx = Math.round(_matrix.tx / this.scale.x) * this.scale.x;
+            _matrix.ty = Math.round(_matrix.ty / this.scale.y) * this.scale.y;
+        }
+
+        final ox = camera.width * 0.5;
+        final oy = camera.height * 0.5;
+        final sx = (camera.scaleX > 0.0 ? Math.max : Math.min)(0.0, (1.0 - zoomFactor) / camera.scaleX + zoomFactor);
+        final sy = (camera.scaleY > 0.0 ? Math.max : Math.min)(0.0, (1.0 - zoomFactor) / camera.scaleY + zoomFactor);
+
+        if (zoomFactorEnabled && zoomFactor != 1) {
+            _matrix.setTo(
+                _matrix.a * sx, _matrix.b * sy,
+                _matrix.c * sx, _matrix.d * sy,
+                (_matrix.tx - ox) * sx + ox,
+                (_matrix.ty - oy) * sy + oy
+            );
+        }
+
+        if (angleFactorEnabled && angleFactor != 1) {
+            _matrix.translate(-ox, -oy);
+            _matrix.rotate(-camera.angle * FlxAngle.TO_RAD * (1.0 - angleFactor));
+            _matrix.translate(ox, oy);
+        }
+
+        camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
+    }
+
+    /*
+    override function prepareDrawMatrix(matrix:FlxMatrix, camera:FlxCamera):Void {
+		super.prepareDrawMatrix(matrix, camera);
+
+		final ox = camera.width * 0.5, oy = camera.height * 0.5;
+		final sx = (camera.scaleX > 0.0 ? Math.max : Math.min)(0.0, (1.0 - zoomFactor) / camera.scaleX + zoomFactor);
+		final sy = (camera.scaleY > 0.0 ? Math.max : Math.min)(0.0, (1.0 - zoomFactor) / camera.scaleY + zoomFactor);
+
+		if (zoomFactorEnabled && zoomFactor != 1) {
+			matrix.setTo(
+				matrix.a * sx, matrix.b * sy,
+				matrix.c * sx, matrix.d * sy,
+				(matrix.tx - ox) * sx + ox,
+				(matrix.ty - oy) * sy + oy
+			);
+		}
+
+		if (angleFactorEnabled && angleFactor != 1) {
+			matrix.translate(-ox, -oy);
+			matrix.rotate(-camera.angle * FlxAngle.TO_RAD * (1.0 - angleFactor));
+			matrix.translate(ox, oy);
+		}
+	}
+    */
 
     // Offset Stuff
     public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
