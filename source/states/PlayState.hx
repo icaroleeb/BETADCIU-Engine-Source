@@ -2245,7 +2245,8 @@ class PlayState extends MusicBeatState
 						while(i < notes.length)
 						{
 							var daNote:Note = notes.members[i];
-							if(daNote == null) continue;
+							i++;
+							if(daNote == null || !daNote.exists) continue;
 
 							var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
 							if(!daNote.mustPress) strumGroup = opponentStrums;
@@ -2272,7 +2273,6 @@ class PlayState extends MusicBeatState
 								daNote.active = daNote.visible = false;
 								invalidateNote(daNote);
 							}
-							if(daNote.exists) i++;
 						}
 					}
 					else
@@ -3048,6 +3048,11 @@ class PlayState extends MusicBeatState
 	// Stores Note Objects in a Group
 	public var noteGroup:FlxTypedGroup<FlxBasic>;
 
+	// pool
+	private var _ratingP:FlxTypedGroup<FunkinSprite>;
+	private var _comboSprP:FlxTypedGroup<FunkinSprite>;
+	private var _comboNumP:FlxTypedGroup<FunkinSprite>;
+
 	private function cachePopUpScore()
 	{
 		var uiFolder:String = "";
@@ -3058,9 +3063,16 @@ class PlayState extends MusicBeatState
 			Paths.image(uiFolder + rating.image + uiPostfix);
 		for (i in 0...10)
 			Paths.image(uiFolder + 'num' + i + uiPostfix);
+
+		if (_ratingP == null) {
+			_ratingP = new FlxTypedGroup<FunkinSprite>();
+			_comboSprP = new FlxTypedGroup<FunkinSprite>();
+			_comboNumP = new FlxTypedGroup<FunkinSprite>();
+		}
 	}
 
 	public var NVScoreTween:Bool = true; // (NV = Nightmare Vision) some people likes this, and its good for recreating mods made on it.
+
 
 	private function popUpScore(note:Note = null):Void
 	{
@@ -3079,7 +3091,17 @@ class PlayState extends MusicBeatState
 				if(spr == null) continue;
 
 				comboGroup.remove(spr);
-				spr.destroy();
+				
+				if (Std.isOfType(spr, FunkinSprite)) {
+					var _sprite:FunkinSprite = cast spr;
+					_sprite.kill();
+
+					if (_sprite.graphic != null && _sprite.graphic.key != null && _sprite.graphic.key.indexOf('num') != -1) _comboNumP.add(_sprite);
+					else if (_sprite.graphic != null && _sprite.graphic.key != null && _sprite.graphic.key.indexOf('combo') != -1) _comboSprP.add(_sprite);
+					else _ratingP.add(_sprite);
+				} else {
+					spr.destroy();
+				}
 			}
 		}
 
@@ -3090,7 +3112,6 @@ class PlayState extends MusicBeatState
 		}
 
 		var placement:Float = FlxG.width * 0.35;
-		var rating:FunkinSprite = new FunkinSprite();
 		var score:Int = 350;
 
 		//tryna do MS based judgment due to popular demand
@@ -3152,6 +3173,11 @@ class PlayState extends MusicBeatState
 			return;
 		}
 
+		var rating:FunkinSprite = _ratingP.recycle(FunkinSprite);
+		rating.revive();
+		FlxTween.cancelTweensOf(rating);
+		rating.velocity.set(0, 0);
+		rating.acceleration.set(0, 0);
 		rating.loadGraphic(Paths.image(uiFolder + daRating.image + uiPostfix));
 		rating.screenCenter();
 		rating.x = placement - 40;
@@ -3176,10 +3202,11 @@ class PlayState extends MusicBeatState
 			i.alpha = ratingsAlpha;
 		}
 
-		var comboSpr:FunkinSprite = new FunkinSprite();
-		
-		if (showCombo) comboSpr.loadGraphic(Paths.image(uiFolder + 'combo' + uiPostfix));
-		// don't render if we don't need it	
+		var comboSpr:FunkinSprite = _comboSprP.recycle(FunkinSprite);
+		comboSpr.revive();
+		comboSpr.velocity.set(0, 0);
+		comboSpr.acceleration.set(0, 0);
+		if (showCombo) comboSpr.loadGraphic(Paths.image(uiFolder + 'combo' + uiPostfix)); // don't render if we don't need it	
 		comboSpr.screenCenter();
 		comboSpr.x = placement;
 		comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
@@ -3252,7 +3279,11 @@ class PlayState extends MusicBeatState
 		var separatedScore:String = Std.string(combo).lpad('0', 3);
 		for (i in 0...separatedScore.length)
 		{
-			var numScore:FunkinSprite = new FunkinSprite(0, 0, Paths.image(uiFolder + 'num' + Std.parseInt(separatedScore.charAt(i)) + uiPostfix));
+			var numScore:FunkinSprite = _comboNumP.recycle(FunkinSprite);
+			numScore.revive();
+			numScore.velocity.set(0, 0);
+			numScore.acceleration.set(0, 0);
+			numScore.loadGraphic(Paths.image(uiFolder + 'num' + Std.parseInt(separatedScore.charAt(i)) + uiPostfix));
 			numScore.screenCenter();
 			numScore.x = placement + (43 * daLoop) - 90 + ClientPrefs.data.comboOffset[2];
 			numScore.y += 80 - ClientPrefs.data.comboOffset[3];
@@ -3305,7 +3336,9 @@ class PlayState extends MusicBeatState
 			FlxTween.tween(numScore, {alpha: 0}, 0.2 / playbackRate, {
 				onComplete: function(tween:FlxTween)
 				{
-					if (!NVScoreTween) numScore.destroy();
+					_comboNumP.add(numScore);
+					numScore.kill();
+					comboGroup.remove(numScore, true);
 				},
 				ease: customFade,
 				startDelay: Conductor.crochet * fadeScore / playbackRate
@@ -3323,8 +3356,13 @@ class PlayState extends MusicBeatState
 		FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
 			onComplete: function(tween:FlxTween)
 			{
-				comboSpr.destroy();
-				rating.destroy();
+				_comboSprP.add(comboSpr);
+				comboSpr.kill();
+				comboGroup.remove(comboSpr, true);
+
+				_ratingP.add(rating);
+				rating.kill();
+				comboGroup.remove(rating, true);
 			},
 			ease: customFade,
 			startDelay: Conductor.crochet * 0.002 / playbackRate

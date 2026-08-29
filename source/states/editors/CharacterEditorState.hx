@@ -697,6 +697,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			character.isPsychPlayer = playerSpriteSheetCheckBox.checked;
 
 			character.flipCharacter();
+			updateText();
 		};
 
 		// positionXStepper = new PsychUINumericStepper(flipXCheckBox.x + 110, flipXCheckBox.y, 10, character.positionArray[0], -9000, 9000, 0);
@@ -1114,16 +1115,18 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		}
 
 		var anim = anims[curAnim];
-		if(changedOffset && anim != null && anim.offsets != null && !character.isPlayer)
+		if(changedOffset && anim != null && anim.offsets != null)
 		{
-			anim.offsets[0] = character.offset.x;
-			anim.offsets[1] = character.offset.y;
-
-			character.addOffset(anim.anim, character.offset.x, character.offset.y);
-			updateText();
+			if (!(character.isPlayer && !character.isPsychPlayer)) {
+				anim.offsets[0] = character.offset.x;
+				anim.offsets[1] = character.offset.y;
+	
+				character.addOffset(anim.anim, character.offset.x, character.offset.y);
+				updateText();
+			}
 		}
 
-		if(changedOffset && anim != null && anim.playerOffsets != null && character.isPlayer)
+		if(changedOffset && anim != null && anim.playerOffsets != null && (character.isPlayer && !character.isPsychPlayer))
 		{
 			anim.playerOffsets[0] = character.offset.x;
 			anim.playerOffsets[1] = character.offset.y;
@@ -1309,28 +1312,34 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			{
 				var n:Int = intendText.length;
 				intendText += anim.anim + ": " + anim.offsets;
-				if (!character.isPlayer)animsTxt.addFormat(selectedFormat, n, intendText.length);
+				if (character.isPsychPlayer || !character.isPlayer) animsTxt.addFormat(selectedFormat, n, intendText.length);
 			}
 			else intendText += anim.anim + ": " + anim.offsets;
 		}
 		animsTxt.text = intendText;
 
 		// Player Offsets
+		final idkhowtoconvertinttofloat:Float = 0;
 		intendText += "\n \nPlayer Offsets:\n";
+		if (character.isPsychPlayer) {
+			intendText += "Disabled.";	
+			animsTxt.text = intendText;
+			return;
+		}
+
 		for (num => anim in anims)
+		{
+			if(num > 0) intendText += '\n';
+
+			if(num == curAnim)
 			{
-				if(num > 0) intendText += '\n';
-	
-				if(num == curAnim)
-				{
-					var n:Int = intendText.length;
-					intendText += anim.anim + ": " + (anim.playerOffsets != null ? anim.playerOffsets : anim.offsets); // if cannot find player offsets, display's opponent ones to prevent crashes
-					if (character.isPlayer) animsTxt.addFormat(selectedFormat, n, intendText.length);
-				}
-				else intendText += anim.anim + ": " + (anim.playerOffsets != null ? anim.playerOffsets : anim.offsets);
+				var n:Int = intendText.length;
+				intendText += anim.anim + ": " + (anim.playerOffsets != null ? anim.playerOffsets : [idkhowtoconvertinttofloat]);
+				if (character.isPlayer) animsTxt.addFormat(selectedFormat, n, intendText.length);
 			}
+			else intendText += anim.anim + ": " + (anim.playerOffsets != null ? anim.playerOffsets : [idkhowtoconvertinttofloat]);
+		}
 		animsTxt.text = intendText;
-	
 	}
 
 	inline function updateCharacterPositions()

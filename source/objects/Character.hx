@@ -313,9 +313,9 @@ class Character extends Bopper
 		// positioning
 		var playerPosition = json.player_position ?? json.playerposition ?? null;
 
-		positionArray = ((!debugMode && isPlayer && playerPosition != null) ? playerPosition : json.position);
+		positionArray = ((!debugMode && isPlayer && !isPsychPlayer && playerPosition != null) ? playerPosition : json.position);
 		playerPositionArray = playerPosition ?? json.position;
-		cameraPosition = (isPlayer && json.player_camera_position != null ? json.player_camera_position : json.camera_position);
+		cameraPosition = (isPlayer && !isPsychPlayer && json.player_camera_position != null ? json.player_camera_position : json.camera_position);
 		playerCameraPosition = json.player_camera_position ?? json.camera_position;
 
 		// data
@@ -599,7 +599,7 @@ class Character extends Bopper
 		super.playAnim(animName, force, reversed, frame);
 
 		final playedAnim = correctAnimationName(animName);
-		if (isPlayer) {
+		if (isPlayer && !isPsychPlayer) {
 			var playerOff = animPlayerOffsets.get(playedAnim);
 			if (playerOff != null) {
 				final offsetX = (scalableOffsets ? playerOff[0]*scale.x : playerOff[0]);
