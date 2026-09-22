@@ -3073,18 +3073,12 @@ class PlayState extends MusicBeatState
 
 	public var NVScoreTween:Bool = true; // (NV = Nightmare Vision) some people likes this, and its good for recreating mods made on it.
 
-
 	private function popUpScore(note:Note = null):Void
 	{
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.data.ratingOffset);
 		vocals.volume = 1;
 
-		var daComboStacking = !ClientPrefs.data.comboStacking; // hate this bug man...
-
-		if (NVScoreTween)
-			daComboStacking = ClientPrefs.data.comboStacking;
-
-		if (daComboStacking && comboGroup.members.length > 0)
+		if (!ClientPrefs.data.comboStacking && comboGroup.members.length > 0)
 		{
 			for (spr in comboGroup)
 			{
@@ -3182,17 +3176,14 @@ class PlayState extends MusicBeatState
 		rating.screenCenter();
 		rating.x = placement - 40;
 		rating.y -= 60;
-
-		if (!NVScoreTween) {
-			rating.acceleration.y = 550 * playbackRate * playbackRate;
-			rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
-			rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
-		}
-
+		rating.acceleration.y = 550 * playbackRate * playbackRate;
+		rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
+		rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
 		rating.visible = (!ClientPrefs.data.hideHud && showRating);
 		rating.x += ClientPrefs.data.comboOffset[0];
 		rating.y -= ClientPrefs.data.comboOffset[1];
 		rating.antialiasing = antialias;
+
 		if (ClientPrefs.data.comboCam == "Game") {
 			rating.x = -40 + offsetX;
 			rating.y = 300 + (30 + offsetY);
@@ -3217,14 +3208,8 @@ class PlayState extends MusicBeatState
 		comboSpr.antialiasing = antialias;
 		comboSpr.y += 60;
 		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
-		
-		// FIX: Align combo sprite if using the Game Camera
-		if (ClientPrefs.data.comboCam == "Game") {
-			comboSpr.x = offsetX - 40; 
-			comboSpr.y = rating.y + rating.height + 10; // Places it cleanly right below the rating
-		}
-
 		comboGroup.add(rating);
+
 		if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel')
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
@@ -3269,6 +3254,7 @@ class PlayState extends MusicBeatState
 		var xThing:Float = 0;
 		if (showCombo)
 			comboGroup.add(comboSpr);
+
 		var customFade = FlxEase.linear;
 
 		if(ClientPrefs.data.perfectPixel == "inGame" || ClientPrefs.data.perfectPixel == "RatingAndCountdownOnly"){
@@ -3287,11 +3273,10 @@ class PlayState extends MusicBeatState
 			numScore.screenCenter();
 			numScore.x = placement + (43 * daLoop) - 90 + ClientPrefs.data.comboOffset[2];
 			numScore.y += 80 - ClientPrefs.data.comboOffset[3];
-			
+
 			if (ClientPrefs.data.comboCam == "Game") {
-				// FIX: Centered the numbers relative to the rating width and adjusted Y so it isn't completely detached
-				numScore.x = offsetX + (43 * daLoop) - 55;
-				numScore.y = rating.y + rating.height - 10; 
+				numScore.x = (43 * daLoop) - 90 + offsetX;
+				numScore.y = 450 + (30 + offsetY);
 			}
 
 			if (isPixelStage && !customRatingSkin || uiPostfix == '-pixel'){
@@ -3302,24 +3287,14 @@ class PlayState extends MusicBeatState
 					numScore.pixelPerfectRender = true;
 				}
 			}
-			else {
-				if (!NVScoreTween)
-				{
-					numScore.setGraphicSize(Std.int(numScore.width * 0.5));
-					numScore.updateHitbox();
-				}
-			}
+			else 
+				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
 
-			if (!NVScoreTween) {
-				numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
-				numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
-				numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
-			}else{
-				numScore.scale.set(0.6 * (isPixelStage ? daPixelZoom : 1), 0.6 * (isPixelStage ? daPixelZoom : 1));
-				FlxTween.cancelTweensOf(numScore, ['scale.x', 'scale.y']);
-				FlxTween.tween(numScore.scale, {x: 0.5 * (isPixelStage ? daPixelZoom : 1), y: 0.5 * (isPixelStage ? daPixelZoom : 1)}, 0.5, {ease: fadeEase});
-			}
+			numScore.updateHitbox();
 
+			numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
+			numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
+			numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
 			numScore.visible = !ClientPrefs.data.hideHud;
 			numScore.antialiasing = antialias;
 			numScore.alpha = ratingsAlpha;
@@ -3327,11 +3302,6 @@ class PlayState extends MusicBeatState
 			//if (combo >= 10 || combo == 0)
 			if(showComboNum)
 				comboGroup.add(numScore);
-
-			var fadeScore = 0.002;
-
-			if (NVScoreTween)
-				fadeScore = 0.001;
 
 			FlxTween.tween(numScore, {alpha: 0}, 0.2 / playbackRate, {
 				onComplete: function(tween:FlxTween)
@@ -3341,11 +3311,11 @@ class PlayState extends MusicBeatState
 					comboGroup.remove(numScore, true);
 				},
 				ease: customFade,
-				startDelay: Conductor.crochet * fadeScore / playbackRate
+				startDelay: Conductor.crochet * 0.002 / playbackRate
 			});
 
 			daLoop++;
-			if(!NVScoreTween && numScore.x > xThing) xThing = numScore.x;
+			if(numScore.x > xThing) xThing = numScore.x;
 		}
 		comboSpr.x = xThing + 50;
 		FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {

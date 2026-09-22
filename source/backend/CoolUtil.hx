@@ -286,6 +286,45 @@ class CoolUtil
 		}).join(" ");
 	}
 
+	/**
+	 * Converts a string of "1..3,5,7..9,8..5" into an array of numbers like [1,2,3,5,7,8,9,8,7,6,5]
+	 * @param input String to parse
+	 * @return Array of numbers
+	 */
+	public static function parseNumberRange(input:String):Array<Int> {
+		var result:Array<Int> = [];
+		var parts:Array<String> = input.split(",");
+
+		for (part in parts) {
+			part = part.trim();
+			var idx = part.indexOf("..");
+			if (idx != -1) {
+				var start = Std.parseInt(part.substring(0, idx).trim());
+				var end = Std.parseInt(part.substring(idx + 2).trim());
+
+				if(start == null || end == null) {
+					continue;
+				}
+
+				if (start < end) {
+					for (j in start...end + 1) {
+						result.push(j);
+					}
+				} else {
+					for (j in end...start + 1) {
+						result.push(start + end - j);
+					}
+				}
+			} else {
+				var num = Std.parseInt(part);
+				if (num != null) {
+					result.push(num);
+				}
+			}
+		}
+		return result;
+	}
+
 	// CREDIT TO ruby0x1 https://gist.github.com/ruby0x1/8dc3a206c325fbc9a97e. I just modified it to fit our use case
 	public static function unzip(_path:String, _dest:String, ?ignoreRootFolder:String = "") {
 		var _in_file = sys.io.File.read(_path);

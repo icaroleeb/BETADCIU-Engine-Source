@@ -232,17 +232,18 @@ class Bopper extends FunkinSprite
 	public function applyAnimOffset(rawX:Float, rawY:Float) {
 		var ox:Float = rawX;
 		var oy:Float = rawY;
+		var newOffsetX:Float = 0;
+
+		if (correctFlippedOffsets) {
+			if (flipX == true)
+				ox = frameWidth - width - ox;
+			if (flipY == true)
+				oy = frameHeight - height - oy;
+		}
 
 		if (scalableOffsets) {
 			ox *= scale.x;
 			oy *= scale.y;
-		}
-
-		if (correctFlippedOffsets) {
-			if (flipX != false)
-				ox = (frameWidth - width) - ox;
-			if (flipY != false)
-				oy = (frameHeight - height) - oy;
 		}
 
 		offset.set(ox, oy);

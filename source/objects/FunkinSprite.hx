@@ -185,32 +185,6 @@ class FunkinSprite extends FlxAnimate
         camera.copyPixels(_frame, framePixels, _flashRect, _flashPoint, colorTransform, blend, antialiasing);
     }
 
-    override function drawComplex(camera:FlxCamera):Void
-    {
-        _frame.prepareMatrix(_matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
-        _matrix.translate(-origin.x, -origin.y);
-        _matrix.scale(scale.x, scale.y);
-
-        if (bakedRotationAngle <= 0)
-        {
-          updateTrig();
-
-          if (angle != 0) _matrix.rotateWithTrig(_cosAngle, _sinAngle);
-        }
-
-        getScreenPosition(_point, camera).subtractPoint(offset);
-        _point.add(origin.x, origin.y);
-        _matrix.translate(_point.x, _point.y);
-
-        if (isPixelPerfectRender(camera))
-        {
-          _matrix.tx = Math.round(_matrix.tx / this.scale.x) * this.scale.x;
-          _matrix.ty = Math.round(_matrix.ty / this.scale.y) * this.scale.y;
-        }
-
-        camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
-    }
-
     /**
      * Gets the default settings for a texture atlas sprite.
      * @return The default settings for a texture atlas sprite.
