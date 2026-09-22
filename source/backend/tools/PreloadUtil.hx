@@ -56,11 +56,11 @@ class PreloadUtil
         if ((FlxG.state is PlayState) && stagesToLoad.length > 0) {
             var ogStage = PlayState.instance.curStage;
             for (stage in stagesToLoad) {
-                PlayState.instance.changeStage(stage, true);
+                PlayState.instance?.changeStage(stage, "noChangeDetailsAndCreatePost");
                 loadedArray.push(stage);
             }
             stagesToLoad = [];
-            PlayState.instance.changeStage(ogStage, true); 
+            PlayState.instance?.changeStage(ogStage, "noCreatePost"); 
 
             trace("Stages Loaded: " + loadedArray);
             loadedArray = [];
@@ -94,7 +94,6 @@ class PreloadUtil
             if (FileSystem.exists(path)) {
                 var items = CoolUtil.coolTextFile(path);
                 for (item in items) list.push(item.split(' ')[0]);
-                isPreloading = true;
             }
         };
 
@@ -112,7 +111,6 @@ class PreloadUtil
                 if (data.stages != null) stagesToLoad = stagesToLoad.concat(cast data.stages);
                 if (data.images != null) imagesToLoad = imagesToLoad.concat(cast data.images);
                 if (data.sounds != null) soundsToLoad = soundsToLoad.concat(cast data.sounds);
-                isPreloading = true;
             } catch (e:Dynamic) {
                 trace("Error parsing JSON: " + e);
             }

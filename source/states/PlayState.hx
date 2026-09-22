@@ -480,7 +480,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		addStage(false, true);
+		addStage(false, "noCreatePost");
 		
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// "SCRIPTS FOLDER" SCRIPTS
@@ -4500,8 +4500,8 @@ class PlayState extends MusicBeatState
 		return false;
 	}
 
-	public function changeStage(id:String, ?preload:Bool = false) {
-		removeStage(preload); // Remove current stage	
+	public function changeStage(id:String, ?preload:String="") {
+		removeStage(); // Remove current stage	
 		curStage = id; // Set new stage name
  		stageData = StageData.getStageFile(curStage); 
  		addStage(false, preload);
@@ -4624,7 +4624,7 @@ class PlayState extends MusicBeatState
 	public var addedStages:Array<String> = [];
 	public var addedStagesHScript:Array<String> = [];
 
-	public function removeStage(?preload:Bool=false) {
+	public function removeStage() {
 		removeObjects(stageData);
 
 		if (hardCodedStage != null) {
@@ -4643,11 +4643,11 @@ class PlayState extends MusicBeatState
 		for (stage in addedStagesHScript) stopHScriptsNamed(stage, "stage"); #end
 		#end
 
-		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
+		var stageVars:Map<String, FlxBasic> = MusicBeatState.getVariables().get("stageVariables");
 	
 		if (stageVars != null) {
 			for (key in stageVars.keys()) {
-				var sprite:FlxSprite = stageVars.get(key);
+				var sprite:FlxBasic = stageVars.get(key);
 
 				if (sprite != null) {
 					sprite.kill();
@@ -4659,9 +4659,9 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) {
-		if(!preload) {
-			if (!PreloadUtil.isPreloading) setStageDetails(stageData); // for some reason they don't add the chars position on them.
+	public function addStage(?onlyLuas:Bool=false, ?preloadType:String="") {
+		if(preloadType != "noChangeDetails" || preloadType != "noChangeDetailsAndCreatePost") {
+			setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		} else {
 			var dir:String = stageData.directory;
 			if (dir != null) {
@@ -4680,7 +4680,7 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(!preload){
+		if(preloadType != "noCreatePost"){
 			hardCodedStage?.createPost();
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');

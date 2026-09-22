@@ -9,6 +9,8 @@ import Type.ValueType;
 
 import substates.GameOverSubstate;
 
+import flixel.FlxBasic;
+
 typedef LuaTweenOptions = {
 	type:FlxTweenType,
 	startDelay:Float,
@@ -393,15 +395,16 @@ class LuaUtils
 		var variables = MusicBeatState.getVariables();
 
 		if (!variables.exists("stageVariables")){
-			variables.set("stageVariables", new Map<String, FlxSprite>());
+			variables.set("stageVariables", new Map<String, FlxBasic>());
 		}
 
 		var stageVars = variables.get("stageVariables");
 
-		var obj:FlxSprite = variables.get(tag);
+		var obj:FlxBasic = variables.get(tag);
 		if (obj == null || obj.destroy == null) return;
 
-		LuaUtils.getTargetInstance().remove(obj, true);
+		// LuaUtils.getTargetInstance().remove(obj, true);
+		obj.kill();
 		obj.destroy();
 		if (stageVars.exists(tag)) stageVars.remove(tag); // destroy stageVar as well
 		variables.remove(tag);
