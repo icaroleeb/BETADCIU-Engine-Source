@@ -694,3 +694,11 @@ class Paths
 	}
 	#end
 }
+
+enum abstract PathsFunction(String)
+{
+  public var MUSIC;
+  public var INST;
+  public var VOICES;
+  public var SOUND;
+}
