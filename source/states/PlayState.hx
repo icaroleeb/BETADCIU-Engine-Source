@@ -4327,6 +4327,17 @@ class PlayState extends MusicBeatState
 		}
 		#end
 	}
+	public function removeOnHScript(variable:String, exclusions:Array<String> = null) {
+		#if HSCRIPT_ALLOWED
+		if(exclusions == null) exclusions = [];
+		for (script in hscriptArray) {
+			if(exclusions.contains(script.origin))
+				continue;
+
+			// script.remove(variable);
+		}
+		#end
+	}
 
 	function strumPlayAnim(isDad:Bool, id:Int, time:Float) {
 		var spr:StrumNote = null;
@@ -4680,7 +4691,7 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(preloadType != "noCreatePost"){
+		if(preloadType != "noCreatePost" || preloadType != "noChangeDetailsAndCreatePost"){
 			hardCodedStage?.createPost();
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');

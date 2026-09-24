@@ -1488,6 +1488,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			"vocals_file": character.vocalsFile,
 			"is_player_char": character.isPsychPlayer,
 			"reverseFlip": character.reverseFlipping,
+			"dance_every": character.danceEveryNumBeats,
 			"note_skin": character.noteSkin,
 			"_editor_isPlayer": character.isPlayer,
 

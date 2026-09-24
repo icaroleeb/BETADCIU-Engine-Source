@@ -407,6 +407,7 @@ class LuaUtils
 		obj.kill();
 		obj.destroy();
 		if (stageVars.exists(tag)) stageVars.remove(tag); // destroy stageVar as well
+		PlayState.instance.removeOnHScript(tag);
 		variables.remove(tag);
 	}
 

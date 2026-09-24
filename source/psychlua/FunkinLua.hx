@@ -1294,6 +1294,7 @@ class FunkinLua {
 
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leSprite);
+			PlayState.instance.setOnHScript(tag, leSprite);
 
 			switch(this.scriptType.toLowerCase()){
 				case "stage":
@@ -1333,6 +1334,7 @@ class FunkinLua {
 
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leSprite);
+			PlayState.instance.setOnHScript(tag, leSprite);
 
 			switch(this.scriptType.toLowerCase()){
 				case "stage":
@@ -1369,6 +1371,7 @@ class FunkinLua {
 
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leSprite);
+			PlayState.instance.setOnHScript(tag, leSprite);
 
 			switch(this.scriptType.toLowerCase()){
 				case "stage":
@@ -1409,6 +1412,7 @@ class FunkinLua {
 			var leSprite:FlxTiledSprite = new FlxTiledSprite(daImage, width, height, repeatX, repeatY);
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leSprite);
+			PlayState.instance.setOnHScript(tag, leSprite);
 
 			switch(scriptType.toLowerCase()){
 				case "stage":
@@ -1445,6 +1449,7 @@ class FunkinLua {
 
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leSprite);
+			PlayState.instance.setOnHScript(tag, leSprite);
 
 			switch(this.scriptType.toLowerCase()){
 				case "stage":
@@ -1501,6 +1506,7 @@ class FunkinLua {
 				leVSprite.play();
 
 				variables.set(tag, leVSprite);
+				PlayState.instance.setOnHScript(tag, leVSprite);
 				
 				switch(this.scriptType.toLowerCase()){
 					case "stage":
@@ -1540,6 +1546,7 @@ class FunkinLua {
 
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leCamera);
+			PlayState.instance.setOnHScript(tag, leCamera);
 		});
 		Lua_helper.add_callback(lua, "setupCameraFollow", function(tag:String, ?x:Float=null, ?y:Float=null) { // creates the camera follow point
 			tag = tag.replace('.', '');
@@ -1554,6 +1561,7 @@ class FunkinLua {
 
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, leFollowPoint);
+			PlayState.instance.setOnHScript(tag, leFollowPoint);
 		});
 		Lua_helper.add_callback(lua, "setCameraFollow", function(tag:String, ?followPoint:String=null, ?speed:Float=0) { // sets the follow point to the camera
 			var variables = MusicBeatState.getVariables();
@@ -2924,6 +2932,7 @@ class FunkinLua {
 
 		var variables = MusicBeatState.getVariables();
 		variables.set(tag, leSprite);
+		PlayState.instance.setOnHScript(tag, leSprite);
 
 		var shit:HealthIcon = variables.get(tag);
 		shit.cameras = [PlayState.instance.camHUD];

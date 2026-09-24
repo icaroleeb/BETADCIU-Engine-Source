@@ -31,6 +31,7 @@ typedef CharacterFile = {
 	var flip_x:Bool;
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
+	@:optional var dance_every:Int;
 	var vocals_file:String;
 	@:optional var noteSkin:String;
 	@:optional var reverseFlip:Bool; // flipping for opponents!
@@ -334,6 +335,8 @@ class Character extends Bopper
 		// antialiasing
 		noAntialiasing = (json.no_antialiasing == true);
 		antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing : false;
+
+		danceEveryNumBeats = json.dance_every ?? 2;
 
 		// animations
 		animationsArray = json.animations;
