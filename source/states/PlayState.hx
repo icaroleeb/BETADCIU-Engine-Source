@@ -1205,25 +1205,25 @@ class PlayState extends MusicBeatState
 					switch (swagCounter)
 					{
 						case 0:
-            if (introAlts.length > 3)
-              countdownOnYourMarks = createCountdownSprite(introAlts[0], antialias, isCustomCountdown);
-            else
-              countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
+							if (introAlts.length > 3)
+								countdownOnYourMarks = createCountdownSprite(introAlts[0], antialias, isCustomCountdown);
+							else
+								countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
 
-            FunkinSound.playOnce(introSoundsPrefix + 'intro3' + introSoundsSuffix, 0.6);
-            tick = THREE;
-          case 1:
-            countdownReady = createCountdownSprite(introAlts[introAlts.length - 3], antialias, isCustomCountdown);
-            FunkinSound.playOnce(introSoundsPrefix + 'intro2' + introSoundsSuffix, 0.6);
+							FunkinSound.playOnce(introSoundsPrefix + 'intro3' + introSoundsSuffix, 0.6);
+							tick = THREE;
+						case 1:
+							countdownReady = createCountdownSprite(introAlts[introAlts.length - 3], antialias, isCustomCountdown);
+							FunkinSound.playOnce(introSoundsPrefix + 'intro2' + introSoundsSuffix, 0.6);
 
-            tick = TWO;
-          case 2:
-            countdownSet = createCountdownSprite(introAlts[introAlts.length - 2], antialias, isCustomCountdown);
-            FunkinSound.playOnce(introSoundsPrefix + 'intro1' + introSoundsSuffix, 0.6);
-            tick = ONE;
-          case 3:
-            countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, isCustomCountdown);
-            FunkinSound.playOnce(introSoundsPrefix + 'introGo' + introSoundsSuffix, 0.6);
+							tick = TWO;
+						case 2:
+							countdownSet = createCountdownSprite(introAlts[introAlts.length - 2], antialias, isCustomCountdown);
+							FunkinSound.playOnce(introSoundsPrefix + 'intro1' + introSoundsSuffix, 0.6);
+							tick = ONE;
+						case 3:
+							countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, isCustomCountdown);
+							FunkinSound.playOnce(introSoundsPrefix + 'introGo' + introSoundsSuffix, 0.6);
 							tick = GO;
 						case 4:
 							tick = START;
