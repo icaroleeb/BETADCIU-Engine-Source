@@ -31,6 +31,7 @@ typedef CharacterFile = {
 	var flip_x:Bool;
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
+	@:optional var dance_every:Int;
 	var vocals_file:String;
 	@:optional var noteSkin:String;
 	@:optional var reverseFlip:Bool; // flipping for opponents!
@@ -335,6 +336,8 @@ class Character extends Bopper
 		noAntialiasing = (json.no_antialiasing == true);
 		antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing : false;
 
+		danceEveryNumBeats = json.dance_every ?? 2;
+
 		// animations
 		animationsArray = json.animations;
 		if(animationsArray != null && animationsArray.length > 0) {
@@ -367,7 +370,15 @@ class Character extends Bopper
 				if(offsets != null && a.offsets.length > 1) addOffset(a.anim, offsets[0], offsets[1]);
 				else addOffset(a.anim, 0, 0);
 
-				if (a.playerOffsets == null) isPsychPlayer = true; // i tried to set this out of the loop but it didn't worked
+				if (a.playerOffsets == null)
+				{
+					// reverseFlipping = false; // i tried to set this out of the loop but it didn't worked
+					correctFlippedOffsets = true;
+				}
+				else
+				{
+					correctFlippedOffsets = false;
+				}
 
 				if(playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(a.anim, playerOffsets[0], playerOffsets[1]);
 				else addPlayerOffset(a.anim, 0, 0);
@@ -596,12 +607,15 @@ class Character extends Bopper
 		super.playAnim(animName, force, reversed, frame);
 
 		final playedAnim = correctAnimationName(animName);
-		if (isPlayer && !isPsychPlayer) {
+
+		if (!correctFlippedOffsets && isPlayer && !isPsychPlayer) {
 			var playerOff = animPlayerOffsets.get(playedAnim);
+
 			if (playerOff != null) {
-				final offsetX = (scalableOffsets ? playerOff[0]*scale.x : playerOff[0]);
-				final offsetY = (scalableOffsets ? playerOff[1]*scale.y : playerOff[0]);
-				offset.set(playerOff[0] , playerOff[1]);
+				final offsetX = (scalableOffsets ? playerOff[0] * scale.x : playerOff[0]);
+				final offsetY = (scalableOffsets ? playerOff[1] * scale.y : playerOff[1]);
+
+				offset.set(playerOff[0], playerOff[1]);
 			}
 		}
 

@@ -61,6 +61,7 @@ class TitleState extends MusicBeatState
 	override public function create():Void
 	{
 		Paths.clearStoredMemory();
+		// initCustomStateScript();
 		super.create();
 		Paths.clearUnusedMemory();
 
@@ -91,6 +92,8 @@ class TitleState extends MusicBeatState
 		{
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 		}
+
+		// initCustomStateScript();
 
 		FlxG.mouse.visible = false;
 		#if BETADCIU

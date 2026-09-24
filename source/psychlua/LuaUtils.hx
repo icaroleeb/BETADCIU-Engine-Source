@@ -9,6 +9,8 @@ import Type.ValueType;
 
 import substates.GameOverSubstate;
 
+import flixel.FlxBasic;
+
 typedef LuaTweenOptions = {
 	type:FlxTweenType,
 	startDelay:Float,
@@ -391,12 +393,21 @@ class LuaUtils
 
 	public static function destroyObject(tag:String) {
 		var variables = MusicBeatState.getVariables();
-		var obj:FlxSprite = variables.get(tag);
-		if(obj == null || obj.destroy == null)
-			return;
 
-		LuaUtils.getTargetInstance().remove(obj, true);
+		if (!variables.exists("stageVariables")){
+			variables.set("stageVariables", new Map<String, FlxBasic>());
+		}
+
+		var stageVars = variables.get("stageVariables");
+
+		var obj:FlxBasic = variables.get(tag);
+		if (obj == null || obj.destroy == null) return;
+
+		// LuaUtils.getTargetInstance().remove(obj, true);
+		obj.kill();
 		obj.destroy();
+		if (stageVars.exists(tag)) stageVars.remove(tag); // destroy stageVar as well
+		PlayState.instance.removeOnHScript(tag);
 		variables.remove(tag);
 	}
 
@@ -544,7 +555,7 @@ class LuaUtils
 			case 'camhud' | 'hud': return PlayState.instance.camHUD;
 			case 'camother' | 'other': return PlayState.instance.camOther;
 		}
-		var camera:FlxCamera = MusicBeatState.getVariables().get(cam);
+		var camera = MusicBeatState.getVariables().get(cam);
 		if (camera == null || !Std.isOfType(camera, FlxCamera)) camera = PlayState.instance.camGame;
 		return camera;
 	}

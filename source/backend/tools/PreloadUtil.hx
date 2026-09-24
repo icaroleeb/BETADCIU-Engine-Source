@@ -11,6 +11,7 @@ import flixel.graphics.FlxGraphic;
 
 class PreloadUtil
 {
+    public static var isPreloading:Bool = false;
     public static var stagesToLoad:Array<String> = [];
     public static var charactersToLoad:Array<String> = [];
     public static var imagesToLoad:Array<String> = [];
@@ -55,11 +56,11 @@ class PreloadUtil
         if ((FlxG.state is PlayState) && stagesToLoad.length > 0) {
             var ogStage = PlayState.instance.curStage;
             for (stage in stagesToLoad) {
-                PlayState.instance.changeStage(stage, true);
+                PlayState.instance?.changeStage(stage, "noChangeDetailsAndCreatePost");
                 loadedArray.push(stage);
             }
             stagesToLoad = [];
-            PlayState.instance.changeStage(ogStage, true); 
+            PlayState.instance?.changeStage(ogStage, "noCreatePost"); 
 
             trace("Stages Loaded: " + loadedArray);
             loadedArray = [];

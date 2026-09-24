@@ -141,8 +141,7 @@ class SchoolEvilErect extends BaseStage
 
 	// Ghouls event
 	var bgGhouls:FunkinSprite;
-	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
-	{
+	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, value4:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, flValue4:Null<Float>, strumTime:Float)	{
 		switch(eventName)
 		{
 			case "Trigger BG Ghouls":
@@ -281,14 +280,15 @@ class SchoolEvilErect extends BaseStage
 	override function characterChangePost(charExist:String, charNew:String) {
 		if (ClientPrefs.data.shaders)
 		{
-			if (charExist == "bf") 
-				charExist = "boyfriend";
-			else if (charExist == "girlfriend")
-				charExist = "gf";
-			else if (charExist == "opponent")
-				charExist = "dad";
+			if (charExist == "boyfriend" || charExist == "bf") 
+				applyCharacterShader("boyfriend", 0);
+			else if (charExist == "gf" || charExist == "girlfriend")
+				applyCharacterShader("gf", 1);
+			else if (charExist == "dad" || charExist == "opponent")
+				applyCharacterShader("dad", 2);
+			else
+				applyCharacterShader(charExist, modchartCharacters.get(charExist).isPlayer ? 0 : 2);
 
-			applyCharacterShader(charExist);
 		}
 	}
 
@@ -296,19 +296,19 @@ class SchoolEvilErect extends BaseStage
 	{
 		if (ClientPrefs.data.shaders)
 		{
-			applyCharacterShader("boyfriend");
-			applyCharacterShader("dad");
-			if (gf != null) applyCharacterShader("gf");
+			boyfriend.shader = null;
+			dad.shader = null;
+			gf.shader = null;
 
 			for (value in modchartCharacters.keys()) // apply for the lua characters too
 			{
-				// var daLuaChars:Character = modchartCharacters.get(value);
-				applyCharacterShader(value);
+				var daLuaChars = modchartCharacters.get(value);
+				if (daLuaChars.shader != null) daLuaChars.shader = null;
 			}
 		}
 	}
 
-	function applyCharacterShader(char:String):Void
+	function applyCharacterShader(char:String, ?type:Int = 0)
 	{
 		var character:objects.Character = psychlua.LuaUtils.getObjectDirectly(char);
 		
@@ -317,37 +317,32 @@ class SchoolEvilErect extends BaseStage
     	rim.color = 0xFF940226;
 		rim.antialiasAmt = 0;
 		rim.attachedSprite = character;
+		character.shader = rim;
 		rim.distance = 5;
 
-		if (character.isPlayer)
+		if (type == 0) // bf type
 		{
 			//rim.color = 0xFF4a0523;
 			rim.angle = 180;
 		    rim.distance = 3;
 		}
-		else if (character.isSpeakerChar)
+		else if (type == 1) // gf type
 		{
 			rim.angle = 180;
 			rim.distance = 3;
 		}
-		else
+		else if (type == 2) // dad type
 		{
 			rim.angle = 90;
 		}
 
-		var altMaskPath:Dynamic = Paths.image('weeb/erect/masks/' + character.curCharacter + '_mask', "week6");
-
-		#if MODS_ALLOWED
-		if (FileSystem.exists(altMaskPath))
-		#else
-		if (OpenFlAssets.exists(altMaskPath))
-		#end
+		if(Paths.fileExists("images/weeb/erect/masks/" + character.curCharacter + "_mask.png", IMAGE))
 		{
-			rim.loadAltMask(altMaskPath);
+			rim.loadAltMask(Paths.getPath("images/weeb/erect/masks/" + character.curCharacter + "_mask.png", IMAGE));
 			rim.useAltMask = true;
-		}
-
-		character.shader = rim;
+			trace("mask is active for " + character.curCharacter);
+		}else
+			trace("mask not found for " + character.curCharacter);
 
 		character.animation.callback = function(animName:String, frameNumber:Int, frameIndex:Int) 
 		{

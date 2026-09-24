@@ -36,6 +36,7 @@ class StrumNote extends FunkinSprite
 			texture = value;
 			reloadNote();
 
+			/*
 			if (texture.toLowerCase().contains('pixel')){
 				pixelPerfectPosition = true;
 				pixelPerfectRender = true;
@@ -43,6 +44,7 @@ class StrumNote extends FunkinSprite
 				pixelPerfectPosition = false;
 				pixelPerfectRender = false;
 			}
+			*/
 		}
 		return value;
 	}

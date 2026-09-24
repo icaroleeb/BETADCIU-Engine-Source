@@ -8,6 +8,9 @@ import openfl.display.Loader;
 import openfl.display.Bitmap;
 import openfl.events.Event;
 import openfl.net.URLRequest;
+import openfl.display.Shape;
+import openfl.geom.Point;
+import openfl.display.BitmapData;
 
 class OnlineModpackState extends MusicBeatState
 {
@@ -158,7 +161,7 @@ class OnlineModpackState extends MusicBeatState
 
 class ModpackListItem extends FlxSpriteGroup {
 	public var alphabet:Alphabet;
-	public var icon:ProfileYoutube;
+	public var icon:ProfilePic;
 	public var targetY:Float = 0;
 
 	public function new(x:Float, y:Float, text:String, youtubeUser:String) {
@@ -168,7 +171,7 @@ class ModpackListItem extends FlxSpriteGroup {
 		alphabet.setScale(0.8, 0.8);
 		add(alphabet);
 
-		icon = new ProfileYoutube(youtubeUser);
+		icon = new ProfilePic(youtubeUser);
 		add(icon);
 	}
 
@@ -185,29 +188,56 @@ class ModpackListItem extends FlxSpriteGroup {
 	}
 }
 
-class ProfileYoutube extends FlxSprite {
-	public function new(username:String) 
-	{
-		super();
-		// makeGraphic(1, 1, FlxColor.TRANSPARENT); 
-		createProfile(username);
-	}
+class ProfilePic extends FlxSprite {
+    public function new(username:String) {
+        super();
+        createProfile(username);
+    }
 
-	function createProfile(username:String)
-	{
-		var url = "https://unavatar.io/youtube/" + username;
+    function createProfile(username:String, playform:String = "youtube") {
+		if (playform == "twitter")
+			playform = "x";
 
-		loadImageFromUrl(url);
-	}
+        var url = "https://unavatar.io/" + playform + "/" + username;
+        loadImageFromUrl(url);
+    }
 
 	function loadImageFromUrl(url:String) {
 		var loader = new Loader();
 		loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(e:Event) {
-			var bitmapData = cast(loader.content, Bitmap).bitmapData;
-			loadGraphic(bitmapData);
-			antialiasing = ClientPrefs.data.antialiasing; 
+			var origBitmapData = cast(loader.content, Bitmap).bitmapData;
+			
+			var radius = Math.min(origBitmapData.width, origBitmapData.height) / 2;
+			var centerX = origBitmapData.width / 2;
+			var centerY = origBitmapData.height / 2;
+			
+			var maskShape = new Shape();
+			maskShape.graphics.beginFill(0xFFFFFF, 1.0);
+			maskShape.graphics.drawCircle(centerX, centerY, radius);
+			maskShape.graphics.endFill();
+			
+
+			var maskBmd = new BitmapData(origBitmapData.width, origBitmapData.height, true, 0x00000000);
+			maskBmd.draw(maskShape, null, null, null, null, true);
+			
+			var finalBmd = new BitmapData(origBitmapData.width, origBitmapData.height, true, 0x00000000);
+			finalBmd.draw(origBitmapData);
+			
+			finalBmd.copyChannel(
+				maskBmd, 
+				maskBmd.rect, 
+				new Point(0, 0), 
+				openfl.display.BitmapDataChannel.ALPHA, 
+				openfl.display.BitmapDataChannel.ALPHA
+			);
+			
+			loadGraphic(finalBmd, false, 0, 0, true);
+			antialiasing = true;
 			setGraphicSize(100, 100);
 			updateHitbox();
+			
+			origBitmapData.dispose();
+			maskBmd.dispose();
 		});
 		
 		loader.load(new URLRequest(url));

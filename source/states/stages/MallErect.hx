@@ -47,7 +47,6 @@ class MallErect extends BaseStage
 		add(fog);
 
 		bottomBoppers = new MallCrowd(-410, 100, 'christmas/erect/bottomBop', 'bottomBop');
-		bottomBoppers.scrollFactor.set(0.9, 0.9);
 		stageVars.set("bottomBoppers", bottomBoppers);
 		add(bottomBoppers);
 
@@ -55,7 +54,9 @@ class MallErect extends BaseStage
 		stageVars.set("snowUnder", snowUnder);
 		add(snowUnder);
 
-		var fgSnow:BGSprite = new BGSprite('christmas/fgSnow', -1150, 680);
+		var fgSnow:BGSprite = new BGSprite('christmas/fgSnow', -1350, 680);
+		fgSnow.scale.set(1.1, 1);
+		fgSnow.updateHitbox();
 		stageVars.set("fgSnow", fgSnow);
 		add(fgSnow);
 
@@ -101,8 +102,7 @@ class MallErect extends BaseStage
 		if (curBeat % (gfSpeed * speedBaseMod) == 0) everyoneDance();
 	}
 
-	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
-	{
+	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, value4:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, flValue4:Null<Float>, strumTime:Float)	{
 		switch(eventName)
 		{
 			/*

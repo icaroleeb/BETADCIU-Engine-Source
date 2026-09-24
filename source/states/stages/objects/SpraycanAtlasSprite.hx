@@ -1,7 +1,5 @@
 package states.stages.objects;
 
-import animate.FlxAnimate;
-
 enum SpraycanState
 {
 	WAITING;

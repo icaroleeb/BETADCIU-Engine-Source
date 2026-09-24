@@ -115,7 +115,7 @@ class NoteSkinLoader
 				{
 					note.isLegacyNoteSkin = (noteDirectory == "notes/");
 
-					if (noteDirectory.startsWith("pixelUI/") || StringTools.contains(skin, "-pixel"))
+					if (noteDirectory.startsWith("pixelUI/") || skin.contains("-pixel"))
 						note.isPixelNote = true;
 
 					break;

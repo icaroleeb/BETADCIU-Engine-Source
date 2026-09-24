@@ -13,6 +13,7 @@ class MasterEditorMenu extends MusicBeatState
 		'Chart Editor',
 		'Character Editor',
 		'Stage Editor',
+		'Lua Stage Editor',
 		'Week Editor',
 		'Menu Character Editor',
 		'Dialogue Editor',
@@ -122,6 +123,8 @@ class MasterEditorMenu extends MusicBeatState
 					else LoadingState.loadAndSwitchState(new states.editors.CharacterEditorState(Character.DEFAULT_CHARACTER, false));
 				case 'Stage Editor':
 					LoadingState.loadAndSwitchState(new StageEditorState());
+				case 'Lua Stage Editor':
+					LoadingState.loadAndSwitchState(new LuaStageEditorState());
 				case 'Week Editor':
 					MusicBeatState.switchState(new WeekEditorState());
 				case 'Menu Character Editor':

@@ -137,7 +137,8 @@ class VSlice
 			var time:Float = 0;
 			allEvents.sort(sortByTime);
 
-			focusCameraEvents = allEvents.filter((event:Dynamic) -> event.e == 'FocusCamera' && (event.v == 0 || event.v == 1 || event.v.char != null));
+			/*
+			focusCameraEvents = allEvents.filter((event:Dynamic) -> event.e == 'FocusCamera' && (event.v == 0 || event.v == 1 || event.v == 2 || event.v == 3 || event.v.char != null));
 			if(focusCameraEvents.length > 0)
 			{
 				var focusEventNum:Int = 0;
@@ -178,6 +179,7 @@ class VSlice
 					time += sectionTime;
 				}
 			}
+			*/
 		}
 		if(sectionMustHits.length < 1) sectionMustHits.push(false);
 
@@ -284,7 +286,7 @@ class VSlice
 							for (field in Reflect.fields(event.v))
 							{
 								fields.push(Std.string(Reflect.field(event.v, field)));
-								if(fields.length == 2) break;
+								if(fields.length == 4) break;
 							}
 						case TClass(String):
 							fields.push(event.v);
@@ -296,14 +298,14 @@ class VSlice
 								{
 									fields.push(Std.string(value));
 
-									if(fields.length == 2) break;
+									if(fields.length == 4) break;
 								}
 							}
 						default:
 							fields.push(Std.string(event.v));
 					}
 				}
-				while(fields.length < 2) fields.push('');
+				while(fields.length < 4) fields.push('');
 
 				fields.insert(0, event.e);
 				fileEvents.push([event.t, [fields]]);
@@ -324,7 +326,7 @@ class VSlice
 				var subEvents:Array<Array<Dynamic>> = cast event[1];
 				if(subEvents != null && subEvents.length > 0)
 					for (lilEvent in subEvents)
-						events.push({t: event[0], e: lilEvent[0], v: {value1: lilEvent[1], value2: lilEvent[2]}});
+						events.push({t: event[0], e: lilEvent[0], v: {value1: lilEvent[1], value2: lilEvent[2], value3: lilEvent[3], value4: lilEvent[4]}});
 			}
 		}
 
@@ -364,11 +366,13 @@ class VSlice
 					timeChanges.push({t: time, bpm: bpm});
 				}
 
+				/*
 				if(lastMustHit != section.mustHitSection)
 				{
 					events.push({t: time, e: 'FocusCamera', v: {char: section.mustHitSection ? 0 : 1}});
 					lastMustHit = section.mustHitSection;
 				}
+				*/
 
 				var rowRound:Int = Math.round(4 * section.sectionBeats);
 				time += beat * (rowRound / 4);

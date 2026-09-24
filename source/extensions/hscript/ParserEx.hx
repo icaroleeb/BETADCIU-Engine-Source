@@ -56,7 +56,16 @@ class ParserEx extends Parser
 				if (Type.enumEq(tk, TOp("="))) e = parseExpr();
 				else push(tk);
 				mk(EVar(ident, t, e, id == "final"), p1, (e == null) ? tokenMax : pmax(e));
-				
+			case "static":
+				final e = parseExpr();
+
+				switch (e.expr())
+				{
+					case EVar(name, _), EFunction(_, _, name) if (name != null):
+						mk(EMeta(':static', [], e), tokenMin, tokenMax);
+					default:
+						unexpected(TId(id));
+				}
 			case "while":
 				var econd = parseExpr();
 				var e = parseExpr();

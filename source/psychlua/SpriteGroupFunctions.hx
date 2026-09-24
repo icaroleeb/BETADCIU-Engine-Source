@@ -87,10 +87,10 @@ class SpriteGroupFunctions
 			var group:FlxSpriteGroup = LuaUtils.getObjectDirectly(tag);
 
 			var real = cast(LuaUtils.getObjectDirectly(obj), FlxSprite);
-					if(real!=null){
-			if (group != null) group.add(real);
-						return true;
-					} 
+			if(real!=null){
+				if (group != null) group.add(real);
+				return true;
+			} 
 
 			var killMe:Array<String> = obj.split('.');
 					var object:FlxBasic = LuaUtils.getObjectDirectly(killMe[0]);

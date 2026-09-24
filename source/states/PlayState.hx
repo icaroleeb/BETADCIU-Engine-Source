@@ -228,6 +228,16 @@ class PlayState extends MusicBeatState
 	private var curSong:String = "";
 
 	public var gfSpeed:Int = 1;
+
+	function set_gfSpeed(value:Int)
+	{
+		if (gfGroup == null || gf == null) return gfSpeed = value;
+		
+		gf.danceEveryNumBeats *= value;
+		
+		return gfSpeed = value;
+	}
+
 	public var speedBaseMod:Int = 1;
 	public var health(default, set):Float = 1;
 	public var combo:Int = 0;
@@ -336,6 +346,8 @@ class PlayState extends MusicBeatState
 	public var canControlPauseMenu:Bool = true; // becasue set/getPropertyFromClass don't work?!
 	public static var restarted:Bool = false;
 
+	public static var extraChar:CharConfig = null; // beta...
+
 	override public function create()
 	{
 		if (FlxG.sound.music != null) {
@@ -402,17 +414,22 @@ class PlayState extends MusicBeatState
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		storyDifficultyText = Difficulty.getString();
 
-		if (isStoryMode)
-			detailsText = "Story Mode: " + WeekData.getCurrentWeek().weekName;
-		else if (isBETADCIU)
-			detailsText =  SONG.song + " But Every Turn A Different Cover is Used";
-		else if (isBonus) // adding one for bonus songs too because i want
-			detailsText =  "Bonus Song";
+		if (WeekData.getCurrentWeek().noDiscordRPC)
+			detailsText = "???"; // best way not leaking the song on discord :3
 		else
-			detailsText = "Freeplay";
+		{
+			if (isStoryMode)
+				detailsText = "Story Mode: " + WeekData.getCurrentWeek().weekName;
+			else if (isBETADCIU)
+				detailsText =  SONG.song + " But Every Turn A Different Cover is Used";
+			else if (isBonus) // adding one for bonus songs too because i want
+				detailsText =  "Bonus Song";
+			else
+				detailsText = "Freeplay";
 
-		// String for when the game is paused
-		detailsPausedText = "Paused - " + detailsText;
+			// String for when the game is paused
+			detailsPausedText = "Paused - " + detailsText;
+		}
 		#end
 
 		GameOverSubstate.resetVariables();
@@ -454,8 +471,19 @@ class PlayState extends MusicBeatState
 		boyfriend = new Character(0, 0, SONG.player1, true);
 		boyfriend.charName = "boyfriend";
 		startCharacterPos(boyfriend);
+
+		var daExtraPlayer = SONG.extraPlayer;
+
+		if (daExtraPlayer != null && daExtraPlayer.length > 0) // beta...
+		{
+			for (i in 0...daExtraPlayer.length)
+			{
+				var char = daExtraPlayer[i];
+				FunkinLua.makeLuaCharacter(char.charObj, char.charNew, char.isPlayer);
+			}
+		}
 		
-		addStage(false, true);
+		addStage(false, "noCreatePost");
 		
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// "SCRIPTS FOLDER" SCRIPTS
@@ -640,12 +668,12 @@ class PlayState extends MusicBeatState
 			for (file in FileSystem.readDirectory(folder))
 			{
 				#if LUA_ALLOWED
-				if(file.toLowerCase().endsWith('.lua'))
+				if(file.toLowerCase().endsWith('.lua') && !file.toLowerCase().endsWith(scriptSuffix + '.lua'))
 					new FunkinLua(folder + file);
 				#end
 
 				#if HSCRIPT_ALLOWED
-				if(file.toLowerCase().endsWith('.hx'))
+				if(file.toLowerCase().endsWith('.hx') && !file.toLowerCase().endsWith(scriptSuffix + '.hx'))
 					initHScript(folder + file);
 				#end
 			}
@@ -934,7 +962,6 @@ class PlayState extends MusicBeatState
 
 	public function stopCharacterScripts(name:String)
 	{
-		// different from "startCharacterScripts" cuz kinda hardcoding.
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 			#if LUA_ALLOWED stopLuasNamed('characters/' + name + '.lua'); #end
 			#if HSCRIPT_ALLOWED stopHScriptsNamed('characters/' + name + '.hx'); #end
@@ -1178,20 +1205,25 @@ class PlayState extends MusicBeatState
 					switch (swagCounter)
 					{
 						case 0:
-							countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
-							FunkinSound.playOnce(introSoundsPrefix + 'intro3' + introSoundsSuffix, 0.6);
-							tick = THREE;
-						case 1:
-							countdownReady = createCountdownSprite(introAlts[0], antialias, isCustomCountdown);
-							FunkinSound.playOnce(introSoundsPrefix + 'intro2' + introSoundsSuffix, 0.6);
-							tick = TWO;
-						case 2:
-							countdownSet = createCountdownSprite(introAlts[1], antialias, isCustomCountdown);
-							FunkinSound.playOnce(introSoundsPrefix + 'intro1' + introSoundsSuffix, 0.6);
-							tick = ONE;
-						case 3:
-							countdownGo = createCountdownSprite(introAlts[2], antialias, isCustomCountdown);
-							FunkinSound.playOnce(introSoundsPrefix + 'introGo' + introSoundsSuffix, 0.6);
+            if (introAlts.length > 3)
+              countdownOnYourMarks = createCountdownSprite(introAlts[0], antialias, isCustomCountdown);
+            else
+              countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
+
+            FunkinSound.playOnce(introSoundsPrefix + 'intro3' + introSoundsSuffix, 0.6);
+            tick = THREE;
+          case 1:
+            countdownReady = createCountdownSprite(introAlts[introAlts.length - 3], antialias, isCustomCountdown);
+            FunkinSound.playOnce(introSoundsPrefix + 'intro2' + introSoundsSuffix, 0.6);
+
+            tick = TWO;
+          case 2:
+            countdownSet = createCountdownSprite(introAlts[introAlts.length - 2], antialias, isCustomCountdown);
+            FunkinSound.playOnce(introSoundsPrefix + 'intro1' + introSoundsSuffix, 0.6);
+            tick = ONE;
+          case 3:
+            countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, isCustomCountdown);
+            FunkinSound.playOnce(introSoundsPrefix + 'introGo' + introSoundsSuffix, 0.6);
 							tick = GO;
 						case 4:
 							tick = START;
@@ -1338,7 +1370,7 @@ class PlayState extends MusicBeatState
 		}
 
 		var tempScore:String;
-		var formattedScore:String = FlxStringUtil.formatMoney(songScore, false);
+		var formattedScore:String = FlxStringUtil.formatMoney(songScore, false, true);
 		if(!instakillOnMiss) tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [formattedScore, songMisses, str]);
 		else tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [formattedScore, str]);
 		scoreTxt.text = tempScore;
@@ -1452,13 +1484,20 @@ class PlayState extends MusicBeatState
 		FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
+		var daSong;
+
+		if (WeekData.getCurrentWeek().noDiscordRPC)
+			daSong = "???"
+		else
+			daSong = SONG.song;
+
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
 		if(autoUpdateRPC) 
 			if (isBETADCIU) {
 				DiscordClient.changePresence(detailsText, " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
 			} else {
-				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
+				DiscordClient.changePresence(detailsText, daSong + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
 			}
 
 		#end
@@ -1861,7 +1900,7 @@ class PlayState extends MusicBeatState
 	}
 
 	function eventEarlyTrigger(event:EventNote):Float {
-		var returnedValue:Null<Float> = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2, event.value3, event.strumTime], true);
+		var returnedValue:Null<Float> = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2, event.value3, event.value4, event.strumTime], true);
 		if(returnedValue != null && returnedValue != 0) {
 			return returnedValue;
 		}
@@ -1883,11 +1922,12 @@ class PlayState extends MusicBeatState
 			event: event[1][i][0],
 			value1: event[1][i][1],
 			value2: event[1][i][2],
-			value3: event[1][i][3]
+			value3: event[1][i][3],
+			value4: event[1][i][4]
 		};
 		eventNotes.push(subEvent);
 		eventPushed(subEvent);
-		callOnScripts('onEventPushed', [subEvent.event, subEvent.value1 != null ? subEvent.value1 : '', subEvent.value2 != null ? subEvent.value2 : '', subEvent.value3 != null ? subEvent.value3 : '', subEvent.strumTime]);
+		callOnScripts('onEventPushed', [subEvent.event, subEvent.value1 != null ? subEvent.value1 : '', subEvent.value2 != null ? subEvent.value2 : '', subEvent.value3 != null ? subEvent.value3 : '', subEvent.value4 != null ? subEvent.value4 : '', subEvent.strumTime]);
 	}
 
 	public var skipArrowStartTween:Bool = false; //for lua
@@ -2496,7 +2536,11 @@ class PlayState extends MusicBeatState
 			if(eventNotes[0].value3 != null)
 				value3 = eventNotes[0].value3;
 
-			triggerEvent(eventNotes[0].event, value1, value2, value3, leStrumTime);
+			var value4:String = '';
+			if(eventNotes[0].value4 != null)
+				value4 = eventNotes[0].value4;
+
+			triggerEvent(eventNotes[0].event, value1, value2, value3, value4, leStrumTime);
 			eventNotes.shift();
 		}
 	}
@@ -2517,13 +2561,15 @@ class PlayState extends MusicBeatState
 	public var opponentNoteSkin:String = "NOTE_assets";
 	public var playerNoteSkin:String = "NOTE_assets";
 
-	public function triggerEvent(eventName:String, value1:String, value2:String, value3:String, strumTime:Float) {
+	public function triggerEvent(eventName:String, value1:String, value2:String, value3:String, value4:String, strumTime:Float) {
 		var flValue1:Null<Float> = Std.parseFloat(value1);
 		var flValue2:Null<Float> = Std.parseFloat(value2);
 		var flValue3:Null<Float> = Std.parseFloat(value3);
+		var flValue4:Null<Float> = Std.parseFloat(value4);
 		if(Math.isNaN(flValue1)) flValue1 = null;
 		if(Math.isNaN(flValue2)) flValue2 = null;
 		if(Math.isNaN(flValue3)) flValue3 = null;
+		if(Math.isNaN(flValue4)) flValue4 = null;
 
 		switch(eventName) {
 			case 'Hey!':
@@ -2750,10 +2796,12 @@ class PlayState extends MusicBeatState
 					changeStage(value1);
 					callOnScripts('onStageChangePost', [value1]);
  				}
+			case "FocusCamera":
+				moveCameraVSlice(value1, value2, Std.parseFloat(value3), value4); // wip
 		}
 
-		hardCodedStage?.eventCalled(eventName, value1, value2, value3, flValue1, flValue2, flValue3, strumTime);
-		callOnScripts('onEvent', [eventName, value1, value2, value3, strumTime]);
+		hardCodedStage?.eventCalled(eventName, value1, value2, value3, value4, flValue1, flValue2, flValue3, flValue4, strumTime);
+		callOnScripts('onEvent', [eventName, value1, value2, value3, value4, strumTime]);
 	}
 
 	public function moveCameraSection(?sec:Null<Int>):Void {
@@ -3030,7 +3078,6 @@ class PlayState extends MusicBeatState
 	}
 
 	public var NVScoreTween:Bool = true; // (NV = Nightmare Vision) some people likes this, and its good for recreating mods made on it.
-
 
 	private function popUpScore(note:Note = null):Void
 	{
@@ -3805,6 +3852,12 @@ class PlayState extends MusicBeatState
 		#end
 		hardCodedStage?.destroy();
 
+		if (hardCodedStage != null){
+			hardCodedStage.destroy();
+			hardCodedStage = null;
+		}
+
+
 		#if VIDEOS_ALLOWED
 		if(videoCutscene != null)
 		{
@@ -4046,7 +4099,7 @@ class PlayState extends MusicBeatState
 		return false;
 	}
 
-	public function callLuaFile(luaFile:String, ?callLua:String = "")
+	public function callLuaFile(luaFile:String, ?callLua:String = "", ?luaType:String = "")
 	{
 		#if MODS_ALLOWED
 		var luaToLoad:String = Paths.modFolders(luaFile);
@@ -4062,7 +4115,9 @@ class PlayState extends MusicBeatState
 			for (script in luaArray) {
 				if (script.scriptName == luaToLoad) {
 					// Custom function call
+					script.scriptType = luaType; // wanna make this work for types too...
 					script.call(callLua, []);
+					script.scriptType = "";
 					return true;
 				}
 			}
@@ -4117,7 +4172,7 @@ class PlayState extends MusicBeatState
 			return false;
 		}
 
-	public function callHScriptFile(scriptFile:String, ?callHScript:String = "")
+	public function callHScriptFile(scriptFile:String, ?callHScript:String = "", hscriptType:String = "")
 	{
 		#if MODS_ALLOWED
 		var scriptToLoad:String = Paths.modFolders(scriptFile);
@@ -4275,6 +4330,17 @@ class PlayState extends MusicBeatState
 				continue;
 
 			script.set(variable, arg);
+		}
+		#end
+	}
+	public function removeOnHScript(variable:String, exclusions:Array<String> = null) {
+		#if HSCRIPT_ALLOWED
+		if(exclusions == null) exclusions = [];
+		for (script in hscriptArray) {
+			if(exclusions.contains(script.origin))
+				continue;
+
+			// script.remove(variable);
 		}
 		#end
 	}
@@ -4451,8 +4517,8 @@ class PlayState extends MusicBeatState
 		return false;
 	}
 
-	public function changeStage(id:String, ?preload:Bool = false) {
-		removeStage(preload); // Remove current stage	
+	public function changeStage(id:String, ?preload:String="") {
+		removeStage(); // Remove current stage	
 		curStage = id; // Set new stage name
  		stageData = StageData.getStageFile(curStage); 
  		addStage(false, preload);
@@ -4554,24 +4620,28 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.data.comboCam == "Game") add(comboGroup);
 	}
 
-	/*
-	function callGlobal(tag:String)
+	public function callOnChange(call:String, nameOne:String, nameTwo:String)
 	{
-		if (tag == 'characterChange') {
-			stagesFunc(function(stage:BaseStage) stage.characterChange(value1, value2));
-		} else if (tag == 'characterChangePost') {
-			stagesFunc(function(stage:BaseStage) stage.characterChangePost(value1, value2));
+		if (call.toLowerCase().trim() == 'characterchange') {
+			stagesFunc(function(stage:BaseStage) stage.characterChange(nameOne, nameTwo));
+			callOnScripts('onCharacterChange', [nameOne, nameTwo]);
+		} else if (call.toLowerCase().trim() == 'characterchangepost') {
+			stagesFunc(function(stage:BaseStage) stage.characterChangePost(nameOne, nameTwo));
+			callOnScripts('onCharacterChangePost', [nameOne, nameTwo]);
+		} else if (call.toLowerCase().trim() == 'stagechange') {
+			// stagesFunc(function(stage:BaseStage) stage.stageChange(nameOne));
+			callOnScripts('onStageChange', [nameOne]);
+		} else if (call.toLowerCase().trim() == 'stagechangepost') {
+			// stagesFunc(function(stage:BaseStage) stage.stageChangePost(nameOne));
+			callOnScripts('onStageChangePost', [nameOne]);
 		}
-
-		callOnScripts('onCharacterChangePost', [value1, value2]);
 	}
-	*/
 
 	public var hardCodedStage:Null<BaseStage>; // oh hey, its nullable now
 	public var addedStages:Array<String> = [];
 	public var addedStagesHScript:Array<String> = [];
 
-	public function removeStage(?preload:Bool=false) {
+	public function removeStage() {
 		removeObjects(stageData);
 
 		if (hardCodedStage != null) {
@@ -4590,11 +4660,11 @@ class PlayState extends MusicBeatState
 		for (stage in addedStagesHScript) stopHScriptsNamed(stage, "stage"); #end
 		#end
 
-		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
+		var stageVars:Map<String, FlxBasic> = MusicBeatState.getVariables().get("stageVariables");
 	
 		if (stageVars != null) {
 			for (key in stageVars.keys()) {
-				var sprite:FlxSprite = stageVars.get(key);
+				var sprite:FlxBasic = stageVars.get(key);
 
 				if (sprite != null) {
 					sprite.kill();
@@ -4606,8 +4676,8 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function addStage(?onlyLuas:Bool=false, ?preload:Bool=false) {
-		if(!preload) {
+	public function addStage(?onlyLuas:Bool=false, ?preloadType:String="") {
+		if(preloadType != "noChangeDetails" || preloadType != "noChangeDetailsAndCreatePost") {
 			setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		} else {
 			var dir:String = stageData.directory;
@@ -4627,7 +4697,7 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
-		if(!preload){
+		if(preloadType != "noCreatePost" || preloadType != "noChangeDetailsAndCreatePost"){
 			hardCodedStage?.createPost();
 			callLuaFile('stages/' + curStage + '.lua', 'onCreatePost');
 			callHScriptFile('stages/' + curStage + '.hx', 'onCreatePost');
@@ -4648,5 +4718,56 @@ class PlayState extends MusicBeatState
 	function set_gf(value:Character):Character {
 		if (value != null) value.playSingAnim = true;
 		return gf = value;
+	}
+
+	// alternative lol
+	function set_bf(value:Character):Character {
+		boyfriend = value;
+		return boyfriend;
+	}
+
+	function get_bf(value:Character):Character {
+		boyfriend = value;
+		return boyfriend;
+	}
+
+
+	// VSlice Events WIP as Hell
+
+	function moveCameraVSlice(value:String, camPos:String, duration:Float = 16, easeString:String = "linear")
+	{
+		isCameraOnForcedPos = true;
+
+		var cameraPos = camPos.split(",");
+		var targetCamX:Float = 0;
+		var targetCamY:Float = 0;
+
+		if (value != null)
+		{
+			switch(value)
+			{
+				case "0":
+					targetCamX = boyfriend.getMidpoint().x - 100 - boyfriend.cameraPosition[0] + cameraPos[0] != null ? Std.parseFloat(cameraPos[0].trim()) : 0;
+					targetCamY = boyfriend.getMidpoint().y - 100 + boyfriend.cameraPosition[1] + cameraPos[1] != null ? Std.parseFloat(cameraPos[1].trim()) : 0;
+				case "1":
+					targetCamX = dad.getMidpoint().x + 150 + dad.cameraPosition[0] + cameraPos[0] != null ? Std.parseFloat(cameraPos[0].trim()) : 0;
+					targetCamY = dad.getMidpoint().y - 100 + dad.cameraPosition[1] + cameraPos[1] != null ? Std.parseFloat(cameraPos[1].trim()) : 0;
+				case "2":
+					targetCamX = gf.getMidpoint().x + gf.cameraPosition[0] + cameraPos[0] != null ? Std.parseFloat(cameraPos[0].trim()) : 0;
+					targetCamY = gf.getMidpoint().y + gf.cameraPosition[1] + cameraPos[1] != null ? Std.parseFloat(cameraPos[1].trim()) : 0;
+			}
+		}
+		else
+		{
+			if(cameraPos[0] != null) targetCamX = Std.parseFloat(cameraPos[0].trim());
+			if(cameraPos[1] != null) targetCamY = Std.parseFloat(cameraPos[1].trim());
+		}
+
+		if (easeString.toLowerCase() == "classic" || easeString == "")
+			camFollow.setPosition(targetCamX, targetCamY);
+		else {
+			FlxTween.cancelTweensOf(camFollow, ["x", "y"]);
+			FlxTween.tween(camFollow, {x: targetCamX, y: targetCamY}, Conductor.stepCrochet * duration / 1000 / playbackRate, {ease: LuaUtils.getTweenEaseByString(easeString)});
+		}
 	}
 }

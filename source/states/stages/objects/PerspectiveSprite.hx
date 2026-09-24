@@ -1,10 +1,9 @@
 package states.stages.objects;
 
 import flixel.addons.effects.FlxSkewedSprite;
-import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
-import flixel.FlxSprite;
+import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.math.FlxPoint;
 
@@ -106,11 +105,9 @@ class PerspectiveSprite extends FlxTypedSpriteGroup<FlxSprite>
         sprite.y = correctedBottom.y - sprite.height;
     }
 
-    /*
-    override public function isOnScreen(camera:FlxCamera):Bool
+    override public function isOnScreen(?camera:FlxCamera):Bool
     {
         // Turns out skewing an image like crazy fucks up its rendering... oops!
         return true;
     }
-    */
 }

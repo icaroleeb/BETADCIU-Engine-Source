@@ -70,7 +70,20 @@ class InterpEx extends crowplexus.hscript.Interp
 		parentFields = value != null ? Type.getInstanceFields(Type.getClass(value)) : [];
 		return parent;
 	}
-	
+
+	function remove(arr:Dynamic, index:Dynamic):Dynamic {
+		if (isMap(arr)) {
+			var map = cast(arr, IMap<Dynamic, Dynamic>);
+			var exists = map.exists(index);
+			map.remove(index);
+			return exists;
+		} else if (Std.isOfType(arr, Array)) {
+			return arr.remove(index);
+		} else {
+			return false;
+		}
+	}
+
 	override function resolve(id:String):Dynamic
 	{
 		if (locals.exists(id))
